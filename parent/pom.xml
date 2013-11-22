@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+    xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <modelVersion>4.0.0</modelVersion>
+
+    <prerequisites>
+        <maven>3.0</maven>
+    </prerequisites>
+
+    <groupId>de.marw.cdt.cmake</groupId>
+    <artifactId>cmake-parent</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>CDT CMake Parent</name>
+
+    <properties>
+        <tycho-version>0.19.0</tycho-version>
+        <tycho-extras-version>0.19.0</tycho-extras-version>
+        <download-site>http://download.eclipse.org</download-site>
+        <platform-site>${download-site}/eclipse/updates/${platform-version}</platform-site>
+        <orbit-site>${download-site}/tools/orbit/downloads/drops/${orbit-version}/repository</orbit-site>
+        <!--
+            <tm-site>${download-site}/tm/updates/${tm-version}</tm-site>
+            <sonar.core.codeCoveragePlugin>jacoco</sonar.core.codeCoveragePlugin>
+            <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
+            <sonar.jacoco.reportPath>${project.basedir}/../../target/jacoco.exec</sonar.jacoco.reportPath>
+        -->
+    </properties>
+
+    <licenses>
+        <license>
+            <name>Eclipse Public License v1.0</name>
+            <comments>All rights reserved.
+
+       This program and the accompanying materials are made
+       available under the terms of the Eclipse Public License v1.0
+       which accompanies this distribution, and is available at
+       http://www.eclipse.org/legal/epl-v10.htm
+      </comments>
+        </license>
+    </licenses>
+
+    <modules>
+        <module>../releng/de.marw.cdt.cmake.repo</module>
+    </modules>
+
+    <repositories>
+    <!-- 
+        <repository>
+            <id>platform</id>
+            <url>${platform-site}</url>
+            <layout>p2</layout>
+        </repository>
+        <repository>
+            <id>orbit</id>
+            <url>${orbit-site}</url>
+            <layout>p2</layout>
+        </repository>
+     -->
+    </repositories>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.eclipse.tycho</groupId>
+                <artifactId>tycho-maven-plugin</artifactId>
+                <version>${tycho-version}</version>
+                <extensions>true</extensions>
+            </plugin>
+            <plugin>
+                <groupId>org.eclipse.tycho</groupId>
+                <artifactId>target-platform-configuration</artifactId>
+                <version>${tycho-version}</version>
+                <configuration>
+                    <resolver>p2</resolver>
+                    <pomDependencies>consider</pomDependencies>
+                    <environments>
+                        <environment>
+                            <os>linux</os>
+                            <ws>gtk</ws>
+                            <arch>x86</arch>
+                        </environment>
+                        <environment>
+                            <os>linux</os>
+                            <ws>gtk</ws>
+                            <arch>x86_64</arch>
+                        </environment>
+                        <environment>
+                            <os>linux</os>
+                            <ws>gtk</ws>
+                            <arch>ppc64</arch>
+                        </environment>
+                        <environment>
+                            <os>win32</os>
+                            <ws>win32</ws>
+                            <arch>x86</arch>
+                        </environment>
+                        <environment>
+                            <os>win32</os>
+                            <ws>win32</ws>
+                            <arch>x86_64</arch>
+                        </environment>
+                        <environment>
+                            <os>macosx</os>
+                            <ws>cocoa</ws>
+                            <arch>x86</arch>
+                        </environment>
+                        <environment>
+                            <os>macosx</os>
+                            <ws>cocoa</ws>
+                            <arch>x86_64</arch>
+                        </environment>
+                        <environment>
+                            <os>aix</os>
+                            <ws>gtk</ws>
+                            <arch>ppc</arch>
+                        </environment>
+                        <environment>
+                            <os>solaris</os>
+                            <ws>gtk</ws>
+                            <arch>sparc</arch>
+                        </environment>
+                    </environments>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.eclipse.tycho</groupId>
+                <artifactId>tycho-source-plugin</artifactId>
+                <version>${tycho-version}</version>
+                <configuration>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-source</id>
+                        <goals>
+                            <goal>plugin-source</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+        </plugins>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.eclipse.tycho</groupId>
+                    <artifactId>tycho-compiler-plugin</artifactId>
+                    <version>${tycho-version}</version>
+                    <configuration>
+                        <encoding>UTF-8</encoding>
+                    </configuration>
+                </plugin>
+                <!-- enable source bundle generation -->
+                <plugin>
+                    <groupId>org.eclipse.tycho</groupId>
+                    <artifactId>tycho-source-plugin</artifactId>
+                    <version>${tycho-version}</version>
+                    <executions>
+                        <execution>
+                            <id>plugin-source</id>
+                            <goals>
+                                <goal>plugin-source</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>2.4.1</version>
+                    <configuration>
+                        <encoding>ISO-8859-1</encoding>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+    <url>http://code.google.com/p/cmake4eclipsecdt/</url>
+    <scm>
+        <url>http://code.google.com/p/cmake4eclipsecdt/source/browse/</url>
+        <connection>http://code.google.com/p/cmake4eclipsecdt/source/browse/</connection>
+        <developerConnection>https://code.google.com/p/cmake4eclipsecdt/</developerConnection>
+    </scm>
+    <issueManagement>
+        <url>http://code.google.com/p/cmake4eclipsecdt/issues/list</url>
+    </issueManagement>
+
+    <inceptionYear>2013</inceptionYear>
+    <developers>
+        <developer>
+            <name>fifteenknots505</name>
+            <email>fifteenknots505@gmail.com</email>
+            <roles>
+                <role>owner</role>
+                <role>developer</role>
+            </roles>
+        </developer>
+    </developers>
+</project>
