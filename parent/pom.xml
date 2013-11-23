@@ -17,10 +17,14 @@
     <properties>
         <tycho-version>0.19.0</tycho-version>
         <tycho-extras-version>0.19.0</tycho-extras-version>
+
+        <cdt-version>8.2.1</cdt-version>
         <download-site>http://download.eclipse.org</download-site>
         <platform-site>${download-site}/eclipse/updates/${platform-version}</platform-site>
-        <orbit-site>${download-site}/tools/orbit/downloads/drops/${orbit-version}/repository</orbit-site>
+        <cdt-site>${download-site}/tools/cdt/releases/${platform-name}</cdt-site>
+
         <!--
+            <orbit-site>${download-site}/tools/orbit/downloads/drops/${orbit-version}/repository</orbit-site>
             <tm-site>${download-site}/tm/updates/${tm-version}</tm-site>
             <sonar.core.codeCoveragePlugin>jacoco</sonar.core.codeCoveragePlugin>
             <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
@@ -42,32 +46,93 @@
     </licenses>
 
     <modules>
+        <module>../de.marw.cdt.cmake.core</module>
         <module>../releng/de.marw.cdt.cmake.repo</module>
     </modules>
 
     <repositories>
-    <!-- 
         <repository>
             <id>platform</id>
             <url>${platform-site}</url>
             <layout>p2</layout>
         </repository>
         <repository>
+            <id>cdt-${cdt-version}</id>
+            <url>${cdt-site}</url>
+            <layout>p2</layout>
+        </repository>
+        <!--
+            <repository>
             <id>orbit</id>
             <url>${orbit-site}</url>
             <layout>p2</layout>
-        </repository>
-     -->
+            </repository>
+        -->
     </repositories>
+
+    <profiles>
+        <profile>
+            <id>platform-4.2</id>
+            <activation>
+                <property>
+                    <name>!platform-3.8</name>
+                </property>
+            </activation>
+            <properties>
+                <platform-version>4.2</platform-version>
+                <platform-name>kepler</platform-name>
+                <orbit-version>R20130517111416</orbit-version>
+                <tm-version>3.5</tm-version>
+            </properties>
+        </profile>
+        <profile>
+            <id>platform-3.8</id>
+            <activation>
+                <property>
+                    <name>platform-3.8</name>
+                </property>
+            </activation>
+            <properties>
+                <platform-version>3.8</platform-version>
+                <platform-name>juno</platform-name>
+                <orbit-version>R20110523182458</orbit-version>
+                <tm-version>3.3</tm-version>
+            </properties>
+        </profile>
+        <profile>
+            <id>macosx</id>
+            <activation>
+                <os>
+                    <family>mac</family>
+                </os>
+            </activation>
+            <properties>
+                <base.ui.test.vmargs>-XstartOnFirstThread</base.ui.test.vmargs>
+            </properties>
+        </profile>
+        <profile>
+            <id>other-os</id>
+            <activation>
+                <os>
+                    <family>!mac</family>
+                </os>
+            </activation>
+            <properties>
+                <base.ui.test.vmargs></base.ui.test.vmargs>
+            </properties>
+        </profile>
+    </profiles>
 
     <build>
         <plugins>
+            <!-- enable tycho build extension -->
             <plugin>
                 <groupId>org.eclipse.tycho</groupId>
                 <artifactId>tycho-maven-plugin</artifactId>
                 <version>${tycho-version}</version>
                 <extensions>true</extensions>
             </plugin>
+
             <plugin>
                 <groupId>org.eclipse.tycho</groupId>
                 <artifactId>target-platform-configuration</artifactId>
@@ -125,24 +190,14 @@
                 </configuration>
             </plugin>
 
+            <!-- enable source bundle generation -->
             <plugin>
                 <groupId>org.eclipse.tycho</groupId>
                 <artifactId>tycho-source-plugin</artifactId>
-                <version>${tycho-version}</version>
-                <configuration>
-                    <encoding>UTF-8</encoding>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>attach-source</id>
-                        <goals>
-                            <goal>plugin-source</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
 
         </plugins>
+
         <pluginManagement>
             <plugins>
                 <plugin>
@@ -153,20 +208,7 @@
                         <encoding>UTF-8</encoding>
                     </configuration>
                 </plugin>
-                <!-- enable source bundle generation -->
-                <plugin>
-                    <groupId>org.eclipse.tycho</groupId>
-                    <artifactId>tycho-source-plugin</artifactId>
-                    <version>${tycho-version}</version>
-                    <executions>
-                        <execution>
-                            <id>plugin-source</id>
-                            <goals>
-                                <goal>plugin-source</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
+
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-resources-plugin</artifactId>
@@ -175,6 +217,66 @@
                         <encoding>ISO-8859-1</encoding>
                     </configuration>
                 </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-install-plugin</artifactId>
+                    <version>2.5.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>2.8.1</version>
+                </plugin>
+
+                <!-- enable source bundle generation -->
+                <plugin>
+                    <groupId>org.eclipse.tycho</groupId>
+                    <artifactId>tycho-source-plugin</artifactId>
+                    <version>${tycho-version}</version>
+                    <configuration>
+                        <encoding>UTF-8</encoding>
+                        <!-- Don't add the generated Maven information to jar -->
+                        <archive>
+                            <addMavenDescriptor>false</addMavenDescriptor>
+                        </archive>
+                        <excludeResources>true</excludeResources>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>attach-source</id>
+                            <goals>
+                                <goal>plugin-source</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>2.4</version>
+                    <configuration>
+                        <archive>
+                            <!-- Don't add the generated Maven information to the
+                                jar -->
+                            <addMavenDescriptor>false</addMavenDescriptor>
+                        </archive>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.eclipse.tycho</groupId>
+                    <artifactId>tycho-packaging-plugin</artifactId>
+                    <version>${tycho-version}</version>
+                    <configuration>
+                        <!-- Don't add the generated Maven information to jar -->
+                        <archive>
+                            <addMavenDescriptor>false</addMavenDescriptor>
+                        </archive>
+                    </configuration>
+                </plugin>
+
             </plugins>
         </pluginManagement>
     </build>
