@@ -19,6 +19,18 @@
             id="de.marw.cdt.cmake.core.cmakeMakeBuilder">
       </builder>
    </extension>
+   <extension
+         id="de.marw.cdt.cmake.core.cmakeMakeBuilder"
+         name="CMake make builder"
+         point="org.eclipse.core.resources.builders">
+      <builder
+            hasNature="true"
+            isConfigurable="true">
+         <run
+               class="de.marw.cdt.cmake.core.internal.CMakeMakeBuilder">
+         </run>
+      </builder>
+   </extension>
 
     <extension
           point="org.eclipse.cdt.core.templateProcessTypes">
@@ -185,7 +197,7 @@
             isAbstract="false"
             isSystem="false"
             isVariableCaseSensitive="true"
-            name="CMake make builder">
+            name="CMake makefile generator">
          <option
                browseType="directory"
                id="de.marw.cdt.cmake.core.option.topBuildDir"
