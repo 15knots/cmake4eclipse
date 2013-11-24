@@ -56,13 +56,15 @@ import de.marw.cdt.cmake.core.CMakePlugin;
 public class CMakeMakefileGenerator implements
     IManagedBuilderMakefileGenerator2 {
 
+  /** CBuildConsole element id */
+  private static final String CMAKE_CONSOLE_ID = "de.marw.cdt.cmake.core.cmakeConsole";
   private static final boolean MULTIPLE_SOURCE_DIRS_SUPPORTED = false;
+
   private IProject project;
   private IProgressMonitor monitor;
   private IPath topBuildDir; //  Build directory - relative to the project
   private IConfiguration config;
   private IBuilder builder;
-  private ICSourceEntry[] srcEntries;
 
   /**
    *
@@ -90,16 +92,6 @@ public class CMakeMakefileGenerator implements
     final IPath binPath = new Path("build").append(cfg.getName());
     topBuildDir = project.getFolder(binPath).getProjectRelativePath();
 
-    srcEntries = config.getSourceEntries();
-    if (srcEntries.length == 0) {
-      // no source folders specified in project: assume project root as source folder
-      srcEntries = new ICSourceEntry[] { new CSourceEntry(Path.EMPTY, null,
-          ICSettingEntry.RESOLVED | ICSettingEntry.VALUE_WORKSPACE_PATH) };
-    } else {
-      ICConfigurationDescription cfgDes = ManagedBuildManager
-          .getDescriptionForConfiguration(config);
-      srcEntries = CDataUtil.resolveEntries(srcEntries, cfgDes);
-    }
   }
 
   /*-
@@ -158,14 +150,30 @@ public class CMakeMakefileGenerator implements
     // See if the user has cancelled the build
     checkCancel();
 
+    ICSourceEntry[] srcEntries = config.getSourceEntries();
     if (!MULTIPLE_SOURCE_DIRS_SUPPORTED && srcEntries.length > 1) {
       return new MultiStatus(CMakePlugin.PLUGIN_ID, IStatus.ERROR,
           "Only a single source location supported by CMake", null);
     }
 
+    if (srcEntries.length == 0) {
+      // no source folders specified in project: assume project root as source folder
+      srcEntries = new ICSourceEntry[] { new CSourceEntry(Path.EMPTY, null,
+          ICSettingEntry.RESOLVED | ICSettingEntry.VALUE_WORKSPACE_PATH) };
+    } else {
+      ICConfigurationDescription cfgDes = ManagedBuildManager
+          .getDescriptionForConfiguration(config);
+      srcEntries = CDataUtil.resolveEntries(srcEntries, cfgDes);
+    }
+
+    final IConsole console = CCorePlugin.getDefault().getConsole(
+        CMAKE_CONSOLE_ID);
+    console.start(project);
+
     // create makefiles, assuming each source directory contains a CMakeLists.txt
     for (int i = 0; i < srcEntries.length; i++) {
       ICSourceEntry srcEntry = srcEntries[i];
+      updateMonitor("Invoking CMake for " + srcEntry.getName());
 
       final IPath srcPath = srcEntry.getFullPath(); // project relative
       // Create the top-level directory for the build output
@@ -173,8 +181,9 @@ public class CMakeMakefileGenerator implements
           .append(srcPath) : topBuildDir);
       final IPath srcDir = project.getFolder(srcPath).getLocation();
       final IPath buildDir = project.getFolder(cfgBuildPath).getLocation();
+
       checkCancel();
-      MultiStatus status2 = invokeCMake(srcDir, buildDir, monitor);
+      MultiStatus status2 = invokeCMake(srcDir, buildDir, console);
       if (status2.getSeverity() == IStatus.ERROR) {
         // failed to generate
         return status2;
@@ -214,14 +223,14 @@ public class CMakeMakefileGenerator implements
         folder.create(true, true, null);
       } catch (CoreException e) {
         if (e.getStatus().getCode() == IResourceStatus.PATH_OCCUPIED)
-          folder.refreshLocal(IResource.DEPTH_ZERO, null);
+          folder.refreshLocal(IResource.DEPTH_ZERO, monitor);
         else
           throw e;
       }
 
       // Make sure the folder is marked as derived so it is not added to CM
       if (!folder.isDerived()) {
-        folder.setDerived(true, null);
+        folder.setDerived(true, monitor);
       }
     }
 
@@ -231,17 +240,16 @@ public class CMakeMakefileGenerator implements
   /**
    * Run 'cmake -G xyz' command.
    *
-   * @param monitor
    * @param console
-   *        TODO
+   *        the build console to send messages to
    * @param buildDir
    *        abs path
    * @param srcDir
    * @return
    * @throws CoreException
    */
-  private MultiStatus invokeCMake(IPath srcDir, IPath buildDir,
-      IProgressMonitor monitor) throws CoreException {
+  private MultiStatus invokeCMake(IPath srcDir, IPath buildDir, IConsole console)
+      throws CoreException {
     MultiStatus status = // Return value
     new MultiStatus(CMakePlugin.PLUGIN_ID, IStatus.OK, "", null);
 
@@ -275,17 +283,13 @@ public class CMakeMakefileGenerator implements
         }
       }
     }
+    // tell cmake where its script is located..
     argList.add(srcDir.toOSString());
 
-    IConsole console = CCorePlugin.getDefault().getConsole();
-    console.start(project);
-    ICommandLauncher launcher = builder.getCommandLauncher();
 
     String errMsg = null;
-    updateMonitor("Invoking CMake " + project.getName());
 
-    ConsoleOutputStream out = console.getOutputStream();
-
+    final ICommandLauncher launcher = builder.getCommandLauncher();
     launcher.showCommand(true);
     Process proc = launcher.execute(cmd,
         argList.toArray(new String[argList.size()]), null, buildDir, monitor);
@@ -295,7 +299,7 @@ public class CMakeMakefileGenerator implements
         proc.getOutputStream().close();
       } catch (IOException e) {
       }
-      int state = launcher.waitAndRead(out, console.getErrorStream(),
+      int state = launcher.waitAndRead(console.getOutputStream(), console.getErrorStream(),
           new SubProgressMonitor(monitor, IProgressMonitor.UNKNOWN));
       if (state != ICommandLauncher.OK) {
         errMsg = launcher.getErrorMessage();
@@ -311,7 +315,7 @@ public class CMakeMakefileGenerator implements
       }
 
     } else {
-      // process start faled
+      // process start failed
       errMsg = launcher.getErrorMessage();
     }
 
@@ -319,17 +323,16 @@ public class CMakeMakefileGenerator implements
     if (errMsg != null && errMsg.length() > 0) {
       status = new MultiStatus(CMakePlugin.PLUGIN_ID, IStatus.ERROR, errMsg,
           null);
-      StringBuilder buf = new StringBuilder();
-      buf.append(errMsg).append('\n');
       // Write message on the console
       try {
-        out.write(buf.toString().getBytes());
-        out.flush();
+        ConsoleOutputStream err = console.getErrorStream();
+        err.write(errMsg.getBytes());
+        err.write('\n');
+        err.flush();
       } catch (IOException ex) {
         // TODO Auto-generated catch block
         ex.printStackTrace();
       }
-//      epmOutputStream.close();
     }
     return status;
   }
@@ -384,7 +387,7 @@ public class CMakeMakefileGenerator implements
   }
 
   /**
-   * Check whether the build has been cancelled. Cancellation requests
+   * Checks whether the build has been cancelled. Cancellation requests are
    * propagated to the caller by throwing
    * <code>OperationCanceledException</code>.
    *

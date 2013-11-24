@@ -39,3 +39,4 @@ Import-Package: org.eclipse.cdt.core,
  org.eclipse.ui.plugin,
  org.osgi.framework;version="1.7.0"
 Bundle-Activator: de.marw.cdt.cmake.core.CMakePlugin
+Export-Package: de.marw.cdt.cmake.core
