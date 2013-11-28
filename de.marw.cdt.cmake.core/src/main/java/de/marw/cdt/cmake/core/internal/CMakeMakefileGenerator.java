@@ -18,9 +18,7 @@ import org.eclipse.cdt.core.CCorePlugin;
 import org.eclipse.cdt.core.ConsoleOutputStream;
 import org.eclipse.cdt.core.ICommandLauncher;
 import org.eclipse.cdt.core.resources.IConsole;
-import org.eclipse.cdt.core.settings.model.CSourceEntry;
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
-import org.eclipse.cdt.core.settings.model.ICSettingEntry;
 import org.eclipse.cdt.core.settings.model.ICSourceEntry;
 import org.eclipse.cdt.core.settings.model.util.CDataUtil;
 import org.eclipse.cdt.managedbuilder.buildproperties.IBuildProperty;
@@ -44,6 +42,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import de.marw.cdt.cmake.core.CMakePlugin;
@@ -88,7 +87,7 @@ public class CMakeMakefileGenerator implements
     this.builder = builder;
 
     // set the top build dir path for the current configuration
-    // TODO MWE allow to customize the root common to all configs
+    // TODO MWE allow user to customize the root common to all configs
     final IPath binPath = new Path("build").append(cfg.getName());
     topBuildDir = project.getFolder(binPath).getProjectRelativePath();
 
@@ -127,6 +126,7 @@ public class CMakeMakefileGenerator implements
     final CMakelistsVisitor visitor = new CMakelistsVisitor();
     updateMonitor("Visiting CMakeLists.txt");
     delta.accept(visitor);
+    // TODO detect removed/renamed source dirs.. see GnuMakefileGenerator.ResourceDeltaVisitor
     if (visitor.isCmakelistsAffected()) {
       // normally, the cmake-generated makefiles detect changes in CMake scripts
       // and regenerate the makefiles. But this seems not to be the case, when
@@ -135,8 +135,8 @@ public class CMakeMakefileGenerator implements
       return regenerateMakefiles();
     }
 
-    MultiStatus status = new MultiStatus(CMakePlugin.PLUGIN_ID, IStatus.OK,
-        new String(), null);
+    MultiStatus status = new MultiStatus(CMakePlugin.PLUGIN_ID, IStatus.OK, "",
+        null);
     return status;
   }
 
@@ -152,14 +152,22 @@ public class CMakeMakefileGenerator implements
 
     ICSourceEntry[] srcEntries = config.getSourceEntries();
     if (!MULTIPLE_SOURCE_DIRS_SUPPORTED && srcEntries.length > 1) {
-      return new MultiStatus(CMakePlugin.PLUGIN_ID, IStatus.ERROR,
-          "Only a single source location supported by CMake", null);
+      final String msg = "Only a single source location supported by CMake";
+      updateMonitor(msg);
+      status = new MultiStatus(CMakePlugin.PLUGIN_ID, IStatus.ERROR, "", null);
+      status
+          .add(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, 0, msg, null));
+      return status;
     }
 
     if (srcEntries.length == 0) {
-      // no source folders specified in project: assume project root as source folder
-      srcEntries = new ICSourceEntry[] { new CSourceEntry(Path.EMPTY, null,
-          ICSettingEntry.RESOLVED | ICSettingEntry.VALUE_WORKSPACE_PATH) };
+      // no source folders specified in project
+      // Make sure there is something to build
+      String msg = "No source directories in project " + project.getName();
+      updateMonitor(msg);
+      status = new MultiStatus(CMakePlugin.PLUGIN_ID, IStatus.INFO, "", null);
+      status.add(new Status(IStatus.INFO, CMakePlugin.PLUGIN_ID, 0, msg, null));
+      return status;
     } else {
       ICConfigurationDescription cfgDes = ManagedBuildManager
           .getDescriptionForConfiguration(config);
@@ -177,18 +185,26 @@ public class CMakeMakefileGenerator implements
 
       final IPath srcPath = srcEntry.getFullPath(); // project relative
       // Create the top-level directory for the build output
-      final IPath cfgBuildPath = createDirectory(MULTIPLE_SOURCE_DIRS_SUPPORTED ? topBuildDir
+      final IPath cfgBuildPath = createFolder(MULTIPLE_SOURCE_DIRS_SUPPORTED ? topBuildDir
           .append(srcPath) : topBuildDir);
-      final IPath srcDir = project.getFolder(srcPath).getLocation();
       final IPath buildDir = project.getFolder(cfgBuildPath).getLocation();
+
+      IPath srcDir;
+      if (srcPath.isEmpty()) {
+        // source folder is project folder
+        srcDir = project.getLocation();
+      } else {
+        // source folder ist folder below project
+        srcDir = project.getFolder(srcPath).getLocation();
+      }
 
       checkCancel();
       MultiStatus status2 = invokeCMake(srcDir, buildDir, console);
-      if (status2.getSeverity() == IStatus.ERROR) {
+      // NOTE: Commonbuilder reads getCode() to detect errors, not getSeverity()
+      if (status2.getCode() == IStatus.ERROR) {
         // failed to generate
         return status2;
       }
-
     }
 
     status = new MultiStatus(CMakePlugin.PLUGIN_ID, IStatus.OK, "", null);
@@ -202,9 +218,9 @@ public class CMakeMakefileGenerator implements
    *
    * @param path
    *        a path, relative to the project root
-   * @return the project relative pat of the created folder
+   * @return the project relative path of the created folder
    */
-  private IPath createDirectory(IPath path) throws CoreException {
+  private IPath createFolder(IPath path) throws CoreException {
     IFolder folder = project.getFolder(path);
 
     if (!folder.exists()) {
@@ -214,7 +230,7 @@ public class CMakeMakefileGenerator implements
       if (!parentPath.isEmpty()) {
         IFolder parent = project.getFolder(parentPath);
         if (!parent.exists()) {
-          createDirectory(parentPath);
+          createFolder(parentPath);
         }
       }
 
@@ -245,16 +261,16 @@ public class CMakeMakefileGenerator implements
    * @param buildDir
    *        abs path
    * @param srcDir
-   * @return
+   * @return a MultiStatus object, where .getCode() return the severity
    * @throws CoreException
    */
   private MultiStatus invokeCMake(IPath srcDir, IPath buildDir, IConsole console)
       throws CoreException {
-    MultiStatus status = // Return value
-    new MultiStatus(CMakePlugin.PLUGIN_ID, IStatus.OK, "", null);
-
     Assert.isLegal(srcDir.isAbsolute(), "srcDir");
     Assert.isLegal(buildDir.isAbsolute(), "buildDir");
+
+    MultiStatus status = // Return value
+    new MultiStatus(CMakePlugin.PLUGIN_ID, IStatus.OK, null, null);
 
     Path cmd = new Path("cmake");
     List<String> argList = new ArrayList<String>();
@@ -286,12 +302,11 @@ public class CMakeMakefileGenerator implements
     // tell cmake where its script is located..
     argList.add(srcDir.toOSString());
 
-
     String errMsg = null;
 
     final ICommandLauncher launcher = builder.getCommandLauncher();
     launcher.showCommand(true);
-    Process proc = launcher.execute(cmd,
+    final Process proc = launcher.execute(cmd,
         argList.toArray(new String[argList.size()]), null, buildDir, monitor);
     if (proc != null) {
       try {
@@ -299,21 +314,23 @@ public class CMakeMakefileGenerator implements
         proc.getOutputStream().close();
       } catch (IOException e) {
       }
-      int state = launcher.waitAndRead(console.getOutputStream(), console.getErrorStream(),
-          new SubProgressMonitor(monitor, IProgressMonitor.UNKNOWN));
-      if (state != ICommandLauncher.OK) {
-        errMsg = launcher.getErrorMessage();
-
-        if (state == ICommandLauncher.COMMAND_CANCELED) {
-          //TODO: a better way of handling cancel is needed
-          //currently the rebuild state is set to true forcing the full rebuild
-          //on the next builder invocation
-          config.setRebuildState(true);
-          status = new MultiStatus(CMakePlugin.PLUGIN_ID, IStatus.CANCEL, "",
-              null);
-        }
+      int state = launcher.waitAndRead(console.getOutputStream(), console
+          .getErrorStream(), new SubProgressMonitor(monitor,
+          IProgressMonitor.UNKNOWN));
+      if (state == ICommandLauncher.COMMAND_CANCELED) {
+        throw new OperationCanceledException(launcher.getErrorMessage());
       }
 
+      // check cmake exit status
+      final int exitValue = proc.exitValue();
+      if (exitValue != 0) {
+        errMsg = String
+            .format("%1$s exited with status %2$d. ", cmd, exitValue);
+        status = new MultiStatus(CMakePlugin.PLUGIN_ID, IStatus.ERROR, errMsg,
+            null);
+//        status.add(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, errMsg));
+        return status; // errmsg already logged on console
+      }
     } else {
       // process start failed
       errMsg = launcher.getErrorMessage();
@@ -323,6 +340,7 @@ public class CMakeMakefileGenerator implements
     if (errMsg != null && errMsg.length() > 0) {
       status = new MultiStatus(CMakePlugin.PLUGIN_ID, IStatus.ERROR, errMsg,
           null);
+
       // Write message on the console
       try {
         ConsoleOutputStream err = console.getErrorStream();
@@ -330,8 +348,8 @@ public class CMakeMakefileGenerator implements
         err.write('\n');
         err.flush();
       } catch (IOException ex) {
-        // TODO Auto-generated catch block
-        ex.printStackTrace();
+        status.add(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, ex
+            .getLocalizedMessage(), ex));
       }
     }
     return status;
@@ -342,7 +360,8 @@ public class CMakeMakefileGenerator implements
    */
   @Override
   public String getMakefileName() {
-    return "Makefile"; // file is generated by cmake
+    // file is generated by cmake
+    return "Makefile";
   }
 
   /*-
