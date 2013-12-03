@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.cdt.core.CCorePlugin;
-import org.eclipse.cdt.core.ConsoleOutputStream;
 import org.eclipse.cdt.core.ICommandLauncher;
 import org.eclipse.cdt.core.resources.IConsole;
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
@@ -132,7 +131,7 @@ public class CMakeMakefileGenerator implements
       // and regenerate the makefiles. But this seems not to be the case, when
       // someone writes CTests in a CMakeLists.txt.
       // So regenerate the makefiles...
-      return regenerateMakefiles();
+//      return regenerateMakefiles();
     }
 
     MultiStatus status = new MultiStatus(CMakePlugin.PLUGIN_ID, IStatus.OK, "",
@@ -174,6 +173,8 @@ public class CMakeMakefileGenerator implements
       srcEntries = CDataUtil.resolveEntries(srcEntries, cfgDes);
     }
 
+    status = new MultiStatus(CMakePlugin.PLUGIN_ID, IStatus.OK, "", null);
+
     final IConsole console = CCorePlugin.getDefault().getConsole(
         CMAKE_CONSOLE_ID);
     console.start(project);
@@ -182,7 +183,15 @@ public class CMakeMakefileGenerator implements
     for (int i = 0; i < srcEntries.length; i++) {
       ICSourceEntry srcEntry = srcEntries[i];
       updateMonitor("Invoking CMake for " + srcEntry.getName());
-
+      try {
+        console
+            .getInfoStream()
+            .write(
+                ("Buildfile generation for configuration" + config.getName() + " \n")
+                    .getBytes());
+      } catch (IOException ex) {
+        // ignore
+      }
       final IPath srcPath = srcEntry.getFullPath(); // project relative
       // Create the top-level directory for the build output
       final IPath cfgBuildPath = createFolder(MULTIPLE_SOURCE_DIRS_SUPPORTED ? topBuildDir
@@ -205,9 +214,9 @@ public class CMakeMakefileGenerator implements
         // failed to generate
         return status2;
       }
+// nutzlos:      status= status2; // return last success status
     }
 
-    status = new MultiStatus(CMakePlugin.PLUGIN_ID, IStatus.OK, "", null);
     return status;
   }
 
@@ -269,8 +278,7 @@ public class CMakeMakefileGenerator implements
     Assert.isLegal(srcDir.isAbsolute(), "srcDir");
     Assert.isLegal(buildDir.isAbsolute(), "buildDir");
 
-    MultiStatus status = // Return value
-    new MultiStatus(CMakePlugin.PLUGIN_ID, IStatus.OK, null, null);
+    MultiStatus status; // Return value
 
     Path cmd = new Path("cmake");
     List<String> argList = new ArrayList<String>();
@@ -323,35 +331,24 @@ public class CMakeMakefileGenerator implements
 
       // check cmake exit status
       final int exitValue = proc.exitValue();
-      if (exitValue != 0) {
-        errMsg = String
-            .format("%1$s exited with status %2$d. ", cmd, exitValue);
+      if (exitValue == 0) {
+        // success
+        status = new MultiStatus(CMakePlugin.PLUGIN_ID, IStatus.OK, null, null);
+      } else {
+        // cmake had errors...
+        errMsg = String.format(
+            "%1$s exited with status %2$d. See CMake console for details.",
+            cmd, exitValue);
         status = new MultiStatus(CMakePlugin.PLUGIN_ID, IStatus.ERROR, errMsg,
             null);
-//        status.add(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, errMsg));
-        return status; // errmsg already logged on console
       }
     } else {
       // process start failed
       errMsg = launcher.getErrorMessage();
-    }
-
-    // Report the failure of our mission
-    if (errMsg != null && errMsg.length() > 0) {
       status = new MultiStatus(CMakePlugin.PLUGIN_ID, IStatus.ERROR, errMsg,
           null);
-
-      // Write message on the console
-      try {
-        ConsoleOutputStream err = console.getErrorStream();
-        err.write(errMsg.getBytes());
-        err.write('\n');
-        err.flush();
-      } catch (IOException ex) {
-        status.add(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, ex
-            .getLocalizedMessage(), ex));
-      }
     }
+
     return status;
   }
 

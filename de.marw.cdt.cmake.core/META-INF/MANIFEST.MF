@@ -8,6 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Import-Package: org.eclipse.cdt.core,
  org.eclipse.cdt.core.envvar,
+ org.eclipse.cdt.core.errorparsers,
  org.eclipse.cdt.core.model,
  org.eclipse.cdt.core.resources,
  org.eclipse.cdt.core.settings.model,

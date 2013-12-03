@@ -24,8 +24,13 @@ public class CMakeConsole implements IConsole {
 
   private static final String CONSOLE_CONTEXT_MENU_ID = "CMakeConsole"; //$NON-NLS-1$
 
-  private IProject project;
-  private IBuildConsoleManager fConsoleManager;
+  private ConsoleOutputStream os;
+
+  private ConsoleOutputStream es;
+
+  private ConsoleOutputStream is;
+
+  private IConsole console;
 
   /**
    */
@@ -40,10 +45,10 @@ public class CMakeConsole implements IConsole {
    */
   @Override
   public void start(IProject project) {
-    this.project = project;
-    fConsoleManager = CUIPlugin.getDefault().getConsoleManager("CMake Console",
+    IBuildConsoleManager fConsoleManager = CUIPlugin.getDefault().getConsoleManager("CMake Console",
         CONSOLE_CONTEXT_MENU_ID);
-    fConsoleManager.getConsole(project).start(project);
+    console = fConsoleManager.getConsole(project);
+    console.start(project);
   }
 
   /*-
@@ -51,7 +56,9 @@ public class CMakeConsole implements IConsole {
    */
   @Override
   public ConsoleOutputStream getOutputStream() throws CoreException {
-    return fConsoleManager.getConsole(project).getOutputStream();
+    if (os == null)
+      os = console.getOutputStream();
+    return os;
   }
 
   /*-
@@ -59,7 +66,9 @@ public class CMakeConsole implements IConsole {
    */
   @Override
   public ConsoleOutputStream getInfoStream() throws CoreException {
-    return fConsoleManager.getConsole(project).getInfoStream();
+    if (is == null)
+      is = console.getInfoStream();
+    return is;
   }
 
   /*-
@@ -67,7 +76,9 @@ public class CMakeConsole implements IConsole {
    */
   @Override
   public ConsoleOutputStream getErrorStream() throws CoreException {
-    return fConsoleManager.getConsole(project).getErrorStream();
+    if (es == null)
+      es = console.getErrorStream();
+    return es;
   }
 
 }
