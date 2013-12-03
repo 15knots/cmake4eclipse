@@ -26,11 +26,10 @@
             buildfileGenerator="de.marw.cdt.cmake.core.internal.CMakeMakefileGenerator"
             cleanBuildTarget="clean"
             command="make"
-            errorParsers="org.eclipse.cdt.core.MakeErrorParser"
+            errorParsers="de.marw.cdt.cmake.core.CMakeErrorParser;org.eclipse.cdt.core.MakeErrorParser"
             id="de.marw.cdt.cmake.core.genmakebuilder"
             ignoreErrCmd="-k"
             incrementalBuildTarget="all"
-            isAbstract="false"
             isSystem="false"
             isVariableCaseSensitive="true"
             name="CMake make builder">
@@ -43,6 +42,7 @@
                valueType="string">
          </option>
       </builder>
+      <!--
       <toolChain
             id="de.marw.cdt.cmake.core.toolChain"
             isAbstract="false"
@@ -53,7 +53,6 @@
             superClass="de.marw.cdt.cmake.core.genmakebuilder">
       </builder>
       </toolChain>
-      <!--
       -->
    </extension>
    <extension
@@ -71,6 +70,21 @@
             class="de.marw.cdt.cmake.core.ui.CMakeConsole"
             id="de.marw.cdt.cmake.core.cmakeConsole">
       </CBuildConsole>
+   </extension>
+   <extension
+         id="CMakeErrorParser"
+         name="CMake Error Parser"
+         point="org.eclipse.cdt.core.ErrorParser">
+      <errorparser
+            class="de.marw.cdt.cmake.core.CMakeErrorParser"></errorparser>
+   </extension>
+   <extension
+         id="problem"
+         name="CMake Problem"
+         point="org.eclipse.core.resources.markers">
+      <super
+            type="org.eclipse.core.resources.problemmarker">
+      </super>
    </extension>
 
 </plugin>
