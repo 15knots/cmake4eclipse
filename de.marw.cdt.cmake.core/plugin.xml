@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-
-    
-
     <extension
           point="org.eclipse.core.contenttype.contentTypes">
        <content-type
@@ -55,6 +52,7 @@
       </toolChain>
       -->
    </extension>
+   <!--
    <extension
          point="org.eclipse.cdt.ui.cPropertyTab">
       <tab
@@ -64,6 +62,7 @@
             weight="15">
       </tab>
    </extension>
+   -->
    <extension
          point="org.eclipse.cdt.core.CBuildConsole">
       <CBuildConsole
@@ -85,6 +84,12 @@
       <super
             type="org.eclipse.core.resources.problemmarker">
       </super>
+		<super
+			type="org.eclipse.core.resources.textmarker">
+		</super>
+  <persistent
+        value="true">
+  </persistent>
    </extension>
 
 </plugin>
