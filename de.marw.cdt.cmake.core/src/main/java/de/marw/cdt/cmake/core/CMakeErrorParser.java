@@ -60,26 +60,29 @@ public class CMakeErrorParser extends AbstractErrorParser implements
    *
    * <pre>
    * CMake Error at CMakeLists.txt:14 (XXXproject):
-   *   Unknown CMake command "XXXproject".
    * </pre>
    */
   private static final Pattern PTN_SCRIPT_ERROR = Pattern
-      .compile("^CMake Error at (.+):\\s*(\\d+)\\s+.+?:$");
+      .compile("^CMake Error at (.+):\\s*(\\d+)\\s+\\((.+?)\\):$");
   /**
    * CMakelists.txt warnings...
    *
    * <pre>
    * CMake Warning at CMakeLists.txt:14 (XXXproject):
-   *   CPack.cmake has already been included!!
    * </pre>
    */
   private static final Pattern PTN_SCRIPT_WARN = Pattern
-      .compile("^CMake Warning at (.+):\\s*(\\d+)\\s+.+?:$");
+      .compile("^CMake Warning at (.+):\\s*(\\d+)\\s+\\((.+?)\\):$");
   /**
    * CMakelists.txt developer warnings...
    *
    * <pre>
    * CMake Warning (dev) in CMakeLists.txt:
+   * </pre>
+   *
+   * Block is terminated by a single trailing empty line!
+   *
+   * <pre>
    *   A logical block opening on the line
    *
    *     /home/weber/devel/src/CDT-CMake/CDT-mgmt-C-0src/CMakeLists.txt:51 (IF)
@@ -94,12 +97,11 @@ public class CMakeErrorParser extends AbstractErrorParser implements
    * </pre>
    */
   private static final Pattern PTN_SCRIPT_WARN_DEV = Pattern
-      .compile("^CMake Warning }(dev}) in (.+):\\s*(\\d+)\\s+.+?:$");
+      .compile("^CMake Warning \\(dev\\) in (.+):\\s*(\\d+)\\s+.+?:$");
   /**
    * Script error, first part of problem description
    *
    * <pre>
-   * CMake Error at CMakeLists.txt:30 (include):
    *   include could not find load file:
    *
    *     CPackXX
@@ -108,12 +110,11 @@ public class CMakeErrorParser extends AbstractErrorParser implements
    * </pre>
    */
   private static final Pattern PTN_SCRIPT_ERROR_DESCR1 = Pattern
-      .compile("^ +(.+:) *$");
+      .compile("^ *(.+:) *$");
   /**
    * Script error/warning. No empty lines before problem description.
    *
    * <pre>
-   * CMake Error at CMakeLists.txt:33 (ifXXX):
    *   Unknown CMake command "ifXXX".
    *
    *
@@ -134,7 +135,7 @@ public class CMakeErrorParser extends AbstractErrorParser implements
    */
   @Override
   public boolean processLine(String line, ErrorParserManager epm) {
-//    System.err.println("# " + line);
+    System.err.println("# " + line);
 
     switch (pstate) {
     case NONE:
@@ -144,22 +145,26 @@ public class CMakeErrorParser extends AbstractErrorParser implements
         pstate = PState.ERR_SCRIPT;
         String fileName = matcher.group(1);
         String lineNo = matcher.group(2);
+        String var = matcher.group(3);
         createMarker(fileName, epm, lineNo,
-            IMarkerGenerator.SEVERITY_ERROR_RESOURCE);
+            IMarkerGenerator.SEVERITY_ERROR_RESOURCE, var);
         return true; // consume line
       } else if ((matcher = PTN_SCRIPT_WARN.matcher(line)).matches()) {
         // "CMake Warning at "
         pstate = PState.ERR_SCRIPT;
         String fileName = matcher.group(1);
         String lineNo = matcher.group(2);
-        createMarker(fileName, epm, lineNo, IMarkerGenerator.SEVERITY_WARNING);
+        String var = matcher.group(3);
+        createMarker(fileName, epm, lineNo, IMarkerGenerator.SEVERITY_WARNING,
+            var);
         return true; // consume line
       } else if ((matcher = PTN_SCRIPT_WARN_DEV.matcher(line)).matches()) {
         // "CMake Warning at "
         pstate = PState.ERR_SCRIPT;
         String fileName = matcher.group(1);
         String lineNo = matcher.group(2);
-        createMarker(fileName, epm, lineNo, IMarkerGenerator.SEVERITY_WARNING);
+        createMarker(fileName, epm, lineNo, IMarkerGenerator.SEVERITY_WARNING,
+            null);
         return true; // consume line
       } else if ((matcher = PTN_INVOKE_ERROR.matcher(line)).matches()) {
         pstate = PState.NONE;
@@ -173,21 +178,21 @@ public class CMakeErrorParser extends AbstractErrorParser implements
       // marker is present, description is missing
       if (line.length() == 0)
         return true; // consume leading empty line
-      if (markerInfo.description == null) {
-        // we need a problem description
-        if ((matcher = PTN_SCRIPT_ERROR_DESCR1.matcher(line)).matches()) {
-          pstate = PState.ERR_SCRIPT_DESCR_1;
-          String descr = matcher.group(1);
-          markerInfo.description = descr;
-          return true; // consume line
-        } else if ((matcher = PTN_SCRIPT_ERROR_DESCR2.matcher(line)).matches()) {
-          pstate = PState.ERR_SCRIPT_END_1;
-          String descr = matcher.group(1);
-          markerInfo.description = descr;
-          epm.addProblemMarker(markerInfo);
-          return true; // consume line
-        }
+      if (line.startsWith("-- "))
+        return true; // CDT or cmake sometimes reorder lines, ignore
 
+      // extract problem description
+      if ((matcher = PTN_SCRIPT_ERROR_DESCR1.matcher(line)).matches()) {
+        pstate = PState.ERR_SCRIPT_DESCR_1;
+        String descr = matcher.group(1);
+        markerInfo.description = descr;
+        return true; // consume line
+      } else if ((matcher = PTN_SCRIPT_ERROR_DESCR2.matcher(line)).matches()) {
+        pstate = PState.ERR_SCRIPT_END_1;
+        String descr = matcher.group(1);
+        markerInfo.description = descr;
+        epm.addProblemMarker(markerInfo);
+        return true; // consume line
       }
       break;
 
@@ -204,7 +209,6 @@ public class CMakeErrorParser extends AbstractErrorParser implements
       return true; // consume line
 
     case ERR_SCRIPT_END_1:
-      line = line.trim();
       if (line.length() == 0) {
         pstate = PState.ERR_SCRIPT_END_2;
         return true; // consume empty line
@@ -232,13 +236,19 @@ public class CMakeErrorParser extends AbstractErrorParser implements
    * Creates a problem marker.
    *
    * @param fileName
+   *        the file where the problem has occurred
    * @param epm
    * @param lineNo
+   *        the line number of the problem
    * @param severity
-   *        problem severity, see {@link IMarkerGenerator}
+   *        the severity of the problem, see {@link IMarkerGenerator} for
+   *        acceptable severity values
+   * @param varName
+   *        the name of the variable involved in the error or {@code null} if
+   *        unknown
    */
   private void createMarker(String fileName, ErrorParserManager epm,
-      String lineNo, int severity) {
+      String lineNo, int severity, String varName) {
     int lineNumber = Integer.parseInt(lineNo);
     // cmake reports the file relative to source entry
     final IProject project = epm.getProject();
@@ -257,7 +267,7 @@ public class CMakeErrorParser extends AbstractErrorParser implements
     IFile file = epm.findFileName(filePath.toString());
 
     this.markerInfo = new ProblemMarkerInfo(file2, lineNumber, null, severity,
-        null);
+        varName);
     markerInfo.setType(CMAKE_PROBLEM_MARKER_ID);
   }
 
