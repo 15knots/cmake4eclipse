@@ -205,6 +205,8 @@
                     <artifactId>tycho-compiler-plugin</artifactId>
                     <version>${tycho-version}</version>
                     <configuration>
+                        <source>1.6</source>
+                        <target>1.6</target>
                         <encoding>UTF-8</encoding>
                     </configuration>
                 </plugin>
@@ -283,9 +285,9 @@
 
     <url>http://code.google.com/p/cmake4eclipsecdt/</url>
     <scm>
-        <url>http://code.google.com/p/cmake4eclipsecdt/source/browse/</url>
-        <connection>http://code.google.com/p/cmake4eclipsecdt/source/browse/</connection>
-        <developerConnection>https://code.google.com/p/cmake4eclipsecdt/</developerConnection>
+        <url>http://code.google.com/p/cmake4eclipsecdt/source/checkout</url>
+        <connection>scm:git:https://code.google.com/p/cmake4eclipsecdt/</connection>
+        <developerConnection>scm:git:https://code.google.com/p/cmake4eclipsecdt/</developerConnection>
     </scm>
     <issueManagement>
         <url>http://code.google.com/p/cmake4eclipsecdt/issues/list</url>
