@@ -39,18 +39,6 @@
                valueType="string">
          </option>
       </builder>
-      <!--
-      <toolChain
-            id="de.marw.cdt.cmake.core.toolChain"
-            isAbstract="false"
-            name="CMake (empty)">
-      <builder
-            id="de.marw.cdt.cmake.core.toolchain.genmakebuilder"
-            isSystem="true"
-            superClass="de.marw.cdt.cmake.core.genmakebuilder">
-      </builder>
-      </toolChain>
-      -->
    </extension>
    <!--
    <extension
