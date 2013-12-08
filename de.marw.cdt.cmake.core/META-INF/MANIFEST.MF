@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: CDT CMake build integration
+Bundle-Name: %bundleName
 Bundle-SymbolicName: de.marw.cdt.cmake.core;singleton:=true
 Bundle-Version: 0.1.0.qualifier
 Bundle-Vendor: Martin Weber
