@@ -41,16 +41,50 @@
       </builder>
    </extension>
    <!--
+   -->
    <extension
          point="org.eclipse.cdt.ui.cPropertyTab">
       <tab
-            class="de.marw.cdt.cmake.core.ui.BuilderSettingsTab"
+            class="de.marw.cdt.cmake.core.ui.CMakeSettingsTab"
             name="CMake"
-            parent="cdt.managedbuilder.ui.properties.Page_head_build"
+            parent="de.marw.cdt.cmake.core.ui.CMakePrefPage"
             weight="15">
       </tab>
+      <tab
+            class="de.marw.cdt.cmake.core.ui.CMakeSettingsTab"
+            name="CMake"
+            parent="de.marw.cdt.cmake.core.ui.CMakeSettingsPage">
+      </tab>
    </extension>
-   -->
+
+   <extension
+         point="org.eclipse.ui.preferencePages">
+         <!--
+            category="org.eclipse.cdt.ui.preferences.CPluginPreferencePage"
+         -->
+      <page
+            category="org.eclipse.cdt.ui.preferences.BuildSettings"
+            class="de.marw.cdt.cmake.core.ui.CMakePrefPage"
+            id="de.marw.cdt.cmake.core.ui.CMakePrefPage"
+            name="CMake">
+      </page>
+  </extension>
+  
+    <extension
+         point="org.eclipse.ui.propertyPages">
+        <page
+              category="org.eclipse.cdt.managedbuilder.ui.properties.Page_head_build"
+              class="de.marw.cdt.cmake.core.ui.CMakeSettingsPage"
+              id="de.marw.cdt.cmake.core.ui.CMakeSettingsPage"
+              name="%page.c.build">
+         <enabledWhen>
+           <adapt type="org.eclipse.core.resources.IResource">
+	            <test property="org.eclipse.core.resources.projectNature"
+	                  value="org.eclipse.cdt.managedbuilder.core.managedBuildNature"/>
+           </adapt>
+         </enabledWhen>
+        </page>    
+  </extension>
    <extension
          point="org.eclipse.cdt.core.CBuildConsole">
       <CBuildConsole
