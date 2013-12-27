@@ -10,7 +10,14 @@
  *******************************************************************************/
 package de.marw.cdt.cmake.core.ui;
 
+import org.eclipse.cdt.core.CCorePlugin;
+import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
+import org.eclipse.cdt.core.settings.model.ICResourceDescription;
+import org.eclipse.cdt.managedbuilder.core.ManagedBuildManager;
 import org.eclipse.cdt.ui.newui.AbstractPrefPage;
+import org.eclipse.core.runtime.CoreException;
+
+import de.marw.cdt.cmake.core.CMakePlugin;
 
 /**
  * Preference page for CMake workspace settings.
@@ -18,6 +25,23 @@ import org.eclipse.cdt.ui.newui.AbstractPrefPage;
  * @author Martin Weber
  */
 public class CMakePrefPage extends AbstractPrefPage {
+
+  /**  */
+  static final String CFG_STORAGE_ID = CMakePlugin.PLUGIN_ID + ".cmakeSettings";
+
+  private ICConfigurationDescription prefCfgd = null;
+
+  @Override
+  public ICResourceDescription getResDesc() {
+    if (prefCfgd == null)
+      try {
+          prefCfgd = CCorePlugin.getDefault().getPreferenceConfiguration(
+              ManagedBuildManager.CFG_DATA_PROVIDER_ID);
+      } catch (CoreException e) {
+        return null;
+      }
+    return prefCfgd.getRootFolderDescription();
+  }
 
   /*-
    * @see org.eclipse.cdt.ui.newui.AbstractPrefPage#getHeader()

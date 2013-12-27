@@ -30,14 +30,6 @@
             isSystem="false"
             isVariableCaseSensitive="true"
             name="CMake make builder">
-         <option
-               browseType="directory"
-               id="de.marw.cdt.cmake.core.option.topBuildDir"
-               isAbstract="false"
-               name="Top build directory"
-               resourceFilter="project"
-               valueType="string">
-         </option>
       </builder>
    </extension>
    <!--
@@ -76,7 +68,7 @@
               category="org.eclipse.cdt.managedbuilder.ui.properties.Page_head_build"
               class="de.marw.cdt.cmake.core.ui.CMakeSettingsPage"
               id="de.marw.cdt.cmake.core.ui.CMakeSettingsPage"
-              name="%page.c.build">
+              name="CMake">
          <enabledWhen>
            <adapt type="org.eclipse.core.resources.IResource">
 	            <test property="org.eclipse.core.resources.projectNature"
@@ -113,5 +105,12 @@
         value="true">
   </persistent>
    </extension>
-
+ <extension
+         point="org.eclipse.cdt.managedbuilder.core.buildProperties">
+    <propertyValue
+            property="org.eclipse.cdt.build.core.buildArtefactType"
+            id="org.eclipse.cdt.build.core.buildArtefactType.NONE"
+            name="BuildProperty.type.name.executable"/>
+   </extension>
+            
 </plugin>
