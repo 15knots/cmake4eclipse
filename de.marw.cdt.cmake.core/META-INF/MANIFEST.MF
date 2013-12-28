@@ -11,7 +11,9 @@ Import-Package: org.eclipse.cdt.core,
  org.eclipse.cdt.core.resources,
  org.eclipse.cdt.core.settings.model,
  org.eclipse.cdt.core.settings.model.util,
+ org.eclipse.cdt.managedbuilder.buildproperties,
  org.eclipse.cdt.managedbuilder.core,
+ org.eclipse.cdt.managedbuilder.makegen,
  org.eclipse.cdt.ui,
  org.eclipse.cdt.ui.newui,
  org.eclipse.core.resources,
@@ -22,6 +24,7 @@ Import-Package: org.eclipse.cdt.core,
  org.eclipse.swt.layout,
  org.eclipse.swt.widgets,
  org.eclipse.ui.plugin,
- org.osgi.framework
+ org.osgi.framework,
+ org.osgi.service.prefs;version="1.1.1"
 Bundle-Activator: de.marw.cdt.cmake.core.CMakePlugin
 Export-Package: de.marw.cdt.cmake.core
