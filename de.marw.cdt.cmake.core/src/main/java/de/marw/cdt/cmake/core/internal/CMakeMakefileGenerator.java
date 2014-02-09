@@ -19,6 +19,7 @@ import org.eclipse.cdt.core.ICommandLauncher;
 import org.eclipse.cdt.core.resources.IConsole;
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
 import org.eclipse.cdt.core.settings.model.ICSourceEntry;
+import org.eclipse.cdt.core.settings.model.ICStorageElement;
 import org.eclipse.cdt.core.settings.model.util.CDataUtil;
 import org.eclipse.cdt.managedbuilder.buildproperties.IBuildProperty;
 import org.eclipse.cdt.managedbuilder.buildproperties.IBuildPropertyValue;
@@ -187,7 +188,7 @@ public class CMakeMakefileGenerator implements
         console
             .getInfoStream()
             .write(
-                ("Buildfile generation for configuration" + config.getName() + " \n")
+                ("Buildfile generation for configuration " + config.getName() + " \n")
                     .getBytes());
       } catch (IOException ex) {
         // ignore
@@ -280,7 +281,17 @@ public class CMakeMakefileGenerator implements
 
     MultiStatus status; // Return value
 
-    Path cmd = new Path("cmake");
+    final CMakePreferences prefs = new CMakePreferences();
+    {  // load user preferences..
+      final ICConfigurationDescription cfgd = ManagedBuildManager
+          .getDescriptionForConfiguration(config);
+      final ICStorageElement storage = cfgd.getStorage(
+          CMakePreferences.CFG_STORAGE_ID, false);
+      prefs.reset();
+      prefs.loadFromStorage(storage);
+    }
+
+    Path cmd = new Path(prefs.getCommand());
     List<String> argList = new ArrayList<String>();
     // generate makefiles..
     argList.add("-G");

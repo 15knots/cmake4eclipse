@@ -17,7 +17,7 @@ import org.eclipse.cdt.ui.newui.AbstractPage;
  *
  * @author Martin Weber
  */
-public class CMakeSettingsPage extends AbstractPage {
+public class CMakePropertyPage extends AbstractPage {
 
 //  /*-
 //   * @see org.eclipse.cdt.ui.newui.AbstractPrefPage#getHeader()

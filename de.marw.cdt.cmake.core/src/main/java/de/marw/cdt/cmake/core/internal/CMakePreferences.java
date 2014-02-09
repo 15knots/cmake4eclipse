@@ -23,7 +23,11 @@ import de.marw.cdt.cmake.core.CMakePlugin;
  */
 public class CMakePreferences {
 
+  /** storage ID used to store settings or preferences with a ICConfigurationDescription */
+  public static final String CFG_STORAGE_ID = CMakePlugin.PLUGIN_ID + ".cmakeSettings";
+
   private static final String ATTR_COMMAND = "command";
+
   private String command;
 
   /**

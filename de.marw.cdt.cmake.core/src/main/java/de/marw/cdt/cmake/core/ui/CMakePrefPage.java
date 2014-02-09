@@ -17,17 +17,12 @@ import org.eclipse.cdt.managedbuilder.core.ManagedBuildManager;
 import org.eclipse.cdt.ui.newui.AbstractPrefPage;
 import org.eclipse.core.runtime.CoreException;
 
-import de.marw.cdt.cmake.core.CMakePlugin;
-
 /**
  * Preference page for CMake workspace settings.
  *
  * @author Martin Weber
  */
 public class CMakePrefPage extends AbstractPrefPage {
-
-  /**  */
-  static final String CFG_STORAGE_ID = CMakePlugin.PLUGIN_ID + ".cmakeSettings";
 
   private ICConfigurationDescription prefCfgd = null;
 
