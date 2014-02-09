@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 Martin Weber.
+ * Copyright (c) 2014 Martin Weber.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,11 +16,11 @@ import org.eclipse.cdt.core.settings.model.ICProjectDescription;
 import org.eclipse.cdt.core.settings.model.ICProjectDescriptionManager;
 import org.eclipse.cdt.core.settings.model.ICResourceDescription;
 import org.eclipse.cdt.core.settings.model.ICStorageElement;
-import org.eclipse.cdt.managedbuilder.core.IBuilder;
 import org.eclipse.cdt.managedbuilder.core.IConfiguration;
 import org.eclipse.cdt.managedbuilder.core.IMultiConfiguration;
 import org.eclipse.cdt.ui.newui.AbstractCPropertyTab;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -28,36 +28,29 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
 
 import de.marw.cdt.cmake.core.internal.CMakePreferences;
+import de.marw.cdt.cmake.core.ui.util.BuildVariableSelectionDialog;
+import de.marw.cdt.cmake.core.ui.util.FileSystemFileSelectionDialog;
+import de.marw.cdt.cmake.core.ui.util.SelectionDialog;
 
 /**
- * UI to control settings and preferences for cmake. This tab isd responsible
- * for storing its vaules.
+ * UI to control host OS specific project properties and preferences for cmake.
+ * Host OS specific properties override generic properties and get automatically
+ * applied if the plugin is running under that operating system.<br>
+ * This tab is responsible for storing its values.<br>
  *
  * @author Martin Weber
  */
-public class CMakeSettingsTab extends AbstractCPropertyTab {
+public class LinuxPropertyTab extends AbstractCPropertyTab {
 
-  // Widgets
-  //1
-  private Button b_useDefault;
-//  private Combo c_builderType;
-  private Text t_buildCmd;
-  //5
-  private Text t_dir;
-  private Button b_dirWsp;
-  private Button b_dirFile;
-  private Button b_dirVars;
-//  private Group group_dir;
-
-  private IBuilder bldr;
-  private IConfiguration icfg;
   private boolean canModify = true;
   /** the configuration we manage here. Initialized in {@link #updateData} */
   private ICConfigurationDescription cfgd;
@@ -67,65 +60,151 @@ public class CMakeSettingsTab extends AbstractCPropertyTab {
    */
   private CMakePreferences prefs;
 
+  // Widgets
+  /** 'use exec from path' checkbox */
+  private Button b_cmdFromPath;
+  /** cmake executable */
+  private Text t_cmd;
+
+  /** Combo that shows the generator names for cmake */
+  private Combo c_generator;
+
+  /**
+   *
+   */
+  public LinuxPropertyTab() {
+    super();
+    // TODO Auto-generated constructor stub
+  }
+
   @Override
   public void createControls(Composite parent) {
     super.createControls(parent);
-    usercomp.setLayout(new GridLayout(1, false));
+    usercomp.setLayout(new GridLayout(2, false));
+    GridLayout layout;
 
     // cmake executable group
-    Group g1 = setupGroup(usercomp, "cmake executable", 3,
-        GridData.FILL_HORIZONTAL);
-//    setupLabel(g1, "Messages.BuilderSettingsTab_1", 1, GridData.BEGINNING);
-//    c_builderType = new Combo(g1, SWT.READ_ONLY | SWT.DROP_DOWN | SWT.BORDER);
-//    setupControl(c_builderType, 2, GridData.FILL_HORIZONTAL);
-//    c_builderType.add("Messages.BuilderSettingsTab_2");
-//    c_builderType.add("Messages.BuilderSettingsTab_3");
-//    c_builderType.addSelectionListener(new SelectionAdapter() {
-//      @Override
-//      public void widgetSelected(SelectionEvent event) {
-////                          enableInternalBuilder(c_builderType.getSelectionIndex() == 1);
-//        updateButtons();
-//      }
-//    });
+    {
+      Group gr = setupGroup(usercomp, "cmake executable", 1,
+          GridData.FILL_HORIZONTAL);
+      setupControl(gr, 2, GridData.FILL_HORIZONTAL);
 
-    b_useDefault = setupCheck(g1, "Use cmake executable found on system &path",
-        3, GridData.BEGINNING);
+      b_cmdFromPath = setupCheck(gr,
+          "Use cmake executable found on &system path", 1, SWT.BEGINNING);
+      // the control that is en-/disabled by the b_cmdFromPath checkbox..
+      Composite c = new Composite(gr, SWT.NONE);
+      setupControl(c, 1, GridData.FILL_HORIZONTAL);
+//      c.setBackground(BACKGROUND_FOR_USER_VAR);
+      b_cmdFromPath.setData(c); // to get know which control to enable/disable
 
-    setupLabel(g1, "cmake &command", 1, GridData.BEGINNING);
-    t_buildCmd = setupBlock(g1, b_useDefault);
-    t_buildCmd.addModifyListener(new ModifyListener() {
+      layout = new GridLayout(3, false);
+      layout.marginHeight = 0;
+      layout.marginWidth = 0;
+      c.setLayout(layout);
+
+      Label label = setupLabel(c, "&Cmake", 1, SWT.BEGINNING);
+      label.setToolTipText(ADD_STR);
+      t_cmd = setupText(c, 2, GridData.FILL_HORIZONTAL);
+
+      t_cmd.addModifyListener(new ModifyListener() {
+        @Override
+        public void modifyText(ModifyEvent e) {
+          if (!canModify)
+            return;
+          String buildCommand = t_cmd.getText().trim();
+          if (!buildCommand.equals(prefs.getCommand())) {
+            setCommand(buildCommand);
+          }
+        }
+      });
+      // "Filesystem", "Variables" dialog launcher buttons...
+
+      Composite buttonBar = new Composite(c, SWT.NONE);
+      {
+        buttonBar.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false,
+            3, 1));
+//        buttonBar.setBackground(BACKGROUND_FOR_USER_VAR);
+        layout = new GridLayout(2, false);
+        layout.marginHeight = 0;
+        layout.marginWidth = 0;
+        buttonBar.setLayout(layout);
+      }
+      setupDialogLauncherButton(buttonBar, new FileSystemFileSelectionDialog(
+          null), t_cmd);
+      setupDialogLauncherButton(buttonBar, new BuildVariableSelectionDialog(
+          cfgd), t_cmd);
+    }
+    // makefile generator combo
+    {
+      Label label = setupLabel(usercomp, "Buildscript &generator (-G)", 1,
+          SWT.BEGINNING);
+      label.setToolTipText("larglblah");
+      String generatorNames[] = getAvailableGenerators();
+      c_generator = new Combo(usercomp, SWT.READ_ONLY | SWT.DROP_DOWN
+          | SWT.BORDER);
+      setupControl(c_generator, 1, GridData.FILL_HORIZONTAL);
+//      c_generator.setEnabled(page.isForProject());
+
+      for (String gen : generatorNames) {
+        c_generator.add(gen);
+      }
+      c_generator.setToolTipText("görglblah");
+      c_generator.addSelectionListener(new SelectionAdapter() {
+        @Override
+        public void widgetSelected(SelectionEvent event) {
+          updateButtons();
+        }
+      });
+    }
+  }
+
+  /**
+   * Get all sensible choices for cmake's '-G' option on this platform. The
+   * returned array should not include generators for IDE project files, such as
+   * "Eclipse CDT4 - Unix Makefiles".
+   *
+   * @return an array of non-empty strings, where each string must be an valid
+   *         argument for cmake.
+   */
+  protected String[] getAvailableGenerators() {
+    return new String[] { "Unix Makefiles" };
+  }
+
+  /**
+   * Creates a button that fires up a selection dialog.
+   *
+   * @param buttonParent
+   * @param selectionDialog
+   *        the dialog to fire up when the button is pressed
+   * @param receivingWidget
+   *        the Text widget wher to append text
+   */
+  private Button setupDialogLauncherButton(final Composite buttonParent,
+      final SelectionDialog selectionDialog, Text receivingWidget) {
+    if (buttonParent == null || selectionDialog == null
+        || receivingWidget == null) {
+      throw new NullPointerException();
+    }
+
+    final Button b = setupButton(buttonParent,
+        selectionDialog.getLauncherButtonText(), 1, SWT.CENTER);
+    b.setData(receivingWidget); // to get know which Text is affected
+
+    b.addSelectionListener(new SelectionAdapter() {
       @Override
-      public void modifyText(ModifyEvent e) {
-        if (!canModify)
+      public void widgetSelected(SelectionEvent evt) {
+        Widget b = evt.widget;
+        if (b == null)
           return;
-        String buildCommand = t_buildCmd.getText().trim();
-        if (!buildCommand.equals(prefs.getCommand())) {
-          setCommand(buildCommand);
+        if (b.getData() instanceof Text) {
+          // launch dialo, insert input text into receivingWidget..
+          String x = selectionDialog.getTextFromDialog(buttonParent.getShell());
+          if (x != null)
+            ((Text) b.getData()).insert(x);
         }
       }
     });
-
-//    // Build location group
-//    group_dir = setupGroup(usercomp, Messages.BuilderSettingsTab_21, 2,
-//        GridData.FILL_HORIZONTAL);
-//    setupLabel(group_dir, Messages.BuilderSettingsTab_22, 1, GridData.BEGINNING);
-//    t_dir = setupText(group_dir, 1, GridData.FILL_HORIZONTAL);
-//    t_dir.addModifyListener(new ModifyListener() {
-//      @Override
-//      public void modifyText(ModifyEvent e) {
-//        if (canModify)
-//          setBuildPath(t_dir.getText());
-//      }
-//    });
-//    Composite c = new Composite(group_dir, SWT.NONE);
-//    setupControl(c, 2, GridData.FILL_HORIZONTAL);
-//    GridLayout f = new GridLayout(4, false);
-//    c.setLayout(f);
-//    Label dummy = new Label(c, 0);
-//    dummy.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-//    b_dirWsp = setupBottomButton(c, WORKSPACEBUTTON_NAME);
-//    b_dirFile = setupBottomButton(c, FILESYSTEMBUTTON_NAME);
-//    b_dirVars = setupBottomButton(c, VARIABLESBUTTON_NAME);
+    return b;
   }
 
   /*-
@@ -169,8 +248,8 @@ public class CMakeSettingsTab extends AbstractCPropertyTab {
     ICConfigurationDescription srcCfg = src.getConfiguration();
 
     try {
-      ICStorageElement srcEl = srcCfg.getStorage(CMakePreferences.CFG_STORAGE_ID,
-          false);
+      ICStorageElement srcEl = srcCfg.getStorage(
+          CMakePreferences.CFG_STORAGE_ID, false);
       if (srcEl != null) {
         prefs = new CMakePreferences();
         prefs.loadFromStorage(srcEl);
@@ -222,52 +301,6 @@ public class CMakeSettingsTab extends AbstractCPropertyTab {
     updateButtons();
   }
 
-  /**
-   * Sets up text + corresponding button. Checkbox can be implemented either by
-   * Button or by TriButton
-   */
-  private Text setupBlock(Composite c, Control check) {
-    Text t = setupText(c, 1, GridData.FILL_HORIZONTAL);
-    Button b = setupButton(c, VARIABLESBUTTON_NAME, 1, GridData.END);
-    b.setData(t); // to get know which text is affected
-    t.setData(b); // to get know which button to enable/disable
-    b.addSelectionListener(new SelectionAdapter() {
-      @Override
-      public void widgetSelected(SelectionEvent event) {
-        buttonVarPressed(event);
-      }
-    });
-    if (check != null)
-      check.setData(t);
-    return t;
-  }
-
-  /*
-   * Unified handler for "Variables" buttons
-   */
-  private void buttonVarPressed(SelectionEvent e) {
-    Widget b = e.widget;
-    if (b == null || b.getData() == null)
-      return;
-    if (b.getData() instanceof Text) {
-      String x = null;
-      if (b.equals(b_dirWsp)) {
-        x = getWorkspaceDirDialog(usercomp.getShell(), EMPTY_STR);
-        if (x != null)
-          ((Text) b.getData()).setText(x);
-      } else if (b.equals(b_dirFile)) {
-        x = getFileSystemDirDialog(usercomp.getShell(), EMPTY_STR);
-        if (x != null)
-          ((Text) b.getData()).setText(x);
-      } else {
-        x = AbstractCPropertyTab.getVariableDialog(usercomp.getShell(),
-            getResDesc().getConfiguration());
-        if (x != null)
-          ((Text) b.getData()).insert(x);
-      }
-    }
-  }
-
   private void setCommand(String buildCommand) {
     if (cfgd instanceof IMultiConfiguration) {
       IConfiguration[] cfs = (IConfiguration[]) ((IMultiConfiguration) cfgd)
@@ -284,7 +317,7 @@ public class CMakeSettingsTab extends AbstractCPropertyTab {
   // This page can be displayed for project and preferences
   @Override
   public boolean canBeVisible() {
-    return page.isForProject() || page.isForPrefs();
+    return page.isForProject();// || page.isForPrefs();
   }
 
   /**
@@ -301,31 +334,19 @@ public class CMakeSettingsTab extends AbstractCPropertyTab {
       return;
 
     boolean val = false;
-    if (b instanceof Button)
+    if (b instanceof Button) {
       val = ((Button) b).getSelection();
-
-    if (b.getData() instanceof Text) {
-      Text t = (Text) b.getData();
-      if (b == b_useDefault) {
+      if (b == b_cmdFromPath) {
+        // 'use exec from path' checkbox
         val = !val;
       }
-      t.setEnabled(val);
-      if (t.getData() != null && t.getData() instanceof Control) {
-        Control c = (Control) t.getData();
-        c.setEnabled(val);
-      }
     }
-    // call may be used just to set text state above
-    // in this case, settings update is not required
-    if (!needUpdate)
-      return;
-
-//          if (b == b_useDefault) {
-//                  setUseDefaultBuildCmd(!val);
-//          } else if (b == b_expandVars) {
-//                  if(bldr.canKeepEnvironmentVariablesInBuildfile())
-//                          setKeepEnvironmentVariablesInBuildfile(!val);
-//          }
+    // adjust sensitivity...
+    final Object slave_control = b.getData();
+    if (slave_control instanceof Control) {
+      // enable/disable the associated Control
+      ((Control) slave_control).setEnabled(val);
+    }
   }
 
   /*-
@@ -336,31 +357,23 @@ public class CMakeSettingsTab extends AbstractCPropertyTab {
 //    bldr = icfg.getEditableBuilder();
     canModify = false; // avoid extra update from modifyListeners
 
-//    AbstractCPropertyTab
-//        .setTriSelection(b_useDefault, bldr.isDefaultBuildCmd());
-
-    t_buildCmd.setText(prefs.getCommand());
-
     if (page.isMultiCfg()) {
-//      group_dir.setVisible(false);
+//      group_cmd.setVisible(false);
     } else {
-//      group_dir.setVisible(true);
-//      t_dir.setText(bldr.getBuildPath());
-//      boolean mbOn = bldr.isManagedBuildOn();
-//      t_dir.setEnabled(!mbOn);
-//      b_dirVars.setEnabled(!mbOn);
-//      b_dirWsp.setEnabled(!mbOn);
-//      b_dirFile.setEnabled(!mbOn);
+      t_cmd.setText(prefs.getCommand());
+      // TODO
+//      b_cmdFromPath.setEnabled(canModify);
+//
+//      final String[] gens = c_generator.getItems();
+//      for (int i = 0; i < gens.length; i++) {
+//        if (gens[i].equals(prefs.linux.getGenerator())) {
+//          c_generator.select(i);
+//          break;
+//        }
+//      }
     }
-
-//    b_useDefault.setEnabled(external);
-//    t_buildCmd.setEnabled(external);
-//    ((Control) t_buildCmd.getData()).setEnabled(external
-//        & !b_useDefault.getSelection());
-
     canModify = true;
     // TODO Auto-generated function stub
 
   }
-
 }

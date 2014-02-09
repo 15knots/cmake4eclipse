@@ -32,23 +32,58 @@
             name="CMake make builder">
       </builder>
    </extension>
-   <!--
-   -->
+   <!-- project settings UI   -->
+  
+    <extension
+         point="org.eclipse.ui.propertyPages">
+        <page
+              category="org.eclipse.cdt.managedbuilder.ui.properties.Page_head_build"
+              class="de.marw.cdt.cmake.core.ui.CMakePropertyPage"
+              id="de.marw.cdt.cmake.core.ui.CMakePropertyPage"
+              name="CMake">
+         <enabledWhen>
+           <adapt type="org.eclipse.core.resources.IResource">
+	            <test property="org.eclipse.core.resources.projectNature"
+	                  value="org.eclipse.cdt.managedbuilder.core.managedBuildNature"/>
+           </adapt>
+         </enabledWhen>
+        </page>    
+        <page
+              category="de.marw.cdt.cmake.core.ui.CMakePropertyPage"
+              class="de.marw.cdt.cmake.core.ui.HostOSPropertyPage"
+              id="de.marw.cdt.cmake.core.ui.HostOSPropertyPage"
+              name="Host OS overrides">
+        </page>    
+  </extension>
    <extension
          point="org.eclipse.cdt.ui.cPropertyTab">
       <tab
             class="de.marw.cdt.cmake.core.ui.CMakeSettingsTab"
             name="CMake"
-            parent="de.marw.cdt.cmake.core.ui.CMakePrefPage"
-            weight="15">
+            parent="de.marw.cdt.cmake.core.ui.CMakePropertyPage"
+            >
       </tab>
       <tab
-            class="de.marw.cdt.cmake.core.ui.CMakeSettingsTab"
-            name="CMake"
-            parent="de.marw.cdt.cmake.core.ui.CMakeSettingsPage">
+            class="de.marw.cdt.cmake.core.ui.LinuxPropertyTab"
+            name="Linux/default"
+            parent="de.marw.cdt.cmake.core.ui.HostOSPropertyPage"
+            weight="10">
+      </tab>
+      <tab
+            class="org.eclipse.cdt.ui.newui.SymbolTab"
+            name="OS X"
+            parent="de.marw.cdt.cmake.core.ui.HostOSPropertyPage"
+            weight="20">
+      </tab>
+      <tab
+            class="org.eclipse.cdt.ui.newui.SymbolTab"
+            name="Windows"
+            parent="de.marw.cdt.cmake.core.ui.HostOSPropertyPage"
+            weight="80">
       </tab>
    </extension>
 
+   <!-- workspace preferences UI -->
    <extension
          point="org.eclipse.ui.preferencePages">
          <!--
@@ -61,22 +96,15 @@
             name="CMake">
       </page>
   </extension>
-  
     <extension
-         point="org.eclipse.ui.propertyPages">
-        <page
-              category="org.eclipse.cdt.managedbuilder.ui.properties.Page_head_build"
-              class="de.marw.cdt.cmake.core.ui.CMakeSettingsPage"
-              id="de.marw.cdt.cmake.core.ui.CMakeSettingsPage"
-              name="CMake">
-         <enabledWhen>
-           <adapt type="org.eclipse.core.resources.IResource">
-	            <test property="org.eclipse.core.resources.projectNature"
-	                  value="org.eclipse.cdt.managedbuilder.core.managedBuildNature"/>
-           </adapt>
-         </enabledWhen>
-        </page>    
-  </extension>
+          point="org.eclipse.cdt.ui.cPropertyTab">
+      <tab
+            class="de.marw.cdt.cmake.core.ui.CMakeSettingsTab"
+            name="CMake"
+            parent="de.marw.cdt.cmake.core.ui.CMakePrefPage"
+            weight="15">
+      </tab>
+    </extension>
    <extension
          point="org.eclipse.cdt.core.CBuildConsole">
       <CBuildConsole
@@ -109,8 +137,8 @@
          point="org.eclipse.cdt.managedbuilder.core.buildProperties">
     <propertyValue
             property="org.eclipse.cdt.build.core.buildArtefactType"
-            id="org.eclipse.cdt.build.core.buildArtefactType.NONE"
-            name="BuildProperty.type.name.executable"/>
+            id="org.eclipse.cdt.build.core.buildArtefactType.UNKONWN"
+            name="defined by CMakeLists.txt"/>
    </extension>
             
 </plugin>
