@@ -12,6 +12,7 @@ package de.marw.cdt.cmake.core.ui.util;
 
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
 import org.eclipse.cdt.ui.newui.AbstractCPropertyTab;
+import org.eclipse.debug.ui.StringVariableSelectionDialog;
 import org.eclipse.swt.widgets.Shell;
 
 /**
@@ -41,8 +42,11 @@ public class BuildVariableSelectionDialog implements SelectionDialog {
 
   @Override
   public String getTextFromDialog(Shell shell) {
-    return AbstractCPropertyTab.getVariableDialog(shell,
-        configurationDescription);
+    StringVariableSelectionDialog dialog = new StringVariableSelectionDialog(shell);
+    dialog.open();
+    return dialog.getVariableExpression();
+//    return AbstractCPropertyTab.getVariableDialog(shell,
+//        configurationDescription);
   }
 
 }
