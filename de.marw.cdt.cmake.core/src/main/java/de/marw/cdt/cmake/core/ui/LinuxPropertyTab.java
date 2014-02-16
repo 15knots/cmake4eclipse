@@ -185,7 +185,7 @@ public class LinuxPropertyTab extends AbstractCPropertyTab {
         GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL);
 
     final DefinesViewer definesViewer = new DefinesViewer(gr);
-definesViewer.setInput(defines);
+    definesViewer.setInput(defines);
 
     final TableViewer tableViewer = definesViewer.getTableViewer();
     // let double click trigger the edit dialog
@@ -193,7 +193,7 @@ definesViewer.setInput(defines);
 
       @Override
       public void doubleClick(DoubleClickEvent event) {
-          handleDefineEditButton(tableViewer);
+        handleDefineEditButton(tableViewer);
       }
     });
     // let DEL key trigger the delete dialog
@@ -294,30 +294,29 @@ definesViewer.setInput(defines);
       AddCmakeDefineDialog dlg = new AddCmakeDefineDialog(usercomp.getShell(),
           (CmakeDefine) cmakeDefine);
       if (dlg.open() == Dialog.OK) {
-        tableViewer.update(cmakeDefine,null); // update the display
+        tableViewer.update(cmakeDefine, null); // update the display
       }
     }
   }
 
   private void handleDefineDelButton(TableViewer tableViewer) {
-//    ICdtVariable macros[] = getSelectedUserMacros();
-//    if(macros != null && macros.length > 0){
-            if(MessageDialog.openQuestion(usercomp.getShell(),
-                            "Cmake-Define deletion confirmation",
-                            "Are you sure to delete the selected Cmake-defines?")){
-                            if (cfgd != null) {
-                                    if (page.isMultiCfg() && cfgd instanceof ICMultiItemsHolder) {
-                                            ICConfigurationDescription[] cfs = (ICConfigurationDescription[])((ICMultiItemsHolder)cfgd).getItems();
-                                            for (int k=0; k<cfs.length; k++)
-                                                    fUserSup.deleteMacro(macros[i].getName(), cfs[k]);
-                                            replaceMacros();
-                                    }
-                                    else
-                                      defines.remove();
-                                            fUserSup.deleteMacro(macros[i].getName(), cfgd);
-                            }
-                    }
-            }
+    final IStructuredSelection selection = (IStructuredSelection) tableViewer
+        .getSelection();
+    if (MessageDialog.openQuestion(usercomp.getShell(),
+        "Cmake-Define deletion confirmation",
+        "Are you sure to delete the selected Cmake-defines?")) {
+      if (cfgd != null) {
+        if (page.isMultiCfg() && cfgd instanceof ICMultiItemsHolder) {
+          ICConfigurationDescription[] cfs = (ICConfigurationDescription[]) ((ICMultiItemsHolder) cfgd)
+              .getItems();
+          for (int k = 0; k < cfs.length; k++) {
+// TODO                                                    fUserSup.deleteMacro(macros[i].getName(), cfs[k]);
+          }
+//                                            replaceMacros();
+        } else {
+          defines.removeAll(selection.toList());
+        }
+      }
     }
   }
 
