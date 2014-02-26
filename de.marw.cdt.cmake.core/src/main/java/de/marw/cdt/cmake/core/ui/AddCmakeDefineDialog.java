@@ -30,12 +30,12 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import de.marw.cdt.cmake.core.internal.CmakeDefine;
-import de.marw.cdt.cmake.core.internal.CmakeVariableType;
+import de.marw.cdt.cmake.core.internal.settings.CmakeDefine;
+import de.marw.cdt.cmake.core.internal.settings.CmakeVariableType;
 
 /**
  * The dialog used to create or edit a cmake define.
- *
+ * 
  * @author Martin Weber
  */
 public class AddCmakeDefineDialog extends Dialog {
@@ -65,7 +65,7 @@ public class AddCmakeDefineDialog extends Dialog {
    * Creates a dialog. If a variable to edit is specified, it will be modified
    * in-place when the OK button is pressed. It will remain unchanged, if the
    * dialog is cancelled.
-   *
+   * 
    * @param parentShell
    * @param editedVar
    *        the variable to edit or {@code null} if a new variable is going to
@@ -78,21 +78,12 @@ public class AddCmakeDefineDialog extends Dialog {
 
   /**
    * Gets the edited or newly created cmake define.
-   *
+   * 
    * @return the modified or new CmakeDefine or {@code null} if this dialog has
    *         been cancelled.
    */
   public CmakeDefine getCmakeDefine() {
-//    if (editedVar != null) {
-//      editedVar.setName(variableName.getText().trim());
-//      editedVar.setType(indexToType(typeSelector.getSelectionIndex()));
-//      editedVar.setValue(variableValue.getText());
     return editedVar;
-//    } else {
-//      return new CmakeDefine(variableName.getText(),
-//          indexToType(typeSelector.getSelectionIndex()),
-//          variableValue.getText());
-//    }
   }
 
   @Override
@@ -124,15 +115,13 @@ public class AddCmakeDefineDialog extends Dialog {
 
   /**
    * Create contents of the dialog.
-   *
+   * 
    * @param parent
    */
   @Override
   protected Control createDialogArea(Composite parent) {
-    Composite comp = new Composite(parent, SWT.NONE);
-    comp.setLayout(new GridLayout(3, false));
-    GridData gd = new GridData(GridData.FILL_BOTH);
-    comp.setLayoutData(gd);
+    Composite comp = (Composite) super.createDialogArea(parent);
+    ((GridLayout) comp.getLayout()).numColumns = 3;
 
     Label nameLabel = new Label(comp, SWT.NONE);
     nameLabel.setText("Variable &name:");
@@ -156,7 +145,7 @@ public class AddCmakeDefineDialog extends Dialog {
     typeLabel.setText("&Type:");
 
     typeSelector = new Combo(comp, SWT.READ_ONLY | SWT.DROP_DOWN | SWT.BORDER);
-    gd = new GridData(SWT.LEFT, SWT.CENTER, true, false, 2, 1);
+    GridData gd = new GridData(SWT.LEFT, SWT.CENTER, true, false, 2, 1);
     gd.widthHint = 100;
     typeSelector.setLayoutData(gd);
     typeSelector.setItems(typeNames);
@@ -239,7 +228,6 @@ public class AddCmakeDefineDialog extends Dialog {
     final Control control = super.createContents(parent);
     updateDisplay();
     return control;
-
   }
 
   /**
@@ -260,7 +248,7 @@ public class AddCmakeDefineDialog extends Dialog {
   /**
    * Converts an index in {@link AddCmakeDefineDialog#typeNames} to a Cmake
    * variable type.
-   *
+   * 
    * @param selectionIndex
    */
   private static CmakeVariableType indexToType(int selectionIndex) {

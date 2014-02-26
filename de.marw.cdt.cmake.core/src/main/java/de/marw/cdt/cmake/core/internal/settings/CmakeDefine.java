@@ -8,11 +8,11 @@
  * Contributors:
  *      Martin Weber - Initial implementation
  *******************************************************************************/
-package de.marw.cdt.cmake.core.internal;
+package de.marw.cdt.cmake.core.internal.settings;
 
 /**
  * Represents a cmake variable to define.
- *
+ * 
  * @author Martin Weber
  */
 public class CmakeDefine {
@@ -22,11 +22,11 @@ public class CmakeDefine {
 
   /**
    * Creates a new object with type STRING and an empty value.
-   *
+   * 
    * @param name
    *        the variable name, must not be empty.
    * @throws IllegalArgumentException
-   *         if {@code name} is {@code null} or empty
+   *         if {@code name} is empty
    * @throws NullPointerException
    *         if {@code name} is {@code null}
    */
@@ -36,7 +36,7 @@ public class CmakeDefine {
 
   /**
    * Creates a new object with the specified values.
-   *
+   * 
    * @param name
    *        the variable name, must not be empty.
    * @param type
@@ -60,7 +60,7 @@ public class CmakeDefine {
 
   /**
    * Gets the type.
-   *
+   * 
    * @return the current type.
    */
   public CmakeVariableType getType() {
@@ -69,7 +69,7 @@ public class CmakeDefine {
 
   /**
    * Sets the type.
-   *
+   * 
    * @throws NullPointerException
    *         if {@code type} is {@code null}
    */
@@ -82,7 +82,7 @@ public class CmakeDefine {
 
   /**
    * Gets the name property.
-   *
+   * 
    * @return the current name property.
    */
   public String getName() {
@@ -91,7 +91,7 @@ public class CmakeDefine {
 
   /**
    * Sets the name property.
-   *
+   * 
    * @throws IllegalArgumentException
    *         if {@code name} is empty
    * @throws NullPointerException
@@ -109,7 +109,7 @@ public class CmakeDefine {
 
   /**
    * Gets the value.
-   *
+   * 
    * @return the current value.
    */
   public String getValue() {
@@ -118,7 +118,7 @@ public class CmakeDefine {
 
   /**
    * Sets the value.
-   *
+   * 
    * @throws NullPointerException
    *         if {@code value} is {@code null}
    */

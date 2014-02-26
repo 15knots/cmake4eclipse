@@ -62,7 +62,7 @@ import org.eclipse.core.runtime.CoreException;
 
   /**
    * Checks for CMakeLists.txt files.
-   *
+   * 
    * @param resource
    * @return {@code true} if the resource is a CMakeLists.txt file, otherwise
    *         {@code false}

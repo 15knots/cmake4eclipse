@@ -8,11 +8,11 @@
  * Contributors:
  *      Martin Weber - Initial implementation
  *******************************************************************************/
-package de.marw.cdt.cmake.core.internal;
+package de.marw.cdt.cmake.core.internal.settings;
 
 /**
  * The type identifier of a cmake variable.
- *
+ * 
  * @author Martin Weber
  */
 public enum CmakeVariableType {

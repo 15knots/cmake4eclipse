@@ -34,12 +34,12 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
 
-import de.marw.cdt.cmake.core.internal.CMakePreferences;
+import de.marw.cdt.cmake.core.internal.settings.CMakePreferences;
 
 /**
  * UI to control settings and preferences for cmake. This tab isd responsible
  * for storing its vaules.
- *
+ * 
  * @author Martin Weber
  */
 public class CMakeSettingsTab extends AbstractCPropertyTab {
@@ -137,6 +137,7 @@ public class CMakeSettingsTab extends AbstractCPropertyTab {
       return;
 
     cfgd = resd.getConfiguration();
+    cfgd.get("de.marw.cdt.cmake.cfgdataprovider.id1");
     prefs = new CMakePreferences();
     // TODO (cfgd instanceof ICMultiItemsHolder)
 
@@ -159,7 +160,7 @@ public class CMakeSettingsTab extends AbstractCPropertyTab {
 
   /**
    * Invoked when project configuration changes??
-   *
+   * 
    * @see org.eclipse.cdt.ui.newui.AbstractCPropertyTab#performApply(org.eclipse.cdt.core.settings.model.ICResourceDescription,
    *      org.eclipse.cdt.core.settings.model.ICResourceDescription)
    */
@@ -169,8 +170,8 @@ public class CMakeSettingsTab extends AbstractCPropertyTab {
     ICConfigurationDescription srcCfg = src.getConfiguration();
 
     try {
-      ICStorageElement srcEl = srcCfg.getStorage(CMakePreferences.CFG_STORAGE_ID,
-          false);
+      ICStorageElement srcEl = srcCfg.getStorage(
+          CMakePreferences.CFG_STORAGE_ID, false);
       if (srcEl != null) {
         prefs = new CMakePreferences();
         prefs.loadFromStorage(srcEl);
@@ -277,7 +278,7 @@ public class CMakeSettingsTab extends AbstractCPropertyTab {
 //        b.setCommand(buildCommand);
       }
     } else {
-      prefs.setCommand(buildCommand);
+//      prefs.setCommand(buildCommand);
     }
   }
 

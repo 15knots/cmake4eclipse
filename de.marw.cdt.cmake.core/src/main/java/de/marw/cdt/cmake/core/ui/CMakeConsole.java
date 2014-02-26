@@ -39,14 +39,14 @@ public class CMakeConsole implements IConsole {
 
   /**
    * Starts the console for a given project.
-   *
+   * 
    * @param project
    *        - the project to start the console.
    */
   @Override
   public void start(IProject project) {
-    IBuildConsoleManager fConsoleManager = CUIPlugin.getDefault().getConsoleManager("CMake Console",
-        CONSOLE_CONTEXT_MENU_ID);
+    IBuildConsoleManager fConsoleManager = CUIPlugin.getDefault()
+        .getConsoleManager("CMake Console", CONSOLE_CONTEXT_MENU_ID);
     console = fConsoleManager.getConsole(project);
     console.start(project);
   }

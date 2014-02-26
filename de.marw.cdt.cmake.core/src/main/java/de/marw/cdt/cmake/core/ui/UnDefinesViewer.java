@@ -28,18 +28,18 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 
-import de.marw.cdt.cmake.core.internal.settings.CmakeDefine;
+import de.marw.cdt.cmake.core.internal.settings.CmakeUnDefine;
 
 /**
- * Displays a table for the Cmake defines.
- * 
+ * Displays a table for the Cmake undefines.
+ *
  * @author Martin Weber
  */
-/* package */class DefinesViewer {
+/* package */class UnDefinesViewer {
   /** table column names */
-  private static final String[] tableColumnNames = { "Name", "Type", "Value" };
+  private static final String[] tableColumnNames = { "Name" };
   /** table column widths */
-  private static final int[] tableColumnWidths = { 120, 80, 250 };
+  private static final int[] tableColumnWidths = { 120 };
 
   private TableViewer viewer;
   private MyViewerComparator comparator;
@@ -47,7 +47,7 @@ import de.marw.cdt.cmake.core.internal.settings.CmakeDefine;
   /**
    * @param parent
    */
-  public DefinesViewer(Composite parent) {
+  public UnDefinesViewer(Composite parent) {
     createViewer(parent);
     // Set the sorter for the table
     comparator = new MyViewerComparator();
@@ -55,19 +55,19 @@ import de.marw.cdt.cmake.core.internal.settings.CmakeDefine;
   }
 
   /**
-   * Gets the TableViewer for the Cmake-defines
+   * Gets the TableViewer for the Cmake-undefines
    */
   public TableViewer getTableViewer() {
     return viewer;
   }
 
   /**
-   * Sets the list of cmake defines that are displayed by the viewer.
+   * Sets the list of cmake undefines that are displayed by the viewer.
    */
-  public void setInput(List<CmakeDefine> defines) {
+  public void setInput(List<CmakeUnDefine> list) {
     // Get the content for the viewer, setInput will call getElements in the
     // contentProvider
-    viewer.setInput(defines);
+    viewer.setInput(list);
   }
 
   private void createViewer(Composite parent) {
@@ -80,7 +80,7 @@ import de.marw.cdt.cmake.core.internal.settings.CmakeDefine;
     table.setHeaderVisible(true);
     table.setLinesVisible(true);
 
-    viewer.setContentProvider(new CmakeDefineTableContentProvider());
+    viewer.setContentProvider(new CmakeUnDefineTableContentProvider());
     viewer.setLabelProvider(new CmakeVariableLabelProvider());
 
 //    // make the selection available to other views
@@ -98,7 +98,7 @@ import de.marw.cdt.cmake.core.internal.settings.CmakeDefine;
 
   /**
    * Creates the columns for the table.
-   * 
+   *
    * @param parent
    * @param viewer
    */
@@ -149,16 +149,16 @@ import de.marw.cdt.cmake.core.internal.settings.CmakeDefine;
   ////////////////////////////////////////////////////////////////////
 
   /**
-   * Converts the list of CmakeDefine object.
-   * 
+   * Converts the list of CmakeUnDefine objects.
+   *
    * @author Martin Weber
    */
-  private static class CmakeDefineTableContentProvider implements
+  private static class CmakeUnDefineTableContentProvider implements
       IStructuredContentProvider {
     @Override
     public Object[] getElements(Object inputElement) {
       @SuppressWarnings("unchecked")
-      final List<CmakeDefine> elems = (List<CmakeDefine>) inputElement;
+      final List<CmakeUnDefine> elems = (List<CmakeUnDefine>) inputElement;
       return elems.toArray();
     }
 
@@ -169,7 +169,7 @@ import de.marw.cdt.cmake.core.internal.settings.CmakeDefine;
     @Override
     public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
     }
-  } // CmakeDefineTableContentProvider
+  } // CmakeUnUnDefineTableContentProvider
 
   private static class CmakeVariableLabelProvider extends BaseLabelProvider
       implements ITableLabelProvider {
@@ -189,16 +189,7 @@ import de.marw.cdt.cmake.core.internal.settings.CmakeDefine;
     // interface ITableLabelProvider
     @Override
     public String getColumnText(Object element, int columnIndex) {
-      final CmakeDefine var = (CmakeDefine) element;
-      switch (columnIndex) {
-      case 0:
-        return var.getName();
-      case 1:
-        return var.getType().name();
-      case 2:
-        return var.getValue();
-      }
-      return "";
+      return ((CmakeUnDefine) element).getName();
     }
   } // CmakeVariableLabelProvider
 
@@ -228,22 +219,9 @@ import de.marw.cdt.cmake.core.internal.settings.CmakeDefine;
 
     @Override
     public int compare(Viewer viewer, Object e1, Object e2) {
-      CmakeDefine v1 = (CmakeDefine) e1;
-      CmakeDefine v2 = (CmakeDefine) e2;
-      int rc = 0;
-      switch (sortColumn) {
-      case 0:
-        rc = v1.getName().compareTo(v2.getName());
-        break;
-      case 1:
-        rc = v1.getType().name().compareTo(v2.getType().name());
-        break;
-      case 2:
-        rc = v1.getValue().compareTo(v2.getValue());
-        break;
-      default:
-        rc = 0;
-      }
+      CmakeUnDefine v1 = (CmakeUnDefine) e1;
+      CmakeUnDefine v2 = (CmakeUnDefine) e2;
+      int rc = v1.getName().compareTo(v2.getName());
       // If descending order, flip the direction
       if (!ascending) {
         rc = -rc;
