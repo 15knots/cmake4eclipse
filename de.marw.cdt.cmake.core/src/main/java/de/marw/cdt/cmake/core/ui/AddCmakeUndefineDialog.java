@@ -1,0 +1,154 @@
+/*******************************************************************************
+ * Copyright (c) 2014 Martin Weber.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *      Martin Weber - Initial implementation
+ *******************************************************************************/
+package de.marw.cdt.cmake.core.ui;
+
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
+
+import de.marw.cdt.cmake.core.internal.settings.CmakeUnDefine;
+
+/**
+ * The dialog used to create or edit a cmake undefine.
+ * 
+ * @author Martin Weber
+ */
+public class AddCmakeUndefineDialog extends Dialog {
+
+  /**
+   * the variable to edit or {@code null} if a new variable is going to be
+   * created.
+   */
+  private CmakeUnDefine editedVar;
+
+  private Text variableName;
+
+  /**
+   * Create the dialog.
+   * 
+   * @param parentShell
+   * @wbp.parser.constructor
+   */
+  public AddCmakeUndefineDialog(Shell parentShell) {
+    this(parentShell, null);
+  }
+
+  /**
+   * Creates a dialog. If a variable to edit is specified, it will be modified
+   * in-place when the OK button is pressed. It will remain unchanged, if the
+   * dialog is cancelled.
+   * 
+   * @param parentShell
+   * @param editedVar
+   *        the variable to edit or {@code null} if a new variable is going to
+   *        be created.
+   * @see #getCmakeUndefine()
+   */
+  public AddCmakeUndefineDialog(Shell parentShell, CmakeUnDefine editedVar) {
+    super(parentShell);
+    this.editedVar = editedVar;
+  }
+
+  /**
+   * Gets the edited or newly created cmake define.
+   * 
+   * @return the modified or new CmakeDefine or {@code null} if this dialog has
+   *         been cancelled.
+   */
+  public CmakeUnDefine getCmakeUndefine() {
+    return editedVar;
+  }
+
+  @Override
+  protected void configureShell(Shell shell) {
+    super.configureShell(shell);
+    setShellStyle(getShellStyle() | SWT.PRIMARY_MODAL);
+    if (editedVar != null)
+      shell.setText("Edit existing CMake variable");
+    else
+      shell.setText("Define a new CMake variable");
+  }
+
+  /**
+   * Overridden to read out the widgets before these get disposed.
+   */
+  @Override
+  protected void okPressed() {
+    if (editedVar != null) {
+      editedVar.setName(variableName.getText().trim());
+    } else {
+      editedVar = new CmakeUnDefine(variableName.getText());
+    }
+    super.okPressed();
+  }
+
+  /**
+   * Create contents of the dialog.
+   * 
+   * @param parent
+   */
+  @Override
+  protected Control createDialogArea(Composite parent) {
+    Composite comp = (Composite) super.createDialogArea(parent);
+    ((GridLayout) comp.getLayout()).numColumns = 2;
+
+    Label nameLabel = new Label(comp, SWT.NONE);
+    nameLabel.setText("Variable &name:");
+    GridData gd_nameLabel = new GridData();
+    gd_nameLabel.horizontalAlignment = SWT.LEFT;
+    nameLabel.setLayoutData(gd_nameLabel);
+
+    variableName = new Text(comp, SWT.BORDER);
+    // disable OK button if variable name is empty..
+    variableName.addModifyListener(new ModifyListener() {
+      public void modifyText(ModifyEvent e) {
+        final boolean enable = ((Text) e.widget).getText().trim().length() > 0;
+        final Button button = getButton(IDialogConstants.OK_ID);
+        button.setEnabled(enable);
+      }
+    });
+    variableName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+
+    return comp;
+  }
+
+  /**
+   * Overridden to set the sensitivity of the dialog's OK-button.
+   */
+  protected Control createContents(Composite parent) {
+    final Control control = super.createContents(parent);
+    updateDisplay();
+    return control;
+  }
+
+  /**
+   * Updates displayed values according to the variable to edit.
+   */
+  private void updateDisplay() {
+    if (editedVar == null) {
+      // create a new define
+      variableName.setText("");
+    } else {
+      variableName.setText(editedVar.getName());
+    }
+  }
+
+}

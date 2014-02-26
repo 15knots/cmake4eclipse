@@ -19,7 +19,7 @@ import org.eclipse.core.runtime.CoreException;
 
 /**
  * Preference page for CMake workspace settings.
- *
+ * 
  * @author Martin Weber
  */
 public class CMakePrefPage extends AbstractPrefPage {
@@ -30,8 +30,8 @@ public class CMakePrefPage extends AbstractPrefPage {
   public ICResourceDescription getResDesc() {
     if (prefCfgd == null)
       try {
-          prefCfgd = CCorePlugin.getDefault().getPreferenceConfiguration(
-              ManagedBuildManager.CFG_DATA_PROVIDER_ID);
+        prefCfgd = CCorePlugin.getDefault().getPreferenceConfiguration(
+            ManagedBuildManager.CFG_DATA_PROVIDER_ID);
       } catch (CoreException e) {
         return null;
       }

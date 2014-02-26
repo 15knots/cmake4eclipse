@@ -25,8 +25,6 @@ public class CMakePlugin extends AbstractUIPlugin {
   public static final String BUILDER_ID = CMakePlugin.PLUGIN_ID
       + "." + "genmakebuilder"; //$NON-NLS-1$
 
-  public static final String CMAKETOOLS_PROJECT_TYPE_ID = "de.marw.cdt.cmake.core.projectType"; //$NON-NLS-1$
-
   //The shared instance.
   private static CMakePlugin plugin;
 

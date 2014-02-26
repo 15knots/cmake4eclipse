@@ -8,23 +8,28 @@
  * Contributors:
  *      Martin Weber - Initial implementation
  *******************************************************************************/
-package de.marw.cdt.cmake.core.ui;
-
-import org.eclipse.cdt.ui.newui.AbstractPage;
+package de.marw.cdt.cmake.core.internal.settings;
 
 /**
- * Page for CMake host OS specific project settings.
+ * Preferences that override/augment the generic properties when running under
+ * Windows.
  * 
  * @author Martin Weber
  */
-public class HostOSPropertyPage extends AbstractPage {
+public class WindowsPreferences extends AbstractOsPreferences {
 
-  /*-
-   * @see org.eclipse.cdt.ui.newui.AbstractPage#isSingle()
-   */
-  @Override
-  protected boolean isSingle() {
-    return false;
+  private static final String ELEM_OS = "win32";
+
+  /** Overridden to set a sensible generator name. */
+  public void reset() {
+    super.reset();
+    setGeneratorName("MinGW Makefiles");
   }
 
+  /**
+   * @return the String "win32".
+   */
+  protected String getStorageElementName() {
+    return ELEM_OS;
+  }
 }

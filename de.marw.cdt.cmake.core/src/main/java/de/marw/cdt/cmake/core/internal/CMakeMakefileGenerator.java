@@ -42,14 +42,18 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import de.marw.cdt.cmake.core.CMakePlugin;
+import de.marw.cdt.cmake.core.internal.settings.AbstractOsPreferences;
+import de.marw.cdt.cmake.core.internal.settings.CMakePreferences;
+import de.marw.cdt.cmake.core.internal.settings.WindowsPreferences;
 
 /**
  * Generates unix makefiles from CMake scripts (CMakeLists.txt).
- *
+ * 
  * @author Martin Weber
  */
 public class CMakeMakefileGenerator implements
@@ -109,7 +113,7 @@ public class CMakeMakefileGenerator implements
       throws CoreException {
     /*
      * Let's do a sanity check right now.
-     *
+     * 
      * This is an incremental build, so if the build directory is not there,
      * then a rebuild is needed.
      */
@@ -225,7 +229,7 @@ public class CMakeMakefileGenerator implements
    * Return or create the folder needed for the build output. If we are creating
    * the folder, set the derived bit to true so the CM system ignores the
    * contents. If the resource exists, respect the existing derived setting.
-   *
+   * 
    * @param path
    *        a path, relative to the project root
    * @return the project relative path of the created folder
@@ -265,7 +269,7 @@ public class CMakeMakefileGenerator implements
 
   /**
    * Run 'cmake -G xyz' command.
-   *
+   * 
    * @param console
    *        the build console to send messages to
    * @param buildDir
@@ -282,7 +286,7 @@ public class CMakeMakefileGenerator implements
     MultiStatus status; // Return value
 
     final CMakePreferences prefs = new CMakePreferences();
-    {  // load user preferences..
+    { // load user preferences..
       final ICConfigurationDescription cfgd = ManagedBuildManager
           .getDescriptionForConfiguration(config);
       final ICStorageElement storage = cfgd.getStorage(
@@ -291,17 +295,31 @@ public class CMakeMakefileGenerator implements
       prefs.loadFromStorage(storage);
     }
 
-    Path cmd = new Path(prefs.getCommand());
+    String cmd = "cmake"; // default for all OSes
+
+    String os = Platform.getOS();
+    List<String> osArgList = new ArrayList<String>();
+    if (Platform.OS_LINUX.equals(os)) {
+      AbstractOsPreferences osPrefs = prefs.getLinuxPreferences();
+      if (!osPrefs.getUseDefaultCommand())
+        cmd = osPrefs.getCommand();
+      osArgList.add("-G");
+      osArgList.add(osPrefs.getGeneratorName());
+    } else if (Platform.OS_WIN32.equals(os)) {
+      WindowsPreferences osPrefs = prefs.getWindowsPreferences();
+
+      if (!osPrefs.getUseDefaultCommand())
+        cmd = osPrefs.getCommand();
+    }
+
     List<String> argList = new ArrayList<String>();
     // generate makefiles..
-    argList.add("-G");
-    argList.add("Unix Makefiles");
     // colored output during build is useless for build console
     argList.add("-DCMAKE_COLOR_MAKEFILE:BOOL=OFF");
     // echo commands to the console during the make to give output parser a chance
     argList.add("-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON");
 
-    // check for debug or release build..
+    // set argument for debug or release build..
     {
       IBuildObjectProperties buildProperties = config.getBuildProperties();
       IBuildProperty property = buildProperties
@@ -318,6 +336,8 @@ public class CMakeMakefileGenerator implements
         }
       }
     }
+    // jam in OS specific args
+    argList.addAll(osArgList);
     // tell cmake where its script is located..
     argList.add(srcDir.toOSString());
 
@@ -325,7 +345,7 @@ public class CMakeMakefileGenerator implements
 
     final ICommandLauncher launcher = builder.getCommandLauncher();
     launcher.showCommand(true);
-    final Process proc = launcher.execute(cmd,
+    final Process proc = launcher.execute(new Path(cmd),
         argList.toArray(new String[argList.size()]), null, buildDir, monitor);
     if (proc != null) {
       try {
@@ -417,7 +437,7 @@ public class CMakeMakefileGenerator implements
    * Checks whether the build has been cancelled. Cancellation requests are
    * propagated to the caller by throwing
    * <code>OperationCanceledException</code>.
-   *
+   * 
    * @see org.eclipse.core.runtime.OperationCanceledException#OperationCanceledException()
    */
   protected void checkCancel() {
