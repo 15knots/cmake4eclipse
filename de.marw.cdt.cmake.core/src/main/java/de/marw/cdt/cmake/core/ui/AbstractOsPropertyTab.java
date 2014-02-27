@@ -26,6 +26,7 @@ import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -45,6 +46,7 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 import de.marw.cdt.cmake.core.CMakePlugin;
@@ -147,10 +149,14 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
       btnBrowseFiles.addSelectionListener(new SelectionAdapter() {
         @Override
         public void widgetSelected(SelectionEvent e) {
+          IDialogSettings settings = CMakePlugin.getDefault().getDialogSettings();
           FileDialog dialog = new FileDialog(t_cmd.getShell());
+          dialog.setFilterPath(settings.get("cmake_dir"));
           String text = dialog.open();
-          if (text != null)
+          settings.put("cmake_dir", dialog.getFilterPath());
+          if (text != null) {
             t_cmd.insert(text);
+          }
         }
       });
 
@@ -183,19 +189,19 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
     } // makefile generator combo
 
     // cmake defines table...
-    createCmakeDefinesEditor(usercomp);
+    definesViewer = createCmakeDefinesEditor(usercomp);
     // cmake undefines table...
-    createCmakeUnDefinesEditor(usercomp);
+    undefinesViewer = createCmakeUnDefinesEditor(usercomp);
   }
 
   /**
    * Creates the control to add/delete/edit cmake-variables to define.
    */
-  private void createCmakeDefinesEditor(Composite parent) {
-    final Group gr = createGroup(usercomp, 2,
+  private DefinesViewer createCmakeDefinesEditor(Composite parent) {
+    final Group gr = createGroup(parent, 2,
         "Cmake cache entries to define (-D)", SWT.FILL, 2);
 
-    definesViewer = new DefinesViewer(gr);
+    DefinesViewer definesViewer = new DefinesViewer(gr);
 
     final TableViewer tableViewer = definesViewer.getTableViewer();
     // let double click trigger the edit dialog
@@ -270,16 +276,18 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
         buttonDefineDel.setEnabled(canDel);
       }
     });
+
+    return definesViewer;
   }
 
   /**
    * Creates the control to add/delete/edit cmake-variables to undefine.
    */
-  private void createCmakeUnDefinesEditor(Composite parent) {
-    final Group gr = createGroup(usercomp, 2,
+  private UnDefinesViewer createCmakeUnDefinesEditor(Composite parent) {
+    final Group gr = createGroup(parent, 2,
         "Cmake cache entries to undefine (-U)", SWT.FILL, 2);
 
-    undefinesViewer = new UnDefinesViewer(gr);
+    UnDefinesViewer undefinesViewer = new UnDefinesViewer(gr);
 
     final TableViewer tableViewer = undefinesViewer.getTableViewer();
     // let double click trigger the edit dialog
@@ -351,6 +359,8 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
         buttonDefineDel.setEnabled(canDel);
       }
     });
+
+    return undefinesViewer;
   }
 
   /**
@@ -394,7 +404,7 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
 
   private Group createGroup(Composite parent, int numColumns, String text,
       int horizontalAlignment, int horizontalSpan) {
-    Group gr = new Group(usercomp, SWT.NONE);
+    Group gr = new Group(parent, SWT.NONE);
     gr.setLayout(new GridLayout(numColumns, false));
     gr.setText(text);
     GridData gd = new GridData(horizontalAlignment, SWT.CENTER, true, false);
@@ -404,8 +414,8 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
   }
 
   private void handleDefineAddButton(TableViewer tableViewer) {
-    AddCmakeDefineDialog dlg = new AddCmakeDefineDialog(usercomp.getShell(),
-        null);
+    final Shell shell = tableViewer.getControl().getShell();
+    AddCmakeDefineDialog dlg = new AddCmakeDefineDialog(shell, null);
     if (dlg.open() == Dialog.OK) {
       CmakeDefine cmakeDefine = dlg.getCmakeDefine();
       @SuppressWarnings("unchecked")
@@ -422,7 +432,8 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
     if (selection.size() == 1) {
       Object cmakeDefine = selection.getFirstElement();
       // edit the selected variable in-place..
-      AddCmakeDefineDialog dlg = new AddCmakeDefineDialog(usercomp.getShell(),
+      final Shell shell = tableViewer.getControl().getShell();
+      AddCmakeDefineDialog dlg = new AddCmakeDefineDialog(shell,
           (CmakeDefine) cmakeDefine);
       if (dlg.open() == Dialog.OK) {
         tableViewer.update(cmakeDefine, null); // updates the display
@@ -433,14 +444,14 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
   private void handleDefineDelButton(TableViewer tableViewer) {
     final IStructuredSelection selection = (IStructuredSelection) tableViewer
         .getSelection();
-    if (MessageDialog.openQuestion(usercomp.getShell(),
-        "Cmake-Define deletion confirmation",
+    final Shell shell = tableViewer.getControl().getShell();
+    if (MessageDialog.openQuestion(shell, "Cmake-Define deletion confirmation",
         "Are you sure to delete the selected Cmake-defines?")) {
       if (cfgd != null) {
         if (cfgd instanceof ICMultiItemsHolder) {
-          ICConfigurationDescription[] cfs = (ICConfigurationDescription[]) ((ICMultiItemsHolder) cfgd)
+          ICConfigurationDescription[] cfgs = (ICConfigurationDescription[]) ((ICMultiItemsHolder) cfgd)
               .getItems();
-          for (int k = 0; k < cfs.length; k++) {
+          for (int k = 0; k < cfgs.length; k++) {
             // TODO                                                    fUserSup.deleteMacro(macros[i].getName(), cfs[k]);
           }
         } else {
@@ -455,8 +466,8 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
   }
 
   private void handleUnDefineAddButton(TableViewer tableViewer) {
-    AddCmakeUndefineDialog dlg = new AddCmakeUndefineDialog(
-        usercomp.getShell(), null);
+    final Shell shell = tableViewer.getControl().getShell();
+    AddCmakeUndefineDialog dlg = new AddCmakeUndefineDialog(shell, null);
     if (dlg.open() == Dialog.OK) {
       CmakeUnDefine cmakeDefine = dlg.getCmakeUndefine();
       @SuppressWarnings("unchecked")
@@ -473,8 +484,9 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
     if (selection.size() == 1) {
       Object cmakeDefine = selection.getFirstElement();
       // edit the selected variable in-place..
-      AddCmakeUndefineDialog dlg = new AddCmakeUndefineDialog(
-          usercomp.getShell(), (CmakeUnDefine) cmakeDefine);
+      final Shell shell = tableViewer.getControl().getShell();
+      AddCmakeUndefineDialog dlg = new AddCmakeUndefineDialog(shell,
+          (CmakeUnDefine) cmakeDefine);
       if (dlg.open() == Dialog.OK) {
         tableViewer.update(cmakeDefine, null); // updates the display
       }
@@ -484,7 +496,8 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
   private void handleUnDefineDelButton(TableViewer tableViewer) {
     final IStructuredSelection selection = (IStructuredSelection) tableViewer
         .getSelection();
-    if (MessageDialog.openQuestion(usercomp.getShell(),
+    final Shell shell = tableViewer.getControl().getShell();
+    if (MessageDialog.openQuestion(shell,
         "Cmake-Undefine deletion confirmation",
         "Are you sure to delete the selected Cmake-undefines?")) {
       @SuppressWarnings("unchecked")
@@ -515,11 +528,10 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
     try {
       ICStorageElement storage = cfgd.getStorage(
           CMakePreferences.CFG_STORAGE_ID, false);
-//      allPrefs.loadFromStorage(storage);
       prefs = getOsPreferences(allPrefs);
       prefs.loadFromStorage(storage);
     } catch (CoreException ex) {
-      log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, null,ex));
+      log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, null, ex));
     }
     updateDisplay();
   }
@@ -575,7 +587,7 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
         prefs.saveToStorage(dstEl);
       }
     } catch (CoreException ex) {
-      log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, null,ex));
+      log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, null, ex));
     }
   }
 
@@ -603,7 +615,7 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
       mgr.setProjectDescription(projectDescription.getProject(),
           projectDescription, true, null);
     } catch (CoreException ex) {
-      log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, null,ex));
+      log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, null, ex));
     }
   }
 
