@@ -13,6 +13,7 @@ package de.marw.cdt.cmake.core.ui;
 import org.eclipse.debug.ui.StringVariableSelectionDialog;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -30,12 +31,13 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
+import de.marw.cdt.cmake.core.CMakePlugin;
 import de.marw.cdt.cmake.core.internal.settings.CmakeDefine;
 import de.marw.cdt.cmake.core.internal.settings.CmakeVariableType;
 
 /**
  * The dialog used to create or edit a cmake define.
- * 
+ *
  * @author Martin Weber
  */
 public class AddCmakeDefineDialog extends Dialog {
@@ -51,8 +53,11 @@ public class AddCmakeDefineDialog extends Dialog {
   private Button btnBrowseVars;
   private Button btnBrowseFiles;
 
+  private static final String DIALOG_SETTINGS_SECT = "dlg_addCmakeDefine";
+
   /** String representation of each {@code CmakeVariableType}, by ordinal */
-  private static String[] typeNames;
+  private static final String[] typeNames;
+
   static {
     CmakeVariableType[] variableTypes = CmakeVariableType.values();
     typeNames = new String[variableTypes.length];
@@ -65,7 +70,7 @@ public class AddCmakeDefineDialog extends Dialog {
    * Creates a dialog. If a variable to edit is specified, it will be modified
    * in-place when the OK button is pressed. It will remain unchanged, if the
    * dialog is cancelled.
-   * 
+   *
    * @param parentShell
    * @param editedVar
    *        the variable to edit or {@code null} if a new variable is going to
@@ -73,12 +78,13 @@ public class AddCmakeDefineDialog extends Dialog {
    */
   public AddCmakeDefineDialog(Shell parentShell, CmakeDefine editedVar) {
     super(parentShell);
+    setShellStyle(SWT.SHELL_TRIM);
     this.editedVar = editedVar;
   }
 
   /**
    * Gets the edited or newly created cmake define.
-   * 
+   *
    * @return the modified or new CmakeDefine or {@code null} if this dialog has
    *         been cancelled.
    */
@@ -89,11 +95,10 @@ public class AddCmakeDefineDialog extends Dialog {
   @Override
   protected void configureShell(Shell shell) {
     super.configureShell(shell);
-    setShellStyle(getShellStyle() | SWT.PRIMARY_MODAL);
     if (editedVar != null)
-      shell.setText("Edit existing CMake variable");
+      shell.setText("Edit existing CMake Define");
     else
-      shell.setText("Define a new CMake variable");
+      shell.setText("Add new CMake Define");
   }
 
   /**
@@ -115,7 +120,7 @@ public class AddCmakeDefineDialog extends Dialog {
 
   /**
    * Create contents of the dialog.
-   * 
+   *
    * @param parent
    */
   @Override
@@ -180,13 +185,19 @@ public class AddCmakeDefineDialog extends Dialog {
       @Override
       public void widgetSelected(SelectionEvent e) {
         String text;
+        IDialogSettings settings = getDialogBoundsSettings();
+
         int sel = typeSelector.getSelectionIndex();
         if (CmakeVariableType.PATH == indexToType(sel)) {
           DirectoryDialog dialog = new DirectoryDialog(getShell());
+          dialog.setFilterPath(settings.get("dir"));
           text = dialog.open();
+          settings.put("dir", dialog.getFilterPath());
         } else {
           FileDialog dialog = new FileDialog(getShell());
+          dialog.setFilterPath(settings.get("dir"));
           text = dialog.open();
+          settings.put("dir", dialog.getFilterPath());
         }
 
         if (text != null)
@@ -245,10 +256,23 @@ public class AddCmakeDefineDialog extends Dialog {
     }
   }
 
+  /*-
+   * @see org.eclipse.jface.dialogs.Dialog#getDialogBoundsSettings()
+   */
+  @Override
+  protected IDialogSettings getDialogBoundsSettings() {
+    IDialogSettings settings = CMakePlugin.getDefault().getDialogSettings();
+    IDialogSettings section = settings.getSection(DIALOG_SETTINGS_SECT);
+    if (section == null) {
+      section = settings.addNewSection(DIALOG_SETTINGS_SECT);
+    }
+    return section;
+  }
+
   /**
    * Converts an index in {@link AddCmakeDefineDialog#typeNames} to a Cmake
    * variable type.
-   * 
+   *
    * @param selectionIndex
    */
   private static CmakeVariableType indexToType(int selectionIndex) {
