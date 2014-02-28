@@ -14,8 +14,6 @@ import java.util.ArrayList;
 
 import org.eclipse.cdt.core.CCorePlugin;
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
-import org.eclipse.cdt.core.settings.model.ICMultiConfigDescription;
-import org.eclipse.cdt.core.settings.model.ICMultiItemsHolder;
 import org.eclipse.cdt.core.settings.model.ICProjectDescription;
 import org.eclipse.cdt.core.settings.model.ICProjectDescriptionManager;
 import org.eclipse.cdt.core.settings.model.ICResourceDescription;
@@ -72,8 +70,6 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
   /**  */
   private static final ILog log = CMakePlugin.getDefault().getLog();
 
-  private boolean canModify = true;
-
   /** the configuration we manage here. Initialized in {@link #updateData} */
   private ICConfigurationDescription cfgd;
   /**
@@ -94,7 +90,6 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
   private UnDefinesViewer undefinesViewer;
 
   /**
-   *
    */
   public AbstractOsPropertyTab() {
   }
@@ -115,6 +110,15 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
    *         argument for cmake.
    */
   protected abstract String[] getAvailableGenerators();
+
+  @Override
+  public boolean canBeVisible() {
+    return page.isForProject();
+  }
+
+  public boolean canSupportMultiCfg() {
+    return false;
+  }
 
   @Override
   public void createControls(Composite parent) {
@@ -149,7 +153,8 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
       btnBrowseFiles.addSelectionListener(new SelectionAdapter() {
         @Override
         public void widgetSelected(SelectionEvent e) {
-          IDialogSettings settings = CMakePlugin.getDefault().getDialogSettings();
+          IDialogSettings settings = CMakePlugin.getDefault()
+              .getDialogSettings();
           FileDialog dialog = new FileDialog(t_cmd.getShell());
           dialog.setFilterPath(settings.get("cmake_dir"));
           String text = dialog.open();
@@ -223,8 +228,6 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
         }
       }
     });
-    // TODO multicfgtest
-//    tableViewer.getTable().setEnabled(false);
 
     // Buttons, vertically stacked
     Composite editButtons = new Composite(gr, SWT.NONE);
@@ -264,14 +267,10 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
     tableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
       @Override
       public void selectionChanged(SelectionChangedEvent event) {
-        // disable edit & del when multiple configurations are affected
-        boolean isMulti = (cfgd instanceof ICMultiConfigDescription) ? true
-            : false;
-
         // update button sensitivity..
         int sels = ((IStructuredSelection) event.getSelection()).size();
-        boolean canEdit = !isMulti && (sels == 1);
-        boolean canDel = !isMulti && (sels >= 1);
+        boolean canEdit = (sels == 1);
+        boolean canDel = !(sels >= 1);
         buttonDefineEdit.setEnabled(canEdit);
         buttonDefineDel.setEnabled(canDel);
       }
@@ -347,14 +346,10 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
     tableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
       @Override
       public void selectionChanged(SelectionChangedEvent event) {
-        // disable edit & del when multiple configurations are affected
-        boolean isMulti = (cfgd instanceof ICMultiConfigDescription) ? true
-            : false;
-
         // update button sensitivity..
         int sels = ((IStructuredSelection) event.getSelection()).size();
-        boolean canEdit = !isMulti && (sels == 1);
-        boolean canDel = !isMulti && (sels >= 1);
+        boolean canEdit = (sels == 1);
+        boolean canDel = (sels >= 1);
         buttonDefineEdit.setEnabled(canEdit);
         buttonDefineDel.setEnabled(canDel);
       }
@@ -447,21 +442,11 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
     final Shell shell = tableViewer.getControl().getShell();
     if (MessageDialog.openQuestion(shell, "Cmake-Define deletion confirmation",
         "Are you sure to delete the selected Cmake-defines?")) {
-      if (cfgd != null) {
-        if (cfgd instanceof ICMultiItemsHolder) {
-          ICConfigurationDescription[] cfgs = (ICConfigurationDescription[]) ((ICMultiItemsHolder) cfgd)
-              .getItems();
-          for (int k = 0; k < cfgs.length; k++) {
-            // TODO                                                    fUserSup.deleteMacro(macros[i].getName(), cfs[k]);
-          }
-        } else {
-          @SuppressWarnings("unchecked")
-          ArrayList<CmakeDefine> defines = (ArrayList<CmakeDefine>) tableViewer
-              .getInput();
-          defines.removeAll(selection.toList());
-          tableViewer.remove(selection.toArray());// updates the display
-        }
-      }
+      @SuppressWarnings("unchecked")
+      ArrayList<CmakeDefine> defines = (ArrayList<CmakeDefine>) tableViewer
+          .getInput();
+      defines.removeAll(selection.toList());
+      tableViewer.remove(selection.toArray());// updates the display
     }
   }
 
@@ -517,14 +502,6 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
 
     cfgd = resd.getConfiguration();
     CMakePreferences allPrefs = new CMakePreferences();
-    if (cfgd instanceof ICMultiConfigDescription) {
-      ICConfigurationDescription[] cfs = (ICConfigurationDescription[]) ((ICMultiConfigDescription) cfgd)
-          .getItems();
-      for (int i = 0; i < cfs.length; i++) {
-// TODO
-      }
-      // disable table viewers when multiple configurations are affected
-    }
     try {
       ICStorageElement storage = cfgd.getStorage(
           CMakePreferences.CFG_STORAGE_ID, false);
@@ -540,27 +517,16 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
    * Updates displayed values according to the preferences edited by this tab.
    */
   private void updateDisplay() {
-    canModify = false; // avoid extra update from modifyListeners
-    try {
-      if (cfgd instanceof ICMultiConfigDescription) {
-        // TODO multicfg test
-        definesViewer.getTableViewer().getTable().setEnabled(false);
-        //      group_cmd.setVisible(false);
-      } else {
-        t_cmd.setText(prefs.getCommand());
-        b_cmdFromPath.setSelection(prefs.getUseDefaultCommand());
+    t_cmd.setText(prefs.getCommand());
+    b_cmdFromPath.setSelection(prefs.getUseDefaultCommand());
 
-        String generatorName = prefs.getGeneratorName();
-        int idx = c_generator.indexOf(generatorName);
-        if (idx >= 0)
-          c_generator.select(idx);
+    String generatorName = prefs.getGeneratorName();
+    int idx = c_generator.indexOf(generatorName);
+    if (idx >= 0)
+      c_generator.select(idx);
 
-        definesViewer.setInput(prefs.getDefines());
-        undefinesViewer.setInput(prefs.getUndefines());
-      }
-    } finally {
-      canModify = true;
-    }
+    definesViewer.setInput(prefs.getDefines());
+    undefinesViewer.setInput(prefs.getUndefines());
   }
 
   /**
@@ -579,8 +545,10 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
       ICStorageElement srcEl = srcCfg.getStorage(
           CMakePreferences.CFG_STORAGE_ID, false);
       if (srcEl != null) {
-        CMakePreferences prefs = new CMakePreferences();
+        CMakePreferences allPrefs = new CMakePreferences();
+        P prefs = getOsPreferences(allPrefs);
         prefs.loadFromStorage(srcEl);
+
         ICConfigurationDescription dstCfg = dst.getConfiguration();
         ICStorageElement dstEl = dstCfg.getStorage(
             CMakePreferences.CFG_STORAGE_ID, true);
@@ -594,13 +562,15 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
   @Override
   protected void performOK() {
     try {
+      prefs.setUseDefaultCommand(b_cmdFromPath.getSelection());
+      String command = t_cmd.getText().trim();
+      prefs.setCommand(command);
+
       int idx = c_generator.getSelectionIndex();
       if (idx >= 0) {
         String gen = c_generator.getItem(idx);
         prefs.setGeneratorName(gen);
       }
-      String command = t_cmd.getText().trim();
-      prefs.setCommand(command);
       // NB: defines & undefines are modified by the widget listeners directly
 
       // save as project settings..
@@ -623,11 +593,6 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
   protected void performDefaults() {
     prefs.reset();
     updateDisplay();
-  }
-
-  @Override
-  public boolean canBeVisible() {
-    return page.isForProject();
   }
 
   @Override
