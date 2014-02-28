@@ -51,7 +51,7 @@ public abstract class AbstractOsPreferences {
    * Sets each value to its default.
    */
   public void reset() {
-    useDefaultCommand = false;
+    useDefaultCommand = true;
     setCommand("cmake");
     setGeneratorName("");
     defines.clear();
