@@ -121,9 +121,11 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
   }
 
   @Override
-  public void createControls(Composite parent) {
+  protected void createControls(Composite parent) {
     super.createControls(parent);
     usercomp.setLayout(new GridLayout(2, false));
+//    usercomp.setBackground(BACKGROUND_FOR_USER_VAR);
+
     GridLayout layout;
 
     // cmake executable group...
@@ -146,7 +148,6 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
         layout.marginHeight = 0;
         layout.marginWidth = 0;
         buttonBar.setLayout(layout);
-        //        buttonBar.setBackground(BACKGROUND_FOR_USER_VAR);
       }
       final Button btnBrowseFiles = createButton(buttonBar, "File System...",
           true);
