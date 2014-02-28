@@ -14,8 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.cdt.core.settings.model.ICStorageElement;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.eclipse.core.runtime.preferences.InstanceScope;
 
 import de.marw.cdt.cmake.core.CMakePlugin;
 import de.marw.cdt.cmake.core.internal.storage.CmakeDefineSerializer;
@@ -35,16 +33,25 @@ public class CMakePreferences {
    */
   public static final String CFG_STORAGE_ID = CMakePlugin.PLUGIN_ID
       + ".settings";
+  private static final String ATTR_WARN_NO_DEV = "warnNoDev";
+  private static final String ATTR_DEBUG = "debug";
+  private static final String ATTR_TRACE = "trace";
+  private static final String ATTR_WARN_UNITIALIZED = "warnUnitialized";
+  private static final String ATTR_WARN_UNUSED = "warnUnused";
+  /**  */
+  static final String ELEM_DEFINES = "defs";
+  /**  */
+  static final String ELEM_UNDEFINES = "undefs";
+  private static final String ELEM_OPTIONS = "options";
+
+  private boolean warnNoDev, debug, trace, warnUnitialized, warnUnused;
+
   private List<CmakeDefine> defines = new ArrayList<CmakeDefine>(0);
   private List<CmakeUnDefine> undefines = new ArrayList<CmakeUnDefine>(0);
 
   private LinuxPreferences linuxPreferences = new LinuxPreferences();
 
   private WindowsPreferences windowsPreferences = new WindowsPreferences();
-  /**  */
-  static final String ELEM_DEFINES = "defs";
-  /**  */
-  static final String ELEM_UNDEFINES = "undefs";
 
   /**
    * Creates a new object, initialized with all default values.
@@ -57,11 +64,16 @@ public class CMakePreferences {
    * Sets each value to its default.
    */
   public void reset() {
+    warnNoDev = false;
+    debug = false;
+    trace = false;
+    warnUnitialized = false;
+    warnUnused = false;
     defines.clear();
     undefines.clear();
-    linuxPreferences.reset();
-    windowsPreferences.reset();
-//    setCommand("cmake");
+
+//    linuxPreferences.reset();
+//    windowsPreferences.reset();
   }
 
   /**
@@ -75,62 +87,146 @@ public class CMakePreferences {
   public void loadFromStorage(ICStorageElement parent) {
     if (parent == null)
       return;
-    ICStorageElement[] children = parent.getChildren();
+
+    final ICStorageElement[] children = parent.getChildren();
     for (ICStorageElement child : children) {
-      if (ELEM_DEFINES.equals(child.getName())) {
+      if (ELEM_OPTIONS.equals(child.getName())) {
+        // options...
+        warnNoDev = Boolean.parseBoolean(child.getAttribute(ATTR_WARN_NO_DEV));
+        debug = Boolean.parseBoolean(child.getAttribute(ATTR_DEBUG));
+        trace = Boolean.parseBoolean(child.getAttribute(ATTR_TRACE));
+        warnUnitialized = Boolean.parseBoolean(child
+            .getAttribute(ATTR_WARN_UNITIALIZED));
+        warnUnused = Boolean.parseBoolean(child.getAttribute(ATTR_WARN_UNUSED));
+      } else if (ELEM_DEFINES.equals(child.getName())) {
         // defines...
         Util.deserializeCollection(defines, new CmakeDefineSerializer(), parent);
       } else if (ELEM_UNDEFINES.equals(child.getName())) {
         // undefines...
-        Util.deserializeCollection(undefines, new CmakeUndefineSerializer(), parent);
+        Util.deserializeCollection(undefines, new CmakeUndefineSerializer(),
+            parent);
       }
     }
-    linuxPreferences.loadFromStorage(parent);
-    windowsPreferences.loadFromStorage(parent);
+//    linuxPreferences.loadFromStorage(parent);
+//    windowsPreferences.loadFromStorage(parent);
   }
 
   /**
    * Persists this configuration to the project file.
    */
   public void saveToStorage(ICStorageElement parent) {
+    ICStorageElement pOpts;
+    ICStorageElement[] options = parent.getChildrenByName(ELEM_OPTIONS);
+    if (options.length > 0) {
+      pOpts = options[0];
+    } else {
+      pOpts = parent.createChild(ELEM_OPTIONS);
+    }
+    if (warnNoDev) {
+      pOpts.setAttribute(ATTR_WARN_NO_DEV, String.valueOf(warnNoDev));
+    } else {
+      pOpts.removeAttribute(ATTR_WARN_NO_DEV);
+    }
+    if (debug) {
+      pOpts.setAttribute(ATTR_DEBUG, String.valueOf(debug));
+    } else {
+      pOpts.removeAttribute(ATTR_DEBUG);
+    }
+    if (trace) {
+      pOpts.setAttribute(ATTR_TRACE, String.valueOf(trace));
+    } else {
+      pOpts.removeAttribute(ATTR_TRACE);
+    }
+    if (warnUnitialized) {
+      pOpts
+          .setAttribute(ATTR_WARN_UNITIALIZED, String.valueOf(warnUnitialized));
+    } else {
+      pOpts.removeAttribute(ATTR_WARN_UNITIALIZED);
+    }
+    if (warnUnused) {
+      pOpts.setAttribute(ATTR_WARN_UNUSED, String.valueOf(warnUnused));
+    } else {
+      pOpts.removeAttribute(ATTR_WARN_UNUSED);
+    }
+
     // defines...
     Util.serializeCollection(ELEM_DEFINES, parent, new CmakeDefineSerializer(),
         defines);
     // undefines...
-    Util.serializeCollection(ELEM_UNDEFINES, parent, new CmakeUndefineSerializer(),
-        undefines);
-    linuxPreferences.saveToStorage(parent);
+    Util.serializeCollection(ELEM_UNDEFINES, parent,
+        new CmakeUndefineSerializer(), undefines);
+//    linuxPreferences.saveToStorage(parent);
 //    windowsPreferences.saveToStorage(parent);
   }
 
   /**
-   * Initializes the configuration information from the eclipse runtime
-   * preferences.
+   * @return
    */
-  public void loadFromPrefs() {
-    IEclipsePreferences store = InstanceScope.INSTANCE
-        .getNode(CMakePlugin.PLUGIN_ID);
-//    String val;
-//    val = store.get(ATTR_COMMAND, null);
-//    if (val != null)
-//      setCommand(val);
+  public boolean isWarnNoDev() {
+    return warnNoDev;
   }
 
   /**
-   * Persists this configuration to the eclipse runtime preferences.
+   * @return
    */
-  public void saveToPrefs() {
-    IEclipsePreferences store = InstanceScope.INSTANCE
-        .getNode(CMakePlugin.PLUGIN_ID);
-//    store.put(ATTR_COMMAND, command);
+  public boolean isDebug() {
+    return debug;
   }
 
-  public LinuxPreferences getLinuxPreferences() {
-    return linuxPreferences;
+  /**
+   * Sets the debug property.
+   */
+  public void setDebug(boolean debug) {
+    this.debug = debug;
   }
 
-  public WindowsPreferences getWindowsPreferences() {
-    return windowsPreferences;
+  /**
+   * @return
+   */
+  public boolean isTrace() {
+    return trace;
+  }
+
+  /**
+   * Sets the trace property.
+   */
+  public void setTrace(boolean trace) {
+    this.trace = trace;
+  }
+
+  /**
+   * @return
+   */
+  public boolean isWarnUnitialized() {
+    return warnUnitialized;
+  }
+
+  /**
+   * Sets the warnUnitialized property.
+   */
+  public void setWarnUnitialized(boolean warnUnitialized) {
+    this.warnUnitialized = warnUnitialized;
+  }
+
+  /**
+   * @return
+   */
+  public boolean isWarnUnused() {
+    return warnUnused;
+  }
+
+  /**
+   * Sets the warnUnused property.
+   */
+  public void setWarnUnused(boolean warnUnused) {
+    this.warnUnused = warnUnused;
+  }
+
+  /**
+   * @param warnNoDev
+   */
+  public void setWarnNoDev(boolean warnNoDev) {
+    this.warnNoDev = warnNoDev;
   }
 
   /**
@@ -151,10 +247,12 @@ public class CMakePreferences {
     return undefines;
   }
 
-  /**
-   * @return
-   */
-  public String getCommand() {
-    return "kannwech";
+  public LinuxPreferences getLinuxPreferences() {
+    return linuxPreferences;
   }
+
+  public WindowsPreferences getWindowsPreferences() {
+    return windowsPreferences;
+  }
+
 }

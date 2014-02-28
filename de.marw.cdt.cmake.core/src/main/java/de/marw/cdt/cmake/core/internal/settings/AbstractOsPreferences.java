@@ -147,8 +147,7 @@ public abstract class AbstractOsPreferences {
     String val;
     // use default command
     val = parent.getAttribute(ATTR_USE_DEFAULT_COMMAND);
-    if (val != null)
-      useDefaultCommand = Boolean.parseBoolean(val);
+    useDefaultCommand = Boolean.parseBoolean(val);
     // command
     val = parent.getAttribute(ATTR_COMMAND);
     if (val != null)
