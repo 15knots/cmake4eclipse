@@ -45,15 +45,20 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.variables.IStringVariableManager;
+import org.eclipse.core.variables.VariablesPlugin;
 
 import de.marw.cdt.cmake.core.CMakePlugin;
 import de.marw.cdt.cmake.core.internal.settings.AbstractOsPreferences;
 import de.marw.cdt.cmake.core.internal.settings.CMakePreferences;
+import de.marw.cdt.cmake.core.internal.settings.CmakeDefine;
+import de.marw.cdt.cmake.core.internal.settings.CmakeUnDefine;
+import de.marw.cdt.cmake.core.internal.settings.LinuxPreferences;
 import de.marw.cdt.cmake.core.internal.settings.WindowsPreferences;
 
 /**
  * Generates unix makefiles from CMake scripts (CMakeLists.txt).
- * 
+ *
  * @author Martin Weber
  */
 public class CMakeMakefileGenerator implements
@@ -113,7 +118,7 @@ public class CMakeMakefileGenerator implements
       throws CoreException {
     /*
      * Let's do a sanity check right now.
-     * 
+     *
      * This is an incremental build, so if the build directory is not there,
      * then a rebuild is needed.
      */
@@ -229,7 +234,7 @@ public class CMakeMakefileGenerator implements
    * Return or create the folder needed for the build output. If we are creating
    * the folder, set the derived bit to true so the CM system ignores the
    * contents. If the resource exists, respect the existing derived setting.
-   * 
+   *
    * @param path
    *        a path, relative to the project root
    * @return the project relative path of the created folder
@@ -269,11 +274,11 @@ public class CMakeMakefileGenerator implements
 
   /**
    * Run 'cmake -G xyz' command.
-   * 
+   *
    * @param console
    *        the build console to send messages to
    * @param buildDir
-   *        abs path
+   *        abs. path
    * @param srcDir
    * @return a MultiStatus object, where .getCode() return the severity
    * @throws CoreException
@@ -285,64 +290,12 @@ public class CMakeMakefileGenerator implements
 
     MultiStatus status; // Return value
 
-    final CMakePreferences prefs = new CMakePreferences();
-    { // load user preferences..
-      final ICConfigurationDescription cfgd = ManagedBuildManager
-          .getDescriptionForConfiguration(config);
-      final ICStorageElement storage = cfgd.getStorage(
-          CMakePreferences.CFG_STORAGE_ID, false);
-      prefs.reset();
-      prefs.loadFromStorage(storage);
-    }
-
-    String cmd = "cmake"; // default for all OSes
-
-    String os = Platform.getOS();
-    List<String> osArgList = new ArrayList<String>();
-    if (Platform.OS_LINUX.equals(os)) {
-      AbstractOsPreferences osPrefs = prefs.getLinuxPreferences();
-      if (!osPrefs.getUseDefaultCommand())
-        cmd = osPrefs.getCommand();
-      osArgList.add("-G");
-      osArgList.add(osPrefs.getGeneratorName());
-    } else if (Platform.OS_WIN32.equals(os)) {
-      WindowsPreferences osPrefs = prefs.getWindowsPreferences();
-
-      if (!osPrefs.getUseDefaultCommand())
-        cmd = osPrefs.getCommand();
-    }
-
-    List<String> argList = new ArrayList<String>();
-    // generate makefiles..
-    // colored output during build is useless for build console
-    argList.add("-DCMAKE_COLOR_MAKEFILE:BOOL=OFF");
-    // echo commands to the console during the make to give output parser a chance
-    argList.add("-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON");
-
-    // set argument for debug or release build..
-    {
-      IBuildObjectProperties buildProperties = config.getBuildProperties();
-      IBuildProperty property = buildProperties
-          .getProperty(ManagedBuildManager.BUILD_TYPE_PROPERTY_ID);
-      if (property != null) {
-        IBuildPropertyValue value = property.getValue();
-        if (ManagedBuildManager.BUILD_TYPE_PROPERTY_DEBUG.equals(value.getId())) {
-          argList.add("-D");
-          argList.add("CMAKE_BUILD_TYPE:STRING=Debug");
-        } else if (ManagedBuildManager.BUILD_TYPE_PROPERTY_RELEASE.equals(value
-            .getId())) {
-          argList.add("-D");
-          argList.add("CMAKE_BUILD_TYPE:STRING=Release");
-        }
-      }
-    }
-    // jam in OS specific args
-    argList.addAll(osArgList);
-    // tell cmake where its script is located..
-    argList.add(srcDir.toOSString());
-
     String errMsg = null;
-
+    final List<String> argList = buildCommandline(srcDir);
+    // extract cmake command
+    final String cmd = argList.get(0);
+    argList.remove(0);
+    // run cmake..
     final ICommandLauncher launcher = builder.getCommandLauncher();
     launcher.showCommand(true);
     final Process proc = launcher.execute(new Path(cmd),
@@ -383,6 +336,146 @@ public class CMakeMakefileGenerator implements
     return status;
   }
 
+  /**
+   * Build the command-line for cmake. The first argument will be the
+   * cmake-command.
+   *
+   * @throws CoreException
+   */
+  private List<String> buildCommandline(IPath srcDir) throws CoreException {
+    final CMakePreferences prefs = new CMakePreferences();
+    { // load user preferences..
+      final ICConfigurationDescription cfgd = ManagedBuildManager
+          .getDescriptionForConfiguration(config);
+      final ICStorageElement storage = cfgd.getStorage(
+          CMakePreferences.CFG_STORAGE_ID, false);
+      prefs.loadFromStorage(storage, true);
+    }
+
+    List<String> args = new ArrayList<String>();
+    /* add our defaults first */
+    {
+      String cmd = "cmake"; // default for all OSes
+      args.add(cmd);
+      // colored output during build is useless for build console
+      args.add("-DCMAKE_COLOR_MAKEFILE:BOOL=OFF");
+      // echo commands to the console during the make to give output parser a chance
+      args.add("-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON");
+
+      // set argument for debug or release build..
+      IBuildObjectProperties buildProperties = config.getBuildProperties();
+      IBuildProperty property = buildProperties
+          .getProperty(ManagedBuildManager.BUILD_TYPE_PROPERTY_ID);
+      if (property != null) {
+        IBuildPropertyValue value = property.getValue();
+        if (ManagedBuildManager.BUILD_TYPE_PROPERTY_DEBUG.equals(value.getId())) {
+          args.add("-DCMAKE_BUILD_TYPE:STRING=Debug");
+        } else if (ManagedBuildManager.BUILD_TYPE_PROPERTY_RELEASE.equals(value
+            .getId())) {
+          args.add("-DCMAKE_BUILD_TYPE:STRING=Release");
+        }
+      }
+    }
+
+    /* add general settings */
+    {
+      if (prefs.isWarnNoDev())
+        args.add("-Wno-dev");
+      if (prefs.isDebugOutput())
+        args.add("--debug-output");
+      if (prefs.isTrace())
+        args.add("--trace");
+      if (prefs.isWarnUnitialized())
+        args.add("--warn-unitialized");
+      if (prefs.isWarnUnused())
+        args.add("--warn-unused");
+
+      appendDefines(args, prefs.getDefines());
+      appendUndefines(args, prefs.getUndefines());
+    }
+
+    /* add settings for the operating system we are running under */
+    final String os = Platform.getOS();
+    if (Platform.OS_WIN32.equals(os)) {
+      WindowsPreferences osPrefs = prefs.getWindowsPreferences();
+      appendAbstractOsPreferences(args, osPrefs);
+    } else {
+      // fall back to linux, if OS is unknown
+      LinuxPreferences osPrefs = prefs.getLinuxPreferences();
+      appendAbstractOsPreferences(args, osPrefs);
+    }
+
+    // tell cmake where its script is located..
+    args.add(srcDir.toOSString());
+
+    return args;
+  }
+
+  /**
+   * Appends arguments common to all OS preferences. The first argument in the
+   * list will be replaced by the cmake command from the specified preferences,
+   * if given.
+   *
+   * @param args
+   *        the list to append cmake-arguments to.
+   * @param prefs
+   *        the generic OS preferences to convert and append.
+   * @throws CoreException
+   *         if unable to resolve the value of one or more variables
+   */
+  private void appendAbstractOsPreferences(List<String> args,
+      final AbstractOsPreferences prefs) throws CoreException {
+    // replace cmake command, if given
+    if (!prefs.getUseDefaultCommand())
+      args.set(0, prefs.getCommand());
+    args.add("-G");
+    args.add(prefs.getGeneratorName());
+
+    appendDefines(args, prefs.getDefines());
+    appendUndefines(args, prefs.getUndefines());
+  }
+
+  /**
+   * Appends arguments for the specified cmake undefines.
+   *
+   * @param args
+   *        the list to append cmake-arguments to.
+   * @param undefines
+   *        the cmake defines to convert and append.
+   */
+  private void appendUndefines(List<String> args,
+      final List<CmakeUnDefine> undefines) {
+    for (CmakeUnDefine def : undefines) {
+      args.add("-U" + def.getName());
+    }
+  }
+
+  /**
+   * Appends arguments for the specified cmake defines. Performs substitutions
+   * on variables found in a value of each define.
+   *
+   * @param args
+   *        the list to append cmake-arguments to.
+   * @param defines
+   *        the cmake defines to convert and append.
+   * @throws CoreException
+   *         if unable to resolve the value of one or more variables
+   */
+  private void appendDefines(List<String> args, final List<CmakeDefine> defines)
+      throws CoreException {
+    final IStringVariableManager varMgr = VariablesPlugin.getDefault()
+        .getStringVariableManager();
+    for (CmakeDefine def : defines) {
+      final StringBuilder sb = new StringBuilder("-D");
+      sb.append(def.getName());
+      sb.append(':').append(def.getType().getCmakeArg());
+      sb.append('=');
+      String expanded = varMgr.performStringSubstitution(def.getValue(),false);
+      sb.append(expanded);
+      args.add(sb.toString());
+    }
+  }
+
   /*-
    * @see org.eclipse.cdt.managedbuilder.makegen.IManagedBuilderMakefileGenerator#getMakefileName()
    */
@@ -398,8 +491,7 @@ public class CMakeMakefileGenerator implements
   @Override
   public void initialize(IProject project, IManagedBuildInfo info,
       IProgressMonitor monitor) {
-    // TODO Auto-generated function stub
-    System.out.println("# in CMakeMakefileGenerator.initialize()");
+//    System.out.println("# in CMakeMakefileGenerator.initialize()");
   }
 
   /*-
@@ -437,7 +529,7 @@ public class CMakeMakefileGenerator implements
    * Checks whether the build has been cancelled. Cancellation requests are
    * propagated to the caller by throwing
    * <code>OperationCanceledException</code>.
-   * 
+   *
    * @see org.eclipse.core.runtime.OperationCanceledException#OperationCanceledException()
    */
   protected void checkCancel() {

@@ -12,42 +12,42 @@ package de.marw.cdt.cmake.core.internal.settings;
 
 /**
  * The type identifier of a cmake variable.
- * 
+ *
  * @author Martin Weber
  */
 public enum CmakeVariableType {
   /** Boolean ON/OFF checkbox */
   BOOL {
     @Override
-    String getCmakeArg() {
+    public String getCmakeArg() {
       return "BOOL";
     }
   },
   /** File chooser dialog */
   FILEPATH {
     @Override
-    String getCmakeArg() {
+    public String getCmakeArg() {
       return "FILEPATH";
     }
   },
   /** Directory chooser dialog */
   PATH {
     @Override
-    String getCmakeArg() {
+    public String getCmakeArg() {
       return "PATH";
     }
   },
   /** Arbitrary string */
   STRING {
     @Override
-    String getCmakeArg() {
+    public String getCmakeArg() {
       return "STRING";
     }
   },
   /** No GUI entry (used for persistent variables) */
   INTERNAL {
     @Override
-    String getCmakeArg() {
+    public String getCmakeArg() {
       return "INTERNAL";
     }
   };
@@ -55,5 +55,5 @@ public enum CmakeVariableType {
   /**
    * Gets the type as a valid commandline argument for cmake.
    */
-  abstract String getCmakeArg();
+  public abstract String getCmakeArg();
 }

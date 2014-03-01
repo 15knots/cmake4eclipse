@@ -34,7 +34,7 @@ public class CMakePreferences {
   public static final String CFG_STORAGE_ID = CMakePlugin.PLUGIN_ID
       + ".settings";
   private static final String ATTR_WARN_NO_DEV = "warnNoDev";
-  private static final String ATTR_DEBUG = "debug";
+  private static final String ATTR_DEBUG = "debugOutput";
   private static final String ATTR_TRACE = "trace";
   private static final String ATTR_WARN_UNITIALIZED = "warnUnitialized";
   private static final String ATTR_WARN_UNUSED = "warnUnused";
@@ -44,7 +44,7 @@ public class CMakePreferences {
   static final String ELEM_UNDEFINES = "undefs";
   private static final String ELEM_OPTIONS = "options";
 
-  private boolean warnNoDev, debug, trace, warnUnitialized, warnUnused;
+  private boolean warnNoDev, debugOutput, trace, warnUnitialized, warnUnused;
 
   private List<CmakeDefine> defines = new ArrayList<CmakeDefine>(0);
   private List<CmakeUnDefine> undefines = new ArrayList<CmakeUnDefine>(0);
@@ -57,7 +57,7 @@ public class CMakePreferences {
    * Creates a new object, initialized with all default values.
    */
   public CMakePreferences() {
-//    reset();
+    reset();
   }
 
   /**
@@ -65,7 +65,7 @@ public class CMakePreferences {
    */
   public void reset() {
     warnNoDev = false;
-    debug = false;
+    debugOutput = false;
     trace = false;
     warnUnitialized = false;
     warnUnused = false;
@@ -83,8 +83,13 @@ public class CMakePreferences {
    * @param parent
    *        A storage element containing the configuration information. If
    *        {@code null}, nothing is loaded from storage.
+   * @param deepLoading
+   *        {@code true} to also load the embedded OS-Preferences that
+   *        override/augment the generic properties. When loading for one of the
+   *        property tabs, {@code false} should be specified here for higher
+   *        performance.
    */
-  public void loadFromStorage(ICStorageElement parent) {
+  public void loadFromStorage(ICStorageElement parent, boolean deepLoading) {
     if (parent == null)
       return;
 
@@ -93,7 +98,7 @@ public class CMakePreferences {
       if (ELEM_OPTIONS.equals(child.getName())) {
         // options...
         warnNoDev = Boolean.parseBoolean(child.getAttribute(ATTR_WARN_NO_DEV));
-        debug = Boolean.parseBoolean(child.getAttribute(ATTR_DEBUG));
+        debugOutput = Boolean.parseBoolean(child.getAttribute(ATTR_DEBUG));
         trace = Boolean.parseBoolean(child.getAttribute(ATTR_TRACE));
         warnUnitialized = Boolean.parseBoolean(child
             .getAttribute(ATTR_WARN_UNITIALIZED));
@@ -107,8 +112,10 @@ public class CMakePreferences {
             parent);
       }
     }
-//    linuxPreferences.loadFromStorage(parent);
-//    windowsPreferences.loadFromStorage(parent);
+    if (deepLoading) {
+      linuxPreferences.loadFromStorage(parent);
+      windowsPreferences.loadFromStorage(parent);
+    }
   }
 
   /**
@@ -127,8 +134,8 @@ public class CMakePreferences {
     } else {
       pOpts.removeAttribute(ATTR_WARN_NO_DEV);
     }
-    if (debug) {
-      pOpts.setAttribute(ATTR_DEBUG, String.valueOf(debug));
+    if (debugOutput) {
+      pOpts.setAttribute(ATTR_DEBUG, String.valueOf(debugOutput));
     } else {
       pOpts.removeAttribute(ATTR_DEBUG);
     }
@@ -160,73 +167,73 @@ public class CMakePreferences {
   }
 
   /**
-   * @return
+   * {@code -Wno-dev}
    */
   public boolean isWarnNoDev() {
     return warnNoDev;
   }
 
   /**
-   * @return
+   * {@code -Wno-dev}
    */
-  public boolean isDebug() {
-    return debug;
+  public void setWarnNoDev(boolean warnNoDev) {
+    this.warnNoDev = warnNoDev;
   }
 
   /**
-   * Sets the debug property.
+   * {@code --debug-output}
    */
-  public void setDebug(boolean debug) {
-    this.debug = debug;
+  public boolean isDebugOutput() {
+    return debugOutput;
   }
 
   /**
-   * @return
+   * {@code --debug-output}
+   */
+  public void setDebugOutput(boolean debugOutput) {
+    this.debugOutput = debugOutput;
+  }
+
+  /**
+   * {@code --trace}
    */
   public boolean isTrace() {
     return trace;
   }
 
   /**
-   * Sets the trace property.
+   * {@code --trace}
    */
   public void setTrace(boolean trace) {
     this.trace = trace;
   }
 
   /**
-   * @return
+   * {@code --warn-uninitialized}
    */
   public boolean isWarnUnitialized() {
     return warnUnitialized;
   }
 
   /**
-   * Sets the warnUnitialized property.
+   * {@code --warn-uninitialized}
    */
   public void setWarnUnitialized(boolean warnUnitialized) {
     this.warnUnitialized = warnUnitialized;
   }
 
   /**
-   * @return
+   * {@code --warn-unused-vars}
    */
   public boolean isWarnUnused() {
     return warnUnused;
   }
 
   /**
-   * Sets the warnUnused property.
+   * {@code --warn-unused-vars}
    */
   public void setWarnUnused(boolean warnUnused) {
     this.warnUnused = warnUnused;
-  }
-
-  /**
-   * @param warnNoDev
-   */
-  public void setWarnNoDev(boolean warnNoDev) {
-    this.warnNoDev = warnNoDev;
   }
 
   /**
