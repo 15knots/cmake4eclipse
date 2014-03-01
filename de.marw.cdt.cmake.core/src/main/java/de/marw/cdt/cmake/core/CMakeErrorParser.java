@@ -40,7 +40,7 @@ public class CMakeErrorParser extends AbstractErrorParser implements
 
   /**
    * CMake Error:
-   * 
+   *
    * <pre>
    * blah Specify
    * --help for usage, or press the help button on the CMake GUI.
@@ -49,7 +49,7 @@ public class CMakeErrorParser extends AbstractErrorParser implements
   private static final String pattern_invoke_ignore = "Specify --help for usage, .+";
   /**
    * cmake invocation error, with exit status 1:
-   * 
+   *
    * <pre>
    * CMake Error: The source directory "/home/gipsnich/build" does not exist.
    */
@@ -57,7 +57,7 @@ public class CMakeErrorParser extends AbstractErrorParser implements
       .compile("^CMake Error:\\s*(.+)$");
   /**
    * CMakelists.txt errors...
-   * 
+   *
    * <pre>
    * CMake Error at CMakeLists.txt:14 (XXXproject):
    * </pre>
@@ -66,7 +66,7 @@ public class CMakeErrorParser extends AbstractErrorParser implements
       .compile("^CMake Error at (.+):\\s*(\\d+)\\s+\\((.+?)\\):$");
   /**
    * CMakelists.txt warnings...
-   * 
+   *
    * <pre>
    * CMake Warning at CMakeLists.txt:14 (XXXproject):
    * </pre>
@@ -75,49 +75,49 @@ public class CMakeErrorParser extends AbstractErrorParser implements
       .compile("^CMake Warning at (.+):\\s*(\\d+)\\s+\\((.+?)\\):$");
   /**
    * CMakelists.txt developer warnings...
-   * 
+   *
    * <pre>
    * CMake Warning (dev) in CMakeLists.txt:
    * </pre>
-   * 
+   *
    * Block is terminated by a single trailing empty line!
-   * 
+   *
    * <pre>
    *   A logical block opening on the line
-   * 
+   *
    *     /home/weber/devel/src/CDT-CMake/CDT-mgmt-C-0src/CMakeLists.txt:51 (IF)
-   * 
+   *
    *   closes on the line
-   * 
+   *
    *     /home/weber/devel/src/CDT-CMake/CDT-mgmt-C-0src/CMakeLists.txt:54 (ENDIF)
-   * 
+   *
    *   with mis-matching arguments.
    * This warning is for project developers.  Use -Wno-dev to suppress it.
-   * 
+   *
    * </pre>
    */
   private static final Pattern PTN_SCRIPT_WARN_DEV = Pattern
       .compile("^CMake Warning \\(dev\\) in (.+):\\s*(\\d+)\\s+.+?:$");
   /**
    * Script error, first part of problem description
-   * 
+   *
    * <pre>
    *   include could not find load file:
-   * 
+   *
    *     CPackXX
-   * 
-   * 
+   *
+   *
    * </pre>
    */
   private static final Pattern PTN_SCRIPT_ERROR_DESCR1 = Pattern
       .compile("^ *(.+:) *$");
   /**
    * Script error/warning. No empty lines before problem description.
-   * 
+   *
    * <pre>
    *   Unknown CMake command "ifXXX".
-   * 
-   * 
+   *
+   *
    * </pre>
    */
   private static final Pattern PTN_SCRIPT_ERROR_DESCR2 = Pattern
@@ -135,7 +135,7 @@ public class CMakeErrorParser extends AbstractErrorParser implements
    */
   @Override
   public boolean processLine(String line, ErrorParserManager epm) {
-    System.err.println("# " + line);
+//    System.err.println("# " + line);
 
     switch (pstate) {
     case NONE:
@@ -234,7 +234,7 @@ public class CMakeErrorParser extends AbstractErrorParser implements
 
   /**
    * Creates a problem marker.
-   * 
+   *
    * @param fileName
    *        the file where the problem has occurred
    * @param epm
