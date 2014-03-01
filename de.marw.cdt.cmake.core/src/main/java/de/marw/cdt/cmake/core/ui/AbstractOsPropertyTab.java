@@ -518,8 +518,9 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
    * Updates displayed values according to the preferences edited by this tab.
    */
   private void updateDisplay() {
-    t_cmd.setText(prefs.getCommand());
     b_cmdFromPath.setSelection(prefs.getUseDefaultCommand());
+    t_cmd.setEnabled(!prefs.getUseDefaultCommand());
+    t_cmd.setText(prefs.getCommand());
 
     String generatorName = prefs.getGeneratorName();
     int idx = c_generator.indexOf(generatorName);
