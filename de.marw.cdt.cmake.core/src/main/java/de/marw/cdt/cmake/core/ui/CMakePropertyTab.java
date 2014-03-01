@@ -39,7 +39,7 @@ import de.marw.cdt.cmake.core.internal.settings.CMakePreferences;
  *
  * @author Martin Weber
  */
-public class CMakeSettingsTab extends AbstractCPropertyTab {
+public class CMakePropertyTab extends AbstractCPropertyTab {
 
   /**  */
   private static final ILog log = CMakePlugin.getDefault().getLog();

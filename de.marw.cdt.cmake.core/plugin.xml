@@ -58,7 +58,7 @@
    <extension
          point="org.eclipse.cdt.ui.cPropertyTab">
       <tab
-            class="de.marw.cdt.cmake.core.ui.CMakeSettingsTab"
+            class="de.marw.cdt.cmake.core.ui.CMakePropertyTab"
             name="CMake"
             parent="de.marw.cdt.cmake.core.ui.CMakePropertyPage"
             tooltip="Properties applied on each OS">
