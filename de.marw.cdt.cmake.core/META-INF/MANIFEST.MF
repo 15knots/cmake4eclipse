@@ -33,5 +33,5 @@ Import-Package: org.eclipse.cdt.core,
  org.osgi.framework
 Bundle-Activator: de.marw.cdt.cmake.core.CMakePlugin
 Export-Package: de.marw.cdt.cmake.core
-Require-Bundle: org.eclipse.ui.workbench;bundle-version="3.105.1",
- org.eclipse.swt
+Require-Bundle: org.eclipse.ui.workbench;bundle-version="3.8.0",
+ org.eclipse.swt;bundle-version="3.8.0"
