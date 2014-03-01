@@ -278,7 +278,42 @@ public class CMakePropertyTab extends AbstractCPropertyTab {
   @Override
   protected void performApply(ICResourceDescription src,
       ICResourceDescription dst) {
-    // TODO Auto-generated function stub
+    ICConfigurationDescription srcCfg = src.getConfiguration();
+    ICConfigurationDescription dstCfg = dst.getConfiguration();
+
+    if (srcCfg instanceof ICMultiConfigDescription) {
+      ICConfigurationDescription[] srcCfgs = (ICConfigurationDescription[]) ((ICMultiConfigDescription) src)
+          .getItems();
+      ICConfigurationDescription[] dstCfgs = (ICConfigurationDescription[]) ((ICMultiConfigDescription) dst)
+          .getItems();
+      for (int i = 0; i < srcCfgs.length; i++) {
+        applyConfig(srcCfgs[i], dstCfgs[i]);
+      }
+    } else {
+      applyConfig(srcCfg, dstCfg);
+    }
+  }
+
+  /**
+   * @param srcCfg
+   * @param dstCfg
+   */
+  private static void applyConfig(ICConfigurationDescription srcCfg,
+      ICConfigurationDescription dstCfg) {
+    try {
+      ICStorageElement srcEl = srcCfg.getStorage(
+          CMakePreferences.CFG_STORAGE_ID, false);
+      if (srcEl != null) {
+        CMakePreferences prefs = new CMakePreferences();
+        prefs.loadFromStorage(srcEl, false);
+
+        ICStorageElement dstEl = dstCfg.getStorage(
+            CMakePreferences.CFG_STORAGE_ID, true);
+        prefs.saveToStorage(dstEl);
+      }
+    } catch (CoreException ex) {
+      log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, null, ex));
+    }
   }
 
   protected void performOK() {
