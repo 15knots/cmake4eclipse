@@ -61,50 +61,24 @@
             class="de.marw.cdt.cmake.core.ui.CMakeSettingsTab"
             name="CMake"
             parent="de.marw.cdt.cmake.core.ui.CMakePropertyPage"
-            >
+            tooltip="Properties applied on each OS">
       </tab>
       <tab
             class="de.marw.cdt.cmake.core.ui.LinuxPropertyTab"
             name="Linux/default"
             parent="de.marw.cdt.cmake.core.ui.HostOSPropertyPage"
+            tooltip="Properties applied on Linux or unkown OS"
             weight="10">
       </tab>
       <tab
-            class="org.eclipse.cdt.ui.newui.SymbolTab"
-            name="OS X"
-            parent="de.marw.cdt.cmake.core.ui.HostOSPropertyPage"
-            weight="20">
-      </tab>
-      <tab
-            class="org.eclipse.cdt.ui.newui.SymbolTab"
+            class="de.marw.cdt.cmake.core.ui.WindowsPropertyTab"
             name="Windows"
             parent="de.marw.cdt.cmake.core.ui.HostOSPropertyPage"
+            tooltip="Properties applied on windows"
             weight="80">
       </tab>
    </extension>
 
-   <!-- workspace preferences UI -->
-   <extension
-         point="org.eclipse.ui.preferencePages">
-         <!--
-            category="org.eclipse.cdt.ui.preferences.CPluginPreferencePage"
-         -->
-      <page
-            category="org.eclipse.cdt.ui.preferences.BuildSettings"
-            class="de.marw.cdt.cmake.core.ui.CMakePrefPage"
-            id="de.marw.cdt.cmake.core.ui.CMakePrefPage"
-            name="CMake">
-      </page>
-  </extension>
-    <extension
-          point="org.eclipse.cdt.ui.cPropertyTab">
-      <tab
-            class="de.marw.cdt.cmake.core.ui.CMakeSettingsTab"
-            name="CMake"
-            parent="de.marw.cdt.cmake.core.ui.CMakePrefPage"
-            weight="15">
-      </tab>
-    </extension>
    <extension
          point="org.eclipse.cdt.core.CBuildConsole">
       <CBuildConsole
