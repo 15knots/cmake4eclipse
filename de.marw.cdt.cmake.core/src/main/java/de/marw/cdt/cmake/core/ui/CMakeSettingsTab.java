@@ -12,11 +12,8 @@ package de.marw.cdt.cmake.core.ui;
 
 import java.util.BitSet;
 
-import org.eclipse.cdt.core.CCorePlugin;
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
 import org.eclipse.cdt.core.settings.model.ICMultiConfigDescription;
-import org.eclipse.cdt.core.settings.model.ICProjectDescription;
-import org.eclipse.cdt.core.settings.model.ICProjectDescriptionManager;
 import org.eclipse.cdt.core.settings.model.ICResourceDescription;
 import org.eclipse.cdt.core.settings.model.ICStorageElement;
 import org.eclipse.cdt.ui.newui.AbstractCPropertyTab;
@@ -25,8 +22,6 @@ import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -152,7 +147,7 @@ public class CMakeSettingsTab extends AbstractCPropertyTab {
           CMakePreferences pref = new CMakePreferences();
           ICStorageElement storage = cfg.getStorage(
               CMakePreferences.CFG_STORAGE_ID, false);
-          pref.loadFromStorage(storage);
+          pref.loadFromStorage(storage, false);
 
           prefs[i] = pref;
         }
@@ -162,7 +157,7 @@ public class CMakeSettingsTab extends AbstractCPropertyTab {
         CMakePreferences pref = prefs[0] = new CMakePreferences();
         ICStorageElement storage = cfgd.getStorage(
             CMakePreferences.CFG_STORAGE_ID, false);
-        pref.loadFromStorage(storage);
+        pref.loadFromStorage(storage, false);
       }
     } catch (CoreException ex) {
       log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, null, ex));
@@ -190,7 +185,7 @@ public class CMakeSettingsTab extends AbstractCPropertyTab {
       // b_debug...
       bs.clear();
       for (int i = 0; i < prefs.length; i++) {
-        bs.set(i, prefs[i].isDebug());
+        bs.set(i, prefs[i].isDebugOutput());
       }
       enterTristateOrToggleMode(b_debug, bs, prefs.length);
 
@@ -219,7 +214,7 @@ public class CMakeSettingsTab extends AbstractCPropertyTab {
       // all buttons are in toggle mode
       CMakePreferences pref = prefs[0];
       enterToggleMode(b_warnNoDev, pref.isWarnNoDev());
-      enterToggleMode(b_debug, pref.isDebug());
+      enterToggleMode(b_debug, pref.isDebugOutput());
       enterToggleMode(b_trace, pref.isTrace());
       enterToggleMode(b_warnUnitialized, pref.isWarnUnitialized());
       enterToggleMode(b_warnUnused, pref.isWarnUnused());
@@ -301,7 +296,7 @@ public class CMakeSettingsTab extends AbstractCPropertyTab {
           if (shouldSaveButtonSelection(b_warnNoDev))
             pref.setWarnNoDev(b_warnNoDev.getSelection());
           if (shouldSaveButtonSelection(b_debug))
-            pref.setDebug(b_debug.getSelection());
+            pref.setDebugOutput(b_debug.getSelection());
           if (shouldSaveButtonSelection(b_trace))
             pref.setTrace(b_trace.getSelection());
           if (shouldSaveButtonSelection(b_warnUnitialized))
@@ -317,7 +312,7 @@ public class CMakeSettingsTab extends AbstractCPropertyTab {
         // we are editing a single configuration...
         CMakePreferences pref = prefs[0];
         pref.setWarnNoDev(b_warnNoDev.getSelection());
-        pref.setDebug(b_debug.getSelection());
+        pref.setDebugOutput(b_debug.getSelection());
         pref.setTrace(b_trace.getSelection());
         pref.setWarnUnitialized(b_warnUnitialized.getSelection());
         pref.setWarnUnused(b_warnUnused.getSelection());
