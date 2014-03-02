@@ -10,28 +10,44 @@
  *******************************************************************************/
 package de.marw.cdt.cmake.core.ui;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.cdt.ui.newui.AbstractCPropertyTab;
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.BaseLabelProvider;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 
 import de.marw.cdt.cmake.core.internal.settings.CmakeUnDefine;
 
 /**
- * Displays a table for the Cmake undefines.
+ * Displays a table for the Cmake undefines. The created table will be displayed
+ * in a group, together with buttons to add, edit and delete table entries.
  *
  * @author Martin Weber
  */
@@ -41,24 +57,24 @@ import de.marw.cdt.cmake.core.internal.settings.CmakeUnDefine;
   /** table column widths */
   private static final int[] tableColumnWidths = { 120 };
 
-  private TableViewer viewer;
+  private TableViewer tableViewer;
   private MyViewerComparator comparator;
 
   /**
    * @param parent
    */
   public UnDefinesViewer(Composite parent) {
-    createViewer(parent);
+    createEditor(parent);
     // Set the sorter for the table
     comparator = new MyViewerComparator();
-    viewer.setComparator(comparator);
+    tableViewer.setComparator(comparator);
   }
 
   /**
    * Gets the TableViewer for the Cmake-undefines
    */
   public TableViewer getTableViewer() {
-    return viewer;
+    return tableViewer;
   }
 
   /**
@@ -67,12 +83,12 @@ import de.marw.cdt.cmake.core.internal.settings.CmakeUnDefine;
   public void setInput(List<CmakeUnDefine> list) {
     // Get the content for the viewer, setInput will call getElements in the
     // contentProvider
-    viewer.setInput(list);
+    tableViewer.setInput(list);
   }
 
-  private void createViewer(Composite parent) {
-    viewer = new TableViewer(parent, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL
-        | SWT.MULTI | SWT.FULL_SELECTION);
+  private TableViewer createViewer(Composite parent) {
+    TableViewer viewer = new TableViewer(parent, SWT.BORDER | SWT.H_SCROLL
+        | SWT.V_SCROLL | SWT.MULTI | SWT.FULL_SELECTION);
 
     createColumns(parent, viewer);
 
@@ -84,7 +100,7 @@ import de.marw.cdt.cmake.core.internal.settings.CmakeUnDefine;
     viewer.setLabelProvider(new CmakeVariableLabelProvider());
 
 //    // make the selection available to other views
-//    getSite().setSelectionProvider(viewer);
+//    getSite().setSelectionProvider(tableViewer);
 
     // Layout the viewer
     GridData gridData = new GridData();
@@ -94,6 +110,7 @@ import de.marw.cdt.cmake.core.internal.settings.CmakeUnDefine;
     gridData.grabExcessVerticalSpace = true;
     gridData.horizontalAlignment = GridData.FILL;
     viewer.getControl().setLayoutData(gridData);
+    return viewer;
   }
 
   /**
@@ -136,12 +153,130 @@ import de.marw.cdt.cmake.core.internal.settings.CmakeUnDefine;
       public void widgetSelected(SelectionEvent e) {
         comparator.setSortColumn(index);
         int dir = comparator.getSortDirection();
-        viewer.getTable().setSortDirection(dir);
-        viewer.getTable().setSortColumn(column);
-        viewer.refresh();
+        tableViewer.getTable().setSortDirection(dir);
+        tableViewer.getTable().setSortColumn(column);
+        tableViewer.refresh();
       }
     };
     return selectionAdapter;
+  }
+
+  /**
+   * Creates the control to add/delete/edit cmake-variables to undefine.
+   */
+  private void createEditor(Composite parent) {
+    final Group gr = WidgetHelper.createGroup(parent, SWT.FILL, 2,
+        "Cmake cache entries to undefine (-U)", 2);
+
+    tableViewer = createViewer(gr);
+    // let double click trigger the edit dialog
+    tableViewer.addDoubleClickListener(new IDoubleClickListener() {
+
+      @Override
+      public void doubleClick(DoubleClickEvent event) {
+        handleUnDefineEditButton(tableViewer);
+      }
+    });
+    // let DEL key trigger the delete dialog
+    tableViewer.getTable().addKeyListener(new KeyAdapter() {
+      @Override
+      public void keyPressed(KeyEvent e) {
+        if (e.keyCode == SWT.DEL) {
+          handleUnDefineDelButton(tableViewer);
+        } else if (e.keyCode == SWT.INSERT) {
+          handleUnDefineAddButton(tableViewer);
+        }
+      }
+    });
+
+    // Buttons, vertically stacked
+    Composite editButtons = new Composite(gr, SWT.NONE);
+    editButtons.setLayoutData(new GridData(SWT.CENTER, SWT.BEGINNING, false,
+        false));
+    editButtons.setLayout(new GridLayout(1, false));
+
+    Button buttonDefineAdd = WidgetHelper.createButton(editButtons,
+        AbstractCPropertyTab.ADD_STR, true);
+    final Button buttonDefineEdit = WidgetHelper.createButton(editButtons,
+        AbstractCPropertyTab.EDIT_STR, false);
+    final Button buttonDefineDel = WidgetHelper.createButton(editButtons,
+        AbstractCPropertyTab.DEL_STR, false);
+
+    // wire button actions...
+    buttonDefineAdd.addSelectionListener(new SelectionAdapter() {
+      @Override
+      public void widgetSelected(SelectionEvent event) {
+        handleUnDefineAddButton(tableViewer);
+      }
+    });
+    buttonDefineEdit.addSelectionListener(new SelectionAdapter() {
+      @Override
+      public void widgetSelected(SelectionEvent event) {
+        handleUnDefineEditButton(tableViewer);
+      }
+    });
+    buttonDefineDel.addSelectionListener(new SelectionAdapter() {
+      @Override
+      public void widgetSelected(SelectionEvent event) {
+        handleUnDefineDelButton(tableViewer);
+      }
+    });
+
+    // enable button sensitivity based on table selection
+    tableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+      @Override
+      public void selectionChanged(SelectionChangedEvent event) {
+        // update button sensitivity..
+        int sels = ((IStructuredSelection) event.getSelection()).size();
+        boolean canEdit = (sels == 1);
+        boolean canDel = (sels >= 1);
+        buttonDefineEdit.setEnabled(canEdit);
+        buttonDefineDel.setEnabled(canDel);
+      }
+    });
+
+  }
+
+  private void handleUnDefineAddButton(TableViewer tableViewer) {
+    final Shell shell = tableViewer.getControl().getShell();
+    AddCmakeUndefineDialog dlg = new AddCmakeUndefineDialog(shell, null);
+    if (dlg.open() == Dialog.OK) {
+      CmakeUnDefine cmakeDefine = dlg.getCmakeUndefine();
+      @SuppressWarnings("unchecked")
+      ArrayList<CmakeUnDefine> undefines = (ArrayList<CmakeUnDefine>) tableViewer
+          .getInput();
+      undefines.add(cmakeDefine);
+      tableViewer.add(cmakeDefine); // updates the display
+    }
+  }
+
+  private void handleUnDefineEditButton(TableViewer tableViewer) {
+    final IStructuredSelection selection = (IStructuredSelection) tableViewer
+        .getSelection();
+    if (selection.size() == 1) {
+      Object cmakeDefine = selection.getFirstElement();
+      // edit the selected variable in-place..
+      final Shell shell = tableViewer.getControl().getShell();
+      AddCmakeUndefineDialog dlg = new AddCmakeUndefineDialog(shell,
+          (CmakeUnDefine) cmakeDefine);
+      if (dlg.open() == Dialog.OK) {
+        tableViewer.update(cmakeDefine, null); // updates the display
+      }
+    }
+  }
+
+  private void handleUnDefineDelButton(TableViewer tableViewer) {
+    final IStructuredSelection selection = (IStructuredSelection) tableViewer
+        .getSelection();
+    final Shell shell = tableViewer.getControl().getShell();
+    if (MessageDialog.openQuestion(shell,
+        "Cmake-Undefine deletion confirmation",
+        "Are you sure to delete the selected Cmake-undefines?")) {
+      @SuppressWarnings("unchecked")
+      ArrayList<String> undefines = (ArrayList<String>) tableViewer.getInput();
+      undefines.removeAll(selection.toList());
+      tableViewer.remove(selection.toArray());// updates the display
+    }
   }
 
   ////////////////////////////////////////////////////////////////////

@@ -22,7 +22,6 @@ import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -71,59 +70,26 @@ public class CMakePropertyTab extends AbstractCPropertyTab {
 
     // cmake options group...
     {
-      Group gr = createGroup(usercomp, 2, "Commandline Options", SWT.FILL, 2);
+      Group gr = WidgetHelper.createGroup(usercomp, SWT.FILL, 2, "Commandline Options", 2);
 
-      b_warnNoDev = createCheckbox(gr,
-          "Suppress developer warnings (-Wno-dev)", SWT.BEGINNING, 2);
+      b_warnNoDev = WidgetHelper.createCheckbox(gr,
+          SWT.BEGINNING, 2, "Suppress developer warnings (-Wno-dev)");
       b_warnNoDev.addListener(SWT.Selection, tsl);
-      b_debug = createCheckbox(gr,
-          "Put cmake in a debug mode (--debug-output)", SWT.BEGINNING, 2);
+      b_debug = WidgetHelper.createCheckbox(gr,
+          SWT.BEGINNING, 2, "Put cmake in a debug mode (--debug-output)");
       b_debug.addListener(SWT.Selection, tsl);
-      b_trace = createCheckbox(gr, "Put cmake in trace mode (--trace)",
-          SWT.BEGINNING, 2);
+      b_trace = WidgetHelper.createCheckbox(gr, SWT.BEGINNING,
+          2, "Put cmake in trace mode (--trace)");
       b_trace.addListener(SWT.Selection, tsl);
-      b_warnUnitialized = createCheckbox(gr,
-          "Warn about uninitialized values (--warn-uninitialized)",
-          SWT.BEGINNING, 2);
+      b_warnUnitialized = WidgetHelper.createCheckbox(gr,
+          SWT.BEGINNING,
+          2, "Warn about uninitialized values (--warn-uninitialized)");
       b_warnUnitialized.addListener(SWT.Selection, tsl);
-      b_warnUnused = createCheckbox(gr,
-          "Warn about unused variables (--warn-unused-vars)", SWT.BEGINNING, 2);
+      b_warnUnused = WidgetHelper.createCheckbox(gr,
+          SWT.BEGINNING, 2, "Warn about unused variables (--warn-unused-vars)");
       b_warnUnused.addListener(SWT.Selection, tsl);
     } // cmake options group
 
-  }
-
-  /**
-   * Creates a checkbox.
-   *
-   * @param parent
-   * @param text
-   *        text to display on checkbox
-   * @param horizontalAlignment
-   *        how control will be positioned horizontally within a cell, one of:
-   *        SWT.BEGINNING (or SWT.LEFT), SWT.CENTER, SWT.END (or SWT.RIGHT), or
-   *        SWT.FILL
-   */
-  private Button createCheckbox(Composite parent, String text,
-      int horizontalAlignment, int horizontalSpan) {
-    Button b = new Button(parent, SWT.CHECK);
-    b.setText(text);
-    GridData gd = new GridData(horizontalAlignment, SWT.CENTER, false, false);
-    gd.horizontalSpan = horizontalSpan;
-    b.setLayoutData(gd);
-    return b;
-  }
-
-  private Group createGroup(Composite parent, int numColumns, String text,
-      int horizontalAlignment, int horizontalSpan) {
-    Group gr = new Group(parent, SWT.NONE);
-    gr.setLayout(new GridLayout(numColumns, false));
-    ((GridLayout) gr.getLayout()).horizontalSpacing = 0;
-    gr.setText(text);
-    GridData gd = new GridData(horizontalAlignment, SWT.CENTER, true, false);
-    gd.horizontalSpan = horizontalSpan;
-    gr.setLayoutData(gd);
-    return gr;
   }
 
   /*-
