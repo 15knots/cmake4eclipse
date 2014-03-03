@@ -14,7 +14,7 @@ import org.eclipse.cdt.ui.newui.AbstractPage;
 
 /**
  * Page for CMake project settings.
- * 
+ *
  * @author Martin Weber
  */
 public class CMakePropertyPage extends AbstractPage {
@@ -32,7 +32,7 @@ public class CMakePropertyPage extends AbstractPage {
    */
   @Override
   protected boolean isSingle() {
-    return true;// currently a single Tab
+    return false;
   }
 
 }
