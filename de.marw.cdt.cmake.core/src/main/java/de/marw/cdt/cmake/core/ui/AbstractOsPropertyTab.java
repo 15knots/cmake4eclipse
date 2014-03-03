@@ -10,8 +10,6 @@
  *******************************************************************************/
 package de.marw.cdt.cmake.core.ui;
 
-import java.util.ArrayList;
-
 import org.eclipse.cdt.core.CCorePlugin;
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
 import org.eclipse.cdt.core.settings.model.ICProjectDescription;
@@ -23,18 +21,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IDoubleClickListener;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -44,13 +32,11 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 import de.marw.cdt.cmake.core.CMakePlugin;
 import de.marw.cdt.cmake.core.internal.settings.AbstractOsPreferences;
 import de.marw.cdt.cmake.core.internal.settings.CMakePreferences;
-import de.marw.cdt.cmake.core.internal.settings.CmakeUnDefine;
 
 /**
  * Generic UI to control host OS specific project properties and preferences for
@@ -285,12 +271,12 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
           CMakePreferences.CFG_STORAGE_ID, true);
       prefs.saveToStorage(storage);
 
-      final ICProjectDescriptionManager mgr = CCorePlugin.getDefault()
-          .getProjectDescriptionManager();
-      final ICProjectDescription projectDescription = cfgd
-          .getProjectDescription();
-      mgr.setProjectDescription(projectDescription.getProject(),
-          projectDescription, true, null);
+//      final ICProjectDescriptionManager mgr = CCorePlugin.getDefault()
+//          .getProjectDescriptionManager();
+//      final ICProjectDescription projectDescription = cfgd
+//          .getProjectDescription();
+//      mgr.setProjectDescription(projectDescription.getProject(),
+//          projectDescription, true, null);
     } catch (CoreException ex) {
       log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, null, ex));
     }
