@@ -59,9 +59,15 @@
          point="org.eclipse.cdt.ui.cPropertyTab">
       <tab
             class="de.marw.cdt.cmake.core.ui.CMakePropertyTab"
-            name="CMake"
+            name="General"
             parent="de.marw.cdt.cmake.core.ui.CMakePropertyPage"
             tooltip="Properties applied on each OS">
+      </tab>
+      <tab
+            class="de.marw.cdt.cmake.core.ui.CMakeSymbolsTab"
+            name="Symbols"
+            parent="de.marw.cdt.cmake.core.ui.CMakePropertyPage"
+            tooltip="Applied on each OS">
       </tab>
       <tab
             class="de.marw.cdt.cmake.core.ui.LinuxPropertyTab"

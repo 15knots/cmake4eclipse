@@ -33,7 +33,7 @@ import de.marw.cdt.cmake.core.CMakePlugin;
 import de.marw.cdt.cmake.core.internal.settings.CMakePreferences;
 
 /**
- * UI to control settings and preferences for cmake. This tab is responsible for
+ * UI to control general project properties for cmake. This tab is responsible for
  * storing its values.
  *
  * @author Martin Weber
@@ -195,7 +195,7 @@ public class CMakePropertyTab extends AbstractCPropertyTab {
    * @param buttonSelected
    *        the selection of the button
    */
-  private void enterToggleMode(Button button, boolean buttonSelected) {
+  private static void enterToggleMode(Button button, boolean buttonSelected) {
     button.setData(null); // mark toggle mode
     button.setSelection(buttonSelected);
     button.setGrayed(false);
@@ -207,7 +207,7 @@ public class CMakePropertyTab extends AbstractCPropertyTab {
    * @param button
    *        the button to modify
    */
-  private void enterTristateOrToggleMode(Button button, BitSet bs, int numBits) {
+  private static void enterTristateOrToggleMode(Button button, BitSet bs, int numBits) {
     if (needsTri(bs, numBits)) {
       enterTristateMode(button);
     } else {
@@ -221,7 +221,7 @@ public class CMakePropertyTab extends AbstractCPropertyTab {
    * @param button
    *        the button to modify
    */
-  private void enterTristateMode(Button button) {
+  private static void enterTristateMode(Button button) {
     button.setData(Boolean.TRUE); // mark in tri-state mode
     button.setSelection(true);
     button.setGrayed(true);
@@ -230,7 +230,7 @@ public class CMakePropertyTab extends AbstractCPropertyTab {
   /**
    * Gets whether all bits in the bit set have the same state.
    */
-  private boolean needsTri(BitSet bs, int numBits) {
+  private static boolean needsTri(BitSet bs, int numBits) {
     final int card = bs.cardinality();
     return !(card == numBits || card == 0);
   }
@@ -333,7 +333,7 @@ public class CMakePropertyTab extends AbstractCPropertyTab {
    * @param button
    *        the button to query
    */
-  private boolean shouldSaveButtonSelection(Button button) {
+  private static boolean shouldSaveButtonSelection(Button button) {
     if (button.getData() == Boolean.TRUE && button.getGrayed()) {
       // if button is in tri-state mode and grayed, do not save
       return false;
