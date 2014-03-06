@@ -48,7 +48,7 @@ import de.marw.cdt.cmake.core.internal.settings.CmakeDefine;
 /**
  * Displays a table for the Cmake defines. The created table will be displayed
  * in a group, together with buttons to add, edit and delete table entries.
- *
+ * 
  * @author Martin Weber
  */
 /* package */class DefinesViewer {
@@ -112,7 +112,7 @@ import de.marw.cdt.cmake.core.internal.settings.CmakeDefine;
 
   /**
    * Creates the columns for the table.
-   *
+   * 
    * @param parent
    * @param viewer
    */
@@ -283,7 +283,7 @@ import de.marw.cdt.cmake.core.internal.settings.CmakeDefine;
 
   /**
    * Converts the list of CmakeDefine object.
-   *
+   * 
    * @author Martin Weber
    */
   private static class CmakeDefineTableContentProvider implements

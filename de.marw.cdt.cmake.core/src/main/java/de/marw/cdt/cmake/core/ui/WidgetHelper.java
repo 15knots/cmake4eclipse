@@ -19,7 +19,7 @@ import org.eclipse.swt.widgets.Group;
 
 /**
  * Static methods for unified creation of widgets.
- *
+ * 
  * @author Martin Weber
  */
 /* package */class WidgetHelper {
@@ -30,7 +30,7 @@ import org.eclipse.swt.widgets.Group;
 
   /**
    * Creates a button.
-   *
+   * 
    * @param parent
    * @param text
    *        button text
@@ -50,7 +50,7 @@ import org.eclipse.swt.widgets.Group;
 
   /**
    * Creates a checkbox button.
-   *
+   * 
    * @param parent
    * @param horizontalAlignment
    *        how control will be positioned horizontally within a cell of the
@@ -74,7 +74,7 @@ import org.eclipse.swt.widgets.Group;
 
   /**
    * Creates a group with a grid layout.
-   *
+   * 
    * @param parent
    * @param horizontalAlignment
    *        how control will be positioned horizontally within a cell of the
@@ -88,8 +88,8 @@ import org.eclipse.swt.widgets.Group;
    * @param numColumns
    *        the number of columns in the grid inside the group
    */
-  static Group createGroup(Composite parent, int horizontalAlignment, int horizontalSpan,
-      String text, int numColumns) {
+  static Group createGroup(Composite parent, int horizontalAlignment,
+      int horizontalSpan, String text, int numColumns) {
     Group gr = new Group(parent, SWT.NONE);
     gr.setLayout(new GridLayout(numColumns, false));
     gr.setText(text);

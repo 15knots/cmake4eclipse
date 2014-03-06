@@ -10,10 +10,9 @@
  *******************************************************************************/
 package de.marw.cdt.cmake.core.ui;
 
-import org.eclipse.cdt.core.CCorePlugin;
+import java.util.List;
+
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
-import org.eclipse.cdt.core.settings.model.ICProjectDescription;
-import org.eclipse.cdt.core.settings.model.ICProjectDescriptionManager;
 import org.eclipse.cdt.core.settings.model.ICResourceDescription;
 import org.eclipse.cdt.core.settings.model.ICStorageElement;
 import org.eclipse.cdt.ui.newui.AbstractCPropertyTab;
@@ -37,6 +36,9 @@ import org.eclipse.swt.widgets.Text;
 import de.marw.cdt.cmake.core.CMakePlugin;
 import de.marw.cdt.cmake.core.internal.settings.AbstractOsPreferences;
 import de.marw.cdt.cmake.core.internal.settings.CMakePreferences;
+import de.marw.cdt.cmake.core.internal.settings.CmakeDefine;
+import de.marw.cdt.cmake.core.internal.settings.CmakeUnDefine;
+import de.marw.cdt.cmake.core.internal.settings.ConfigurationManager;
 
 /**
  * Generic UI to control host OS specific project properties and preferences for
@@ -44,7 +46,7 @@ import de.marw.cdt.cmake.core.internal.settings.CMakePreferences;
  * passed to {@code cmake} and get automatically applied if this plugin detects
  * it is running under that operating system.<br>
  * This tab and any subclass is responsible for storing its values.<br>
- *
+ * 
  * @author Martin Weber
  * @param <P>
  *        the type that holds the OS specific properties.
@@ -81,7 +83,7 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
 
   /**
    * Gets the OS specific preferences from the specified generic preferences.
-   *
+   * 
    * @return the OS specific preferences, never {@code null}.
    */
   protected abstract P getOsPreferences(CMakePreferences prefs);
@@ -90,7 +92,7 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
    * Gets all sensible choices for cmake's '-G' option on this platform. The
    * returned array should not include generators for IDE project files, such as
    * "Eclipse CDT4 - Unix Makefiles".
-   *
+   * 
    * @return an array of non-empty strings, where each string must be an valid
    *         argument for cmake.
    */
@@ -115,10 +117,11 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
 
     // cmake executable group...
     {
-      Group gr = WidgetHelper.createGroup(usercomp, SWT.FILL, 2, "Cmake Executable", 2);
+      Group gr = WidgetHelper.createGroup(usercomp, SWT.FILL, 2,
+          "Cmake Executable", 2);
 
-      b_cmdFromPath = WidgetHelper.createCheckbox(gr,
-          SWT.BEGINNING, 2, "Use cmake executable found on &system path");
+      b_cmdFromPath = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2,
+          "Use cmake executable found on &system path");
 
       setupLabel(gr, "&File", 1, SWT.BEGINNING);
 
@@ -194,15 +197,14 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
       return;
 
     cfgd = resd.getConfiguration();
-    CMakePreferences allPrefs = new CMakePreferences();
+    final ConfigurationManager configMgr = ConfigurationManager.getInstance();
     try {
-      ICStorageElement storage = cfgd.getStorage(
-          CMakePreferences.CFG_STORAGE_ID, false);
+      CMakePreferences allPrefs = configMgr.getOrLoad(cfgd);
       prefs = getOsPreferences(allPrefs);
-      prefs.loadFromStorage(storage);
     } catch (CoreException ex) {
       log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, null, ex));
     }
+
     updateDisplay();
   }
 
@@ -225,7 +227,7 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
   /**
    * Invoked when project configuration changes?? At least when apply button is
    * pressed.
-   *
+   * 
    * @see org.eclipse.cdt.ui.newui.AbstractCPropertyTab#performApply(org.eclipse.cdt.core.settings.model.ICResourceDescription,
    *      org.eclipse.cdt.core.settings.model.ICResourceDescription)
    */
@@ -233,19 +235,27 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
   protected void performApply(ICResourceDescription src,
       ICResourceDescription dst) {
     ICConfigurationDescription srcCfg = src.getConfiguration();
+    ICConfigurationDescription dstCfg = dst.getConfiguration();
+    final ConfigurationManager configMgr = ConfigurationManager.getInstance();
 
     try {
-      ICStorageElement srcEl = srcCfg.getStorage(
-          CMakePreferences.CFG_STORAGE_ID, false);
-      if (srcEl != null) {
-        CMakePreferences allPrefs = new CMakePreferences();
-        P prefs = getOsPreferences(allPrefs);
-        prefs.loadFromStorage(srcEl);
+      P srcPrefs = getOsPreferences(configMgr.getOrLoad(srcCfg));
+      P dstPrefs = getOsPreferences(configMgr.getOrLoad(dstCfg));
 
-        ICConfigurationDescription dstCfg = dst.getConfiguration();
-        ICStorageElement dstEl = dstCfg.getStorage(
-            CMakePreferences.CFG_STORAGE_ID, true);
-        prefs.saveToStorage(dstEl);
+      dstPrefs.setUseDefaultCommand(srcPrefs.getUseDefaultCommand());
+      dstPrefs.setCommand(srcPrefs.getCommand());
+      dstPrefs.setGeneratorName(srcPrefs.getGeneratorName());
+
+      final List<CmakeDefine> defines = dstPrefs.getDefines();
+      defines.clear();
+      for (CmakeDefine def : srcPrefs.getDefines()) {
+        defines.add(def.clone());
+      }
+
+      final List<CmakeUnDefine> undefines = dstPrefs.getUndefines();
+      undefines.clear();
+      for (CmakeUnDefine undef : srcPrefs.getUndefines()) {
+        undefines.add(undef.clone());
       }
     } catch (CoreException ex) {
       log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, null, ex));
@@ -254,6 +264,8 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
 
   @Override
   protected void performOK() {
+    if (cfgd == null)
+      return; // YES, the CDT framework invokes us even if it did not call updateData()!!!
     try {
       prefs.setUseDefaultCommand(b_cmdFromPath.getSelection());
       String command = t_cmd.getText().trim();
@@ -270,13 +282,6 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
       ICStorageElement storage = cfgd.getStorage(
           CMakePreferences.CFG_STORAGE_ID, true);
       prefs.saveToStorage(storage);
-
-//      final ICProjectDescriptionManager mgr = CCorePlugin.getDefault()
-//          .getProjectDescriptionManager();
-//      final ICProjectDescription projectDescription = cfgd
-//          .getProjectDescription();
-//      mgr.setProjectDescription(projectDescription.getProject(),
-//          projectDescription, true, null);
     } catch (CoreException ex) {
       log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, null, ex));
     }
@@ -284,6 +289,8 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
 
   @Override
   protected void performDefaults() {
+    if (cfgd == null)
+      return; // YES, the CDT framework invokes us even if it did not call updateData()!!!
     prefs.reset();
     updateDisplay();
   }

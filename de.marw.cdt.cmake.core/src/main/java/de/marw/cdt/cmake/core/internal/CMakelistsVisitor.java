@@ -62,12 +62,12 @@ import org.eclipse.core.runtime.CoreException;
 
   /**
    * Checks for CMakeLists.txt files.
-   * 
+   *
    * @param resource
    * @return {@code true} if the resource is a CMakeLists.txt file, otherwise
    *         {@code false}
    */
-  private boolean checkCMakeLists(IResource resource) {
+  private static boolean checkCMakeLists(IResource resource) {
 //    System.out.println("# in CMakeBuilder.checkCMakeLists(): "
 //        + resource.getProjectRelativePath());
     if (resource instanceof IFile

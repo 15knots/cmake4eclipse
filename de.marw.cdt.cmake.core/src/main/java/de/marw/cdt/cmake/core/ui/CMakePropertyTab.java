@@ -31,11 +31,12 @@ import org.eclipse.swt.widgets.Listener;
 
 import de.marw.cdt.cmake.core.CMakePlugin;
 import de.marw.cdt.cmake.core.internal.settings.CMakePreferences;
+import de.marw.cdt.cmake.core.internal.settings.ConfigurationManager;
 
 /**
- * UI to control general project properties for cmake. This tab is responsible for
- * storing its values.
- *
+ * UI to control general project properties for cmake. This tab is responsible
+ * for storing its values.
+ * 
  * @author Martin Weber
  */
 public class CMakePropertyTab extends AbstractCPropertyTab {
@@ -70,23 +71,23 @@ public class CMakePropertyTab extends AbstractCPropertyTab {
 
     // cmake options group...
     {
-      Group gr = WidgetHelper.createGroup(usercomp, SWT.FILL, 2, "Commandline Options", 2);
+      Group gr = WidgetHelper.createGroup(usercomp, SWT.FILL, 2,
+          "Commandline Options", 2);
 
-      b_warnNoDev = WidgetHelper.createCheckbox(gr,
-          SWT.BEGINNING, 2, "Suppress developer warnings (-Wno-dev)");
+      b_warnNoDev = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2,
+          "Suppress developer warnings (-Wno-dev)");
       b_warnNoDev.addListener(SWT.Selection, tsl);
-      b_debug = WidgetHelper.createCheckbox(gr,
-          SWT.BEGINNING, 2, "Put cmake in a debug mode (--debug-output)");
+      b_debug = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2,
+          "Put cmake in a debug mode (--debug-output)");
       b_debug.addListener(SWT.Selection, tsl);
-      b_trace = WidgetHelper.createCheckbox(gr, SWT.BEGINNING,
-          2, "Put cmake in trace mode (--trace)");
+      b_trace = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2,
+          "Put cmake in trace mode (--trace)");
       b_trace.addListener(SWT.Selection, tsl);
-      b_warnUnitialized = WidgetHelper.createCheckbox(gr,
-          SWT.BEGINNING,
-          2, "Warn about uninitialized values (--warn-uninitialized)");
+      b_warnUnitialized = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2,
+          "Warn about uninitialized values (--warn-uninitialized)");
       b_warnUnitialized.addListener(SWT.Selection, tsl);
-      b_warnUnused = WidgetHelper.createCheckbox(gr,
-          SWT.BEGINNING, 2, "Warn about unused variables (--warn-unused-vars)");
+      b_warnUnused = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2,
+          "Warn about unused variables (--warn-unused-vars)");
       b_warnUnused.addListener(SWT.Selection, tsl);
     } // cmake options group
 
@@ -101,6 +102,7 @@ public class CMakePropertyTab extends AbstractCPropertyTab {
       return;
 
     cfgd = resd.getConfiguration();
+    final ConfigurationManager configMgr = ConfigurationManager.getInstance();
     try {
       if (cfgd instanceof ICMultiConfigDescription) {
         // we are editing multiple configurations...
@@ -109,21 +111,12 @@ public class CMakePropertyTab extends AbstractCPropertyTab {
 
         prefs = new CMakePreferences[cfgs.length];
         for (int i = 0; i < cfgs.length; i++) {
-          ICConfigurationDescription cfg = cfgs[i];
-          CMakePreferences pref = new CMakePreferences();
-          ICStorageElement storage = cfg.getStorage(
-              CMakePreferences.CFG_STORAGE_ID, false);
-          pref.loadFromStorage(storage, false);
-
-          prefs[i] = pref;
+          prefs[i] = configMgr.getOrLoad(cfgs[i]);
         }
       } else {
         // we are editing a single configuration...
         prefs = new CMakePreferences[1];
-        CMakePreferences pref = prefs[0] = new CMakePreferences();
-        ICStorageElement storage = cfgd.getStorage(
-            CMakePreferences.CFG_STORAGE_ID, false);
-        pref.loadFromStorage(storage, false);
+        prefs[0] = configMgr.getOrLoad(cfgd);
       }
     } catch (CoreException ex) {
       log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, null, ex));
@@ -189,7 +182,7 @@ public class CMakePropertyTab extends AbstractCPropertyTab {
 
   /**
    * Switches the specified button behavior from tri-state mode to toggle mode.
-   *
+   * 
    * @param button
    *        the button to modify
    * @param buttonSelected
@@ -203,11 +196,12 @@ public class CMakePropertyTab extends AbstractCPropertyTab {
 
   /**
    * Switches the specified button behavior from toggle mode to tri-state mode.
-   *
+   * 
    * @param button
    *        the button to modify
    */
-  private static void enterTristateOrToggleMode(Button button, BitSet bs, int numBits) {
+  private static void enterTristateOrToggleMode(Button button, BitSet bs,
+      int numBits) {
     if (needsTri(bs, numBits)) {
       enterTristateMode(button);
     } else {
@@ -217,7 +211,7 @@ public class CMakePropertyTab extends AbstractCPropertyTab {
 
   /**
    * Switches the specified button behavior to toggle mode or to tri-state mode.
-   *
+   * 
    * @param button
    *        the button to modify
    */
@@ -237,7 +231,7 @@ public class CMakePropertyTab extends AbstractCPropertyTab {
 
   /**
    * Invoked when project configuration changes??
-   *
+   * 
    * @see org.eclipse.cdt.ui.newui.AbstractCPropertyTab#performApply(org.eclipse.cdt.core.settings.model.ICResourceDescription,
    *      org.eclipse.cdt.core.settings.model.ICResourceDescription)
    */
@@ -266,23 +260,28 @@ public class CMakePropertyTab extends AbstractCPropertyTab {
    */
   private static void applyConfig(ICConfigurationDescription srcCfg,
       ICConfigurationDescription dstCfg) {
+    final ConfigurationManager configMgr = ConfigurationManager.getInstance();
     try {
-      ICStorageElement srcEl = srcCfg.getStorage(
-          CMakePreferences.CFG_STORAGE_ID, false);
-      if (srcEl != null) {
-        CMakePreferences prefs = new CMakePreferences();
-        prefs.loadFromStorage(srcEl, false);
-
-        ICStorageElement dstEl = dstCfg.getStorage(
-            CMakePreferences.CFG_STORAGE_ID, true);
-        prefs.saveToStorage(dstEl);
-      }
+      CMakePreferences srcPrefs = configMgr.getOrLoad(srcCfg);
+      CMakePreferences dstPrefs = configMgr.getOrLoad(dstCfg);
+//TODO      configMgr.put(dstCfg, dstPrefs);
+      dstPrefs.setDebugOutput(srcPrefs.isDebugOutput());
+      dstPrefs.setTrace(srcPrefs.isTrace());
+      dstPrefs.setWarnNoDev(srcPrefs.isWarnNoDev());
+      dstPrefs.setWarnUnitialized(srcPrefs.isWarnUnitialized());
+      dstPrefs.setWarnUnused(srcPrefs.isWarnUnused());
+//        ICStorageElement dstEl = dstCfg.getStorage(
+//            CMakePreferences.CFG_STORAGE_ID, true);
+//        srcPrefs.saveToStorage(dstEl);
     } catch (CoreException ex) {
       log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, null, ex));
     }
   }
 
   protected void performOK() {
+    if (cfgd == null)
+      return; // YES, the CDT framework invokes us even if it did not call updateData()!!!
+
     // save as project settings..
     try {
       if (prefs.length > 1) {
@@ -329,7 +328,7 @@ public class CMakePropertyTab extends AbstractCPropertyTab {
 
   /**
    * Gets whether the value of the specified button should be saved.
-   *
+   * 
    * @param button
    *        the button to query
    */
@@ -346,6 +345,8 @@ public class CMakePropertyTab extends AbstractCPropertyTab {
    */
   @Override
   protected void performDefaults() {
+    if (cfgd == null)
+      return; // YES, the CDT framework invokes us even if it did not call updateData()!!!
     for (CMakePreferences pref : prefs) {
       pref.reset();
     }
@@ -368,7 +369,7 @@ public class CMakePropertyTab extends AbstractCPropertyTab {
   ////////////////////////////////////////////////////////////////////
   /**
    * Adds tri-state behavior to a button when added as a SWT.Selection listener.
-   *
+   * 
    * @author Martin Weber
    */
   private static class TriStateButtonListener implements Listener {
