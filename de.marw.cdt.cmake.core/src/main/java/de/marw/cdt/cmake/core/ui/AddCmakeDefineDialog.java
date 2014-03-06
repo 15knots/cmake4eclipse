@@ -37,7 +37,7 @@ import de.marw.cdt.cmake.core.internal.settings.CmakeVariableType;
 
 /**
  * The dialog used to create or edit a cmake define.
- *
+ * 
  * @author Martin Weber
  */
 public class AddCmakeDefineDialog extends Dialog {
@@ -70,7 +70,7 @@ public class AddCmakeDefineDialog extends Dialog {
    * Creates a dialog. If a variable to edit is specified, it will be modified
    * in-place when the OK button is pressed. It will remain unchanged, if the
    * dialog is cancelled.
-   *
+   * 
    * @param parentShell
    * @param editedVar
    *        the variable to edit or {@code null} if a new variable is going to
@@ -84,7 +84,7 @@ public class AddCmakeDefineDialog extends Dialog {
 
   /**
    * Gets the edited or newly created cmake define.
-   *
+   * 
    * @return the modified or new CmakeDefine or {@code null} if this dialog has
    *         been cancelled.
    */
@@ -120,7 +120,7 @@ public class AddCmakeDefineDialog extends Dialog {
 
   /**
    * Create contents of the dialog.
-   *
+   * 
    * @param parent
    */
   @Override
@@ -272,7 +272,7 @@ public class AddCmakeDefineDialog extends Dialog {
   /**
    * Converts an index in {@link AddCmakeDefineDialog#typeNames} to a Cmake
    * variable type.
-   *
+   * 
    * @param selectionIndex
    */
   private static CmakeVariableType indexToType(int selectionIndex) {

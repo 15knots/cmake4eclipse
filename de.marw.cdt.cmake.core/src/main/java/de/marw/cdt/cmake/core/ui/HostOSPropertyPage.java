@@ -14,7 +14,7 @@ import org.eclipse.cdt.ui.newui.AbstractPage;
 
 /**
  * Page for CMake host OS specific project settings.
- *
+ * 
  * @author Martin Weber
  */
 public class HostOSPropertyPage extends AbstractPage {

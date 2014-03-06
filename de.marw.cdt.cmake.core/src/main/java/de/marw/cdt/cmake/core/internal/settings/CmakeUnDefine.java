@@ -12,15 +12,15 @@ package de.marw.cdt.cmake.core.internal.settings;
 
 /**
  * Represents a cmake variable to undefine.
- *
+ * 
  * @author Martin Weber
  */
-public class CmakeUnDefine {
+public class CmakeUnDefine implements Cloneable {
   private String name;
 
   /**
    * Creates a new object.
-   *
+   * 
    * @param name
    *        the variable name, must not be empty.
    * @throws IllegalArgumentException
@@ -34,7 +34,7 @@ public class CmakeUnDefine {
 
   /**
    * Gets the name property.
-   *
+   * 
    * @return the current name property.
    */
   public String getName() {
@@ -43,7 +43,7 @@ public class CmakeUnDefine {
 
   /**
    * Sets the name property.
-   *
+   * 
    * @throws IllegalArgumentException
    *         if {@code name} is empty
    * @throws NullPointerException
@@ -61,5 +61,16 @@ public class CmakeUnDefine {
 
   public String toString() {
     return name;
+  }
+
+  /*-
+   * @see java.lang.Object#clone()
+   */
+  public CmakeUnDefine clone() {
+    try {
+      return (CmakeUnDefine) super.clone();
+    } catch (CloneNotSupportedException ex) { // ignore
+      return null;
+    }
   }
 }

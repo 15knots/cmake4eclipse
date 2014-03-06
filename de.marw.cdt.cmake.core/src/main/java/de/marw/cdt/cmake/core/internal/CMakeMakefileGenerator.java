@@ -423,7 +423,7 @@ public class CMakeMakefileGenerator implements
    * @throws CoreException
    *         if unable to resolve the value of one or more variables
    */
-  private void appendAbstractOsPreferences(List<String> args,
+  private static void appendAbstractOsPreferences(List<String> args,
       final AbstractOsPreferences prefs) throws CoreException {
     // replace cmake command, if given
     if (!prefs.getUseDefaultCommand())
@@ -443,7 +443,7 @@ public class CMakeMakefileGenerator implements
    * @param undefines
    *        the cmake defines to convert and append.
    */
-  private void appendUndefines(List<String> args,
+  private static void appendUndefines(List<String> args,
       final List<CmakeUnDefine> undefines) {
     for (CmakeUnDefine def : undefines) {
       args.add("-U" + def.getName());
@@ -461,7 +461,7 @@ public class CMakeMakefileGenerator implements
    * @throws CoreException
    *         if unable to resolve the value of one or more variables
    */
-  private void appendDefines(List<String> args, final List<CmakeDefine> defines)
+  private static void appendDefines(List<String> args, final List<CmakeDefine> defines)
       throws CoreException {
     final IStringVariableManager varMgr = VariablesPlugin.getDefault()
         .getStringVariableManager();

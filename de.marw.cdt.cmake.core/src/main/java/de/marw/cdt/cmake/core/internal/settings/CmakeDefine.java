@@ -15,7 +15,7 @@ package de.marw.cdt.cmake.core.internal.settings;
  * 
  * @author Martin Weber
  */
-public class CmakeDefine {
+public class CmakeDefine implements Cloneable {
   private CmakeVariableType type;
   private String name;
   private String value;
@@ -131,5 +131,14 @@ public class CmakeDefine {
 
   public String toString() {
     return name + ":" + type + "=" + value;
+  }
+
+  @Override
+  public CmakeDefine clone() {
+    try {
+      return (CmakeDefine) super.clone();
+    } catch (CloneNotSupportedException ex) { // ignore
+      return null;
+    }
   }
 }

@@ -27,6 +27,7 @@ public class Util {
 
   /**
    * Converts a collection of {@code T} objects to {@link ICStorageElement}s.
+   *
    * @param targetCollectionStorageName
    *        the name for the ICStorageElement representing the collection. It
    *        will be created.
@@ -37,19 +38,32 @@ public class Util {
    * @param source
    *        the collection to convert, must not be {@code null}.
    */
-  public static <E> void serializeCollection(String targetCollectionStorageName,
-      ICStorageElement parent, StorageSerializer<E> itemSerializer,
-      Collection<E> source) {
-    if (!source.isEmpty()) {
-      ICStorageElement pColl = parent.createChild(targetCollectionStorageName);
-      for (E elem : source) {
-        itemSerializer.toStorage(pColl, elem);
+  public static <E> void serializeCollection(
+      String targetCollectionStorageName, ICStorageElement parent,
+      StorageSerializer<E> itemSerializer, Collection<E> source) {
+    ICStorageElement[] existingColls = parent
+        .getChildrenByName(targetCollectionStorageName);
+
+    ICStorageElement pColl;
+    if (existingColls.length > 0) {
+      pColl = existingColls[0];
+      if (source.isEmpty()) {
+        // remove element if collection is empty
+        parent.removeChild(pColl);
+        return;
       }
+    } else {
+      pColl = parent.createChild(targetCollectionStorageName);
+    }
+    // serialize collection elements
+    for (E elem : source) {
+      itemSerializer.toStorage(pColl, elem);
     }
   }
 
   /**
    * Converts an {@link ICStorageElement} to a collection of {@code T} objects.
+   *
    * @param target
    *        the collection to store the converted objects in, must not be
    *        {@code null}.
@@ -61,8 +75,7 @@ public class Util {
    */
   public static <E> void deserializeCollection(Collection<E> target,
       StorageSerializer<E> itemSerializer, ICStorageElement sourceParent) {
-    for (ICStorageElement elem : sourceParent
-        .getChildren()) {
+    for (ICStorageElement elem : sourceParent.getChildren()) {
       E item = itemSerializer.fromStorage(elem);
       if (item != null)
         target.add(item);

@@ -22,7 +22,7 @@ import de.marw.cdt.cmake.core.internal.storage.Util;
 
 /**
  * Holds preferences or project settings.
- *
+ * 
  * @author Martin Weber
  */
 public class CMakePreferences {
@@ -79,7 +79,7 @@ public class CMakePreferences {
   /**
    * Initializes the configuration information from the storage element
    * specified in the argument.
-   *
+   * 
    * @param parent
    *        A storage element containing the configuration information. If
    *        {@code null}, nothing is loaded from storage.
@@ -105,11 +105,11 @@ public class CMakePreferences {
         warnUnused = Boolean.parseBoolean(child.getAttribute(ATTR_WARN_UNUSED));
       } else if (ELEM_DEFINES.equals(child.getName())) {
         // defines...
-        Util.deserializeCollection(defines, new CmakeDefineSerializer(), parent);
+        Util.deserializeCollection(defines, new CmakeDefineSerializer(), child);
       } else if (ELEM_UNDEFINES.equals(child.getName())) {
         // undefines...
         Util.deserializeCollection(undefines, new CmakeUndefineSerializer(),
-            parent);
+            child);
       }
     }
     if (deepLoading) {
@@ -238,7 +238,7 @@ public class CMakePreferences {
 
   /**
    * Gets the list of cmake variable to define on the cmake command-line.
-   *
+   * 
    * @return a mutable list, never {@code null}
    */
   public List<CmakeDefine> getDefines() {
@@ -247,7 +247,7 @@ public class CMakePreferences {
 
   /**
    * Gets the list of cmake variable to undefine on the cmake command-line.
-   *
+   * 
    * @return a mutable list, never {@code null}
    */
   public List<CmakeUnDefine> getUndefines() {

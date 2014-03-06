@@ -22,7 +22,7 @@ import de.marw.cdt.cmake.core.internal.storage.Util;
 /**
  * Preferences that override/augment the generic properties when running under a
  * specific OS.
- *
+ * 
  * @author Martin Weber
  */
 public abstract class AbstractOsPreferences {
@@ -108,7 +108,7 @@ public abstract class AbstractOsPreferences {
 
   /**
    * Gets the list of cmake variable to define on the cmake command-line.
-   *
+   * 
    * @return a mutable list, never {@code null}
    */
   public List<CmakeDefine> getDefines() {
@@ -117,7 +117,7 @@ public abstract class AbstractOsPreferences {
 
   /**
    * Gets the list of cmake variable to undefine on the cmake command-line.
-   *
+   * 
    * @return a mutable list, never {@code null}
    */
   public List<CmakeUnDefine> getUndefines() {
@@ -127,7 +127,7 @@ public abstract class AbstractOsPreferences {
   /**
    * Initializes the configuration information from the storage element
    * specified in the argument.
-   *
+   * 
    * @param parent
    *        A storage element containing the configuration information. If
    *        {@code null}, nothing is loaded from storage.
@@ -135,7 +135,7 @@ public abstract class AbstractOsPreferences {
   public void loadFromStorage(ICStorageElement parent) {
     if (parent == null)
       return;
-    // loop to read multiple children of the same name
+    // loop to merge multiple children of the same name
     final ICStorageElement[] children = parent
         .getChildrenByName(getStorageElementName());
     for (ICStorageElement child : children) {
@@ -185,10 +185,6 @@ public abstract class AbstractOsPreferences {
       // clear first child
       parent = children[0];
       parent.clear();
-      // remove any other child
-      for (int i = 1; i < children.length; i++) {
-        parent.removeChild(children[i]);
-      }
     }
 
     // use default command
