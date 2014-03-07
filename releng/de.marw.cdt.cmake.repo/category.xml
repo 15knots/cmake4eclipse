@@ -10,7 +10,7 @@
   <category-def name="cmake4eclipsecdt" >
     <description>CMake for Eclipse CDT bundles</description>
   </category-def>
-  <category-def name="cmake4eclipsecdt.source" >
+  <category-def name="Source" >
     <description>CMake for Eclipse CDT source bundles</description>
     <category name="cmake4eclipsecdt" />
   </category-def>
