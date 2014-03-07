@@ -188,7 +188,6 @@
                         <archive>
                             <addMavenDescriptor>false</addMavenDescriptor>
                         </archive>
-                        <excludeResources>true</excludeResources>
                     </configuration>
                     <executions>
                         <execution>
