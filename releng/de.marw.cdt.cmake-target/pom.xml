@@ -10,6 +10,6 @@
         <relativePath>../../parent</relativePath>
         <groupId>de.marw.cdt.cmake</groupId>
         <artifactId>cmake-parent</artifactId>
-        <version>1.0.0</version>
+        <version>1.0.1-SNAPSHOT</version>
     </parent>
 </project>
