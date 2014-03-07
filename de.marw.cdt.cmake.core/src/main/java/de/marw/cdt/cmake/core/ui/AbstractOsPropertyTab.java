@@ -69,6 +69,8 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
   private Button b_cmdFromPath;
   /** cmake executable */
   private Text t_cmd;
+  /** browse files for cmake executable */
+  private Button b_browseFiles;
   /** Combo that shows the generator names for cmake */
   private Combo c_generator;
   /** the table showing the cmake defines */
@@ -137,9 +139,9 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
         layout.marginWidth = 0;
         buttonBar.setLayout(layout);
       }
-      final Button btnBrowseFiles = WidgetHelper.createButton(buttonBar,
-          "File System...", true);
-      btnBrowseFiles.addSelectionListener(new SelectionAdapter() {
+      b_browseFiles = WidgetHelper.createButton(buttonBar, "File System...",
+          true);
+      b_browseFiles.addSelectionListener(new SelectionAdapter() {
         @Override
         public void widgetSelected(SelectionEvent e) {
           IDialogSettings settings = CMakePlugin.getDefault()
@@ -160,9 +162,7 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
         public void widgetSelected(SelectionEvent event) {
           final Button btn = (Button) event.widget;
           // adjust sensitivity...
-          boolean val = !btn.getSelection();
-          t_cmd.setEnabled(val);
-          btnBrowseFiles.setEnabled(val);
+          handleComandEnabled(!btn.getSelection());
         }
       });
 
@@ -214,6 +214,8 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
   private void updateDisplay() {
     t_cmd.setText(prefs.getCommand());
     b_cmdFromPath.setSelection(prefs.getUseDefaultCommand());
+    // adjust sensitivity...
+    handleComandEnabled(!prefs.getUseDefaultCommand());
 
     String generatorName = prefs.getGeneratorName();
     int idx = c_generator.indexOf(generatorName);
@@ -222,6 +224,18 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
 
     definesViewer.setInput(prefs.getDefines());
     undefinesViewer.setInput(prefs.getUndefines());
+  }
+
+  /**
+   * Changes sensitivity of controls to enter the cmake command. Necessary since
+   * Button.setSelection does not fire events.
+   *
+   * @param enabled
+   *        the new enabled state
+   */
+  private void handleComandEnabled(boolean enabled) {
+    t_cmd.setEnabled(enabled);
+    b_browseFiles.setEnabled(enabled);
   }
 
   /**
