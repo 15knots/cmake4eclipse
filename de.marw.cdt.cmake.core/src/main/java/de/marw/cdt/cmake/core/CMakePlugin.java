@@ -38,10 +38,10 @@ public class CMakePlugin extends AbstractUIPlugin {
    * This method is called upon plug-in activation
    */
   public void start(BundleContext context) throws Exception {
+    super.start(context);
     if (!PLUGIN_ID.equals(this.getBundle().getSymbolicName()))
       throw new RuntimeException(
           "BUG: PLUGIN_ID does not match Bundle-SymbolicName");
-    super.start(context);
     plugin = this;
   }
 
