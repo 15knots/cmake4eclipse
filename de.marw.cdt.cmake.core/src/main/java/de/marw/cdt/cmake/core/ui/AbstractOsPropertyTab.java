@@ -46,7 +46,7 @@ import de.marw.cdt.cmake.core.internal.settings.ConfigurationManager;
  * passed to {@code cmake} and get automatically applied if this plugin detects
  * it is running under that operating system.<br>
  * This tab and any subclass is responsible for storing its values.<br>
- * 
+ *
  * @author Martin Weber
  * @param <P>
  *        the type that holds the OS specific properties.
@@ -83,7 +83,7 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
 
   /**
    * Gets the OS specific preferences from the specified generic preferences.
-   * 
+   *
    * @return the OS specific preferences, never {@code null}.
    */
   protected abstract P getOsPreferences(CMakePreferences prefs);
@@ -92,7 +92,7 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
    * Gets all sensible choices for cmake's '-G' option on this platform. The
    * returned array should not include generators for IDE project files, such as
    * "Eclipse CDT4 - Unix Makefiles".
-   * 
+   *
    * @return an array of non-empty strings, where each string must be an valid
    *         argument for cmake.
    */
@@ -227,7 +227,7 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
   /**
    * Invoked when project configuration changes?? At least when apply button is
    * pressed.
-   * 
+   *
    * @see org.eclipse.cdt.ui.newui.AbstractCPropertyTab#performApply(org.eclipse.cdt.core.settings.model.ICResourceDescription,
    *      org.eclipse.cdt.core.settings.model.ICResourceDescription)
    */
@@ -240,7 +240,7 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
 
     try {
       P srcPrefs = getOsPreferences(configMgr.getOrLoad(srcCfg));
-      P dstPrefs = getOsPreferences(configMgr.getOrLoad(dstCfg));
+      P dstPrefs = getOsPreferences(configMgr.getOrCreate(dstCfg));
 
       dstPrefs.setUseDefaultCommand(srcPrefs.getUseDefaultCommand());
       dstPrefs.setCommand(srcPrefs.getCommand());

@@ -36,7 +36,7 @@ import de.marw.cdt.cmake.core.internal.settings.ConfigurationManager;
 /**
  * UI to control general project properties for cmake. This tab is responsible
  * for storing its values.
- * 
+ *
  * @author Martin Weber
  */
 public class CMakePropertyTab extends AbstractCPropertyTab {
@@ -182,7 +182,7 @@ public class CMakePropertyTab extends AbstractCPropertyTab {
 
   /**
    * Switches the specified button behavior from tri-state mode to toggle mode.
-   * 
+   *
    * @param button
    *        the button to modify
    * @param buttonSelected
@@ -196,7 +196,7 @@ public class CMakePropertyTab extends AbstractCPropertyTab {
 
   /**
    * Switches the specified button behavior from toggle mode to tri-state mode.
-   * 
+   *
    * @param button
    *        the button to modify
    */
@@ -211,7 +211,7 @@ public class CMakePropertyTab extends AbstractCPropertyTab {
 
   /**
    * Switches the specified button behavior to toggle mode or to tri-state mode.
-   * 
+   *
    * @param button
    *        the button to modify
    */
@@ -231,7 +231,7 @@ public class CMakePropertyTab extends AbstractCPropertyTab {
 
   /**
    * Invoked when project configuration changes??
-   * 
+   *
    * @see org.eclipse.cdt.ui.newui.AbstractCPropertyTab#performApply(org.eclipse.cdt.core.settings.model.ICResourceDescription,
    *      org.eclipse.cdt.core.settings.model.ICResourceDescription)
    */
@@ -263,8 +263,7 @@ public class CMakePropertyTab extends AbstractCPropertyTab {
     final ConfigurationManager configMgr = ConfigurationManager.getInstance();
     try {
       CMakePreferences srcPrefs = configMgr.getOrLoad(srcCfg);
-      CMakePreferences dstPrefs = configMgr.getOrLoad(dstCfg);
-//TODO      configMgr.put(dstCfg, dstPrefs);
+      CMakePreferences dstPrefs = configMgr.getOrCreate(dstCfg);
       dstPrefs.setDebugOutput(srcPrefs.isDebugOutput());
       dstPrefs.setTrace(srcPrefs.isTrace());
       dstPrefs.setWarnNoDev(srcPrefs.isWarnNoDev());
@@ -328,7 +327,7 @@ public class CMakePropertyTab extends AbstractCPropertyTab {
 
   /**
    * Gets whether the value of the specified button should be saved.
-   * 
+   *
    * @param button
    *        the button to query
    */
@@ -369,7 +368,7 @@ public class CMakePropertyTab extends AbstractCPropertyTab {
   ////////////////////////////////////////////////////////////////////
   /**
    * Adds tri-state behavior to a button when added as a SWT.Selection listener.
-   * 
+   *
    * @author Martin Weber
    */
   private static class TriStateButtonListener implements Listener {
