@@ -181,6 +181,39 @@ public class CMakePropertyTab extends AbstractCPropertyTab {
   }
 
   /**
+   * Stores displayed values to the preferences edited by this tab.
+   *
+   * @see #updateDisplay()
+   */
+  private void saveToModel() {
+    if (prefs.length > 1) {
+      // we are editing multiple configurations...
+      for (int i = 0; i < prefs.length; i++) {
+        CMakePreferences pref = prefs[i];
+
+        if (shouldSaveButtonSelection(b_warnNoDev))
+          pref.setWarnNoDev(b_warnNoDev.getSelection());
+        if (shouldSaveButtonSelection(b_debug))
+          pref.setDebugOutput(b_debug.getSelection());
+        if (shouldSaveButtonSelection(b_trace))
+          pref.setTrace(b_trace.getSelection());
+        if (shouldSaveButtonSelection(b_warnUnitialized))
+          pref.setWarnUnitialized(b_warnUnitialized.getSelection());
+        if (shouldSaveButtonSelection(b_warnUnused))
+          pref.setWarnUnused(b_warnUnused.getSelection());
+      }
+    } else {
+      // we are editing a single configuration...
+      CMakePreferences pref = prefs[0];
+      pref.setWarnNoDev(b_warnNoDev.getSelection());
+      pref.setDebugOutput(b_debug.getSelection());
+      pref.setTrace(b_trace.getSelection());
+      pref.setWarnUnitialized(b_warnUnitialized.getSelection());
+      pref.setWarnUnused(b_warnUnused.getSelection());
+    }
+  }
+
+  /**
    * Switches the specified button behavior from tri-state mode to toggle mode.
    *
    * @param button
@@ -238,6 +271,9 @@ public class CMakePropertyTab extends AbstractCPropertyTab {
   @Override
   protected void performApply(ICResourceDescription src,
       ICResourceDescription dst) {
+    // make sure the displayed values get applied
+    saveToModel();
+
     ICConfigurationDescription srcCfg = src.getConfiguration();
     ICConfigurationDescription dstCfg = dst.getConfiguration();
 
@@ -281,7 +317,8 @@ public class CMakePropertyTab extends AbstractCPropertyTab {
     if (cfgd == null)
       return; // YES, the CDT framework invokes us even if it did not call updateData()!!!
 
-    // save as project settings..
+    saveToModel();
+    // save project properties..
     try {
       if (prefs.length > 1) {
         // we are editing multiple configurations...
@@ -289,40 +326,30 @@ public class CMakePropertyTab extends AbstractCPropertyTab {
             .getItems();
 
         for (int i = 0; i < prefs.length; i++) {
-          ICConfigurationDescription cfg = cfgs[i];
-          CMakePreferences pref = prefs[i];
-
-          if (shouldSaveButtonSelection(b_warnNoDev))
-            pref.setWarnNoDev(b_warnNoDev.getSelection());
-          if (shouldSaveButtonSelection(b_debug))
-            pref.setDebugOutput(b_debug.getSelection());
-          if (shouldSaveButtonSelection(b_trace))
-            pref.setTrace(b_trace.getSelection());
-          if (shouldSaveButtonSelection(b_warnUnitialized))
-            pref.setWarnUnitialized(b_warnUnitialized.getSelection());
-          if (shouldSaveButtonSelection(b_warnUnused))
-            pref.setWarnUnused(b_warnUnused.getSelection());
-
-          ICStorageElement storage = cfg.getStorage(
+          ICStorageElement storage = cfgs[i].getStorage(
               CMakePreferences.CFG_STORAGE_ID, true);
-          pref.saveToStorage(storage);
+          prefs[i].saveToStorage(storage);
         }
       } else {
         // we are editing a single configuration...
-        CMakePreferences pref = prefs[0];
-        pref.setWarnNoDev(b_warnNoDev.getSelection());
-        pref.setDebugOutput(b_debug.getSelection());
-        pref.setTrace(b_trace.getSelection());
-        pref.setWarnUnitialized(b_warnUnitialized.getSelection());
-        pref.setWarnUnused(b_warnUnused.getSelection());
-
         ICStorageElement storage = cfgd.getStorage(
             CMakePreferences.CFG_STORAGE_ID, true);
-        pref.saveToStorage(storage);
+        prefs[0].saveToStorage(storage);
       }
     } catch (CoreException ex) {
       log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, null, ex));
     }
+  }
+
+  /**
+   * Overridden to the displayed values in the model when this tab becomes
+   * invisible.
+   */
+  @Override
+  public void setVisible(boolean visible) {
+    if (!visible)
+      saveToModel();
+    super.setVisible(visible);
   }
 
   /**

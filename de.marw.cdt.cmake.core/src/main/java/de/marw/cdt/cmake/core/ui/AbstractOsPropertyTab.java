@@ -156,12 +156,11 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
         }
       });
 
-      // control sensitivity...
+      // to adjust sensitivity...
       b_cmdFromPath.addSelectionListener(new SelectionAdapter() {
         @Override
         public void widgetSelected(SelectionEvent event) {
           final Button btn = (Button) event.widget;
-          // adjust sensitivity...
           handleComandEnabled(!btn.getSelection());
         }
       });
@@ -227,6 +226,23 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
   }
 
   /**
+   * Stores displayed values to the preferences edited by this tab.
+   * @see #updateDisplay()
+   */
+  private void saveToModel() {
+    prefs.setUseDefaultCommand(b_cmdFromPath.getSelection());
+    String command = t_cmd.getText().trim();
+    prefs.setCommand(command);
+
+    int idx = c_generator.getSelectionIndex();
+    if (idx >= 0) {
+      String gen = c_generator.getItem(idx);
+      prefs.setGeneratorName(gen);
+    }
+    // NB: defines & undefines are modified by the widget listeners directly
+  }
+
+  /**
    * Changes sensitivity of controls to enter the cmake command. Necessary since
    * Button.setSelection does not fire events.
    *
@@ -248,6 +264,9 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
   @Override
   protected void performApply(ICResourceDescription src,
       ICResourceDescription dst) {
+    // make sure the displayed values get applied
+    saveToModel();
+
     ICConfigurationDescription srcCfg = src.getConfiguration();
     ICConfigurationDescription dstCfg = dst.getConfiguration();
     final ConfigurationManager configMgr = ConfigurationManager.getInstance();
@@ -280,18 +299,9 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
   protected void performOK() {
     if (cfgd == null)
       return; // YES, the CDT framework invokes us even if it did not call updateData()!!!
+
+    saveToModel();
     try {
-      prefs.setUseDefaultCommand(b_cmdFromPath.getSelection());
-      String command = t_cmd.getText().trim();
-      prefs.setCommand(command);
-
-      int idx = c_generator.getSelectionIndex();
-      if (idx >= 0) {
-        String gen = c_generator.getItem(idx);
-        prefs.setGeneratorName(gen);
-      }
-      // NB: defines & undefines are modified by the widget listeners directly
-
       // save as project settings..
       ICStorageElement storage = cfgd.getStorage(
           CMakePreferences.CFG_STORAGE_ID, true);
@@ -299,6 +309,16 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
     } catch (CoreException ex) {
       log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, null, ex));
     }
+  }
+
+
+  /** Overridden to the displayed values in the model when this tab becomes invisible.
+   */
+  @Override
+  public void setVisible(boolean visible) {
+    if(!visible)
+      saveToModel();
+    super.setVisible(visible);
   }
 
   @Override
