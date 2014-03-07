@@ -22,7 +22,7 @@ import de.marw.cdt.cmake.core.internal.storage.Util;
 
 /**
  * Holds preferences or project settings.
- * 
+ *
  * @author Martin Weber
  */
 public class CMakePreferences {
@@ -79,17 +79,12 @@ public class CMakePreferences {
   /**
    * Initializes the configuration information from the storage element
    * specified in the argument.
-   * 
+   *
    * @param parent
    *        A storage element containing the configuration information. If
    *        {@code null}, nothing is loaded from storage.
-   * @param deepLoading
-   *        {@code true} to also load the embedded OS-Preferences that
-   *        override/augment the generic properties. When loading for one of the
-   *        property tabs, {@code false} should be specified here for higher
-   *        performance.
    */
-  public void loadFromStorage(ICStorageElement parent, boolean deepLoading) {
+  public void loadFromStorage(ICStorageElement parent) {
     if (parent == null)
       return;
 
@@ -112,10 +107,8 @@ public class CMakePreferences {
             child);
       }
     }
-    if (deepLoading) {
-      linuxPreferences.loadFromStorage(parent);
-      windowsPreferences.loadFromStorage(parent);
-    }
+    linuxPreferences.loadFromStorage(parent);
+    windowsPreferences.loadFromStorage(parent);
   }
 
   /**
@@ -238,7 +231,7 @@ public class CMakePreferences {
 
   /**
    * Gets the list of cmake variable to define on the cmake command-line.
-   * 
+   *
    * @return a mutable list, never {@code null}
    */
   public List<CmakeDefine> getDefines() {
@@ -247,7 +240,7 @@ public class CMakePreferences {
 
   /**
    * Gets the list of cmake variable to undefine on the cmake command-line.
-   * 
+   *
    * @return a mutable list, never {@code null}
    */
   public List<CmakeUnDefine> getUndefines() {
