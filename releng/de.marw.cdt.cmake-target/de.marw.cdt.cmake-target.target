@@ -1,13 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?pde version="3.8"?><target name="cdt8.1.0-ecliipse3.8.target"  sequenceNumber="13">
+<?pde version="3.8"?><target name="cdt/8.1.0-eclipse/3.8.0.target" sequenceNumber="22">
 <locations>
-<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.cdt.feature.group" version="8.1.0.201206111645"/>
-<repository location="http://download.eclipse.org/tools/cdt/releases/juno"/>
-</location>
-<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.platform.ide" version="3.8.0.I20120608-1200"/>
+<location includeAllPlatforms="true" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
+<unit id="org.eclipse.equinox.p2.sdk.feature.group" version="3.8.0.v20120524-0542-9N89H_mGMMn84Osz0TAoT279BRQD"/>
+<unit id="org.eclipse.pde.api.tools.ee.javase16.group" version="1.0.0.v20120530-1420-7D-FYwFAFkNZkOIwNB_6kN"/>
+<unit id="org.eclipse.platform.feature.group" version="3.8.0.v20120607-071945-9gF7jI7nG5qByXMVdkhRMWBQlF4PnDCLybDCPQ"/>
+<unit id="org.eclipse.platform.source.feature.group" version="3.8.0.v20120607-071945-9gF7jI7nG5qByXMVdkhRMWBQlF4PnDCLybDCPQ"/>
+<unit id="org.eclipse.rcp.source.feature.group" version="3.8.0.v20120528-1716-92BmGJTFw3Ez0W7_KvHqgZUR"/>
 <repository location="http://download.eclipse.org/eclipse/updates/3.8/"/>
+</location>
+<location includeAllPlatforms="true" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
+<unit id="org.eclipse.cdt.sdk.feature.group" version="8.1.0.201206111645"/>
+<unit id="org.eclipse.cdt.build.crossgcc.feature.group" version="1.1.0.201206111645"/>
+<repository location="http://download.eclipse.org/tools/cdt/releases/juno/"/>
 </location>
 </locations>
 <targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
