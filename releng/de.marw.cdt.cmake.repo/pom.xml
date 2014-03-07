@@ -15,7 +15,7 @@
 
     <build>
         <!-- rename zipped p2 repository -->
-        <finalName>cmake4eclipsecdt-Update-${project.version}</finalName>
+        <finalName>cmake4eclipsecdt-${project.version}</finalName>
 
         <plugins>
             <plugin>
