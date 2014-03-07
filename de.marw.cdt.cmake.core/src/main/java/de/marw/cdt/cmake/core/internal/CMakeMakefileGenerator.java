@@ -19,7 +19,6 @@ import org.eclipse.cdt.core.ICommandLauncher;
 import org.eclipse.cdt.core.resources.IConsole;
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
 import org.eclipse.cdt.core.settings.model.ICSourceEntry;
-import org.eclipse.cdt.core.settings.model.ICStorageElement;
 import org.eclipse.cdt.core.settings.model.util.CDataUtil;
 import org.eclipse.cdt.managedbuilder.buildproperties.IBuildProperty;
 import org.eclipse.cdt.managedbuilder.buildproperties.IBuildPropertyValue;
@@ -53,6 +52,7 @@ import de.marw.cdt.cmake.core.internal.settings.AbstractOsPreferences;
 import de.marw.cdt.cmake.core.internal.settings.CMakePreferences;
 import de.marw.cdt.cmake.core.internal.settings.CmakeDefine;
 import de.marw.cdt.cmake.core.internal.settings.CmakeUnDefine;
+import de.marw.cdt.cmake.core.internal.settings.ConfigurationManager;
 import de.marw.cdt.cmake.core.internal.settings.LinuxPreferences;
 import de.marw.cdt.cmake.core.internal.settings.WindowsPreferences;
 
@@ -343,14 +343,11 @@ public class CMakeMakefileGenerator implements
    * @throws CoreException
    */
   private List<String> buildCommandline(IPath srcDir) throws CoreException {
-    final CMakePreferences prefs = new CMakePreferences();
-    { // load user preferences..
-      final ICConfigurationDescription cfgd = ManagedBuildManager
-          .getDescriptionForConfiguration(config);
-      final ICStorageElement storage = cfgd.getStorage(
-          CMakePreferences.CFG_STORAGE_ID, false);
-      prefs.loadFromStorage(storage, true);
-    }
+    // load project properties..
+    final ICConfigurationDescription cfgd = ManagedBuildManager
+        .getDescriptionForConfiguration(config);
+    final CMakePreferences prefs = ConfigurationManager.getInstance()
+        .getOrLoad(cfgd);
 
     List<String> args = new ArrayList<String>();
     /* add our defaults first */
@@ -461,8 +458,8 @@ public class CMakeMakefileGenerator implements
    * @throws CoreException
    *         if unable to resolve the value of one or more variables
    */
-  private static void appendDefines(List<String> args, final List<CmakeDefine> defines)
-      throws CoreException {
+  private static void appendDefines(List<String> args,
+      final List<CmakeDefine> defines) throws CoreException {
     final IStringVariableManager varMgr = VariablesPlugin.getDefault()
         .getStringVariableManager();
     for (CmakeDefine def : defines) {
@@ -470,7 +467,7 @@ public class CMakeMakefileGenerator implements
       sb.append(def.getName());
       sb.append(':').append(def.getType().getCmakeArg());
       sb.append('=');
-      String expanded = varMgr.performStringSubstitution(def.getValue(),false);
+      String expanded = varMgr.performStringSubstitution(def.getValue(), false);
       sb.append(expanded);
       args.add(sb.toString());
     }
