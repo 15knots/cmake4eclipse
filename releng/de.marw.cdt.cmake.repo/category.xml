@@ -4,14 +4,13 @@
     <category name="cmake4eclipsecdt" />
   </bundle>
   <bundle id="de.marw.cdt.cmake.core.source">
-    <category name="cmake4eclipsecdt.source" />
+    <category name="source" />
   </bundle>
 
-  <category-def name="cmake4eclipsecdt" >
-    <description>CMake for Eclipse CDT bundles</description>
+  <category-def name="cmake4eclipsecdt" label="CMake for Eclipse CDT bundles" >
+    <description></description>
   </category-def>
-  <category-def name="Source" >
-    <description>CMake for Eclipse CDT source bundles</description>
-    <category name="cmake4eclipsecdt" />
+  <category-def name="source" label="Source bundles">
+     <category name="cmake4eclipsecdt" />
   </category-def>
 </site>
