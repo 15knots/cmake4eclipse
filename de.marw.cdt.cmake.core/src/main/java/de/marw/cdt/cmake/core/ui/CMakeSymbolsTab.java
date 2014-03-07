@@ -32,7 +32,7 @@ import de.marw.cdt.cmake.core.internal.settings.ConfigurationManager;
 /**
  * UI to control general project properties for cmake. This tab is responsible
  * for storing its values.
- * 
+ *
  * @author Martin Weber
  */
 public class CMakeSymbolsTab extends AbstractCPropertyTab {
@@ -94,7 +94,7 @@ public class CMakeSymbolsTab extends AbstractCPropertyTab {
   /**
    * Invoked when project configuration changes?? At least when apply button is
    * pressed.
-   * 
+   *
    * @see org.eclipse.cdt.ui.newui.AbstractCPropertyTab#performApply(org.eclipse.cdt.core.settings.model.ICResourceDescription,
    *      org.eclipse.cdt.core.settings.model.ICResourceDescription)
    */
@@ -107,7 +107,7 @@ public class CMakeSymbolsTab extends AbstractCPropertyTab {
 
     try {
       CMakePreferences srcPrefs = configMgr.getOrLoad(srcCfg);
-      CMakePreferences dstPrefs = configMgr.getOrLoad(dstCfg);
+      CMakePreferences dstPrefs = configMgr.getOrCreate(dstCfg);
 
       final List<CmakeDefine> defines = dstPrefs.getDefines();
       defines.clear();

@@ -20,7 +20,7 @@ import org.eclipse.core.runtime.CoreException;
  * Associates {@link ICConfigurationDescription} objects with our
  * CMakePreferences objects in order to avoid redundant de-serialization from
  * storage.
- * 
+ *
  * @author Martin Weber
  */
 public final class ConfigurationManager {
@@ -64,8 +64,8 @@ public final class ConfigurationManager {
   /**
    * Gets the {@code CMakePreferences} object associated with the specified
    * {@code ICConfigurationDescription}.
-   * 
-   * @return the stored {@code CMakePreferences} object, or null if this object
+   *
+   * @return the stored {@code CMakePreferences} object, or {@code null} if this object
    *         contains no mapping for the configuration description
    */
   public CMakePreferences get(ICConfigurationDescription cfgd) {
@@ -75,11 +75,27 @@ public final class ConfigurationManager {
   /**
    * Tries to get the {@code CMakePreferences} object associated with the
    * specified {@code ICConfigurationDescription}. If no
+   * {@code CMakePreferences} object is found, a new one is created.
+   *
+   * @return the stored {@code CMakePreferences} object, or a newly created one
+   *         if this object contains no mapping for the configuration
+   *         description.
+   */
+  public CMakePreferences getOrCreate(ICConfigurationDescription cfgd) {
+    CMakePreferences pref = map.get(cfgd);
+    if (pref == null) {
+      pref = new CMakePreferences();
+      map.put(cfgd, pref);
+    }
+    return pref;
+  }
+
+  /**
+   * Tries to get the {@code CMakePreferences} object associated with the
+   * specified {@code ICConfigurationDescription}. If no
    * {@code CMakePreferences} object is found, a new one is created, then loaded
-   * from the storage via
-   * {@link CMakePreferences#loadFromStorage(org.eclipse.cdt.core.settings.model.ICStorageElement, boolean)}
-   * .
-   * 
+   * from its storage via {@link CMakePreferences#loadFromStorage}.
+   *
    * @return the stored {@code CMakePreferences} object, or a freshly loaded one
    *         if this object contains no mapping for the configuration
    *         description.
