@@ -53,6 +53,12 @@
               class="de.marw.cdt.cmake.core.ui.HostOSPropertyPage"
               id="de.marw.cdt.cmake.core.ui.HostOSPropertyPage"
               name="Host OS overrides">
+         <enabledWhen>
+           <adapt type="org.eclipse.core.resources.IResource">
+	            <test property="org.eclipse.core.resources.projectNature"
+	                  value="org.eclipse.cdt.managedbuilder.core.managedBuildNature"/>
+           </adapt>
+         </enabledWhen>
         </page>    
   </extension>
    <extension
@@ -119,7 +125,7 @@
             name="defined by CMakeLists.txt"/>
    </extension>
  <extension point="org.eclipse.help.toc">
-    <toc file="doc/toc.xml" primary="false">
+    <toc file="doc/toc.xml" primary="true">
     </toc>
  </extension>
  <extension point="org.eclipse.help.toc">
