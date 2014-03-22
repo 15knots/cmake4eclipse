@@ -55,6 +55,9 @@ public class Util {
     } else {
       pColl = parent.createChild(targetCollectionStorageName);
     }
+    // to avoid duplicates, since we do not track additions/removals to lists..
+    pColl.clear();
+
     // serialize collection elements
     for (E elem : source) {
       itemSerializer.toStorage(pColl, elem);
