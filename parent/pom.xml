@@ -37,7 +37,36 @@
         <module>../de.marw.cdt.cmake.core</module>
         <module>../releng/de.marw.cdt.cmake.repo</module>
     </modules>
+
     <profiles>
+        <profile>
+            <id>retail</id>
+            <build>
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-compiler-plugin</artifactId>
+                            <configuration>
+                                <!-- lines,source required for readable stack traces -->
+                                <debuglevel>lines,source</debuglevel>
+                                <optimize>true</optimize>
+                            </configuration>
+                        </plugin>
+                        <plugin>
+                            <groupId>org.eclipse.tycho</groupId>
+                            <artifactId>tycho-compiler-plugin</artifactId>
+                            <configuration>
+                                <!-- MWE: debuglevel scheint tycho 0.19.0 noch nicht
+                                    zu kennen.. -->
+                                <debuglevel>lines,source</debuglevel>
+                                <optimize>true</optimize>
+                            </configuration>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
+            </build>
+        </profile>
         <profile>
             <id>macosx</id>
             <activation>
