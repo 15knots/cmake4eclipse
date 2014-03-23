@@ -16,7 +16,7 @@ import de.marw.cdt.cmake.core.internal.settings.WindowsPreferences;
 /**
  * UI to control host Windows specific project properties and preferences for
  * cmake. This tab is responsible for storing its values.
- * 
+ *
  * @author Martin Weber
  */
 public class WindowsPropertyTab extends
@@ -34,7 +34,7 @@ public class WindowsPropertyTab extends
   protected String[] getAvailableGenerators() {
     return new String[] { "MinGW Makefiles", "MSYS Makefiles",
         "Unix Makefiles", "NMake Makefiles", "NMake Makefiles JOM",
-        "Borland Makefiles ", "Watcom WMake" };
+        "Borland Makefiles", "Watcom WMake" };
   }
 
 }
