@@ -10,10 +10,11 @@
  *******************************************************************************/
 package de.marw.cdt.cmake.core.internal.settings;
 
+
 /**
  * Preferences that override/augment the generic properties when running under
  * Linux.
- * 
+ *
  * @author Martin Weber
  */
 public class LinuxPreferences extends AbstractOsPreferences {
@@ -26,11 +27,11 @@ public class LinuxPreferences extends AbstractOsPreferences {
   public LinuxPreferences() {
   }
 
-  /** Overridden to set a sensible generator name. */
-  public void reset() {
-    super.reset();
-    setGeneratorName("Unix Makefiles");
-  }
+//  /** Overridden to set a sensible generator. */
+//  public void reset() {
+//    super.reset();
+//    setGenerator( CmakeGenerator.UnixMakefiles);
+//  }
 
   /**
    * @return the String "linux".

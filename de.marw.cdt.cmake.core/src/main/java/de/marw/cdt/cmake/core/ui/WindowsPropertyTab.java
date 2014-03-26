@@ -10,6 +10,9 @@
  *******************************************************************************/
 package de.marw.cdt.cmake.core.ui;
 
+import java.util.EnumSet;
+
+import de.marw.cdt.cmake.core.internal.CmakeGenerator;
 import de.marw.cdt.cmake.core.internal.settings.CMakePreferences;
 import de.marw.cdt.cmake.core.internal.settings.WindowsPreferences;
 
@@ -22,6 +25,12 @@ import de.marw.cdt.cmake.core.internal.settings.WindowsPreferences;
 public class WindowsPropertyTab extends
     AbstractOsPropertyTab<WindowsPreferences> {
 
+  private static final EnumSet<CmakeGenerator> generators = EnumSet.of(
+      CmakeGenerator.MinGWMakefiles, CmakeGenerator.MSYSMakefiles,
+      CmakeGenerator.UnixMakefiles, CmakeGenerator.NMakeMakefiles,
+      CmakeGenerator.NMakeMakefilesJOM, CmakeGenerator.BorlandMakefiles,
+      CmakeGenerator.WatcomWMake);
+
   /*-
    * @see de.marw.cdt.cmake.core.ui.AbstractOsPropertyTab#getOsPreferences(de.marw.cdt.cmake.core.internal.CMakePreferences)
    */
@@ -31,10 +40,8 @@ public class WindowsPropertyTab extends
   }
 
   @Override
-  protected String[] getAvailableGenerators() {
-    return new String[] { "MinGW Makefiles", "MSYS Makefiles",
-        "Unix Makefiles", "NMake Makefiles", "NMake Makefiles JOM",
-        "Borland Makefiles", "Watcom WMake" };
+  protected EnumSet<CmakeGenerator> getAvailableGenerators() {
+    return WindowsPropertyTab.generators;
   }
 
 }
