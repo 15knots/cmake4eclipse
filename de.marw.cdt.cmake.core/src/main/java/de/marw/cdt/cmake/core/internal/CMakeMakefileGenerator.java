@@ -426,7 +426,8 @@ public class CMakeMakefileGenerator implements
     if (!prefs.getUseDefaultCommand())
       args.set(0, prefs.getCommand());
     args.add("-G");
-    args.add(prefs.getGeneratorName());
+    final CmakeGenerator generator = prefs.getGenerator();
+    args.add(generator.getCmakeName());
 
     appendDefines(args, prefs.getDefines());
     appendUndefines(args, prefs.getUndefines());

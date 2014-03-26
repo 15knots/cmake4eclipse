@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.eclipse.cdt.core.settings.model.ICStorageElement;
 
+import de.marw.cdt.cmake.core.internal.CmakeGenerator;
 import de.marw.cdt.cmake.core.internal.storage.CmakeDefineSerializer;
 import de.marw.cdt.cmake.core.internal.storage.CmakeUndefineSerializer;
 import de.marw.cdt.cmake.core.internal.storage.Util;
@@ -29,8 +30,11 @@ public abstract class AbstractOsPreferences {
   private static final String ATTR_COMMAND = "command";
   private static final String ATTR_USE_DEFAULT_COMMAND = "use-default";
   private static final String ATTR_GENERATOR = "generator";
+  private static final String ATTR_BUILD_COMMAND = "build_command";
+
   private String command;
-  private String generator;
+  private CmakeGenerator generator;
+  private String nativeBuildCmd;
   private boolean useDefaultCommand;
   private List<CmakeDefine> defines = new ArrayList<CmakeDefine>(0);
   private List<CmakeUnDefine> undefines = new ArrayList<CmakeUnDefine>(0);
@@ -53,7 +57,8 @@ public abstract class AbstractOsPreferences {
   public void reset() {
     useDefaultCommand = true;
     setCommand("cmake");
-    setGeneratorName("");
+    setGenerator(CmakeGenerator.UnixMakefiles);
+    setNativeBuildCommand(null);
     defines.clear();
     undefines.clear();
   }
@@ -90,16 +95,16 @@ public abstract class AbstractOsPreferences {
   }
 
   /**
-   * Gets the cmake argument that specifies the buildscript generator.
+   * Gets the cmake buildscript generator.
    */
-  public String getGeneratorName() {
+  public final CmakeGenerator getGenerator() {
     return generator;
   }
 
   /**
-   * Gets the cmake argument that specifies the build-script generator.
+   * Sets the cmake build-script generator.
    */
-  public void setGeneratorName(String name) {
+  public void setGenerator(CmakeGenerator name) {
     if (name == null) {
       throw new NullPointerException("name");
     }
@@ -107,11 +112,34 @@ public abstract class AbstractOsPreferences {
   }
 
   /**
+   * Gets the native build command name.
+   *
+   * @return the native build command or {@code null} if the build command
+   *         matching the chosen generator should be used.
+   */
+  public String getNativeBuildCommand() {
+    return nativeBuildCmd;
+  }
+
+  /**
+   * Sets the native build command name.
+   *
+   * @param nativeBuildCommand
+   *        the native build command. If {@code null} or an empty string, the
+   *        build command matching the chosen generator should be used.
+   */
+  public void setNativeBuildCommand(String nativeBuildCommand) {
+    if ("".equals(nativeBuildCommand))
+      nativeBuildCommand = null;
+    this.nativeBuildCmd = nativeBuildCommand;
+  }
+
+  /**
    * Gets the list of cmake variable to define on the cmake command-line.
    *
    * @return a mutable list, never {@code null}
    */
-  public List<CmakeDefine> getDefines() {
+  public final List<CmakeDefine> getDefines() {
     return defines;
   }
 
@@ -120,7 +148,7 @@ public abstract class AbstractOsPreferences {
    *
    * @return a mutable list, never {@code null}
    */
-  public List<CmakeUnDefine> getUndefines() {
+  public final List<CmakeUnDefine> getUndefines() {
     return undefines;
   }
 
@@ -154,8 +182,16 @@ public abstract class AbstractOsPreferences {
       setCommand(val);
     // generator
     val = parent.getAttribute(ATTR_GENERATOR);
-    if (val != null)
-      setGeneratorName(val);
+    if (val != null) {
+      try {
+        setGenerator(CmakeGenerator.valueOf(val));
+      } catch (IllegalArgumentException ex) {
+        // fall back to default generator
+      }
+    }
+    val = parent.getAttribute(ATTR_BUILD_COMMAND);
+//    if (val != null)
+    setNativeBuildCommand(val);
 
     ICStorageElement[] children = parent.getChildren();
     for (ICStorageElement child : children) {
@@ -186,7 +222,7 @@ public abstract class AbstractOsPreferences {
     }
 
     // use default command
-    if(useDefaultCommand) {
+    if (useDefaultCommand) {
       parent.setAttribute(ATTR_USE_DEFAULT_COMMAND,
           String.valueOf(useDefaultCommand));
     } else {
@@ -194,7 +230,12 @@ public abstract class AbstractOsPreferences {
     }
     parent.setAttribute(ATTR_COMMAND, command);
     // generator
-    parent.setAttribute(ATTR_GENERATOR, generator);
+    parent.setAttribute(ATTR_GENERATOR, generator.name());
+    if (nativeBuildCmd != null) {
+      parent.setAttribute(ATTR_BUILD_COMMAND, nativeBuildCmd);
+    } else {
+      parent.removeAttribute(ATTR_BUILD_COMMAND);
+    }
     // defines...
     Util.serializeCollection(CMakePreferences.ELEM_DEFINES, parent,
         new CmakeDefineSerializer(), defines);

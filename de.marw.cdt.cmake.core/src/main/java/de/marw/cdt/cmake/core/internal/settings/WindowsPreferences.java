@@ -10,20 +10,22 @@
  *******************************************************************************/
 package de.marw.cdt.cmake.core.internal.settings;
 
+import de.marw.cdt.cmake.core.internal.CmakeGenerator;
+
 /**
  * Preferences that override/augment the generic properties when running under
  * Windows.
- * 
+ *
  * @author Martin Weber
  */
 public class WindowsPreferences extends AbstractOsPreferences {
 
   private static final String ELEM_OS = "win32";
 
-  /** Overridden to set a sensible generator name. */
+  /** Overridden to set a sensible generator. */
   public void reset() {
     super.reset();
-    setGeneratorName("MinGW Makefiles");
+    setGenerator(CmakeGenerator.MinGWMakefiles);
   }
 
   /**

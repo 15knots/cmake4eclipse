@@ -10,6 +10,7 @@
  *******************************************************************************/
 package de.marw.cdt.cmake.core.ui;
 
+import java.util.EnumSet;
 import java.util.List;
 
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
@@ -21,19 +22,24 @@ import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Text;
 
 import de.marw.cdt.cmake.core.CMakePlugin;
+import de.marw.cdt.cmake.core.internal.CmakeGenerator;
 import de.marw.cdt.cmake.core.internal.settings.AbstractOsPreferences;
 import de.marw.cdt.cmake.core.internal.settings.CMakePreferences;
 import de.marw.cdt.cmake.core.internal.settings.CmakeDefine;
@@ -72,7 +78,7 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
   /** browse files for cmake executable */
   private Button b_browseFiles;
   /** Combo that shows the generator names for cmake */
-  private Combo c_generator;
+  private ComboViewer c_generator;
   /** the table showing the cmake defines */
   private DefinesViewer definesViewer;
   /** the table showing the cmake undefines */
@@ -91,14 +97,11 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
   protected abstract P getOsPreferences(CMakePreferences prefs);
 
   /**
-   * Gets all sensible choices for cmake's '-G' option on this platform. The
-   * returned array should not include generators for IDE project files, such as
-   * "Eclipse CDT4 - Unix Makefiles".
+   * Gets all sensible choices for cmake's generator option on this platform.
    *
-   * @return an array of non-empty strings, where each string must be an valid
-   *         argument for cmake.
+   * @return a non-empty set, never {@code null}.
    */
-  protected abstract String[] getAvailableGenerators();
+  protected abstract EnumSet<CmakeGenerator> getAvailableGenerators();
 
   @Override
   public boolean canBeVisible() {
@@ -170,15 +173,26 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
     // makefile generator combo...
     {
       setupLabel(usercomp, "Buildscript &generator (-G):", 1, SWT.BEGINNING);
-      c_generator = new Combo(usercomp, SWT.READ_ONLY | SWT.DROP_DOWN
-          | SWT.BORDER);
+      c_generator = new ComboViewer(usercomp);
       final GridData gd = new GridData(SWT.BEGINNING, SWT.CENTER, false, false,
           1, 1);
       gd.widthHint = 200;
-      c_generator.setLayoutData(gd);
+      c_generator.getCombo().setLayoutData(gd);
+      c_generator.setContentProvider(ArrayContentProvider.getInstance());
+      c_generator.setLabelProvider(new LabelProvider() {
+        @Override
+        public String getText(Object element) {
+          if (element instanceof CmakeGenerator) {
+            return ((CmakeGenerator) element).getCmakeName();
+          }
+          return super.getText(element);
+        }
 
-      String generatorNames[] = getAvailableGenerators();
-      c_generator.setItems(generatorNames);
+      });
+      final EnumSet<CmakeGenerator> generators = getAvailableGenerators();
+      c_generator.setInput(generators);
+      if (generators.size() == 1)
+        c_generator.getCombo().setEnabled(false);
     } // makefile generator combo
 
     // cmake defines table...
@@ -216,10 +230,8 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
     // adjust sensitivity...
     handleComandEnabled(!prefs.getUseDefaultCommand());
 
-    String generatorName = prefs.getGeneratorName();
-    int idx = c_generator.indexOf(generatorName);
-    if (idx >= 0)
-      c_generator.select(idx);
+    CmakeGenerator generator = prefs.getGenerator();
+    c_generator.setSelection(new StructuredSelection(generator));
 
     definesViewer.setInput(prefs.getDefines());
     undefinesViewer.setInput(prefs.getUndefines());
@@ -227,6 +239,7 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
 
   /**
    * Stores displayed values to the preferences edited by this tab.
+   *
    * @see #updateDisplay()
    */
   private void saveToModel() {
@@ -234,11 +247,9 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
     String command = t_cmd.getText().trim();
     prefs.setCommand(command);
 
-    int idx = c_generator.getSelectionIndex();
-    if (idx >= 0) {
-      String gen = c_generator.getItem(idx);
-      prefs.setGeneratorName(gen);
-    }
+    final IStructuredSelection sel = (IStructuredSelection) c_generator
+        .getSelection();
+    prefs.setGenerator((CmakeGenerator) sel.getFirstElement());
     // NB: defines & undefines are modified by the widget listeners directly
   }
 
@@ -277,7 +288,7 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
 
       dstPrefs.setUseDefaultCommand(srcPrefs.getUseDefaultCommand());
       dstPrefs.setCommand(srcPrefs.getCommand());
-      dstPrefs.setGeneratorName(srcPrefs.getGeneratorName());
+      dstPrefs.setGenerator(srcPrefs.getGenerator());
 
       final List<CmakeDefine> defines = dstPrefs.getDefines();
       defines.clear();
@@ -311,12 +322,13 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
     }
   }
 
-
-  /** Overridden to the displayed values in the model when this tab becomes invisible.
+  /**
+   * Overridden to the displayed values in the model when this tab becomes
+   * invisible.
    */
   @Override
   public void setVisible(boolean visible) {
-    if(!visible)
+    if (!visible)
       saveToModel();
     super.setVisible(visible);
   }
