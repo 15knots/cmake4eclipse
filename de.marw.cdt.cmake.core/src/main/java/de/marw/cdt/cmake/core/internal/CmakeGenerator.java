@@ -23,19 +23,26 @@ public enum CmakeGenerator {
    */
 
   // linux generators
-  UnixMakefiles("Unix Makefiles"),
+  UnixMakefiles("Unix Makefiles"), Ninja("Ninja", "ninja", "-k 999999"),
   // windows generators
   MinGWMakefiles("MinGW Makefiles", "mingw32-make"), MSYSMakefiles(
       "MSYS Makefiles"), NMakeMakefiles("NMake Makefiles", "nmake.exe"), NMakeMakefilesJOM(
-      "NMake Makefiles JOM", "jom.exe"), BorlandMakefiles("Borland Makefiles"), WatcomWMake(
-      "Watcom WMake", "wmake.exe");
+      "NMake Makefiles JOM", "jom"), BorlandMakefiles("Borland Makefiles"), WatcomWMake(
+      "Watcom WMake", "wmake");
 
   private final String name;
   private final String nativeBuildCommand;
+  private String ignoreErrOption;
 
-  private CmakeGenerator(String name, String nativeBuildCommand) {
+  private CmakeGenerator(String name, String nativeBuildCommand,
+      String ignoreErrOption) {
     this.name = name;
     this.nativeBuildCommand = nativeBuildCommand;
+    this.ignoreErrOption = ignoreErrOption;
+  }
+
+  private CmakeGenerator(String name, String nativeBuildCommand) {
+    this(name, nativeBuildCommand, "-k");
   }
 
   private CmakeGenerator(String name) {
@@ -57,5 +64,14 @@ public enum CmakeGenerator {
    */
   public String getNativeBuildCommand() {
     return nativeBuildCommand;
+  }
+
+  /**
+   * Gets the native build tool´s command option to ignore build errors.
+   *
+   * @return
+   */
+  public String getIgnoreErrOption() {
+    return ignoreErrOption;
   }
 }

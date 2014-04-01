@@ -25,7 +25,7 @@ import de.marw.cdt.cmake.core.internal.settings.LinuxPreferences;
 public class LinuxPropertyTab extends AbstractOsPropertyTab<LinuxPreferences> {
 
   private static final EnumSet<CmakeGenerator> generators = EnumSet
-      .of(CmakeGenerator.UnixMakefiles);
+      .of(CmakeGenerator.UnixMakefiles,CmakeGenerator.Ninja);
 
   /*-
    * @see de.marw.cdt.cmake.core.ui.AbstractOsPropertyTab#getOsPreferences(de.marw.cdt.cmake.core.internal.CMakePreferences)

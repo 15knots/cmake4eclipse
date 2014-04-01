@@ -27,9 +27,9 @@ public class WindowsPropertyTab extends
 
   private static final EnumSet<CmakeGenerator> generators = EnumSet.of(
       CmakeGenerator.MinGWMakefiles, CmakeGenerator.MSYSMakefiles,
-      CmakeGenerator.UnixMakefiles, CmakeGenerator.NMakeMakefiles,
-      CmakeGenerator.NMakeMakefilesJOM, CmakeGenerator.BorlandMakefiles,
-      CmakeGenerator.WatcomWMake);
+      CmakeGenerator.UnixMakefiles, CmakeGenerator.Ninja,
+      CmakeGenerator.NMakeMakefiles, CmakeGenerator.NMakeMakefilesJOM,
+      CmakeGenerator.BorlandMakefiles, CmakeGenerator.WatcomWMake);
 
   /*-
    * @see de.marw.cdt.cmake.core.ui.AbstractOsPropertyTab#getOsPreferences(de.marw.cdt.cmake.core.internal.CMakePreferences)

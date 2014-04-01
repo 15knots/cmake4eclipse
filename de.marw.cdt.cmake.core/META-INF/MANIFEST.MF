@@ -8,12 +8,14 @@ Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Import-Package: org.eclipse.cdt.core,
+ org.eclipse.cdt.core.cdtvariables,
  org.eclipse.cdt.core.errorparsers,
  org.eclipse.cdt.core.resources,
  org.eclipse.cdt.core.settings.model,
  org.eclipse.cdt.core.settings.model.util,
  org.eclipse.cdt.managedbuilder.buildproperties,
  org.eclipse.cdt.managedbuilder.core,
+ org.eclipse.cdt.managedbuilder.macros,
  org.eclipse.cdt.managedbuilder.makegen,
  org.eclipse.cdt.ui,
  org.eclipse.cdt.ui.newui,
