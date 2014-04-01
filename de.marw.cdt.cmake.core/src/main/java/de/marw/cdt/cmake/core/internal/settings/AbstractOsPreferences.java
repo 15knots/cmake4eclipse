@@ -104,11 +104,11 @@ public abstract class AbstractOsPreferences {
   /**
    * Sets the cmake build-script generator.
    */
-  public void setGenerator(CmakeGenerator name) {
-    if (name == null) {
-      throw new NullPointerException("name");
+  public void setGenerator(CmakeGenerator generator) {
+    if (generator == null) {
+      throw new NullPointerException("generator");
     }
-    this.generator = name;
+    this.generator = generator;
   }
 
   /**
