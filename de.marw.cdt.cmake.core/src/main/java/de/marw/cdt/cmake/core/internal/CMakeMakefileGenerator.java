@@ -11,10 +11,13 @@
 package de.marw.cdt.cmake.core.internal;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.eclipse.cdt.core.CCorePlugin;
+import org.eclipse.cdt.core.ConsoleOutputStream;
 import org.eclipse.cdt.core.ICommandLauncher;
 import org.eclipse.cdt.core.resources.IConsole;
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
@@ -194,11 +197,11 @@ public class CMakeMakefileGenerator implements
       ICSourceEntry srcEntry = srcEntries[i];
       updateMonitor("Invoking CMake for " + srcEntry.getName());
       try {
-        console
-            .getInfoStream()
-            .write(
-                ("Buildfile generation for configuration " + config.getName() + " \n")
-                    .getBytes());
+        final ConsoleOutputStream cis = console.getInfoStream();
+        cis.write(SimpleDateFormat.getTimeInstance().format(new Date())
+            .getBytes());
+        cis.write((" **** Buildscript generation for configuration "
+            + config.getName() + "\n").getBytes());
       } catch (IOException ex) {
         // ignore
       }
@@ -352,13 +355,8 @@ public class CMakeMakefileGenerator implements
     List<String> args = new ArrayList<String>();
     /* add our defaults first */
     {
-      String cmd = "cmake"; // default for all OSes
-      args.add(cmd);
-      // colored output during build is useless for build console
-      args.add("-DCMAKE_COLOR_MAKEFILE:BOOL=OFF");
-      // echo commands to the console during the make to give output parser a chance
-      args.add("-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON");
-
+      // default for all OSes
+      args.add("cmake");
       // set argument for debug or release build..
       IBuildObjectProperties buildProperties = config.getBuildProperties();
       IBuildProperty property = buildProperties
@@ -372,24 +370,26 @@ public class CMakeMakefileGenerator implements
           args.add("-DCMAKE_BUILD_TYPE:STRING=Release");
         }
       }
+      // colored output during build is useless for build console
+      args.add("-DCMAKE_COLOR_MAKEFILE:BOOL=OFF");
+      // echo commands to the console during the make to give output parsers a chance
+      args.add("-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON");
     }
 
     /* add general settings */
-    {
-      if (prefs.isWarnNoDev())
-        args.add("-Wno-dev");
-      if (prefs.isDebugOutput())
-        args.add("--debug-output");
-      if (prefs.isTrace())
-        args.add("--trace");
-      if (prefs.isWarnUnitialized())
-        args.add("--warn-unitialized");
-      if (prefs.isWarnUnused())
-        args.add("--warn-unused");
+    if (prefs.isWarnNoDev())
+      args.add("-Wno-dev");
+    if (prefs.isDebugOutput())
+      args.add("--debug-output");
+    if (prefs.isTrace())
+      args.add("--trace");
+    if (prefs.isWarnUnitialized())
+      args.add("--warn-unitialized");
+    if (prefs.isWarnUnused())
+      args.add("--warn-unused");
 
-      appendDefines(args, prefs.getDefines());
-      appendUndefines(args, prefs.getUndefines());
-    }
+    appendDefines(args, prefs.getDefines());
+    appendUndefines(args, prefs.getUndefines());
 
     /* add settings for the operating system we are running under */
     final String os = Platform.getOS();
