@@ -291,10 +291,6 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
       log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, null, ex));
     }
 
-    IToolChain toolChain = ManagedBuildManager
-        .getBuildInfo(cfgd.getProjectDescription().getProject(), false)
-        .getDefaultConfiguration().getToolChain();
-    String id = toolChain.getBaseId();
     updateDisplay();
   }
 
