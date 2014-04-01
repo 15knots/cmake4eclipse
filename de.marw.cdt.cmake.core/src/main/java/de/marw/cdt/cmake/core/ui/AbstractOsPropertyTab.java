@@ -16,6 +16,8 @@ import java.util.List;
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
 import org.eclipse.cdt.core.settings.model.ICResourceDescription;
 import org.eclipse.cdt.core.settings.model.ICStorageElement;
+import org.eclipse.cdt.managedbuilder.core.IToolChain;
+import org.eclipse.cdt.managedbuilder.core.ManagedBuildManager;
 import org.eclipse.cdt.ui.newui.AbstractCPropertyTab;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ILog;
@@ -24,8 +26,10 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -76,9 +80,16 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
   /** cmake executable */
   private Text t_cmd;
   /** browse files for cmake executable */
-  private Button b_browseFiles;
+  private Button b_cmdBrowseFiles;
   /** Combo that shows the generator names for cmake */
   private ComboViewer c_generator;
+  /** 'use default native build command' checkbox */
+  private Button b_buildCmdFromPath;
+  /** cmake executable */
+  private Text t_buildCmd;
+  /** browse files for cmake executable */
+  private Button b_buildCmdBrowseFiles;
+
   /** the table showing the cmake defines */
   private DefinesViewer definesViewer;
   /** the table showing the cmake undefines */
@@ -142,9 +153,9 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
         layout.marginWidth = 0;
         buttonBar.setLayout(layout);
       }
-      b_browseFiles = WidgetHelper.createButton(buttonBar, "File System...",
+      b_cmdBrowseFiles = WidgetHelper.createButton(buttonBar, "File System...",
           true);
-      b_browseFiles.addSelectionListener(new SelectionAdapter() {
+      b_cmdBrowseFiles.addSelectionListener(new SelectionAdapter() {
         @Override
         public void widgetSelected(SelectionEvent e) {
           IDialogSettings settings = CMakePlugin.getDefault()
@@ -164,7 +175,7 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
         @Override
         public void widgetSelected(SelectionEvent event) {
           final Button btn = (Button) event.widget;
-          handleComandEnabled(!btn.getSelection());
+          handleCommandEnabled(!btn.getSelection());
         }
       });
 
@@ -195,6 +206,68 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
         c_generator.getCombo().setEnabled(false);
     } // makefile generator combo
 
+    // cmake native build command group...
+    {
+      Group gr = WidgetHelper.createGroup(usercomp, SWT.FILL, 2,
+          "Native build command", 2);
+      gr.setToolTipText("These values have only effect if the CMake toolchain is selected on the Tool Chain Editor tab.");
+      b_buildCmdFromPath = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2,
+          "Use &default command from generator");
+
+      setupLabel(gr, "F&ile", 1, SWT.BEGINNING);
+
+      t_buildCmd = setupText(gr, 1, GridData.FILL_HORIZONTAL);
+
+      // "Filesystem", "Variables" dialog launcher buttons...
+      Composite buttonBar = new Composite(gr, SWT.NONE);
+      {
+        buttonBar.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false,
+            3, 1));
+        layout = new GridLayout(2, false);
+        layout.marginHeight = 0;
+        layout.marginWidth = 0;
+        buttonBar.setLayout(layout);
+      }
+      b_buildCmdBrowseFiles = WidgetHelper.createButton(buttonBar,
+          "File System...", true);
+      b_buildCmdBrowseFiles.addSelectionListener(new SelectionAdapter() {
+        @Override
+        public void widgetSelected(SelectionEvent e) {
+          IDialogSettings settings = CMakePlugin.getDefault()
+              .getDialogSettings();
+          FileDialog dialog = new FileDialog(t_buildCmd.getShell());
+          dialog.setFilterPath(settings.get("native_dir"));
+          String text = dialog.open();
+          settings.put("native_dir", dialog.getFilterPath());
+          if (text != null) {
+            t_buildCmd.insert(text);
+          }
+        }
+      });
+
+      // to adjust sensitivity...
+      b_buildCmdFromPath.addSelectionListener(new SelectionAdapter() {
+        @Override
+        public void widgetSelected(SelectionEvent event) {
+          final Button btn = (Button) event.widget;
+          handleBuildCommandEnabled(!btn.getSelection());
+        }
+      });
+
+    } // cmake executable group
+
+    // build command display follows generator default, if use-default is enabled
+    c_generator.addSelectionChangedListener(new ISelectionChangedListener() {
+      @Override
+      public void selectionChanged(SelectionChangedEvent event) {
+        if (b_buildCmdFromPath.getSelection()) {
+          CmakeGenerator generator = (CmakeGenerator) ((IStructuredSelection) event
+              .getSelection()).getFirstElement();
+          t_buildCmd.setText(generator.getNativeBuildCommand());
+        }
+
+      }
+    });
     // cmake defines table...
     definesViewer = new DefinesViewer(usercomp);
     // cmake undefines table...
@@ -218,6 +291,10 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
       log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, null, ex));
     }
 
+    IToolChain toolChain = ManagedBuildManager
+        .getBuildInfo(cfgd.getProjectDescription().getProject(), false)
+        .getDefaultConfiguration().getToolChain();
+    String id = toolChain.getBaseId();
     updateDisplay();
   }
 
@@ -228,10 +305,14 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
     t_cmd.setText(prefs.getCommand());
     b_cmdFromPath.setSelection(prefs.getUseDefaultCommand());
     // adjust sensitivity...
-    handleComandEnabled(!prefs.getUseDefaultCommand());
+    handleCommandEnabled(!prefs.getUseDefaultCommand());
 
     CmakeGenerator generator = prefs.getGenerator();
     c_generator.setSelection(new StructuredSelection(generator));
+
+    b_buildCmdFromPath.setSelection(prefs.getNativeBuildCommand() == null);
+    // initialize native build command display, adjust sensitivity...
+    handleBuildCommandEnabled(prefs.getNativeBuildCommand() != null);
 
     definesViewer.setInput(prefs.getDefines());
     undefinesViewer.setInput(prefs.getUndefines());
@@ -250,6 +331,11 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
     final IStructuredSelection sel = (IStructuredSelection) c_generator
         .getSelection();
     prefs.setGenerator((CmakeGenerator) sel.getFirstElement());
+    if (t_buildCmd.isEnabled()) {
+      prefs.setNativeBuildCommand(t_buildCmd.getText().trim());
+    } else {
+      prefs.setNativeBuildCommand(null);
+    }
     // NB: defines & undefines are modified by the widget listeners directly
   }
 
@@ -260,9 +346,37 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
    * @param enabled
    *        the new enabled state
    */
-  private void handleComandEnabled(boolean enabled) {
+  private void handleCommandEnabled(boolean enabled) {
     t_cmd.setEnabled(enabled);
-    b_browseFiles.setEnabled(enabled);
+    b_cmdBrowseFiles.setEnabled(enabled);
+  }
+
+  /**
+   * Changes sensitivity of controls to enter the native build command. Also
+   * sets the native build command field.<br>
+   * Necessary since Button.setSelection does not fire events.
+   *
+   * @param enabled
+   *        the new enabled state
+   */
+  private void handleBuildCommandEnabled(boolean enabled) {
+    t_buildCmd.setEnabled(enabled);
+    b_buildCmdBrowseFiles.setEnabled(enabled);
+
+    // build command display follows generator default, if use-default is enabled
+    if (!enabled) {
+      final IStructuredSelection sel = (IStructuredSelection) c_generator
+          .getSelection();
+      final CmakeGenerator generator = (CmakeGenerator) sel.getFirstElement();
+      t_buildCmd.setText(generator.getNativeBuildCommand());
+    } else {
+      final String nativeBuildCommand = prefs.getNativeBuildCommand();
+      if (nativeBuildCommand != null) {
+        t_buildCmd.setText(nativeBuildCommand);
+      } else {
+        // intentionally do nothing, keep default command as a suggestion to the user
+      }
+    }
   }
 
   /**
