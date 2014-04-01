@@ -29,8 +29,29 @@
             incrementalBuildTarget="all"
             isSystem="false"
             isVariableCaseSensitive="true"
-            name="CMake make builder">
+            name="CMake make Builder">
       </builder>
+      <toolChain
+            archList="all"
+            configurationMacroSupplier="de.marw.cdt.cmake.core.internal.CmakeOsMacroSupplier"
+            id="de.marw.cdt.cmake.core.toolChain"
+            name="CMake"
+            osList="all">
+         <targetPlatform
+               archList="all"
+               id="de.marw.cdt.cmake.core.targetPlatform"
+               osList="all">
+         </targetPlatform>
+         <builder
+               command="${cmake_build_cmd}"
+               id="de.marw.cdt.cmake.core.builder1"
+               ignoreErrCmd="${cmake_ignore_err_option}"
+               isVariableCaseSensitive="true"
+               name="CMake Builder (any OS)"
+               reservedMacroNameSupplier="de.marw.cdt.cmake.core.internal.CmakeOsMacroSupplier"
+               superClass="de.marw.cdt.cmake.core.genmakebuilder">
+         </builder>
+      </toolChain>
    </extension>
    <!-- project settings UI   -->
   
@@ -47,6 +68,12 @@
 	                  value="org.eclipse.cdt.managedbuilder.core.managedBuildNature"/>
            </adapt>
          </enabledWhen>
+         <keywordReference
+               id="de.marw.cdt.cmake.core.keyword.cmake">
+         </keywordReference>
+         <keywordReference
+               id="de.marw.cdt.cmake.core.keyword.cdt">
+         </keywordReference>
         </page>    
         <page
               category="de.marw.cdt.cmake.core.ui.CMakePropertyPage"
@@ -65,28 +92,32 @@
          point="org.eclipse.cdt.ui.cPropertyTab">
       <tab
             class="de.marw.cdt.cmake.core.ui.CMakePropertyTab"
+            helpId="t_cmake_options_general"
             name="General"
             parent="de.marw.cdt.cmake.core.ui.CMakePropertyPage"
-            tooltip="Properties applied on each OS">
+            tooltip="Properties applied under each OS">
       </tab>
       <tab
             class="de.marw.cdt.cmake.core.ui.CMakeSymbolsTab"
+            helpId="t_cmake_symbols_general"
             name="Symbols"
             parent="de.marw.cdt.cmake.core.ui.CMakePropertyPage"
-            tooltip="Applied on each OS">
+            tooltip="Applied under each OS">
       </tab>
       <tab
             class="de.marw.cdt.cmake.core.ui.LinuxPropertyTab"
+            helpId="t_cmake_options_OS"
             name="Linux/default"
             parent="de.marw.cdt.cmake.core.ui.HostOSPropertyPage"
-            tooltip="Properties applied on Linux or unkown OS"
+            tooltip="Properties applied under Linux or unkown OS"
             weight="10">
       </tab>
       <tab
             class="de.marw.cdt.cmake.core.ui.WindowsPropertyTab"
+            helpId="t_cmake_options_OS"
             name="Windows"
             parent="de.marw.cdt.cmake.core.ui.HostOSPropertyPage"
-            tooltip="Properties applied on windows"
+            tooltip="Properties applied under windows"
             weight="80">
       </tab>
    </extension>
@@ -131,6 +162,23 @@
  <extension point="org.eclipse.help.toc">
     <toc file="doc/topics_Tasks.xml">
     </toc>
+ </extension>
+ <extension
+       point="org.eclipse.help.contexts">
+    <contexts
+          file="doc/contexts_CMake4CDT.xml">
+    </contexts>
+ </extension>
+ <extension
+       point="org.eclipse.ui.keywords">
+    <keyword
+          id="de.marw.cdt.cmake.core.keyword.cdt"
+          label="cdt">
+    </keyword>
+    <keyword
+          id="de.marw.cdt.cmake.core.keyword.cmake"
+          label="cmake">
+    </keyword>
  </extension>
             
 </plugin>
