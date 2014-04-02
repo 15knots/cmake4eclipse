@@ -28,26 +28,26 @@
             ignoreErrCmd="-k"
             incrementalBuildTarget="all"
             isSystem="false"
-            isVariableCaseSensitive="true"
             name="CMake make Builder">
       </builder>
       <toolChain
             archList="all"
             configurationMacroSupplier="de.marw.cdt.cmake.core.internal.CmakeOsMacroSupplier"
             id="de.marw.cdt.cmake.core.toolChain"
-            name="CMake"
+            name="CMake portable"
             osList="all">
          <targetPlatform
                archList="all"
                id="de.marw.cdt.cmake.core.targetPlatform"
+               name="Portable Platform"
                osList="all">
          </targetPlatform>
          <builder
+               arguments="${cmake_build_cmd_earg}"
                command="${cmake_build_cmd}"
                id="de.marw.cdt.cmake.core.builder1"
                ignoreErrCmd="${cmake_ignore_err_option}"
-               isVariableCaseSensitive="true"
-               name="CMake Builder (any OS)"
+               name="CMake native Builder (portable)"
                reservedMacroNameSupplier="de.marw.cdt.cmake.core.internal.CmakeOsMacroSupplier"
                superClass="de.marw.cdt.cmake.core.genmakebuilder">
          </builder>

@@ -37,7 +37,9 @@ import de.marw.cdt.cmake.core.internal.settings.WindowsPreferences;
  * <li><strong>cmake_build_cmd</strong>: The native build tool´s command that
  * can build a CMake-generated project. Usually {@code make}.</li>
  * <li><strong>cmake_ignore_err_option</strong>: The native build tool´s command
- * option to ignore build errors. Usually {@code -k}</li>
+ * option to ignore build errors. Usually {@code -k}.</li>
+ * <li><strong>cmake_build_cmd_earg</strong> The extra argument to pass to the
+ * native build command.</li>
  * </ul>
  *
  * @author Martin Weber
@@ -80,7 +82,7 @@ public class CmakeOsMacroSupplier implements IConfigurationBuildMacroSupplier,
         }
         return new CmakeBuildMacro(macroName, ICdtVariable.VALUE_TEXT,
             nativeBuildCommand);
-      } else if ("cmake_ignore_err_option".equals(macroName)) {
+      } else {
         CmakeGenerator generator;
         if (Platform.OS_WIN32.equals(os)) {
           WindowsPreferences osPrefs = prefs.getWindowsPreferences();
@@ -90,8 +92,17 @@ public class CmakeOsMacroSupplier implements IConfigurationBuildMacroSupplier,
           LinuxPreferences osPrefs = prefs.getLinuxPreferences();
           generator = osPrefs.getGenerator();
         }
-        return new CmakeBuildMacro(macroName, ICdtVariable.VALUE_TEXT,
-            generator.getIgnoreErrOption());
+
+        if ("cmake_ignore_err_option".equals(macroName)) {
+          return new CmakeBuildMacro(macroName, ICdtVariable.VALUE_TEXT,
+              generator.getIgnoreErrOption());
+        }
+        if ("cmake_build_cmd_earg".equals(macroName)) {
+          String extraArg = generator.getNativeBuildExtraArg();
+          if (extraArg != null)
+            return new CmakeBuildMacro(macroName, ICdtVariable.VALUE_TEXT,
+                extraArg);
+        }
       }
     } catch (CoreException ex) {
       // TODO Auto-generated catch block
@@ -107,7 +118,8 @@ public class CmakeOsMacroSupplier implements IConfigurationBuildMacroSupplier,
       IBuildMacroProvider provider) {
     return new IBuildMacro[] {
         getMacro("cmake_build_cmd", configuration, provider),
-        getMacro("cmake_ignore_err_option", configuration, provider) };
+        getMacro("cmake_ignore_err_option", configuration, provider),
+        getMacro("cmake_build_cmd_earg", configuration, provider) };
   }
 
   /*-
@@ -124,7 +136,8 @@ public class CmakeOsMacroSupplier implements IConfigurationBuildMacroSupplier,
    */
   private static boolean isKnownMacro(String macroName) {
     if ("cmake_build_cmd".equals(macroName)
-        || "cmake_ignore_err_option".equals(macroName))
+        || "cmake_ignore_err_option".equals(macroName)
+        || "cmake_build_cmd_earg".equals(macroName))
       return true;
     return false;
   }
