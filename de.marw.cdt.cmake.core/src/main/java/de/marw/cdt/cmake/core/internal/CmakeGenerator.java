@@ -23,7 +23,14 @@ public enum CmakeGenerator {
    */
 
   // linux generators
-  UnixMakefiles("Unix Makefiles"), Ninja("Ninja", "ninja", "-k 999999"),
+  UnixMakefiles("Unix Makefiles"),
+  // Ninja, experimental
+  Ninja("Ninja", "ninja", "-k 999999"){
+    @Override
+    public String getNativeBuildExtraArg() {
+      return "-v";
+    }
+  },
   // windows generators
   MinGWMakefiles("MinGW Makefiles", "mingw32-make"), MSYSMakefiles(
       "MSYS Makefiles"), NMakeMakefiles("NMake Makefiles", "nmake.exe"), NMakeMakefilesJOM(
@@ -64,6 +71,16 @@ public enum CmakeGenerator {
    */
   public String getNativeBuildCommand() {
     return nativeBuildCommand;
+  }
+
+  /**
+   * Gets the extra argument to pass to the native build command.
+   *
+   * @return a non-empty string, or {@code null} if no extra argument should be
+   *         passed.
+   */
+  public String getNativeBuildExtraArg() {
+    return null;
   }
 
   /**
