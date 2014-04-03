@@ -35,7 +35,7 @@ import de.marw.cdt.cmake.core.internal.settings.ConfigurationManager;
  *
  * @author Martin Weber
  */
-public class CMakeSymbolsTab extends AbstractCPropertyTab {
+public class CMakeSymbolsTab extends QuirklessAbstractCPropertyTab {
 
   /**  */
   private static final ILog log = CMakePlugin.getDefault().getLog();

@@ -16,7 +16,6 @@ import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
 import org.eclipse.cdt.core.settings.model.ICMultiConfigDescription;
 import org.eclipse.cdt.core.settings.model.ICResourceDescription;
 import org.eclipse.cdt.core.settings.model.ICStorageElement;
-import org.eclipse.cdt.ui.newui.AbstractCPropertyTab;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
@@ -28,6 +27,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.ui.PlatformUI;
 
 import de.marw.cdt.cmake.core.CMakePlugin;
 import de.marw.cdt.cmake.core.internal.settings.CMakePreferences;
@@ -39,7 +39,7 @@ import de.marw.cdt.cmake.core.internal.settings.ConfigurationManager;
  *
  * @author Martin Weber
  */
-public class CMakePropertyTab extends AbstractCPropertyTab {
+public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
 
   /**  */
   private static final ILog log = CMakePlugin.getDefault().getLog();
