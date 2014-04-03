@@ -16,7 +16,6 @@ import java.util.List;
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
 import org.eclipse.cdt.core.settings.model.ICResourceDescription;
 import org.eclipse.cdt.core.settings.model.ICStorageElement;
-import org.eclipse.cdt.ui.newui.AbstractCPropertyTab;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
@@ -60,7 +59,7 @@ import de.marw.cdt.cmake.core.internal.settings.ConfigurationManager;
  *        the type that holds the OS specific properties.
  */
 public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
-    extends AbstractCPropertyTab {
+    extends QuirklessAbstractCPropertyTab {
 
   /**  */
   private static final ILog log = CMakePlugin.getDefault().getLog();

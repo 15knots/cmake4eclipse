@@ -92,21 +92,21 @@
          point="org.eclipse.cdt.ui.cPropertyTab">
       <tab
             class="de.marw.cdt.cmake.core.ui.CMakePropertyTab"
-            helpId="t_cmake_options_general"
+            helpId="de.marw.cdt.cmake.core.t_cmake_options_general"
             name="General"
             parent="de.marw.cdt.cmake.core.ui.CMakePropertyPage"
             tooltip="Properties applied under each OS">
       </tab>
       <tab
             class="de.marw.cdt.cmake.core.ui.CMakeSymbolsTab"
-            helpId="t_cmake_symbols_general"
+            helpId="de.marw.cdt.cmake.core.t_cmake_symbols_general"
             name="Symbols"
             parent="de.marw.cdt.cmake.core.ui.CMakePropertyPage"
             tooltip="Applied under each OS">
       </tab>
       <tab
             class="de.marw.cdt.cmake.core.ui.LinuxPropertyTab"
-            helpId="t_cmake_options_OS"
+            helpId="de.marw.cdt.cmake.core.t_cmake_options_OS"
             name="Linux/default"
             parent="de.marw.cdt.cmake.core.ui.HostOSPropertyPage"
             tooltip="Properties applied under Linux or unkown OS"
@@ -114,7 +114,7 @@
       </tab>
       <tab
             class="de.marw.cdt.cmake.core.ui.WindowsPropertyTab"
-            helpId="t_cmake_options_OS"
+            helpId="de.marw.cdt.cmake.core.t_cmake_options_OS"
             name="Windows"
             parent="de.marw.cdt.cmake.core.ui.HostOSPropertyPage"
             tooltip="Properties applied under windows"
