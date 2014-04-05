@@ -80,6 +80,12 @@ public class CMakeSymbolsTab extends QuirklessAbstractCPropertyTab {
   protected void updateData(ICResourceDescription resd) {
     if (resd == null)
       return;
+    if (page.isMultiCfg()) {
+      setAllVisible(false, null);
+      return;
+    } else {
+      setAllVisible(true, null);
+    }
 
     cfgd = resd.getConfiguration();
     final ConfigurationManager configMgr = ConfigurationManager.getInstance();
