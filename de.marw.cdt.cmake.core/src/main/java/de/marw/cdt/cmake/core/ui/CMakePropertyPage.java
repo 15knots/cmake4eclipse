@@ -19,14 +19,6 @@ import org.eclipse.cdt.ui.newui.AbstractPage;
  */
 public class CMakePropertyPage extends AbstractPage {
 
-//  /*-
-//   * @see org.eclipse.cdt.ui.newui.AbstractPrefPage#getHeader()
-//   */
-//  @Override
-//  protected String getHeader() {
-//    return isSingle() ? null : "CMake settings";
-//  }
-
   /*-
    * @see org.eclipse.cdt.ui.newui.AbstractPage#isSingle()
    */

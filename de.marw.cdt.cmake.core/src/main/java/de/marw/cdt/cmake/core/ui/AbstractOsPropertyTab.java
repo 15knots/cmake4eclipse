@@ -317,6 +317,8 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
    * @see #updateDisplay()
    */
   private void saveToModel() {
+    if (prefs == null)
+      return; // nothing was edited
     prefs.setUseDefaultCommand(b_cmdFromPath.getSelection());
     String command = t_cmd.getText().trim();
     prefs.setCommand(command);

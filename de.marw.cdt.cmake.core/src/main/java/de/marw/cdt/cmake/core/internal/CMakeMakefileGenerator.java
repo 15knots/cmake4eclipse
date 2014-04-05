@@ -200,8 +200,11 @@ public class CMakeMakefileGenerator implements
         final ConsoleOutputStream cis = console.getInfoStream();
         cis.write(SimpleDateFormat.getTimeInstance().format(new Date())
             .getBytes());
-        cis.write((" **** Buildscript generation for configuration "
-            + config.getName() + "\n").getBytes());
+        cis.write(" **** Buildscript generation of configuration ".getBytes());
+        cis.write(config.getName().getBytes());
+        cis.write(" for project ".getBytes());
+        cis.write(project.getName().getBytes());
+        cis.write("\n".getBytes());
       } catch (IOException ex) {
         // ignore
       }
