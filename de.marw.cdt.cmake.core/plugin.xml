@@ -20,7 +20,7 @@
       <builder
             autoBuildTarget="all"
             buildRunner="org.eclipse.cdt.managedbuilder.core.ExternalBuildRunner"
-            buildfileGenerator="de.marw.cdt.cmake.core.internal.CMakeMakefileGenerator"
+            buildfileGenerator="de.marw.cdt.cmake.core.internal.BuildscriptGenerator"
             cleanBuildTarget="clean"
             command="make"
             errorParsers="de.marw.cdt.cmake.core.CMakeErrorParser;org.eclipse.cdt.core.MakeErrorParser"

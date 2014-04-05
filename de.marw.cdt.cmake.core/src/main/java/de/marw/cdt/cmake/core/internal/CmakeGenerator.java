@@ -27,6 +27,10 @@ public enum CmakeGenerator {
   // Ninja, experimental
   Ninja("Ninja", "ninja", "-k 999999") {
     @Override
+    public String getMakefileName(){
+      return "build.ninja";
+    }
+    @Override
     public String getNativeBuildExtraArg() {
       return "-v";
     }
@@ -74,6 +78,16 @@ public enum CmakeGenerator {
   }
 
   /**
+   * Gets the name of the top-level makefile (buildscript) which is interpreted
+   * by the native build command.
+   *
+   * @return name of the makefile.
+   */
+  public String getMakefileName(){
+    return "Makefile";
+  }
+
+  /**
    * Gets the extra argument to pass to the native build command.
    *
    * @return a non-empty string, or {@code null} if no extra argument should be
@@ -86,8 +100,7 @@ public enum CmakeGenerator {
   /**
    * Gets the native build tool´s command option to ignore build errors.
    *
-   * @return the command option string or {@code null} if no option is
-   *         needed.
+   * @return the command option string or {@code null} if no option is needed.
    */
   public String getIgnoreErrOption() {
     return ignoreErrOption;
