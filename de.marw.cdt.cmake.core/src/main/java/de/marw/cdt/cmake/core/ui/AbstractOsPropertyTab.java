@@ -279,6 +279,13 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
     if (resd == null)
       return;
 
+    if (page.isMultiCfg()) {
+      setAllVisible(false, null);
+      return;
+    } else {
+      setAllVisible(true, null);
+    }
+
     cfgd = resd.getConfiguration();
     final ConfigurationManager configMgr = ConfigurationManager.getInstance();
     try {
