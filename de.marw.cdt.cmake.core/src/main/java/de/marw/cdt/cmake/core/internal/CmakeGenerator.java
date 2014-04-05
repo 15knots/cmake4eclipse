@@ -25,7 +25,7 @@ public enum CmakeGenerator {
   // linux generators
   UnixMakefiles("Unix Makefiles"),
   // Ninja, experimental
-  Ninja("Ninja", "ninja", "-k 999999"){
+  Ninja("Ninja", "ninja", "-k 999999") {
     @Override
     public String getNativeBuildExtraArg() {
       return "-v";
@@ -86,7 +86,8 @@ public enum CmakeGenerator {
   /**
    * Gets the native build tool´s command option to ignore build errors.
    *
-   * @return
+   * @return the command option string or {@code null} if no option is
+   *         needed.
    */
   public String getIgnoreErrOption() {
     return ignoreErrOption;
