@@ -7,10 +7,13 @@
     <category name="source" />
   </bundle>
 
-  <category-def name="cmake4eclipsecdt" label="CMake for Eclipse CDT bundles" >
-    <description></description>
+  <category-def name="cmake4eclipsecdt" label="CMake for Eclipse CDT">
+    <description>
+      Integrates the CMake cross-platform buildscript generator into the C/C++ Development Toolkit (CDT).
+    </description>
   </category-def>
   <category-def name="source" label="Source bundles">
-     <category name="cmake4eclipsecdt" />
+    <description>Source code of CMake for Eclipse CDT.</description>
+    <category name="cmake4eclipsecdt" />
   </category-def>
 </site>
