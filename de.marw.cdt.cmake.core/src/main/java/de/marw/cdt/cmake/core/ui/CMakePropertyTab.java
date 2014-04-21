@@ -27,7 +27,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Listener;
-import org.eclipse.ui.PlatformUI;
 
 import de.marw.cdt.cmake.core.CMakePlugin;
 import de.marw.cdt.cmake.core.internal.settings.CMakePreferences;
