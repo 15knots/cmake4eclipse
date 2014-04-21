@@ -30,6 +30,7 @@ import org.eclipse.cdt.managedbuilder.core.IBuilder;
 import org.eclipse.cdt.managedbuilder.core.IConfiguration;
 import org.eclipse.cdt.managedbuilder.core.IManagedBuildInfo;
 import org.eclipse.cdt.managedbuilder.core.ManagedBuildManager;
+import org.eclipse.cdt.managedbuilder.makegen.IManagedBuilderMakefileGenerator;
 import org.eclipse.cdt.managedbuilder.makegen.IManagedBuilderMakefileGenerator2;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -181,7 +182,7 @@ public class BuildscriptGenerator implements
       String msg = "No source directories in project " + project.getName();
       updateMonitor(msg);
       status = new MultiStatus(CMakePlugin.PLUGIN_ID, IStatus.INFO, "", null);
-      status.add(new Status(IStatus.INFO, CMakePlugin.PLUGIN_ID, 0, msg, null));
+      status.add(new Status(IStatus.INFO, CMakePlugin.PLUGIN_ID, IManagedBuilderMakefileGenerator.NO_SOURCE_FOLDERS, msg, null));
       return status;
     } else {
       ICConfigurationDescription cfgDes = ManagedBuildManager
@@ -264,7 +265,7 @@ public class BuildscriptGenerator implements
 
       // Now make the requested folder
       try {
-        folder.create(true, true, null);
+        folder.create(true, true, monitor);
       } catch (CoreException e) {
         if (e.getStatus().getCode() == IResourceStatus.PATH_OCCUPIED)
           folder.refreshLocal(IResource.DEPTH_ZERO, monitor);
