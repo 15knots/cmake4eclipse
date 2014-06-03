@@ -277,9 +277,9 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
     ICConfigurationDescription dstCfg = dst.getConfiguration();
 
     if (srcCfg instanceof ICMultiConfigDescription) {
-      ICConfigurationDescription[] srcCfgs = (ICConfigurationDescription[]) ((ICMultiConfigDescription) src)
+      ICConfigurationDescription[] srcCfgs = (ICConfigurationDescription[]) ((ICMultiConfigDescription) srcCfg)
           .getItems();
-      ICConfigurationDescription[] dstCfgs = (ICConfigurationDescription[]) ((ICMultiConfigDescription) dst)
+      ICConfigurationDescription[] dstCfgs = (ICConfigurationDescription[]) ((ICMultiConfigDescription) dstCfg)
           .getItems();
       for (int i = 0; i < srcCfgs.length; i++) {
         applyConfig(srcCfgs[i], dstCfgs[i]);
