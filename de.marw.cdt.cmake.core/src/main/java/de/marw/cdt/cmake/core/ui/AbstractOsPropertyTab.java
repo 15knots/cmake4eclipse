@@ -206,10 +206,10 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
     // cmake native build command group...
     {
       Group gr = WidgetHelper.createGroup(usercomp, SWT.FILL, 2,
-          "Native build command", 2);
-      gr.setToolTipText("These values have only effect if the CMake toolchain is selected on the Tool Chain Editor tab.");
+          "Native build command (CMake portable toolchain only)", 2);
+      gr.setToolTipText("These values have only effect if the CMake portable toolchain is selected on the Tool Chain Editor tab.");
       b_buildCmdFromPath = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2,
-          "Use &default command from generator");
+          "Use command &matching the buildscript generator");
 
       setupLabel(gr, "F&ile", 1, SWT.BEGINNING);
 
