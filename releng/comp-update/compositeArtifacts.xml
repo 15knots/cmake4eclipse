@@ -12,7 +12,5 @@
       location='jar:https://googledrive.com/host/0B-QU1Qnto3huZUZ0QUdxM01pR0U/cmake4eclipsecdt-1.1.0.zip!/' />
     <child
       location='jar:https://googledrive.com/host/0B-QU1Qnto3huZUZ0QUdxM01pR0U/cmake4eclipsecdt-1.0.0.zip!/' />
-    <child
-      location='jar:https://googledrive.com/host/0B-QU1Qnto3huZUZ0QUdxM01pR0U/cmake4eclipsecdt-Update-0.1.0-SNAPSHOT.zip!/' />
   </children>
 </repository>
