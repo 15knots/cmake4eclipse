@@ -47,7 +47,7 @@
                command="${cmake_build_cmd}"
                id="de.marw.cdt.cmake.core.builder1"
                ignoreErrCmd="${cmake_ignore_err_option}"
-               name="CMake native Builder (portable)"
+               name="CMake buildscript processor (portable)"
                reservedMacroNameSupplier="de.marw.cdt.cmake.core.internal.CmakeOsMacroSupplier"
                superClass="de.marw.cdt.cmake.core.genmakebuilder">
          </builder>

@@ -12,7 +12,7 @@ package de.marw.cdt.cmake.core.internal;
 
 /**
  * Represents a cmake buildscript generator including information about the
- * native tool that builds from the generated script.
+ * makefile (buildscript) processor that builds from the generated script.
  *
  * @author Martin Weber
  */
@@ -31,7 +31,7 @@ public enum CmakeGenerator {
       return "build.ninja";
     }
     @Override
-    public String getNativeBuildExtraArg() {
+    public String getBuildscriptProcessorExtraArg() {
       return "-v";
     }
   },
@@ -42,18 +42,18 @@ public enum CmakeGenerator {
       "Watcom WMake", "wmake");
 
   private final String name;
-  private final String nativeBuildCommand;
+  private final String buildscriptProcessorCommand;
   private String ignoreErrOption;
 
-  private CmakeGenerator(String name, String nativeBuildCommand,
+  private CmakeGenerator(String name, String buildscriptProcessorCommand,
       String ignoreErrOption) {
     this.name = name;
-    this.nativeBuildCommand = nativeBuildCommand;
+    this.buildscriptProcessorCommand = buildscriptProcessorCommand;
     this.ignoreErrOption = ignoreErrOption;
   }
 
-  private CmakeGenerator(String name, String nativeBuildCommand) {
-    this(name, nativeBuildCommand, "-k");
+  private CmakeGenerator(String name, String buildscriptProcessorCommand) {
+    this(name, buildscriptProcessorCommand, "-k");
   }
 
   private CmakeGenerator(String name) {
@@ -71,15 +71,15 @@ public enum CmakeGenerator {
   }
 
   /**
-   * Gets the native build command name.
+   * Gets the name of the makefile (buildscript) processor.
    */
-  public String getNativeBuildCommand() {
-    return nativeBuildCommand;
+  public String getBuildscriptProcessorCommand() {
+    return buildscriptProcessorCommand;
   }
 
   /**
    * Gets the name of the top-level makefile (buildscript) which is interpreted
-   * by the native build command.
+   * by the buildscript processor.
    *
    * @return name of the makefile.
    */
@@ -88,17 +88,17 @@ public enum CmakeGenerator {
   }
 
   /**
-   * Gets the extra argument to pass to the native build command.
+   * Gets the extra argument to pass to the buildscript processor.
    *
    * @return a non-empty string, or {@code null} if no extra argument should be
    *         passed.
    */
-  public String getNativeBuildExtraArg() {
+  public String getBuildscriptProcessorExtraArg() {
     return null;
   }
 
   /**
-   * Gets the native build tool´s command option to ignore build errors.
+   * Gets the buildscript processor´s command option to ignore build errors.
    *
    * @return the command option string or {@code null} if no option is needed.
    */
