@@ -34,7 +34,7 @@ public abstract class AbstractOsPreferences {
 
   private String command;
   private CmakeGenerator generator;
-  private String nativeBuildCmd;
+  private String buildscriptProcessorCmd;
   private boolean useDefaultCommand;
   private List<CmakeDefine> defines = new ArrayList<CmakeDefine>(0);
   private List<CmakeUnDefine> undefines = new ArrayList<CmakeUnDefine>(0);
@@ -58,7 +58,7 @@ public abstract class AbstractOsPreferences {
     useDefaultCommand = true;
     setCommand("cmake");
     setGenerator(CmakeGenerator.UnixMakefiles);
-    setNativeBuildCommand(null);
+    setBuildscriptProcessorCommand(null);
     defines.clear();
     undefines.clear();
   }
@@ -112,26 +112,26 @@ public abstract class AbstractOsPreferences {
   }
 
   /**
-   * Gets the native build command name.
+   * Gets the buildscript processor name.
    *
-   * @return the native build command or {@code null} if the build command
+   * @return the buildscript processor or {@code null} if the build command
    *         matching the chosen generator should be used.
    */
-  public String getNativeBuildCommand() {
-    return nativeBuildCmd;
+  public String getBuildscriptProcessorCommand() {
+    return buildscriptProcessorCmd;
   }
 
   /**
-   * Sets the native build command name.
+   * Sets the buildscript processor name.
    *
-   * @param nativeBuildCommand
-   *        the native build command. If {@code null} or an empty string, the
+   * @param buildscriptProcessorCommand
+   *        the buildscript processor. If {@code null} or an empty string, the
    *        build command matching the chosen generator should be used.
    */
-  public void setNativeBuildCommand(String nativeBuildCommand) {
-    if ("".equals(nativeBuildCommand))
-      nativeBuildCommand = null;
-    this.nativeBuildCmd = nativeBuildCommand;
+  public void setBuildscriptProcessorCommand(String buildscriptProcessorCommand) {
+    if ("".equals(buildscriptProcessorCommand))
+      buildscriptProcessorCommand = null;
+    this.buildscriptProcessorCmd = buildscriptProcessorCommand;
   }
 
   /**
@@ -191,7 +191,7 @@ public abstract class AbstractOsPreferences {
     }
     val = parent.getAttribute(ATTR_BUILD_COMMAND);
 //    if (val != null)
-    setNativeBuildCommand(val);
+    setBuildscriptProcessorCommand(val);
 
     ICStorageElement[] children = parent.getChildren();
     for (ICStorageElement child : children) {
@@ -231,8 +231,8 @@ public abstract class AbstractOsPreferences {
     parent.setAttribute(ATTR_COMMAND, command);
     // generator
     parent.setAttribute(ATTR_GENERATOR, generator.name());
-    if (nativeBuildCmd != null) {
-      parent.setAttribute(ATTR_BUILD_COMMAND, nativeBuildCmd);
+    if (buildscriptProcessorCmd != null) {
+      parent.setAttribute(ATTR_BUILD_COMMAND, buildscriptProcessorCmd);
     } else {
       parent.removeAttribute(ATTR_BUILD_COMMAND);
     }

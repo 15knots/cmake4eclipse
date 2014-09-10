@@ -80,7 +80,7 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
   private Button b_cmdBrowseFiles;
   /** Combo that shows the generator names for cmake */
   private ComboViewer c_generator;
-  /** 'use default native build command' checkbox */
+  /** 'use default buildscript processor' checkbox */
   private Button b_buildCmdFromPath;
   /** cmake executable */
   private Text t_buildCmd;
@@ -203,10 +203,10 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
         c_generator.getCombo().setEnabled(false);
     } // makefile generator combo
 
-    // cmake native build command group...
+    // cmake buildscript processor group...
     {
       Group gr = WidgetHelper.createGroup(usercomp, SWT.FILL, 2,
-          "Native build command (CMake portable toolchain only)", 2);
+          "Buildscript processor (CMake portable toolchain only)", 2);
       gr.setToolTipText("These values have only effect if the CMake portable toolchain is selected on the Tool Chain Editor tab.");
       b_buildCmdFromPath = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2,
           "Use command &matching the buildscript generator");
@@ -233,9 +233,9 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
           IDialogSettings settings = CMakePlugin.getDefault()
               .getDialogSettings();
           FileDialog dialog = new FileDialog(t_buildCmd.getShell());
-          dialog.setFilterPath(settings.get("native_dir"));
+          dialog.setFilterPath(settings.get("bs_proc_dir"));
           String text = dialog.open();
-          settings.put("native_dir", dialog.getFilterPath());
+          settings.put("bs_proc_dir", dialog.getFilterPath());
           if (text != null) {
             t_buildCmd.insert(text);
           }
@@ -260,7 +260,7 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
         if (b_buildCmdFromPath.getSelection()) {
           CmakeGenerator generator = (CmakeGenerator) ((IStructuredSelection) event
               .getSelection()).getFirstElement();
-          t_buildCmd.setText(generator.getNativeBuildCommand());
+          t_buildCmd.setText(generator.getBuildscriptProcessorCommand());
         }
 
       }
@@ -310,9 +310,9 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
     CmakeGenerator generator = prefs.getGenerator();
     c_generator.setSelection(new StructuredSelection(generator));
 
-    b_buildCmdFromPath.setSelection(prefs.getNativeBuildCommand() == null);
-    // initialize native build command display, adjust sensitivity...
-    handleBuildCommandEnabled(prefs.getNativeBuildCommand() != null);
+    b_buildCmdFromPath.setSelection(prefs.getBuildscriptProcessorCommand() == null);
+    // initialize buildscript processor display, adjust sensitivity...
+    handleBuildCommandEnabled(prefs.getBuildscriptProcessorCommand() != null);
 
     definesViewer.setInput(prefs.getDefines());
     undefinesViewer.setInput(prefs.getUndefines());
@@ -334,9 +334,9 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
         .getSelection();
     prefs.setGenerator((CmakeGenerator) sel.getFirstElement());
     if (t_buildCmd.isEnabled()) {
-      prefs.setNativeBuildCommand(t_buildCmd.getText().trim());
+      prefs.setBuildscriptProcessorCommand(t_buildCmd.getText().trim());
     } else {
-      prefs.setNativeBuildCommand(null);
+      prefs.setBuildscriptProcessorCommand(null);
     }
     // NB: defines & undefines are modified by the widget listeners directly
   }
@@ -354,8 +354,8 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
   }
 
   /**
-   * Changes sensitivity of controls to enter the native build command. Also
-   * sets the native build command field.<br>
+   * Changes sensitivity of controls to enter the buildscript processor. Also
+   * sets the buildscript processor field.<br>
    * Necessary since Button.setSelection does not fire events.
    *
    * @param enabled
@@ -370,11 +370,11 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
       final IStructuredSelection sel = (IStructuredSelection) c_generator
           .getSelection();
       final CmakeGenerator generator = (CmakeGenerator) sel.getFirstElement();
-      t_buildCmd.setText(generator.getNativeBuildCommand());
+      t_buildCmd.setText(generator.getBuildscriptProcessorCommand());
     } else {
-      final String nativeBuildCommand = prefs.getNativeBuildCommand();
-      if (nativeBuildCommand != null) {
-        t_buildCmd.setText(nativeBuildCommand);
+      final String buildscriptProcessorCmd = prefs.getBuildscriptProcessorCommand();
+      if (buildscriptProcessorCmd != null) {
+        t_buildCmd.setText(buildscriptProcessorCmd);
       } else {
         // intentionally do nothing, keep default command as a suggestion to the user
       }

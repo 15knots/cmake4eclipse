@@ -34,12 +34,12 @@ import de.marw.cdt.cmake.core.internal.settings.WindowsPreferences;
  * Macro values are resloved depending on the current operating system and the
  * active CDT build configuration. The following macros are provided:
  * <ul>
- * <li><strong>cmake_build_cmd</strong>: The native build tool´s command that
+ * <li><strong>cmake_build_cmd</strong>: The buildscript processor´s command that
  * can build a CMake-generated project. Usually {@code make}.</li>
- * <li><strong>cmake_ignore_err_option</strong>: The native build tool´s command
+ * <li><strong>cmake_ignore_err_option</strong>: The buildscript processor´s command
  * option to ignore build errors. Usually {@code -k}.</li>
  * <li><strong>cmake_build_cmd_earg</strong> The extra argument to pass to the
- * native build command.</li>
+ * buildscript processor.</li>
  * </ul>
  *
  * @author Martin Weber
@@ -65,23 +65,23 @@ public class CmakeOsMacroSupplier implements IConfigurationBuildMacroSupplier,
       final String os = Platform.getOS();
 
       if ("cmake_build_cmd".equals(macroName)) {
-        String nativeBuildCommand;
+        String buildscriptProcessorCmd;
         if (Platform.OS_WIN32.equals(os)) {
           WindowsPreferences osPrefs = prefs.getWindowsPreferences();
-          nativeBuildCommand = osPrefs.getNativeBuildCommand();
-          if (nativeBuildCommand == null) {
-            nativeBuildCommand = osPrefs.getGenerator().getNativeBuildCommand();
+          buildscriptProcessorCmd = osPrefs.getBuildscriptProcessorCommand();
+          if (buildscriptProcessorCmd == null) {
+            buildscriptProcessorCmd = osPrefs.getGenerator().getBuildscriptProcessorCommand();
           }
         } else {
           // fall back to linux, if OS is unknown
           LinuxPreferences osPrefs = prefs.getLinuxPreferences();
-          nativeBuildCommand = osPrefs.getNativeBuildCommand();
-          if (nativeBuildCommand == null) {
-            nativeBuildCommand = osPrefs.getGenerator().getNativeBuildCommand();
+          buildscriptProcessorCmd = osPrefs.getBuildscriptProcessorCommand();
+          if (buildscriptProcessorCmd == null) {
+            buildscriptProcessorCmd = osPrefs.getGenerator().getBuildscriptProcessorCommand();
           }
         }
         return new CmakeBuildMacro(macroName, ICdtVariable.VALUE_TEXT,
-            nativeBuildCommand);
+            buildscriptProcessorCmd);
       } else {
         CmakeGenerator generator;
         if (Platform.OS_WIN32.equals(os)) {
@@ -98,7 +98,7 @@ public class CmakeOsMacroSupplier implements IConfigurationBuildMacroSupplier,
               generator.getIgnoreErrOption());
         }
         if ("cmake_build_cmd_earg".equals(macroName)) {
-          String extraArg = generator.getNativeBuildExtraArg();
+          String extraArg = generator.getBuildscriptProcessorExtraArg();
           if (extraArg != null)
             return new CmakeBuildMacro(macroName, ICdtVariable.VALUE_TEXT,
                 extraArg);
