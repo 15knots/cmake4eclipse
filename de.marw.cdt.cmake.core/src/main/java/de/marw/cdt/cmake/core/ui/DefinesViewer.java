@@ -163,7 +163,7 @@ import de.marw.cdt.cmake.core.internal.settings.CmakeDefine;
    */
   private void createEditor(Composite parent) {
     final Group gr = WidgetHelper.createGroup(parent, SWT.FILL, 2,
-        "Cmake cache entries to define (-D)", 2);
+        "CMake cache entries to define (-D)", 2);
 
     tableViewer = createViewer(gr);
 
@@ -267,8 +267,8 @@ import de.marw.cdt.cmake.core.internal.settings.CmakeDefine;
     final IStructuredSelection selection = (IStructuredSelection) tableViewer
         .getSelection();
     final Shell shell = tableViewer.getControl().getShell();
-    if (MessageDialog.openQuestion(shell, "Cmake-Define deletion confirmation",
-        "Are you sure to delete the selected Cmake-defines?")) {
+    if (MessageDialog.openQuestion(shell, "CMake-Define deletion confirmation",
+        "Are you sure to delete the selected CMake-defines?")) {
       @SuppressWarnings("unchecked")
       ArrayList<CmakeDefine> defines = (ArrayList<CmakeDefine>) tableViewer
           .getInput();
