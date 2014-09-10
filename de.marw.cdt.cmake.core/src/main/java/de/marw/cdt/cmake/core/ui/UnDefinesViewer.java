@@ -166,7 +166,7 @@ import de.marw.cdt.cmake.core.internal.settings.CmakeUnDefine;
    */
   private void createEditor(Composite parent) {
     final Group gr = WidgetHelper.createGroup(parent, SWT.FILL, 2,
-        "Cmake cache entries to undefine (-U)", 2);
+        "CMake cache entries to undefine (-U)", 2);
 
     tableViewer = createViewer(gr);
     // let double click trigger the edit dialog
@@ -270,8 +270,8 @@ import de.marw.cdt.cmake.core.internal.settings.CmakeUnDefine;
         .getSelection();
     final Shell shell = tableViewer.getControl().getShell();
     if (MessageDialog.openQuestion(shell,
-        "Cmake-Undefine deletion confirmation",
-        "Are you sure to delete the selected Cmake-undefines?")) {
+        "CMake-Undefine deletion confirmation",
+        "Are you sure to delete the selected CMake-undefines?")) {
       @SuppressWarnings("unchecked")
       ArrayList<String> undefines = (ArrayList<String>) tableViewer.getInput();
       undefines.removeAll(selection.toList());

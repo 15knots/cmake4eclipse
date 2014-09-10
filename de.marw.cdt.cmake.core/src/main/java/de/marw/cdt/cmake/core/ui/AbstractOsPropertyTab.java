@@ -131,7 +131,7 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
     // cmake executable group...
     {
       Group gr = WidgetHelper.createGroup(usercomp, SWT.FILL, 2,
-          "Cmake Executable", 2);
+          "CMake Executable", 2);
 
       b_cmdFromPath = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2,
           "Use cmake executable found on &system path");
