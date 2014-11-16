@@ -10,10 +10,19 @@
  *******************************************************************************/
 package de.marw.cdt.cmake.core.internal;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
 import org.eclipse.cdt.core.cdtvariables.CdtVariable;
 import org.eclipse.cdt.core.cdtvariables.CdtVariableException;
 import org.eclipse.cdt.core.cdtvariables.ICdtVariable;
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
+import org.eclipse.cdt.managedbuilder.core.IBuilder;
 import org.eclipse.cdt.managedbuilder.core.IConfiguration;
 import org.eclipse.cdt.managedbuilder.core.ManagedBuildManager;
 import org.eclipse.cdt.managedbuilder.macros.BuildMacroException;
@@ -22,22 +31,25 @@ import org.eclipse.cdt.managedbuilder.macros.IBuildMacroProvider;
 import org.eclipse.cdt.managedbuilder.macros.IConfigurationBuildMacroSupplier;
 import org.eclipse.cdt.managedbuilder.macros.IReservedMacroNameSupplier;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Platform;
 
+import de.marw.cdt.cmake.core.cmakecache.CMakeCacheFileParser;
+import de.marw.cdt.cmake.core.cmakecache.CMakeCacheFileParser.EntryFilter;
+import de.marw.cdt.cmake.core.cmakecache.SimpleCMakeCacheEntry;
+import de.marw.cdt.cmake.core.internal.settings.AbstractOsPreferences;
 import de.marw.cdt.cmake.core.internal.settings.CMakePreferences;
 import de.marw.cdt.cmake.core.internal.settings.ConfigurationManager;
-import de.marw.cdt.cmake.core.internal.settings.LinuxPreferences;
-import de.marw.cdt.cmake.core.internal.settings.WindowsPreferences;
 
 /**
  * Provides macros that are specific for the running OS.<br>
  * Macro values are resloved depending on the current operating system and the
  * active CDT build configuration. The following macros are provided:
  * <ul>
- * <li><strong>cmake_build_cmd</strong>: The buildscript processor´s command that
- * can build a CMake-generated project. Usually {@code make}.</li>
- * <li><strong>cmake_ignore_err_option</strong>: The buildscript processor´s command
- * option to ignore build errors. Usually {@code -k}.</li>
+ * <li><strong>cmake_build_cmd</strong>: The buildscript processor´s command
+ * that can build a CMake-generated project. Usually {@code make}.</li>
+ * <li><strong>cmake_ignore_err_option</strong>: The buildscript processor´s
+ * command option to ignore build errors. Usually {@code -k}.</li>
  * <li><strong>cmake_build_cmd_earg</strong> The extra argument to pass to the
  * buildscript processor.</li>
  * </ul>
@@ -46,6 +58,13 @@ import de.marw.cdt.cmake.core.internal.settings.WindowsPreferences;
  */
 public class CmakeOsMacroSupplier implements IConfigurationBuildMacroSupplier,
     IReservedMacroNameSupplier {
+
+  /**
+   * cached CMAKE_BUILD_TOOL entry from CMakeCache.txt or {@code null} if
+   * CMakeCache.txt could not be parsed
+   */
+  private String cachedCmakeBuildTool;
+  private long cmCacheFileLastModified;
 
   /*-
    * @see org.eclipse.cdt.managedbuilder.macros.IConfigurationBuildMacroSupplier#getMacro(java.lang.String, org.eclipse.cdt.managedbuilder.core.IConfiguration, org.eclipse.cdt.managedbuilder.macros.IBuildMacroProvider)
@@ -65,33 +84,36 @@ public class CmakeOsMacroSupplier implements IConfigurationBuildMacroSupplier,
       final String os = Platform.getOS();
 
       if ("cmake_build_cmd".equals(macroName)) {
-        String buildscriptProcessorCmd;
-        if (Platform.OS_WIN32.equals(os)) {
-          WindowsPreferences osPrefs = prefs.getWindowsPreferences();
-          buildscriptProcessorCmd = osPrefs.getBuildscriptProcessorCommand();
-          if (buildscriptProcessorCmd == null) {
-            buildscriptProcessorCmd = osPrefs.getGenerator().getBuildscriptProcessorCommand();
+        // try to get CMAKE_BUILD_TOOL entry from CMakeCache.txt...
+        String buildscriptProcessorCmd = getCommandFromCMakeCache(configuration);
+        if (buildscriptProcessorCmd == null) {
+          // fall back to values from OS preferences
+          AbstractOsPreferences osPrefs;
+          if (Platform.OS_WIN32.equals(os)) {
+            osPrefs = prefs.getWindowsPreferences();
+          } else {
+            // fall back to linux, if OS is unknown
+            osPrefs = prefs.getLinuxPreferences();
           }
-        } else {
-          // fall back to linux, if OS is unknown
-          LinuxPreferences osPrefs = prefs.getLinuxPreferences();
           buildscriptProcessorCmd = osPrefs.getBuildscriptProcessorCommand();
           if (buildscriptProcessorCmd == null) {
-            buildscriptProcessorCmd = osPrefs.getGenerator().getBuildscriptProcessorCommand();
+            // fall back to builtin defaults from CMake generator
+            buildscriptProcessorCmd = osPrefs.getGenerator()
+                .getBuildscriptProcessorCommand();
           }
         }
         return new CmakeBuildMacro(macroName, ICdtVariable.VALUE_TEXT,
             buildscriptProcessorCmd);
       } else {
-        CmakeGenerator generator;
+        // all other macros...
+        AbstractOsPreferences osPrefs;
         if (Platform.OS_WIN32.equals(os)) {
-          WindowsPreferences osPrefs = prefs.getWindowsPreferences();
-          generator = osPrefs.getGenerator();
+          osPrefs = prefs.getWindowsPreferences();
         } else {
           // fall back to linux, if OS is unknown
-          LinuxPreferences osPrefs = prefs.getLinuxPreferences();
-          generator = osPrefs.getGenerator();
+          osPrefs = prefs.getLinuxPreferences();
         }
+        CmakeGenerator generator = osPrefs.getGenerator();
 
         if ("cmake_ignore_err_option".equals(macroName)) {
           return new CmakeBuildMacro(macroName, ICdtVariable.VALUE_TEXT,
@@ -106,8 +128,67 @@ public class CmakeOsMacroSupplier implements IConfigurationBuildMacroSupplier,
       }
     } catch (CoreException ex) {
       // TODO Auto-generated catch block
+      ex.printStackTrace();
     }
     return null;
+  }
+
+  /**
+   * Tries to get {@code "cmake_build_cmd"} value from internal cache first. If
+   * internal cache is invalid, tries to read the value of the
+   * {@code CMAKE_BUILD_TOOL} entry from CMakeCache.txt.
+   *
+   * @param configuration
+   *        configuration
+   * @return a value for the {@code "cmake_build_cmd"} macro or {@code null}, if
+   *         none could be determined
+   */
+  private String getCommandFromCMakeCache(IConfiguration configuration) {
+    final IBuilder builder = configuration.getBuilder();
+    IPath buildRoot = builder.getBuildLocation();
+    // returns bullshit:  IPath builderCWD = cfgd.getBuildSetting().getBuilderCWD();
+    IPath cmCache = buildRoot.append("CMakeCache.txt");
+    File file = cmCache.makeAbsolute().toFile();
+
+    if (file.isFile()) {
+      final long lastModified = file.lastModified();
+      if (cmCacheFileLastModified == 0
+          || lastModified > cmCacheFileLastModified) {
+        // internally cached value is outdated, must parse CMakeCache.txt
+        cmCacheFileLastModified = lastModified;
+        cachedCmakeBuildTool = null; // invalidate cache
+        // parse CMakeCache.txt...
+        InputStream is = null;
+        try {
+          is = new FileInputStream(file);
+          Set<SimpleCMakeCacheEntry> entries = new HashSet<SimpleCMakeCacheEntry>();
+          final EntryFilter filter = new EntryFilter() {
+            @Override
+            public boolean accept(String key) {
+              return "CMAKE_BUILD_TOOL".equals(key);
+            }
+          };
+          new CMakeCacheFileParser().parse(is, filter, entries, null);
+          Iterator<SimpleCMakeCacheEntry> iter = entries.iterator();
+          if (iter.hasNext()) {
+            // got a CMAKE_BUILD_TOOL entry, update internally cached value
+            cachedCmakeBuildTool = iter.next().getValue();
+          }
+        } catch (IOException ex) {
+          // ignore, the build command will run cmake anyway.
+          // So let cmake complain about its cache file
+//              ex.printStackTrace();
+        } finally {
+          if (is != null) {
+            try {
+              is.close();
+            } catch (IOException ignore) {
+            }
+          }
+        }
+      }
+    }
+    return cachedCmakeBuildTool;
   }
 
   /*-
