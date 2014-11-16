@@ -32,6 +32,7 @@ import org.eclipse.cdt.managedbuilder.core.IManagedBuildInfo;
 import org.eclipse.cdt.managedbuilder.core.ManagedBuildManager;
 import org.eclipse.cdt.managedbuilder.makegen.IManagedBuilderMakefileGenerator;
 import org.eclipse.cdt.managedbuilder.makegen.IManagedBuilderMakefileGenerator2;
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -67,8 +68,7 @@ import de.marw.cdt.cmake.core.internal.settings.WindowsPreferences;
  *
  * @author Martin Weber
  */
-public class BuildscriptGenerator implements
-    IManagedBuilderMakefileGenerator2 {
+public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
 
   /** CBuildConsole element id */
   private static final String CMAKE_CONSOLE_ID = "de.marw.cdt.cmake.core.cmakeConsole";
@@ -76,7 +76,8 @@ public class BuildscriptGenerator implements
 
   private IProject project;
   private IProgressMonitor monitor;
-  private IPath topBuildDir; //  Build directory - relative to the project
+  private IPath topBuildDirAbs;
+  private IFolder topBuildFolder; //  Build directory - relative to the project
   private IConfiguration config;
   private IBuilder builder;
 
@@ -102,8 +103,8 @@ public class BuildscriptGenerator implements
     // set the top build dir path for the current configuration
     // TODO MWE allow user to customize the root common to all configs
     final IPath binPath = new Path("build").append(cfg.getName());
-    topBuildDir = project.getFolder(binPath).getProjectRelativePath();
-
+    this.topBuildFolder = project.getFolder(binPath);
+    topBuildDirAbs = topBuildFolder.getLocation();
   }
 
   /*-
@@ -111,7 +112,7 @@ public class BuildscriptGenerator implements
    */
   @Override
   public IPath getBuildWorkingDir() {
-    return topBuildDir;
+    return topBuildDirAbs;
   }
 
   /*-
@@ -126,11 +127,9 @@ public class BuildscriptGenerator implements
      * This is an incremental build, so if the build directory is not there,
      * then a rebuild is needed.
      */
-    IFolder folder = project.getFolder(getBuildWorkingDir());
-
-    final IFile cmakeCache = folder.getFile("CMakeCache.txt");
-    final IFile makefile = folder.getFile(getMakefileName());
-    if (!folder.exists() || !cmakeCache.exists() || !makefile.exists()) {
+    final IFile cmakeCache = topBuildFolder.getFile("CMakeCache.txt");
+    final IFile makefile = topBuildFolder.getFile(getMakefileName());
+    if (!topBuildFolder.exists() || !cmakeCache.exists() || !makefile.exists()) {
       if (cmakeCache.exists() && !makefile.exists()) {
         // The user changed the generator, clear cache..
         cmakeCache.delete(true, monitor);
@@ -182,7 +181,8 @@ public class BuildscriptGenerator implements
       String msg = "No source directories in project " + project.getName();
       updateMonitor(msg);
       status = new MultiStatus(CMakePlugin.PLUGIN_ID, IStatus.INFO, "", null);
-      status.add(new Status(IStatus.INFO, CMakePlugin.PLUGIN_ID, IManagedBuilderMakefileGenerator.NO_SOURCE_FOLDERS, msg, null));
+      status.add(new Status(IStatus.INFO, CMakePlugin.PLUGIN_ID,
+          IManagedBuilderMakefileGenerator.NO_SOURCE_FOLDERS, msg, null));
       return status;
     } else {
       ICConfigurationDescription cfgDes = ManagedBuildManager
@@ -214,9 +214,10 @@ public class BuildscriptGenerator implements
       }
       final IPath srcPath = srcEntry.getFullPath(); // project relative
       // Create the top-level directory for the build output
-      final IPath cfgBuildPath = createFolder(MULTIPLE_SOURCE_DIRS_SUPPORTED ? topBuildDir
-          .append(srcPath) : topBuildDir);
-      final IPath buildDir = project.getFolder(cfgBuildPath).getLocation();
+//      createFolder(MULTIPLE_SOURCE_DIRS_SUPPORTED ? topBuildFolder
+//          .getFolder(srcPath) : topBuildFolder);
+      createFolder(topBuildFolder);
+      final IPath buildDir = topBuildFolder.getLocation();
 
       IPath srcDir;
       if (srcPath.isEmpty()) {
@@ -245,27 +246,21 @@ public class BuildscriptGenerator implements
    * the folder, set the derived bit to true so the CM system ignores the
    * contents. If the resource exists, respect the existing derived setting.
    *
-   * @param path
-   *        a path, relative to the project root
+   * @param folder
+   *        a folder, somewhere below the project root
    * @return the project relative path of the created folder
    */
-  private IPath createFolder(IPath path) throws CoreException {
-    IFolder folder = project.getFolder(path);
-
+  private void createFolder(IFolder folder) throws CoreException {
     if (!folder.exists()) {
       // Make sure that parent folders exist
-      IPath parentPath = path.removeLastSegments(1);
-      // Assume that the parent exists if the path is empty
-      if (!parentPath.isEmpty()) {
-        IFolder parent = project.getFolder(parentPath);
-        if (!parent.exists()) {
-          createFolder(parentPath);
-        }
+      IContainer parent = folder.getParent();
+      if (parent instanceof IFolder && !parent.exists()) {
+        createFolder((IFolder) parent);
       }
 
       // Now make the requested folder
       try {
-        folder.create(true, true, monitor);
+        folder.create(false, true, monitor);
       } catch (CoreException e) {
         if (e.getStatus().getCode() == IResourceStatus.PATH_OCCUPIED)
           folder.refreshLocal(IResource.DEPTH_ZERO, monitor);
@@ -278,8 +273,6 @@ public class BuildscriptGenerator implements
         folder.setDerived(true, monitor);
       }
     }
-
-    return folder.getProjectRelativePath();
   }
 
   /**
