@@ -112,6 +112,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
    */
   @Override
   public IPath getBuildWorkingDir() {
+    // prefer to return absolute file system path, since CDT does weird thing if relative
     return topBuildDirAbs;
   }
 
@@ -124,7 +125,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     /*
      * Let's do a sanity check right now.
      *
-     * This is an incremental build, so if the build directory is not there,
+     * If this is an incremental build, so if the build directory is not there,
      * then a rebuild is needed.
      */
     final IFile cmakeCache = topBuildFolder.getFile("CMakeCache.txt");
@@ -217,7 +218,6 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
 //      createFolder(MULTIPLE_SOURCE_DIRS_SUPPORTED ? topBuildFolder
 //          .getFolder(srcPath) : topBuildFolder);
       createFolder(topBuildFolder);
-      final IPath buildDir = topBuildFolder.getLocation();
 
       IPath srcDir;
       if (srcPath.isEmpty()) {
@@ -229,7 +229,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       }
 
       checkCancel();
-      MultiStatus status2 = invokeCMake(srcDir, buildDir, console);
+      MultiStatus status2 = invokeCMake(srcDir, topBuildDirAbs, console);
       // NOTE: Commonbuilder reads getCode() to detect errors, not getSeverity()
       if (status2.getCode() == IStatus.ERROR) {
         // failed to generate
@@ -248,7 +248,6 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
    *
    * @param folder
    *        a folder, somewhere below the project root
-   * @return the project relative path of the created folder
    */
   private void createFolder(IFolder folder) throws CoreException {
     if (!folder.exists()) {

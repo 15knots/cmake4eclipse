@@ -22,7 +22,6 @@ import org.eclipse.cdt.core.cdtvariables.CdtVariable;
 import org.eclipse.cdt.core.cdtvariables.CdtVariableException;
 import org.eclipse.cdt.core.cdtvariables.ICdtVariable;
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
-import org.eclipse.cdt.managedbuilder.core.IBuilder;
 import org.eclipse.cdt.managedbuilder.core.IConfiguration;
 import org.eclipse.cdt.managedbuilder.core.ManagedBuildManager;
 import org.eclipse.cdt.managedbuilder.macros.BuildMacroException;
@@ -31,9 +30,13 @@ import org.eclipse.cdt.managedbuilder.macros.IBuildMacroProvider;
 import org.eclipse.cdt.managedbuilder.macros.IConfigurationBuildMacroSupplier;
 import org.eclipse.cdt.managedbuilder.macros.IReservedMacroNameSupplier;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
 
+import de.marw.cdt.cmake.core.CMakePlugin;
 import de.marw.cdt.cmake.core.cmakecache.CMakeCacheFileParser;
 import de.marw.cdt.cmake.core.cmakecache.CMakeCacheFileParser.EntryFilter;
 import de.marw.cdt.cmake.core.cmakecache.SimpleCMakeCacheEntry;
@@ -58,6 +61,7 @@ import de.marw.cdt.cmake.core.internal.settings.ConfigurationManager;
  */
 public class CmakeOsMacroSupplier implements IConfigurationBuildMacroSupplier,
     IReservedMacroNameSupplier {
+  private static final ILog log = CMakePlugin.getDefault().getLog();
 
   /**
    * cached CMAKE_BUILD_TOOL entry from CMakeCache.txt or {@code null} if
@@ -85,7 +89,7 @@ public class CmakeOsMacroSupplier implements IConfigurationBuildMacroSupplier,
 
       if ("cmake_build_cmd".equals(macroName)) {
         // try to get CMAKE_BUILD_TOOL entry from CMakeCache.txt...
-        String buildscriptProcessorCmd = getCommandFromCMakeCache(configuration);
+        String buildscriptProcessorCmd = getCommandFromCMakeCache(cfgd);
         if (buildscriptProcessorCmd == null) {
           // fall back to values from OS preferences
           AbstractOsPreferences osPrefs;
@@ -113,22 +117,21 @@ public class CmakeOsMacroSupplier implements IConfigurationBuildMacroSupplier,
           // fall back to linux, if OS is unknown
           osPrefs = prefs.getLinuxPreferences();
         }
-        CmakeGenerator generator = osPrefs.getGenerator();
+        final CmakeGenerator generator = osPrefs.getGenerator();
 
         if ("cmake_ignore_err_option".equals(macroName)) {
           return new CmakeBuildMacro(macroName, ICdtVariable.VALUE_TEXT,
               generator.getIgnoreErrOption());
         }
         if ("cmake_build_cmd_earg".equals(macroName)) {
-          String extraArg = generator.getBuildscriptProcessorExtraArg();
+          final String extraArg = generator.getBuildscriptProcessorExtraArg();
           if (extraArg != null)
             return new CmakeBuildMacro(macroName, ICdtVariable.VALUE_TEXT,
                 extraArg);
         }
       }
-    } catch (CoreException ex) {
-      // TODO Auto-generated catch block
-      ex.printStackTrace();
+    } catch (final CoreException ex) {
+      log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, null, ex));
     }
     return null;
   }
@@ -138,17 +141,16 @@ public class CmakeOsMacroSupplier implements IConfigurationBuildMacroSupplier,
    * internal cache is invalid, tries to read the value of the
    * {@code CMAKE_BUILD_TOOL} entry from CMakeCache.txt.
    *
-   * @param configuration
+   * @param cfgd
    *        configuration
    * @return a value for the {@code "cmake_build_cmd"} macro or {@code null}, if
    *         none could be determined
    */
-  private String getCommandFromCMakeCache(IConfiguration configuration) {
-    final IBuilder builder = configuration.getBuilder();
-    IPath buildRoot = builder.getBuildLocation();
-    // returns bullshit:  IPath builderCWD = cfgd.getBuildSetting().getBuilderCWD();
-    IPath cmCache = buildRoot.append("CMakeCache.txt");
-    File file = cmCache.makeAbsolute().toFile();
+  private String getCommandFromCMakeCache(ICConfigurationDescription cfgd) {
+    final IPath builderCWD = cfgd.getBuildSetting().getBuilderCWD()
+        .makeAbsolute();
+    final IPath cmCache = builderCWD.append("CMakeCache.txt");
+    final File file = cmCache.toFile();
 
     if (file.isFile()) {
       final long lastModified = file.lastModified();
@@ -161,7 +163,7 @@ public class CmakeOsMacroSupplier implements IConfigurationBuildMacroSupplier,
         InputStream is = null;
         try {
           is = new FileInputStream(file);
-          Set<SimpleCMakeCacheEntry> entries = new HashSet<SimpleCMakeCacheEntry>();
+          final Set<SimpleCMakeCacheEntry> entries = new HashSet<SimpleCMakeCacheEntry>();
           final EntryFilter filter = new EntryFilter() {
             @Override
             public boolean accept(String key) {
@@ -169,7 +171,7 @@ public class CmakeOsMacroSupplier implements IConfigurationBuildMacroSupplier,
             }
           };
           new CMakeCacheFileParser().parse(is, filter, entries, null);
-          Iterator<SimpleCMakeCacheEntry> iter = entries.iterator();
+          final Iterator<SimpleCMakeCacheEntry> iter = entries.iterator();
           if (iter.hasNext()) {
             // got a CMAKE_BUILD_TOOL entry, update internally cached value
             cachedCmakeBuildTool = iter.next().getValue();
@@ -177,7 +179,8 @@ public class CmakeOsMacroSupplier implements IConfigurationBuildMacroSupplier,
         } catch (IOException ex) {
           // ignore, the build command will run cmake anyway.
           // So let cmake complain about its cache file
-//              ex.printStackTrace();
+          log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID,
+              "Failed to parse file " + file, ex));
         } finally {
           if (is != null) {
             try {
