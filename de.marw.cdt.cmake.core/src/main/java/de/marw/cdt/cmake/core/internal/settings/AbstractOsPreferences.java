@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.cdt.core.settings.model.ICStorageElement;
+import org.eclipse.core.runtime.Platform;
 
 import de.marw.cdt.cmake.core.internal.CmakeGenerator;
 import de.marw.cdt.cmake.core.internal.storage.CmakeDefineSerializer;
@@ -38,12 +39,15 @@ public abstract class AbstractOsPreferences {
   private boolean useDefaultCommand;
   private List<CmakeDefine> defines = new ArrayList<CmakeDefine>(0);
   private List<CmakeUnDefine> undefines = new ArrayList<CmakeUnDefine>(0);
+  private CmakeGenerator generatedWith;
 
   /**
    * Creates a new object, initialized with all default values.
    */
   public AbstractOsPreferences() {
     reset();
+    // after startup: assume the makefiles have been generated with the saved generator
+    generatedWith = generator;
   }
 
   /**
@@ -61,6 +65,26 @@ public abstract class AbstractOsPreferences {
     setBuildscriptProcessorCommand(null);
     defines.clear();
     undefines.clear();
+  }
+
+  /**
+   * Gets the platform specific preferences object from the specified
+   * preferences for the current operating system (the OS we are running under).
+   * If the OS cannot be determined or its specific preferences are not
+   * implemented, the platform specific preferences for Linux are returned as a
+   * fall-back.
+   *
+   * @return the platform specific or fall-back preferences
+   */
+  public static AbstractOsPreferences extractOsPreferences(
+      CMakePreferences prefs) {
+    final String os = Platform.getOS();
+    if (Platform.OS_WIN32.equals(os)) {
+      return prefs.getWindowsPreferences();
+    } else {
+      // fall back to linux, if OS is unknown
+      return prefs.getLinuxPreferences();
+    }
   }
 
   /**
@@ -242,6 +266,22 @@ public abstract class AbstractOsPreferences {
     // undefines...
     Util.serializeCollection(CMakePreferences.ELEM_UNDEFINES, parent,
         new CmakeUndefineSerializer(), undefines);
+  }
+
+  /**
+   * Gets the generator that was used to generate the CMake cache file and the
+   * makefiles. This property is not persisted.
+   */
+  public CmakeGenerator getGeneratedWith() {
+    return this.generatedWith;
+  }
+
+  /**
+   * Sets the generator that was used to generate the CMake cache file and the
+   * makefiles.
+   */
+  public void setGeneratedWith(CmakeGenerator generator) {
+    this.generatedWith = generator;
   }
 
 }

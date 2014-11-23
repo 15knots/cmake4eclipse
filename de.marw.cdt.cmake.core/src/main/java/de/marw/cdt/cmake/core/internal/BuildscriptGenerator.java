@@ -41,13 +41,13 @@ import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceStatus;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.variables.IStringVariableManager;
@@ -59,8 +59,6 @@ import de.marw.cdt.cmake.core.internal.settings.CMakePreferences;
 import de.marw.cdt.cmake.core.internal.settings.CmakeDefine;
 import de.marw.cdt.cmake.core.internal.settings.CmakeUnDefine;
 import de.marw.cdt.cmake.core.internal.settings.ConfigurationManager;
-import de.marw.cdt.cmake.core.internal.settings.LinuxPreferences;
-import de.marw.cdt.cmake.core.internal.settings.WindowsPreferences;
 
 /**
  * Generates makefiles and other build scripts from CMake scripts
@@ -69,6 +67,7 @@ import de.marw.cdt.cmake.core.internal.settings.WindowsPreferences;
  * @author Martin Weber
  */
 public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
+  private static final ILog log = CMakePlugin.getDefault().getLog();
 
   /** CBuildConsole element id */
   private static final String CMAKE_CONSOLE_ID = "de.marw.cdt.cmake.core.cmakeConsole";
@@ -116,25 +115,23 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     return topBuildDirAbs;
   }
 
-  /*-
-   * @see org.eclipse.cdt.managedbuilder.makegen.IManagedBuilderMakefileGenerator#generateMakefiles(org.eclipse.core.resources.IResourceDelta)
+  /** Invoked on incremental build.
    */
   @Override
   public MultiStatus generateMakefiles(IResourceDelta delta)
       throws CoreException {
-    /*
-     * Let's do a sanity check right now.
+    /* Let's do a sanity check right now.
      *
      * If this is an incremental build, so if the build directory is not there,
      * then a rebuild is needed.
      */
     final IFile cmakeCache = topBuildFolder.getFile("CMakeCache.txt");
+    if (cmakeCache.exists() && isGeneratorChanged()) {
+      // The user changed the generator, clear cache..
+      cmakeCache.getLocation().toFile().delete();
+    }
     final IFile makefile = topBuildFolder.getFile(getMakefileName());
     if (!topBuildFolder.exists() || !cmakeCache.exists() || !makefile.exists()) {
-      if (cmakeCache.exists() && !makefile.exists()) {
-        // The user changed the generator, clear cache..
-        cmakeCache.delete(true, monitor);
-      }
       return regenerateMakefiles();
     }
 
@@ -391,20 +388,38 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     appendUndefines(args, prefs.getUndefines());
 
     /* add settings for the operating system we are running under */
-    final String os = Platform.getOS();
-    if (Platform.OS_WIN32.equals(os)) {
-      WindowsPreferences osPrefs = prefs.getWindowsPreferences();
-      appendAbstractOsPreferences(args, osPrefs);
-    } else {
-      // fall back to linux, if OS is unknown
-      LinuxPreferences osPrefs = prefs.getLinuxPreferences();
-      appendAbstractOsPreferences(args, osPrefs);
-    }
+    final AbstractOsPreferences osPrefs = AbstractOsPreferences
+        .extractOsPreferences(prefs);
+    appendAbstractOsPreferences(args, osPrefs);
+    // TODO (does not belong here) remember last generator
+    osPrefs.setGeneratedWith(osPrefs.getGenerator());
 
     // tell cmake where its script is located..
     args.add(srcDir.toOSString());
 
     return args;
+  }
+
+  /**
+   * Gets whether the user changed the generator setting in the preferences.
+   *
+   * @return {@code true} if the user changed the generator setting in the
+   *         preferences, otherwise {@code false}
+   */
+  private boolean isGeneratorChanged() {
+    // load project properties..
+    final ICConfigurationDescription cfgd = ManagedBuildManager
+        .getDescriptionForConfiguration(config);
+    CMakePreferences prefs;
+    try {
+      prefs = ConfigurationManager.getInstance().getOrLoad(cfgd);
+      AbstractOsPreferences osPrefs = AbstractOsPreferences
+          .extractOsPreferences(prefs);
+      return osPrefs.getGenerator() != osPrefs.getGeneratedWith();
+    } catch (CoreException ex) {
+      log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, null, ex));
+      return false;
+    }
   }
 
   /**
@@ -489,19 +504,10 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       ex.printStackTrace();
       return "Makefile"; // default
     }
-    CmakeGenerator generator;
-    final String os = Platform.getOS();
-    if (Platform.OS_WIN32.equals(os)) {
-      WindowsPreferences osPrefs = prefs.getWindowsPreferences();
-      generator = osPrefs.getGenerator();
-    } else {
-      // fall back to linux, if OS is unknown
-      LinuxPreferences osPrefs = prefs.getLinuxPreferences();
-      generator = osPrefs.getGenerator();
-    }
-
+    AbstractOsPreferences osPrefs = AbstractOsPreferences
+        .extractOsPreferences(prefs);
     // file generated by cmake
-    return generator.getMakefileName();
+    return osPrefs.getGenerator().getMakefileName();
   }
 
   /*-

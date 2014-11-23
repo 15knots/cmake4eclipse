@@ -33,7 +33,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 
 import de.marw.cdt.cmake.core.CMakePlugin;
@@ -85,20 +84,14 @@ public class CmakeOsMacroSupplier implements IConfigurationBuildMacroSupplier,
     try {
       final CMakePreferences prefs = ConfigurationManager.getInstance()
           .getOrLoad(cfgd);
-      final String os = Platform.getOS();
-
+      final AbstractOsPreferences osPrefs = AbstractOsPreferences
+          .extractOsPreferences(prefs);
       if ("cmake_build_cmd".equals(macroName)) {
         // try to get CMAKE_BUILD_TOOL entry from CMakeCache.txt...
-        String buildscriptProcessorCmd = getCommandFromCMakeCache(cfgd);
+        String buildscriptProcessorCmd = getCommandFromCMakeCache(cfgd,
+            osPrefs.getGenerator() != osPrefs.getGeneratedWith());
         if (buildscriptProcessorCmd == null) {
           // fall back to values from OS preferences
-          AbstractOsPreferences osPrefs;
-          if (Platform.OS_WIN32.equals(os)) {
-            osPrefs = prefs.getWindowsPreferences();
-          } else {
-            // fall back to linux, if OS is unknown
-            osPrefs = prefs.getLinuxPreferences();
-          }
           buildscriptProcessorCmd = osPrefs.getBuildscriptProcessorCommand();
           if (buildscriptProcessorCmd == null) {
             // fall back to builtin defaults from CMake generator
@@ -110,13 +103,6 @@ public class CmakeOsMacroSupplier implements IConfigurationBuildMacroSupplier,
             buildscriptProcessorCmd);
       } else {
         // all other macros...
-        AbstractOsPreferences osPrefs;
-        if (Platform.OS_WIN32.equals(os)) {
-          osPrefs = prefs.getWindowsPreferences();
-        } else {
-          // fall back to linux, if OS is unknown
-          osPrefs = prefs.getLinuxPreferences();
-        }
         final CmakeGenerator generator = osPrefs.getGenerator();
 
         if ("cmake_ignore_err_option".equals(macroName)) {
@@ -143,10 +129,14 @@ public class CmakeOsMacroSupplier implements IConfigurationBuildMacroSupplier,
    *
    * @param cfgd
    *        configuration
+   * @param forceParsing
+   *        {@code true} to force parsing of the cmake cache file without
+   *        checking its time-stamp, otherwise {@code false}.
    * @return a value for the {@code "cmake_build_cmd"} macro or {@code null}, if
    *         none could be determined
    */
-  private String getCommandFromCMakeCache(ICConfigurationDescription cfgd) {
+  private String getCommandFromCMakeCache(ICConfigurationDescription cfgd,
+      boolean forceParsing) {
     final IPath builderCWD = cfgd.getBuildSetting().getBuilderCWD()
         .makeAbsolute();
     final IPath cmCache = builderCWD.append("CMakeCache.txt");
@@ -154,7 +144,7 @@ public class CmakeOsMacroSupplier implements IConfigurationBuildMacroSupplier,
 
     if (file.isFile()) {
       final long lastModified = file.lastModified();
-      if (cmCacheFileLastModified == 0
+      if (forceParsing || cmCacheFileLastModified == 0
           || lastModified > cmCacheFileLastModified) {
         // internally cached value is outdated, must parse CMakeCache.txt
         cmCacheFileLastModified = lastModified;
