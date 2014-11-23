@@ -4,13 +4,11 @@
   type='org.eclipse.equinox.internal.p2.metadata.repository.CompositeMetadataRepository' version='1.0.0'>
   <properties size='1'>
     <!-- get new time w/ `date +%s000` -->
-    <property name='p2.timestamp' value='1409688486000' />
+    <property name='p2.timestamp' value='1.2.0.201404092022' />
     <property name='p2.name' value='cmake4eclipsecdt Updates' />
   </properties>
-  <children size='2'>
+  <children size='1'>
     <child
       location='jar:https://googledrive.com/host/0B-QU1Qnto3huZUZ0QUdxM01pR0U/cmake4eclipsecdt-1.1.0.zip!/' />
-    <child
-      location='jar:https://googledrive.com/host/0B-QU1Qnto3huZUZ0QUdxM01pR0U/cmake4eclipsecdt-1.0.0.zip!/' />
   </children>
 </repository>
