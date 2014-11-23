@@ -23,10 +23,8 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -80,12 +78,12 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
   private Button b_cmdBrowseFiles;
   /** Combo that shows the generator names for cmake */
   private ComboViewer c_generator;
-  /** 'use default buildscript processor' checkbox */
-  private Button b_buildCmdFromPath;
-  /** cmake executable */
-  private Text t_buildCmd;
-  /** browse files for cmake executable */
-  private Button b_buildCmdBrowseFiles;
+//  /** 'use XXX default buildscript processor' checkbox */
+//  private Button b_buildCmdFromPath;
+//  /** cmake XXX executable */
+//  private Text t_buildCmd;
+//  /** browse XXX files for cmake executable */
+//  private Button b_buildCmdBrowseFiles;
 
   /** the table showing the cmake defines */
   private DefinesViewer definesViewer;
@@ -203,68 +201,6 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
         c_generator.getCombo().setEnabled(false);
     } // makefile generator combo
 
-    // cmake buildscript processor group...
-    {
-      Group gr = WidgetHelper.createGroup(usercomp, SWT.FILL, 2,
-          "Buildscript processor (CMake portable toolchain only)", 2);
-      gr.setToolTipText("These values have only effect if the CMake portable toolchain is selected on the Tool Chain Editor tab.");
-      b_buildCmdFromPath = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2,
-          "Use command &matching the buildscript generator");
-
-      setupLabel(gr, "F&ile", 1, SWT.BEGINNING);
-
-      t_buildCmd = setupText(gr, 1, GridData.FILL_HORIZONTAL);
-
-      // "Filesystem", "Variables" dialog launcher buttons...
-      Composite buttonBar = new Composite(gr, SWT.NONE);
-      {
-        buttonBar.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false,
-            3, 1));
-        layout = new GridLayout(2, false);
-        layout.marginHeight = 0;
-        layout.marginWidth = 0;
-        buttonBar.setLayout(layout);
-      }
-      b_buildCmdBrowseFiles = WidgetHelper.createButton(buttonBar,
-          "File System...", true);
-      b_buildCmdBrowseFiles.addSelectionListener(new SelectionAdapter() {
-        @Override
-        public void widgetSelected(SelectionEvent e) {
-          IDialogSettings settings = CMakePlugin.getDefault()
-              .getDialogSettings();
-          FileDialog dialog = new FileDialog(t_buildCmd.getShell());
-          dialog.setFilterPath(settings.get("bs_proc_dir"));
-          String text = dialog.open();
-          settings.put("bs_proc_dir", dialog.getFilterPath());
-          if (text != null) {
-            t_buildCmd.insert(text);
-          }
-        }
-      });
-
-      // to adjust sensitivity...
-      b_buildCmdFromPath.addSelectionListener(new SelectionAdapter() {
-        @Override
-        public void widgetSelected(SelectionEvent event) {
-          final Button btn = (Button) event.widget;
-          handleBuildCommandEnabled(!btn.getSelection());
-        }
-      });
-
-    } // cmake executable group
-
-    // build command display follows generator default, if use-default is enabled
-    c_generator.addSelectionChangedListener(new ISelectionChangedListener() {
-      @Override
-      public void selectionChanged(SelectionChangedEvent event) {
-        if (b_buildCmdFromPath.getSelection()) {
-          CmakeGenerator generator = (CmakeGenerator) ((IStructuredSelection) event
-              .getSelection()).getFirstElement();
-          t_buildCmd.setText(generator.getBuildscriptProcessorCommand());
-        }
-
-      }
-    });
     // cmake defines table...
     definesViewer = new DefinesViewer(usercomp);
     // cmake undefines table...
@@ -310,10 +246,6 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
     CmakeGenerator generator = prefs.getGenerator();
     c_generator.setSelection(new StructuredSelection(generator));
 
-    b_buildCmdFromPath.setSelection(prefs.getBuildscriptProcessorCommand() == null);
-    // initialize buildscript processor display, adjust sensitivity...
-    handleBuildCommandEnabled(prefs.getBuildscriptProcessorCommand() != null);
-
     definesViewer.setInput(prefs.getDefines());
     undefinesViewer.setInput(prefs.getUndefines());
   }
@@ -333,11 +265,6 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
     final IStructuredSelection sel = (IStructuredSelection) c_generator
         .getSelection();
     prefs.setGenerator((CmakeGenerator) sel.getFirstElement());
-    if (t_buildCmd.isEnabled()) {
-      prefs.setBuildscriptProcessorCommand(t_buildCmd.getText().trim());
-    } else {
-      prefs.setBuildscriptProcessorCommand(null);
-    }
     // NB: defines & undefines are modified by the widget listeners directly
   }
 
@@ -351,34 +278,6 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
   private void handleCommandEnabled(boolean enabled) {
     t_cmd.setEnabled(enabled);
     b_cmdBrowseFiles.setEnabled(enabled);
-  }
-
-  /**
-   * Changes sensitivity of controls to enter the buildscript processor. Also
-   * sets the buildscript processor field.<br>
-   * Necessary since Button.setSelection does not fire events.
-   *
-   * @param enabled
-   *        the new enabled state
-   */
-  private void handleBuildCommandEnabled(boolean enabled) {
-    t_buildCmd.setEnabled(enabled);
-    b_buildCmdBrowseFiles.setEnabled(enabled);
-
-    // build command display follows generator default, if use-default is enabled
-    if (!enabled) {
-      final IStructuredSelection sel = (IStructuredSelection) c_generator
-          .getSelection();
-      final CmakeGenerator generator = (CmakeGenerator) sel.getFirstElement();
-      t_buildCmd.setText(generator.getBuildscriptProcessorCommand());
-    } else {
-      final String buildscriptProcessorCmd = prefs.getBuildscriptProcessorCommand();
-      if (buildscriptProcessorCmd != null) {
-        t_buildCmd.setText(buildscriptProcessorCmd);
-      } else {
-        // intentionally do nothing, keep default command as a suggestion to the user
-      }
-    }
   }
 
   /**
@@ -439,7 +338,7 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
   }
 
   /**
-   * Overridden to the displayed values in the model when this tab becomes
+   * Overridden to save the displayed values in the model when this tab becomes
    * invisible.
    */
   @Override
