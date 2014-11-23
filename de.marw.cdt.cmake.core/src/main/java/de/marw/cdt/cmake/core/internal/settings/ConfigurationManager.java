@@ -26,7 +26,7 @@ import org.eclipse.core.runtime.CoreException;
 public final class ConfigurationManager {
   private static ConfigurationManager instance;
 
-  private WeakHashMap<ICConfigurationDescription, CMakePreferences> map = new WeakHashMap<ICConfigurationDescription, CMakePreferences>(
+  private WeakHashMap<String, CMakePreferences> map = new WeakHashMap<String, CMakePreferences>(
       2);
 
   /**
@@ -65,11 +65,11 @@ public final class ConfigurationManager {
    * Gets the {@code CMakePreferences} object associated with the specified
    * {@code ICConfigurationDescription}.
    *
-   * @return the stored {@code CMakePreferences} object, or {@code null} if this object
-   *         contains no mapping for the configuration description
+   * @return the stored {@code CMakePreferences} object, or {@code null} if this
+   *         object contains no mapping for the configuration description
    */
   public CMakePreferences get(ICConfigurationDescription cfgd) {
-    return map.get(cfgd);
+    return map.get(cfgd.getId());
   }
 
   /**
@@ -82,10 +82,10 @@ public final class ConfigurationManager {
    *         description.
    */
   public CMakePreferences getOrCreate(ICConfigurationDescription cfgd) {
-    CMakePreferences pref = map.get(cfgd);
+    CMakePreferences pref = map.get(cfgd.getId());
     if (pref == null) {
       pref = new CMakePreferences();
-      map.put(cfgd, pref);
+      map.put(cfgd.getId(), pref);
     }
     return pref;
   }
@@ -105,13 +105,13 @@ public final class ConfigurationManager {
    */
   public CMakePreferences getOrLoad(ICConfigurationDescription cfgd)
       throws CoreException {
-    CMakePreferences pref = map.get(cfgd);
+    CMakePreferences pref = map.get(cfgd.getId());
     if (pref == null) {
       pref = new CMakePreferences();
       ICStorageElement storage = cfgd.getStorage(
           CMakePreferences.CFG_STORAGE_ID, false);
       pref.loadFromStorage(storage);
-      map.put(cfgd, pref);
+      map.put(cfgd.getId(), pref);
     }
     return pref;
   }
