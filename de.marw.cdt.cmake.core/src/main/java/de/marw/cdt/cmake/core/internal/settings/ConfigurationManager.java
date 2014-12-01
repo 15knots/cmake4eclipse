@@ -26,6 +26,7 @@ import org.eclipse.core.runtime.CoreException;
 public final class ConfigurationManager {
   private static ConfigurationManager instance;
 
+  /** caches CMakePreferences by ICConfigurationDescription.ID */
   private WeakHashMap<String, CMakePreferences> map = new WeakHashMap<String, CMakePreferences>(
       2);
 
