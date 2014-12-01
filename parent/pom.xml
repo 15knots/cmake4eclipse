@@ -16,7 +16,6 @@
 
     <properties>
         <tycho-version>0.21.0</tycho-version>
-        <tycho-extras-version>0.21.0</tycho-extras-version>
         <platform.version>1.0.1</platform.version>
     </properties>
 
