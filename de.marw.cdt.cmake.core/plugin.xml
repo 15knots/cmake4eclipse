@@ -28,8 +28,21 @@
             ignoreErrCmd="-k"
             incrementalBuildTarget="all"
             isSystem="false"
-            name="CMake make Builder">
+            name="CMake Make Builder">
       </builder>
+         <builder
+               autoBuildTarget="all"
+               buildRunner="de.marw.cdt.cmake.core.internal.CmakeBuildRunner"
+               buildfileGenerator="de.marw.cdt.cmake.core.internal.BuildscriptGenerator"
+               cleanBuildTarget="clean"
+               command="CMAKE_BUILD_TOOL"
+               errorParsers="de.marw.cdt.cmake.core.CMakeErrorParser;org.eclipse.cdt.core.MakeErrorParser"
+               id="de.marw.cdt.cmake.core.genscriptbuilder"
+               ignoreErrCmd="-k"
+               incrementalBuildTarget="all"
+               name="CMake Builder (portable)">
+         </builder>
+         <!--
       <toolChain
             archList="all"
             configurationMacroSupplier="de.marw.cdt.cmake.core.internal.CmakeOsMacroSupplier"
@@ -44,10 +57,11 @@
          </targetPlatform>
          <builder
                arguments="${cmake_build_cmd_earg}"
+               buildRunner="de.marw.cdt.cmake.core.internal.CmakeBuildRunner"
                command="${cmake_build_cmd}"
-               id="de.marw.cdt.cmake.core.builder1"
+               id="de.marw.cdt.cmake.core.genscriptbuilder"
                ignoreErrCmd="${cmake_ignore_err_option}"
-               name="CMake buildscript processor (portable)"
+               name="CMake Builder (portable)"
                reservedMacroNameSupplier="de.marw.cdt.cmake.core.internal.CmakeOsMacroSupplier"
                superClass="de.marw.cdt.cmake.core.genmakebuilder">
          </builder>
@@ -68,6 +82,7 @@
             </property>
          </supportedProperties>
       </toolChain>
+      -->
    </extension>
    <!-- project settings UI   -->
   
