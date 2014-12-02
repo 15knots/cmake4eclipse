@@ -13,6 +13,28 @@
       href="http://www.cmake.org/">CMake</a> cross-platform buildscript
     generator into the C/C++ Development Toolkit (CDT).
   </p>
-  <p></p>
+  <h2>Why CMake for CDT?</h2>
+  <p>Blindly invoked, CMake will generate makefiles (or other build scripts)
+    inside the source tree, cluttering it with lots of files and directories
+    that have to be fleed out from version control: This practice might be ok
+    for simple hello-world-projects, but for larger projects, the CMake
+    developers recommend You to set up a separate directory for building the
+    source.</p>
+  <p>
+    Annoyingly, these recommended <strong>out-of-source-builds</strong> impose
+    some tedious tasks on Your co-workers who check out the code and just want
+    to build it:
+  <ol>
+    <li>leave eclipse workbench,</li>
+    <li>manually fire up a command-line shell,</li>
+    <li>manually create a directory for the out-of-source-build,</li>
+    <li>manually change the CWD to that directory,</li>
+    <li>manually invoke cmake, telling it to generate build scripts, which
+      kind of build scripts you want and where source source files live,</li>
+    <li>re-enter eclipse workbench, configure the checked out project to
+      use the generated buildscripts.</li>
+  </ol>
+  <p>cmake4eclipsecdt aims to address these tasks: Co-workers can just check
+    out the source and have all the tedious tasks automated.</p>
 </body>
 </html>
