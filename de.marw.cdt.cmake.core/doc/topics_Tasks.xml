@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <toc label="Tasks" topic="doc/html/o_tasks.html">
     <anchor id="cmake4cdt_Tasks_Anchor"/>
-    <topic href="doc/html/t_enable_generator.html" label="Enabling makefile generation through cmake"/>
+    <topic href="doc/html/t_enable_generator.html" label="Enabling buildscript generation through cmake"/>
     <topic href="doc/html/t_cmake_options_general.html" label="Adjusting general options for cmake"/>
     <topic href="doc/html/t_cmake_symbols_general.html" label="Setting general cmake variables"/>
     <topic href="doc/html/t_cmake_options_OS.html" label="Controlling cross-platform behavior"/>

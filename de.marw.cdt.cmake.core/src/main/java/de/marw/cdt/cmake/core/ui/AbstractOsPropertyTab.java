@@ -78,12 +78,6 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
   private Button b_cmdBrowseFiles;
   /** Combo that shows the generator names for cmake */
   private ComboViewer c_generator;
-//  /** 'use XXX default buildscript processor' checkbox */
-//  private Button b_buildCmdFromPath;
-//  /** cmake XXX executable */
-//  private Text t_buildCmd;
-//  /** browse XXX files for cmake executable */
-//  private Button b_buildCmdBrowseFiles;
 
   /** the table showing the cmake defines */
   private DefinesViewer definesViewer;

@@ -3,20 +3,33 @@
 <head>
 <meta http-equiv="Content-Language" content="en-us" />
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<title>Enable the cmake makefile generator</title>
+<title>Enabling CMake buildscript generation</title>
 <script type="text/javascript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js">
 	
 </script>
 </head>
 <body>
-  <h1>Enable the cmake makefile generator</h1>
+  <h1>Enabling CMake buildscript generation</h1>
   <p>
-    To enable the cmake makefile generator, open the <a class="command-link"
-      href='javascript:executeCommand("org.eclipse.ui.project.properties")'
-    > <img src="PLUGINS_ROOT/org.eclipse.help/command_link.png"><b>Project
-        > Properties</b></a> dialog.<br>Expand the <b>C/C++ Build</b> node and
-    click onto <b>Tool Chain Editor</b>.<br>On the tool chain editor page,
-    select <b>CMake make builder</b> as the current builder.
+    To enable the cmake buildscript generation, open the <a class="command-link"
+      href='javascript:executeCommand("org.eclipse.ui.project.properties")'>
+      <img src="PLUGINS_ROOT/org.eclipse.help/command_link.png"><b>Project
+        > Properties</b>
+    </a> dialog.<br>Expand the <b>C/C++ Build</b> node and click onto <b>Tool
+      Chain Editor</b>.<br>On the tool chain editor page, select either <b>CMake
+      Make Builder</b> or <b>CMake Builder (portable)</b> as the current builder.
   </p>
+  <h2>CMake Make Builder</h2>
+  <p>
+    This builder is nearly identical to the built-in <i>Gnu Make Builder</i>. It
+    always generates makefiles and then invokes the make tool found in the system's
+    executable search path.
+  </p>
+  <h2>CMake Builder (portable)</h2>
+  <p>This builder allows to customize the build tool to be used on the
+    OS-specific property tabs and lets CMake generate the build scripts for the
+    tool of choice. Since CMake does a fairly good job in detecting the absolute
+    file system location of the built tool, the latter can be invoked even if
+    it is not on the executable search path.</p>
 </body>
 </html>
