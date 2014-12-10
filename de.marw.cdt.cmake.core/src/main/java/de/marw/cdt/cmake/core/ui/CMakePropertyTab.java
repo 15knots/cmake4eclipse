@@ -44,8 +44,8 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
   private static final ILog log = CMakePlugin.getDefault().getLog();
 
   // Widgets
-  //1
   private Button b_warnNoDev;
+  private Button b_debugTryCompile;
   private Button b_debug;
   private Button b_trace;
   private Button b_warnUnitialized;
@@ -74,19 +74,22 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
           "Commandline Options", 2);
 
       b_warnNoDev = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2,
-          "Suppress developer warnings (-Wno-dev)");
+          "Suppress developer &warnings \t(-Wno-dev)");
       b_warnNoDev.addListener(SWT.Selection, tsl);
+      b_debugTryCompile = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2,
+          "Do not delete the t&ry_compile build tree (--debug-trycompile)");
+      b_debugTryCompile.addListener(SWT.Selection, tsl);
       b_debug = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2,
-          "Put cmake in a debug mode (--debug-output)");
+          "Put cmake in a &debug mode \t(--debug-output)");
       b_debug.addListener(SWT.Selection, tsl);
       b_trace = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2,
-          "Put cmake in trace mode (--trace)");
+          "Put cmake in &trace mode \t\t(--trace)");
       b_trace.addListener(SWT.Selection, tsl);
       b_warnUnitialized = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2,
-          "Warn about uninitialized values (--warn-uninitialized)");
+          "Warn about un&initialized values \t(--warn-uninitialized)");
       b_warnUnitialized.addListener(SWT.Selection, tsl);
       b_warnUnused = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2,
-          "Warn about unused variables (--warn-unused-vars)");
+          "Warn about un&used variables \t(--warn-unused-vars)");
       b_warnUnused.addListener(SWT.Selection, tsl);
     } // cmake options group
 
@@ -140,13 +143,19 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
       }
       enterTristateOrToggleMode(b_warnNoDev, bs, prefs.length);
 
+      // b_debugTryCompile
+      bs.clear();
+      for (int i = 0; i < prefs.length; i++) {
+        bs.set(i, prefs[i].isDebugTryCompile());
+      }
+      enterTristateOrToggleMode(b_debugTryCompile, bs, prefs.length);
+
       // b_debug...
       bs.clear();
       for (int i = 0; i < prefs.length; i++) {
         bs.set(i, prefs[i].isDebugOutput());
       }
       enterTristateOrToggleMode(b_debug, bs, prefs.length);
-
       // b_trace...
       bs.clear();
       for (int i = 0; i < prefs.length; i++) {
@@ -192,6 +201,8 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
 
         if (shouldSaveButtonSelection(b_warnNoDev))
           pref.setWarnNoDev(b_warnNoDev.getSelection());
+        if (shouldSaveButtonSelection(b_debugTryCompile))
+          pref.setDebugTryCompile(b_debugTryCompile.getSelection());
         if (shouldSaveButtonSelection(b_debug))
           pref.setDebugOutput(b_debug.getSelection());
         if (shouldSaveButtonSelection(b_trace))
@@ -205,6 +216,7 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
       // we are editing a single configuration...
       CMakePreferences pref = prefs[0];
       pref.setWarnNoDev(b_warnNoDev.getSelection());
+      pref.setDebugTryCompile(b_debugTryCompile.getSelection());
       pref.setDebugOutput(b_debug.getSelection());
       pref.setTrace(b_trace.getSelection());
       pref.setWarnUnitialized(b_warnUnitialized.getSelection());
@@ -299,6 +311,7 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
     try {
       CMakePreferences srcPrefs = configMgr.getOrLoad(srcCfg);
       CMakePreferences dstPrefs = configMgr.getOrCreate(dstCfg);
+      dstPrefs.setDebugTryCompile(srcPrefs.isDebugTryCompile());
       dstPrefs.setDebugOutput(srcPrefs.isDebugOutput());
       dstPrefs.setTrace(srcPrefs.isTrace());
       dstPrefs.setWarnNoDev(srcPrefs.isWarnNoDev());

@@ -34,6 +34,7 @@ public class CMakePreferences {
   public static final String CFG_STORAGE_ID = CMakePlugin.PLUGIN_ID
       + ".settings";
   private static final String ATTR_WARN_NO_DEV = "warnNoDev";
+  private static final String ATTR_DEBUG_TRYCOMPILE = "debugTryCompile";
   private static final String ATTR_DEBUG = "debugOutput";
   private static final String ATTR_TRACE = "trace";
   private static final String ATTR_WARN_UNITIALIZED = "warnUnitialized";
@@ -44,7 +45,8 @@ public class CMakePreferences {
   static final String ELEM_UNDEFINES = "undefs";
   private static final String ELEM_OPTIONS = "options";
 
-  private boolean warnNoDev, debugOutput, trace, warnUnitialized, warnUnused;
+  private boolean warnNoDev, debugTryCompile, debugOutput, trace,
+      warnUnitialized, warnUnused;
 
   private List<CmakeDefine> defines = new ArrayList<CmakeDefine>(0);
   private List<CmakeUnDefine> undefines = new ArrayList<CmakeUnDefine>(0);
@@ -65,6 +67,7 @@ public class CMakePreferences {
    */
   public void reset() {
     warnNoDev = false;
+    debugTryCompile = false;
     debugOutput = false;
     trace = false;
     warnUnitialized = false;
@@ -93,6 +96,8 @@ public class CMakePreferences {
       if (ELEM_OPTIONS.equals(child.getName())) {
         // options...
         warnNoDev = Boolean.parseBoolean(child.getAttribute(ATTR_WARN_NO_DEV));
+        debugTryCompile = Boolean.parseBoolean(child
+            .getAttribute(ATTR_DEBUG_TRYCOMPILE));
         debugOutput = Boolean.parseBoolean(child.getAttribute(ATTR_DEBUG));
         trace = Boolean.parseBoolean(child.getAttribute(ATTR_TRACE));
         warnUnitialized = Boolean.parseBoolean(child
@@ -126,6 +131,12 @@ public class CMakePreferences {
       pOpts.setAttribute(ATTR_WARN_NO_DEV, String.valueOf(warnNoDev));
     } else {
       pOpts.removeAttribute(ATTR_WARN_NO_DEV);
+    }
+    if (debugTryCompile) {
+      pOpts
+          .setAttribute(ATTR_DEBUG_TRYCOMPILE, String.valueOf(debugTryCompile));
+    } else {
+      pOpts.removeAttribute(ATTR_DEBUG_TRYCOMPILE);
     }
     if (debugOutput) {
       pOpts.setAttribute(ATTR_DEBUG, String.valueOf(debugOutput));
@@ -171,6 +182,20 @@ public class CMakePreferences {
    */
   public void setWarnNoDev(boolean warnNoDev) {
     this.warnNoDev = warnNoDev;
+  }
+
+  /**
+   * {@code --debug-trycompile}
+   */
+  public boolean isDebugTryCompile() {
+    return debugTryCompile;
+  }
+
+  /**
+   * {@code --debug-trycompile}
+   */
+  public void setDebugTryCompile(boolean debugTryCompile) {
+    this.debugTryCompile = debugTryCompile;
   }
 
   /**
