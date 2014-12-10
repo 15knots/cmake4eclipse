@@ -375,6 +375,8 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     /* add general settings */
     if (prefs.isWarnNoDev())
       args.add("-Wno-dev");
+    if (prefs.isDebugTryCompile())
+      args.add("--debug-trycompile");
     if (prefs.isDebugOutput())
       args.add("--debug-output");
     if (prefs.isTrace())
