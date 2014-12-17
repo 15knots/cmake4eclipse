@@ -75,8 +75,8 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
 
   private IProject project;
   private IProgressMonitor monitor;
-  private IPath topBuildDirAbs;
-  private IFolder topBuildFolder; //  Build directory - relative to the project
+  private IPath buildPath;// path to build directory - relative to the project
+  private IFolder buildFolder; // build folder - relative to the project
   private IConfiguration config;
   private IBuilder builder;
 
@@ -101,9 +101,8 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
 
     // set the top build dir path for the current configuration
     // TODO MWE allow user to customize the root common to all configs
-    final IPath binPath = new Path("build").append(cfg.getName());
-    this.topBuildFolder = project.getFolder(binPath);
-    topBuildDirAbs = topBuildFolder.getLocation();
+    this.buildPath = new Path("build").append(cfg.getName());
+    this.buildFolder = project.getFolder(buildPath);
   }
 
   /*-
@@ -111,34 +110,37 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
    */
   @Override
   public IPath getBuildWorkingDir() {
-    // prefer to return absolute file system path, since CDT does weird thing if relative
-    return topBuildDirAbs;
+    // return project relative path or absolute file system path,
+    // since CDT does weird thing with workspace-relative paths
+    return buildPath;
   }
 
-  /** Invoked on incremental build.
+  /**
+   * Invoked on incremental build.
    */
   @Override
   public MultiStatus generateMakefiles(IResourceDelta delta)
       throws CoreException {
-    /* Let's do a sanity check right now.
+    /*
+     * Let's do a sanity check right now.
      *
      * If this is an incremental build, so if the build directory is not there,
      * then a rebuild is needed.
      */
-    final IFile cmakeCache = topBuildFolder.getFile("CMakeCache.txt");
+    final IFile cmakeCache = buildFolder.getFile("CMakeCache.txt");
     if (cmakeCache.exists() && isGeneratorChanged()) {
       // The user changed the generator, clear cache..
       cmakeCache.getLocation().toFile().delete();
     }
-    final IFile makefile = topBuildFolder.getFile(getMakefileName());
-    if (!topBuildFolder.exists() || !cmakeCache.exists() || !makefile.exists()) {
+    final IFile makefile = buildFolder.getFile(getMakefileName());
+    if (!buildFolder.exists() || !cmakeCache.exists() || !makefile.exists()) {
       return regenerateMakefiles();
     }
 
     // Visit the CMakeLists.txt in the delta and detect whether to regenerate
     final CMakelistsVisitor visitor = new CMakelistsVisitor();
     updateMonitor("Visiting CMakeLists.txt");
-    delta.accept(visitor);
+//    delta.accept(visitor);
     // TODO detect removed/renamed source dir.. see GnuMakefileGenerator.ResourceDeltaVisitor
     if (visitor.isCmakelistsAffected()) {
       // normally, the cmake-generated makefiles detect changes in CMake scripts
@@ -212,9 +214,9 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       }
       final IPath srcPath = srcEntry.getFullPath(); // project relative
       // Create the top-level directory for the build output
-//      createFolder(MULTIPLE_SOURCE_DIRS_SUPPORTED ? topBuildFolder
-//          .getFolder(srcPath) : topBuildFolder);
-      createFolder(topBuildFolder);
+//      createFolder(MULTIPLE_SOURCE_DIRS_SUPPORTED ? buildFolder
+//          .getFolder(srcPath) : buildFolder);
+      createFolder(buildFolder);
 
       IPath srcDir;
       if (srcPath.isEmpty()) {
@@ -226,6 +228,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       }
 
       checkCancel();
+      final IPath topBuildDirAbs = buildFolder.getLocation();
       MultiStatus status2 = invokeCMake(srcDir, topBuildDirAbs, console);
       // NOTE: Commonbuilder reads getCode() to detect errors, not getSeverity()
       if (status2.getCode() == IStatus.ERROR) {
