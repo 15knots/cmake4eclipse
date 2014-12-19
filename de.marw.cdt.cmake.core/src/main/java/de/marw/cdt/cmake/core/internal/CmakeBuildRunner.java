@@ -40,6 +40,7 @@ import org.eclipse.cdt.managedbuilder.macros.IReservedMacroNameSupplier;
 import org.eclipse.cdt.managedbuilder.makegen.IManagedBuilderMakefileGenerator;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.ILog;
@@ -134,10 +135,17 @@ public class CmakeBuildRunner extends ExternalBuildRunner {
       map.put(cfgd.getId(), fi);
     }
 
-    final IPath builderCWD = cfgd.getBuildSetting().getBuilderCWD()
-        .makeAbsolute();
-    final IPath cmCache = builderCWD.append("CMakeCache.txt");
-    final File file = cmCache.toFile();
+    // getBuilderCWD() returns a workspace relative path, which is garbled..
+    // Note that IPath buildCWD holding variables is mis-constructed,
+    // i.e. ${workspace_loc:/path} gets split into 2 path segments
+    // still, MBS does that and we need to handle that
+    final IPath builderCWD = cfgd.getBuildSetting().getBuilderCWD();
+    IPath location = ResourcesPlugin.getWorkspace().getRoot().getFolder(builderCWD).getLocation();
+    if (location == null) {
+      // fall back to built-in from generator
+      return null;
+    }
+    final File file = location.append("CMakeCache.txt").toFile();
 
     if (file.isFile()) {
       final long lastModified = file.lastModified();
