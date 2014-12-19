@@ -75,7 +75,6 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
 
   private IProject project;
   private IProgressMonitor monitor;
-  private IPath buildPath;// path to build directory - relative to the project
   private IFolder buildFolder; // build folder - relative to the project
   private IConfiguration config;
   private IBuilder builder;
@@ -92,17 +91,36 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       IProgressMonitor monitor) {
     // Save the project so we can get path and member information
     this.project = cfg.getOwner().getProject();
-
     // Save the monitor reference for reporting back to the user
     this.monitor = monitor;
     // Cache the build tools
     this.config = cfg;
     this.builder = builder;
+    initBuildFolder();
+  }
 
+  /*-
+   * @see org.eclipse.cdt.managedbuilder.makegen.IManagedBuilderMakefileGenerator#initialize(org.eclipse.core.resources.IProject, org.eclipse.cdt.managedbuilder.core.IManagedBuildInfo, org.eclipse.core.runtime.IProgressMonitor)
+   */
+  @Override
+  public void initialize(IProject project, IManagedBuildInfo info,
+      IProgressMonitor monitor) {
+    // 15kts; seems this is never called
+    // Save the project so we can get path and member information
+    this.project = project;
+    // Save the monitor reference for reporting back to the user
+    this.monitor = monitor;
+    // Cache the build tools
+    config = info.getDefaultConfiguration();
+    builder = config.getEditableBuilder();
+    initBuildFolder();
+  }
+
+  private void initBuildFolder() {
     // set the top build dir path for the current configuration
     // TODO MWE allow user to customize the root common to all configs
-    this.buildPath = new Path("build").append(cfg.getName());
-    this.buildFolder = project.getFolder(buildPath);
+    IPath buildP = new Path("build").append(config.getName());
+    this.buildFolder = project.getFolder(buildP);
   }
 
   /*-
@@ -110,9 +128,13 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
    */
   @Override
   public IPath getBuildWorkingDir() {
-    // return project relative path or absolute file system path,
-    // since CDT does weird thing with workspace-relative paths
-    return buildPath;
+    // Note that IPath from ICBuildSetting#getBuilderCWD() holding variables is mis-constructed,
+    // i.e. ${workspace_loc:/path} gets split into 2 path segments, if we
+    // return a relatve path here.
+
+    // So return workspace path (absolute) or absolute file system path,
+    // since CDT does weird thing with relative paths
+    return buildFolder.getFullPath();
   }
 
   /**
@@ -516,24 +538,14 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
   }
 
   /*-
-   * @see org.eclipse.cdt.managedbuilder.makegen.IManagedBuilderMakefileGenerator#initialize(org.eclipse.core.resources.IProject, org.eclipse.cdt.managedbuilder.core.IManagedBuildInfo, org.eclipse.core.runtime.IProgressMonitor)
-   */
-  @Override
-  public void initialize(IProject project, IManagedBuildInfo info,
-      IProgressMonitor monitor) {
-//    System.out.println("# in BuildscriptGenerator.initialize()");
-  }
-
-  /*-
    * @see org.eclipse.cdt.managedbuilder.makegen.IManagedBuilderMakefileGenerator#isGeneratedResource(org.eclipse.core.resources.IResource)
    */
   @Override
   public boolean isGeneratedResource(IResource resource) {
     // Is this a generated directory ...
     IPath path = resource.getProjectRelativePath();
-    IPath root = new Path("build");
     // It is if it is a root of the resource pathname
-    if (root.isPrefixOf(path))
+    if (buildFolder.getFullPath().isPrefixOf(path))
       return true;
 
     return false;
