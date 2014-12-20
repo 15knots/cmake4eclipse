@@ -1,8 +1,10 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %bundleName
+Bundle-Description: CDT CMake build integration
+Bundle-Copyright: 2013 Martin Weber
 Bundle-SymbolicName: de.marw.cdt.cmake.core;singleton:=true
-Bundle-Version: 1.2.0.qualifier
+Bundle-Version: 1.3.0.qualifier
 Bundle-Vendor: Martin Weber
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -39,4 +41,3 @@ Import-Package: org.eclipse.cdt.core,
 Bundle-Activator: de.marw.cdt.cmake.core.CMakePlugin
 Export-Package: de.marw.cdt.cmake.core
 Require-Bundle: org.eclipse.ui.workbench;bundle-version="3.8.0"
-
