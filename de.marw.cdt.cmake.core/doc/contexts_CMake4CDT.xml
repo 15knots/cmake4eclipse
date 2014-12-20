@@ -3,9 +3,6 @@
    <context id="t_cmake_options_general" >
       <topic href="doc/html/t_cmake_options_general.html" label="General cmake options"/>
    </context>
-   <context id="t_cmake_symbols_general">
-      <topic href="doc/html/t_cmake_symbols_general.html" label="Defining cmake cache variables (symbols)"/>
-   </context>
    <context id="t_cmake_options_OS">
       <topic href="doc/html/t_cmake_options_OS.html" label="OS specific cmake options"/>
    </context>
