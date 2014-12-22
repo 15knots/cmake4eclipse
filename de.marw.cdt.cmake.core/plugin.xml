@@ -94,14 +94,11 @@
               id="de.marw.cdt.cmake.core.ui.CMakePropertyPage"
               name="CMake">
          <enabledWhen>
-           <adapt type="org.eclipse.core.resources.IResource">
-              <adapt
-                    type="org.eclipse.core.resources.IProject">
+              <adapt type="org.eclipse.core.resources.IProject">
                  <test
                        property="org.eclipse.core.resources.projectNature"
                        value="org.eclipse.cdt.managedbuilder.core.managedBuildNature">
                  </test>
-              </adapt>
            </adapt>
          </enabledWhen>
          <keywordReference
@@ -117,7 +114,7 @@
               id="de.marw.cdt.cmake.core.ui.HostOSPropertyPage"
               name="Host OS overrides">
          <enabledWhen>
-           <adapt type="org.eclipse.core.resources.IResource">
+           <adapt type="org.eclipse.core.resources.IProject">
 	            <test property="org.eclipse.core.resources.projectNature"
 	                  value="org.eclipse.cdt.managedbuilder.core.managedBuildNature"/>
            </adapt>
