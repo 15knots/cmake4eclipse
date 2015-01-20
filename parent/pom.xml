@@ -35,7 +35,8 @@
     <modules>
         <module>../releng/de.marw.cdt.cmake-target</module>
         <module>../de.marw.cdt.cmake.core</module>
-        <module>../releng/de.marw.cdt.cmake.repo</module>
+        <module>../de.marw.cdt.cmake-feature</module>
+        <module>../releng/de.marw.cdt.cmake-repo</module>
     </modules>
 
     <profiles>
