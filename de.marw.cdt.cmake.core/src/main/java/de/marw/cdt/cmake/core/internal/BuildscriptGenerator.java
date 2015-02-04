@@ -391,8 +391,10 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
           args.add("-DCMAKE_BUILD_TYPE:STRING=Release");
         }
       }
-      // colored output during build is useless for build console
-      args.add("-DCMAKE_COLOR_MAKEFILE:BOOL=OFF");
+      // colored output during build is useless for build console (seems to affect rogress report only)
+//      args.add("-DCMAKE_COLOR_MAKEFILE:BOOL=OFF");
+      // speed up build output parsing by disabling progress report msgs
+      args.add("CMAKE_RULE_MESSAGES:BOOL=OFF");
       // echo commands to the console during the make to give output parsers a chance
       args.add("-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON");
     }
