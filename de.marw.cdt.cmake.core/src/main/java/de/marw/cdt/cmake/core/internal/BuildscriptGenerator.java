@@ -10,6 +10,7 @@
  *******************************************************************************/
 package de.marw.cdt.cmake.core.internal;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -63,7 +64,7 @@ import de.marw.cdt.cmake.core.internal.settings.ConfigurationManager;
 /**
  * Generates makefiles and other build scripts from CMake scripts
  * (CMakeLists.txt).
- *
+ * 
  * @author Martin Weber
  */
 public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
@@ -130,7 +131,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
   public IPath getBuildWorkingDir() {
     // Note that IPath from ICBuildSetting#getBuilderCWD() holding variables is mis-constructed,
     // i.e. ${workspace_loc:/path} gets split into 2 path segments, if we
-    // return a relatve path here.
+    // return a relative path here.
 
     // So return workspace path (absolute) or absolute file system path,
     // since CDT does weird thing with relative paths
@@ -145,33 +146,39 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       throws CoreException {
     /*
      * Let's do a sanity check right now.
-     *
+     * 
      * If this is an incremental build, so if the build directory is not there,
-     * then a rebuild is needed.
+     * then a full build is needed.
      */
-    final IFile cmakeCache = buildFolder.getFile("CMakeCache.txt");
-    if (cmakeCache.exists() && isGeneratorChanged()) {
-      // The user changed the generator, clear cache..
-      cmakeCache.getLocation().toFile().delete();
+    File buildDir = buildFolder.getLocation().toFile();
+    final File cacheFile = new File(buildDir, "CMakeCache.txt");
+    if (isGeneratorChanged() && cacheFile.exists()) {
+      // The user changed the generator, remove cache file to avoid cmake's complaints..
+      cacheFile.delete();
+//      System.out.println("DEL "+cacheFile);
+      // tell the workspace about file removal
+      buildFolder.getFile("CMakeCache.txt").refreshLocal(IResource.DEPTH_ZERO,
+          monitor);
     }
-    final IFile makefile = buildFolder.getFile(getMakefileName());
-    if (!buildFolder.exists() || !cmakeCache.exists() || !makefile.exists()) {
+    final File makefile = new File(buildDir, getMakefileName());
+    if (!buildDir.exists() || !cacheFile.exists() || !makefile.exists()) {
       return regenerateMakefiles();
     }
 
-    // Visit the CMakeLists.txt in the delta and detect whether to regenerate
-    final CMakelistsVisitor visitor = new CMakelistsVisitor();
-    updateMonitor("Visiting CMakeLists.txt");
-//    delta.accept(visitor);
-    // TODO detect removed/renamed source dir.. see GnuMakefileGenerator.ResourceDeltaVisitor
-    if (visitor.isCmakelistsAffected()) {
+    if (false) {
+      // Visit the CMakeLists.txt in the delta and detect whether to regenerate
       // normally, the cmake-generated makefiles detect changes in CMake scripts
       // and regenerate the makefiles. But this seems not to be the case, when
       // someone writes CTests in a CMakeLists.txt.
       // So regenerate the makefiles...
-//      return regenerateMakefiles();
+      final CMakelistsVisitor visitor = new CMakelistsVisitor();
+      updateMonitor("Visiting CMakeLists.txt");
+      delta.accept(visitor);
+      // TODO detect removed/renamed source dir.. see GnuMakefileGenerator.ResourceDeltaVisitor
+      if (visitor.isCmakelistsAffected()) {
+        return regenerateMakefiles();
+      }
     }
-
     MultiStatus status = new MultiStatus(CMakePlugin.PLUGIN_ID, IStatus.OK, "",
         null);
     return status;
@@ -231,8 +238,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
         cis.write(" for project ".getBytes());
         cis.write(project.getName().getBytes());
         cis.write("\n".getBytes());
-      } catch (IOException ex) {
-        // ignore
+      } catch (IOException ignore) {
       }
       final IPath srcPath = srcEntry.getFullPath(); // project relative
       // Create the top-level directory for the build output
@@ -245,13 +251,17 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
         // source folder is project folder
         srcDir = project.getLocation();
       } else {
-        // source folder ist folder below project
+        // source folder is a folder below project
         srcDir = project.getFolder(srcPath).getLocation();
       }
 
       checkCancel();
-      final IPath topBuildDirAbs = buildFolder.getLocation();
-      MultiStatus status2 = invokeCMake(srcDir, topBuildDirAbs, console);
+      final IPath buildDirAbs = buildFolder.getLocation();
+      MultiStatus status2 = invokeCMake(srcDir, buildDirAbs, console);
+      // tell the workspace that this file exists
+      buildFolder.getFile("CMakeCache.txt").refreshLocal(IResource.DEPTH_ZERO,
+          monitor);
+
       // NOTE: Commonbuilder reads getCode() to detect errors, not getSeverity()
       if (status2.getCode() == IStatus.ERROR) {
         // failed to generate
@@ -264,10 +274,11 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
   }
 
   /**
-   * Return or create the folder needed for the build output. If we are creating
-   * the folder, set the derived bit to true so the CM system ignores the
-   * contents. If the resource exists, respect the existing derived setting.
-   *
+   * Recursively creates the folder hierarchy needed for the build output, if
+   * necessary. If the folder is created, its derived bit is set to true so the
+   * CM system ignores the contents. If the resource exists, respect the
+   * existing derived setting.
+   * 
    * @param folder
    *        a folder, somewhere below the project root
    */
@@ -281,24 +292,19 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
 
       // Now make the requested folder
       try {
-        folder.create(false, true, monitor);
+        folder.create(IResource.DERIVED | IResource.FORCE, true, monitor);
       } catch (CoreException e) {
         if (e.getStatus().getCode() == IResourceStatus.PATH_OCCUPIED)
           folder.refreshLocal(IResource.DEPTH_ZERO, monitor);
         else
           throw e;
       }
-
-      // Make sure the folder is marked as derived so it is not added to CM
-      if (!folder.isDerived()) {
-        folder.setDerived(true, monitor);
-      }
     }
   }
 
   /**
    * Run 'cmake -G xyz' command.
-   *
+   * 
    * @param console
    *        the build console to send messages to
    * @param buildDir
@@ -363,7 +369,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
   /**
    * Build the command-line for cmake. The first argument will be the
    * cmake-command.
-   *
+   * 
    * @throws CoreException
    */
   private List<String> buildCommandline(IPath srcDir) throws CoreException {
@@ -431,7 +437,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
 
   /**
    * Gets whether the user changed the generator setting in the preferences.
-   *
+   * 
    * @return {@code true} if the user changed the generator setting in the
    *         preferences, otherwise {@code false}
    */
@@ -455,7 +461,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
    * Appends arguments common to all OS preferences. The first argument in the
    * list will be replaced by the cmake command from the specified preferences,
    * if given.
-   *
+   * 
    * @param args
    *        the list to append cmake-arguments to.
    * @param prefs
@@ -478,7 +484,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
 
   /**
    * Appends arguments for the specified cmake undefines.
-   *
+   * 
    * @param args
    *        the list to append cmake-arguments to.
    * @param undefines
@@ -494,7 +500,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
   /**
    * Appends arguments for the specified cmake defines. Performs substitutions
    * on variables found in a value of each define.
-   *
+   * 
    * @param args
    *        the list to append cmake-arguments to.
    * @param defines
@@ -573,7 +579,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
    * Checks whether the build has been cancelled. Cancellation requests are
    * propagated to the caller by throwing
    * <code>OperationCanceledException</code>.
-   *
+   * 
    * @see org.eclipse.core.runtime.OperationCanceledException#OperationCanceledException()
    */
   protected void checkCancel() {
