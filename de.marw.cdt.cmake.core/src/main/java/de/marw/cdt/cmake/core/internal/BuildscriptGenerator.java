@@ -34,7 +34,6 @@ import org.eclipse.cdt.managedbuilder.core.ManagedBuildManager;
 import org.eclipse.cdt.managedbuilder.makegen.IManagedBuilderMakefileGenerator;
 import org.eclipse.cdt.managedbuilder.makegen.IManagedBuilderMakefileGenerator2;
 import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -64,7 +63,7 @@ import de.marw.cdt.cmake.core.internal.settings.ConfigurationManager;
 /**
  * Generates makefiles and other build scripts from CMake scripts
  * (CMakeLists.txt).
- * 
+ *
  * @author Martin Weber
  */
 public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
@@ -146,7 +145,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       throws CoreException {
     /*
      * Let's do a sanity check right now.
-     * 
+     *
      * If this is an incremental build, so if the build directory is not there,
      * then a full build is needed.
      */
@@ -278,7 +277,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
    * necessary. If the folder is created, its derived bit is set to true so the
    * CM system ignores the contents. If the resource exists, respect the
    * existing derived setting.
-   * 
+   *
    * @param folder
    *        a folder, somewhere below the project root
    */
@@ -304,7 +303,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
 
   /**
    * Run 'cmake -G xyz' command.
-   * 
+   *
    * @param console
    *        the build console to send messages to
    * @param buildDir
@@ -369,7 +368,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
   /**
    * Build the command-line for cmake. The first argument will be the
    * cmake-command.
-   * 
+   *
    * @throws CoreException
    */
   private List<String> buildCommandline(IPath srcDir) throws CoreException {
@@ -437,7 +436,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
 
   /**
    * Gets whether the user changed the generator setting in the preferences.
-   * 
+   *
    * @return {@code true} if the user changed the generator setting in the
    *         preferences, otherwise {@code false}
    */
@@ -461,7 +460,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
    * Appends arguments common to all OS preferences. The first argument in the
    * list will be replaced by the cmake command from the specified preferences,
    * if given.
-   * 
+   *
    * @param args
    *        the list to append cmake-arguments to.
    * @param prefs
@@ -484,7 +483,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
 
   /**
    * Appends arguments for the specified cmake undefines.
-   * 
+   *
    * @param args
    *        the list to append cmake-arguments to.
    * @param undefines
@@ -500,7 +499,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
   /**
    * Appends arguments for the specified cmake defines. Performs substitutions
    * on variables found in a value of each define.
-   * 
+   *
    * @param args
    *        the list to append cmake-arguments to.
    * @param defines
@@ -579,7 +578,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
    * Checks whether the build has been cancelled. Cancellation requests are
    * propagated to the caller by throwing
    * <code>OperationCanceledException</code>.
-   * 
+   *
    * @see org.eclipse.core.runtime.OperationCanceledException#OperationCanceledException()
    */
   protected void checkCancel() {
