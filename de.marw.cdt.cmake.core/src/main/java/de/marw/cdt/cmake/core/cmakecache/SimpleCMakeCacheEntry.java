@@ -11,7 +11,7 @@
 package de.marw.cdt.cmake.core.cmakecache;
 
 /**
- * Represent an entry of a CMakeCache.txt file in a simple form: Hold only
+ * Represents an entry of a CMakeCache.txt file in a simple form: Holds only
  * key-value-pairs of an entry. It does not extract any help texts nor entry
  * types.
  *

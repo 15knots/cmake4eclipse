@@ -57,7 +57,7 @@ import de.marw.cdt.cmake.core.internal.settings.ConfigurationManager;
  * its arguments into the build. Necessary since CDT does not allow
  * {@code IConfigurationBuildMacroSupplier}s for a Builder (only for
  * tool-chains).
- * 
+ *
  * @author Martin Weber
  */
 public class CmakeBuildRunner extends ExternalBuildRunner {
@@ -103,10 +103,11 @@ public class CmakeBuildRunner extends ExternalBuildRunner {
   }
 
   /**
-   * Tries to get {@code "cmake_build_cmd"} value from internal cache first. If
-   * internal cache is invalid, tries to read the value of the
-   * {@code CMAKE_BUILD_TOOL} entry from CMakeCache.txt.
-   * 
+   * Gets the {@code "CMAKE_BUILD_TOOL"} value from the parsed content of the
+   * CMake cache file (CMakeCache.txt) corresponding to the specified
+   * configuration. If the cache for the parsed content is invalid, tries to
+   * parse the CMakeCache.txt file first and then caches the parsed content.
+   *
    * @param cfgd
    *        configuration
    * @return a value for the {@code "cmake_build_cmd"} macro or {@code null}, if

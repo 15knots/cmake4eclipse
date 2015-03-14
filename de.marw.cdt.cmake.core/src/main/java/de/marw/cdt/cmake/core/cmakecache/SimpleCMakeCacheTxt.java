@@ -14,7 +14,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -26,6 +29,7 @@ import java.util.Set;
 public class SimpleCMakeCacheTxt {
 
   private String buildTool;
+  private List<String> tools;
 
   /**
    * Creates a new object by parsing the specified file.
@@ -36,6 +40,8 @@ public class SimpleCMakeCacheTxt {
    *         if the file could not be read
    */
   public SimpleCMakeCacheTxt(File file) throws IOException {
+    ArrayList<String> tools= new ArrayList<String>();
+
     // parse CMakeCache.txt...
     InputStream is = null;
     try {
@@ -43,8 +49,28 @@ public class SimpleCMakeCacheTxt {
       final Set<SimpleCMakeCacheEntry> entries = new HashSet<SimpleCMakeCacheEntry>();
       new CMakeCacheFileParser().parse(is, null, entries, null);
       for (SimpleCMakeCacheEntry entry : entries) {
-        if ("CMAKE_BUILD_TOOL".equals(entry.getKey()))
-          buildTool = entry.getValue();
+        final String toolKey = entry.getKey();
+        final String tool = entry.getValue();
+        if ("CMAKE_BUILD_TOOL".equals(toolKey)){
+          buildTool = tool;
+//          tools.add(tool);
+        }
+        else if ("CMAKE_COMMAND".equals(toolKey)){
+          tools.add(tool);
+        }
+        else if ("CMAKE_CPACK_COMMAND".equals(toolKey)){
+          tools.add(tool);
+        }
+        else if ("CMAKE_CTEST_COMMAND".equals(toolKey)){
+          tools.add(tool);
+        }
+        else if ("CMAKE_C_COMPILER".equals(toolKey)){
+          tools.add(tool);
+        }
+        else if ("CMAKE_CXX_COMPILER".equals(toolKey)){
+          tools.add(tool);
+        }
+        this.tools= Collections.unmodifiableList(tools);
       }
     } finally {
       if (is != null) {
@@ -68,13 +94,7 @@ public class SimpleCMakeCacheTxt {
     return buildTool;
   }
 
-  public String getCcTool() {
-    // TODO Auto-generated stub
-    return "cc";
-  }
-
-  public String getCxxTool() {
-    // TODO Auto-generated stub
-    return "cxx";
+  public List<String> getTools() {
+    return tools;
   }
 }
