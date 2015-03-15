@@ -80,14 +80,15 @@ public class CmakeBuildOutputParser extends
   private static Map<String, IBuildOutputToolParser> knownCmdParsers = new HashMap<String, IBuildOutputToolParser>(
       4, 1.0f);
   static {
+    IToolArgumentParser[] posix_cc = { new MacroDefine_C_POSIX(),
+        new MacroUndefine_C_POSIX() };
     knownCmdParsers.put("cmake", skipOutput);
     knownCmdParsers.put("cpack", skipOutput);
     knownCmdParsers.put("ctest", skipOutput);
     // POSIX compatible C-compilers...
     knownCmdParsers.put("cc", new BuildOutputToolParser(
-        "org.eclipse.cdt.core.gcc", new MacroDefine_C_POSIX(),
-        new MacroUndefine_C_POSIX()));
-//    knownCmdParsers.put("gcc", new Object("org.eclipse.cdt.core.g++"));
+        "org.eclipse.cdt.core.gcc", posix_cc));
+//    knownCmdParsers.put("c++", new BuildOutputToolParser("org.eclipse.cdt.core.g++"));
   }
 
   public CmakeBuildOutputParser() {
@@ -184,8 +185,6 @@ public class CmakeBuildOutputParser extends
    */
   @Override
   public boolean processLine(String line) {
-    // see org.eclipse.cdt.managedbuilder.language.settings.providers.AbstractLanguageSettingsOutputScanner
-
     // try each tool..
     for (Entry<Matcher, IBuildOutputToolParser> entry : currentBuildOutputToolParsers
         .entrySet()) {
@@ -198,10 +197,10 @@ public class CmakeBuildOutputParser extends
         final IBuildOutputToolParser botp = entry.getValue();
         final List<ICLanguageSettingEntry> entries = botp.processArgs(args);
         // attach settings to project...
-        super.setSettingEntries(currentCfgDescription, currentProject, botp
-            .getLanguageId(), (entries == null || entries.size() == 0) ? null
-            : entries);
-
+        if (entries == null) {
+          super.setSettingEntries(currentCfgDescription, currentProject,
+              botp.getLanguageId(), entries);
+        }
         return true; // skip other build output parsers
       }
     }

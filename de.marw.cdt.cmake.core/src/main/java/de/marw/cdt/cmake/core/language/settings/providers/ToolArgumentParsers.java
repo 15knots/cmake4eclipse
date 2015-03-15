@@ -19,7 +19,7 @@ import org.eclipse.cdt.core.settings.model.ICSettingEntry;
 import org.eclipse.cdt.core.settings.model.util.CDataUtil;
 
 /**
- * Various tool argument parser implementaions.
+ * Various tool argument parser implementations.
  *
  * @author Martin Weber
  */
@@ -31,6 +31,7 @@ class ToolArgumentParsers {
   private ToolArgumentParsers() {
   }
 
+  ////////////////////////////////////////////////////////////////////
   /**
    * A tool argument parser capable to parse a POSIX compatible C-compiler macro
    * definition argument: {@code -DNAME=value}.
@@ -40,13 +41,16 @@ class ToolArgumentParsers {
     private static final String REGEX_NAME = "([\\w$]+)(?:\\(([\\w$, ]+)\\))?";
 
     static final MacroDefineOptionParser[] optionParsers = {
+        /* quoted value, whitespace in value, w/ macro arglist */
+        new MacroDefineOptionParser("-D\\s*" + REGEX_NAME
+            + "((?:=)([\"'])(.+?)\\4)", 1, 5),
         /* w/ macro arglist */
         new MacroDefineOptionParser("-D\\s*" + REGEX_NAME + "((?:=)(\\S+))?",
             1, 4),
         /* quoted, whitespace in value, w/ macro arglist */
         new MacroDefineOptionParser("-D\\s*([\"'])" + REGEX_NAME
             + "((?:=)(.+?))?\\1", 2, 5),
-        /* w/ macro arglist, shell escapes ['"] in value */
+        /* w/ macro arglist, shell escapes \' and \" in value */
         new MacroDefineOptionParser("-D\\s*" + REGEX_NAME
             + "(?:=)((\\\\([\"']))(.*?)\\2)", 1, 2), };
 
@@ -97,6 +101,7 @@ class ToolArgumentParsers {
     }
   }
 
+  ////////////////////////////////////////////////////////////////////
   /**
    * A tool argument parser capable to parse a POSIX compatible C-compiler macro
    * cancel argument: {@code -UNAME}.
@@ -126,4 +131,5 @@ class ToolArgumentParsers {
       return 0;// no input consumed
     }
   }
+  ////////////////////////////////////////////////////////////////////
 }
