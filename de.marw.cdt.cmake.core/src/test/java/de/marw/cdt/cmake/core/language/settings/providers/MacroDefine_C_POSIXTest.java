@@ -51,7 +51,8 @@ public class MacroDefine_C_POSIXTest {
     // -DFOO
     String name = "FOO";
     entries.clear();
-    assertEquals(5, testee.processArgument(entries, "-D" + name + more));
+    assertEquals(2 + name.length(),
+        testee.processArgument(entries, "-D" + name + more));
     assertEquals("#entries", 1, entries.size());
     parsed = entries.get(0);
     assertEquals("kind", ICSettingEntry.MACRO, parsed.getKind());
@@ -59,7 +60,7 @@ public class MacroDefine_C_POSIXTest {
     assertEquals("value", "", parsed.getValue());
     // -D'FOO'
     entries.clear();
-    assertEquals(5 + 2,
+    assertEquals(2 + name.length() + 2,
         testee.processArgument(entries, "-D" + "'" + name + "'" + more));
     assertEquals("#entries", 1, entries.size());
     parsed = entries.get(0);
@@ -68,7 +69,7 @@ public class MacroDefine_C_POSIXTest {
     assertEquals("value", "", parsed.getValue());
     // -D"FOO"
     entries.clear();
-    assertEquals(5 + 2,
+    assertEquals(2 + name.length() + 2,
         testee.processArgument(entries, "-D" + "\"" + name + "\"" + more));
     assertEquals("#entries", 1, entries.size());
     parsed = entries.get(0);
@@ -77,7 +78,8 @@ public class MacroDefine_C_POSIXTest {
     assertEquals("value", "", parsed.getValue());
     // -D   FOO
     entries.clear();
-    assertEquals(5 + 3, testee.processArgument(entries, "-D   " + name + more));
+    assertEquals(2 + name.length() + 3,
+        testee.processArgument(entries, "-D   " + name + more));
     assertEquals("#entries", 1, entries.size());
     parsed = entries.get(0);
     assertEquals("kind", ICSettingEntry.MACRO, parsed.getKind());
@@ -85,7 +87,7 @@ public class MacroDefine_C_POSIXTest {
     assertEquals("value", "", parsed.getValue());
     // -D   'FOO'
     entries.clear();
-    assertEquals(5 + 2 + 3,
+    assertEquals(2 + name.length() + 2 + 3,
         testee.processArgument(entries, "-D   " + "'" + name + "'" + more));
     assertEquals("#entries", 1, entries.size());
     parsed = entries.get(0);
@@ -94,18 +96,13 @@ public class MacroDefine_C_POSIXTest {
     assertEquals("value", "", parsed.getValue());
     // -D   "FOO"
     entries.clear();
-    assertEquals(5 + 2 + 3,
+    assertEquals(2 + name.length() + 2 + 3,
         testee.processArgument(entries, "-D   " + "\"" + name + "\"" + more));
     assertEquals("#entries", 1, entries.size());
     parsed = entries.get(0);
     assertEquals("kind", ICSettingEntry.MACRO, parsed.getKind());
     assertEquals("name", name, parsed.getName());
     assertEquals("value", "", parsed.getValue());
-
-//  "-DBAR _"
-//  "-DFO_O_B=HUHU"
-//  "-DFOO$SYS=HUHU"
-    fail("Not yet implemented");
   }
 
   /**
@@ -119,12 +116,12 @@ public class MacroDefine_C_POSIXTest {
     List<ICLanguageSettingEntry> entries = new ArrayList<ICLanguageSettingEntry>();
     ICLanguageSettingEntry parsed;
 
-    // -DFOO=noWhiteSpace
     final String name = "FOO";
     String val = "noWhiteSpace";
 
+    // -DFOO=noWhiteSpace
     entries.clear();
-    assertEquals(5 + 1 + val.length(),
+    assertEquals(2 + name.length() + 1 + val.length(),
         testee.processArgument(entries, "-D" + name + "=" + val + more));
     assertEquals("#entries", 1, entries.size());
     parsed = entries.get(0);
@@ -134,8 +131,19 @@ public class MacroDefine_C_POSIXTest {
     // -D'FOO=noWhiteSpace'
     entries.clear();
     assertEquals(
-        5 + 1 + 2 + val.length(),
+        2 + name.length() + 1 + 2 + val.length(),
         testee.processArgument(entries, "-D" + "'" + name + "=" + val + "'"
+            + more));
+    assertEquals("#entries", 1, entries.size());
+    parsed = entries.get(0);
+    assertEquals("kind", ICSettingEntry.MACRO, parsed.getKind());
+    assertEquals("name", name, parsed.getName());
+    assertEquals("value", val, parsed.getValue());
+    // -DFOO='noWhiteSpace'
+    entries.clear();
+    assertEquals(
+        2 + name.length() + 1 + 2 + val.length(),
+        testee.processArgument(entries, "-D" + name + "=" + "'" + val + "'"
             + more));
     assertEquals("#entries", 1, entries.size());
     parsed = entries.get(0);
@@ -145,7 +153,7 @@ public class MacroDefine_C_POSIXTest {
     // -D"FOO=noWhiteSpace"
     entries.clear();
     assertEquals(
-        5 + 1 + 2 + val.length(),
+        2 + name.length() + 1 + 2 + val.length(),
         testee.processArgument(entries, "-D" + "\"" + name + "=" + val + "\""
             + more));
     assertEquals("#entries", 1, entries.size());
@@ -153,9 +161,21 @@ public class MacroDefine_C_POSIXTest {
     assertEquals("kind", ICSettingEntry.MACRO, parsed.getKind());
     assertEquals("name", name, parsed.getName());
     assertEquals("value", val, parsed.getValue());
+    // -DFOO="noWhiteSpace"
+    entries.clear();
+    assertEquals(
+        2 + name.length() + 1 + 2 + val.length(),
+        testee.processArgument(entries, "-D" + name + "=" + "\"" + val + "\""
+            + more));
+    assertEquals("#entries", 1, entries.size());
+    parsed = entries.get(0);
+    assertEquals("kind", ICSettingEntry.MACRO, parsed.getKind());
+    assertEquals("name", name, parsed.getName());
+    assertEquals("value", val, parsed.getValue());
+
     // -D   FOO=noWhiteSpace
     entries.clear();
-    assertEquals(5 + 1 + 3 + val.length(),
+    assertEquals(2 + name.length() + 1 + 3 + val.length(),
         testee.processArgument(entries, "-D   " + name + "=" + val + more));
     assertEquals("#entries", 1, entries.size());
     parsed = entries.get(0);
@@ -165,7 +185,7 @@ public class MacroDefine_C_POSIXTest {
     // -D   'FOO=noWhiteSpace'
     entries.clear();
     assertEquals(
-        5 + 1 + 2 + 3 + val.length(),
+        2 + name.length() + 1 + 2 + 3 + val.length(),
         testee.processArgument(entries, "-D   " + "'" + name + "=" + val + "'"
             + more));
     assertEquals("#entries", 1, entries.size());
@@ -176,7 +196,7 @@ public class MacroDefine_C_POSIXTest {
     // -D   "FOO=noWhiteSpace"
     entries.clear();
     assertEquals(
-        5 + 1 + 2 + 3 + val.length(),
+        2 + name.length() + 1 + 2 + 3 + val.length(),
         testee.processArgument(entries, "-D   " + "\"" + name + "=" + val
             + "\"" + more));
     assertEquals("#entries", 1, entries.size());
@@ -185,8 +205,176 @@ public class MacroDefine_C_POSIXTest {
     assertEquals("name", name, parsed.getName());
     assertEquals("value", val, parsed.getValue());
 
-//    ""-D \"FOO\""
-//    "D \"FOO=white sp A ce  \""
-//    "-D \"FOO(a,b,c)=white sp A ce\""
+    //----------------------------------------
+    val = "Wh it e s ap ac ";
+    // -D'FOO=Wh it e s ap ac '
+    entries.clear();
+    assertEquals(
+        2 + name.length() + 1 + 2 + val.length(),
+        testee.processArgument(entries, "-D" + "'" + name + "=" + val + "'"
+            + more));
+    assertEquals("#entries", 1, entries.size());
+    parsed = entries.get(0);
+    assertEquals("kind", ICSettingEntry.MACRO, parsed.getKind());
+    assertEquals("name", name, parsed.getName());
+    assertEquals("value", val, parsed.getValue());
+    // -D"FOO=Wh it e s ap ac "
+    entries.clear();
+    assertEquals(
+        2 + name.length() + 1 + 2 + val.length(),
+        testee.processArgument(entries, "-D" + "\"" + name + "=" + val + "\""
+            + more));
+    assertEquals("#entries", 1, entries.size());
+    parsed = entries.get(0);
+    assertEquals("kind", ICSettingEntry.MACRO, parsed.getKind());
+    assertEquals("name", name, parsed.getName());
+    assertEquals("value", val, parsed.getValue());
+    // -D   'FOO=Wh it e s ap ac '
+    entries.clear();
+    assertEquals(
+        2 + name.length() + 1 + 2 + 3 + val.length(),
+        testee.processArgument(entries, "-D   " + "'" + name + "=" + val + "'"
+            + more));
+    assertEquals("#entries", 1, entries.size());
+    parsed = entries.get(0);
+    assertEquals("kind", ICSettingEntry.MACRO, parsed.getKind());
+    assertEquals("name", name, parsed.getName());
+    assertEquals("value", val, parsed.getValue());
+    // -D   "FOO=Wh it e s ap ac "
+    entries.clear();
+    assertEquals(
+        2 + name.length() + 1 + 2 + 3 + val.length(),
+        testee.processArgument(entries, "-D   " + "\"" + name + "=" + val
+            + "\"" + more));
+    assertEquals("#entries", 1, entries.size());
+    parsed = entries.get(0);
+    assertEquals("kind", ICSettingEntry.MACRO, parsed.getKind());
+    assertEquals("name", name, parsed.getName());
+    assertEquals("value", val, parsed.getValue());
+
+    //----------------------------------------
+
+    //  -DFOO=\'noWhiteSpace\'
+    val = "\\'" + "noWhiteSpace" + "\\'";
+    entries.clear();
+    assertEquals(2 + name.length() + 1 + val.length(),
+        testee.processArgument(entries, "-D" + name + "=" + val + more));
+    assertEquals("#entries", 1, entries.size());
+    parsed = entries.get(0);
+    assertEquals("kind", ICSettingEntry.MACRO, parsed.getKind());
+    assertEquals("name", name, parsed.getName());
+    assertEquals("value", val, parsed.getValue());
+    //  -DFOO=\"noWhiteSpace\"
+    val = "\\\"" + "noWhiteSpace" + "\\\"";
+    entries.clear();
+    assertEquals(2 + name.length() + 1 + val.length(),
+        testee.processArgument(entries, "-D" + name + "=" + val + more));
+    assertEquals("#entries", 1, entries.size());
+    parsed = entries.get(0);
+    assertEquals("kind", ICSettingEntry.MACRO, parsed.getKind());
+    assertEquals("name", name, parsed.getName());
+    assertEquals("value", val, parsed.getValue());
+    //  -D   FOO=\'noWhiteSpace\'
+    val = "\\'" + "noWhiteSpace" + "\\'";
+    entries.clear();
+    assertEquals(2 + 3 + name.length() + 1 + val.length(),
+        testee.processArgument(entries, "-D   " + name + "=" + val + more));
+    assertEquals("#entries", 1, entries.size());
+    parsed = entries.get(0);
+    assertEquals("kind", ICSettingEntry.MACRO, parsed.getKind());
+    assertEquals("name", name, parsed.getName());
+    assertEquals("value", val, parsed.getValue());
+    //  -D   FOO=\"noWhiteSpace\"
+    val = "\\\"" + "noWhiteSpace" + "\\\"";
+    entries.clear();
+    assertEquals(2 + 3 + name.length() + 1 + val.length(),
+        testee.processArgument(entries, "-D   " + name + "=" + val + more));
+    assertEquals("#entries", 1, entries.size());
+    parsed = entries.get(0);
+    assertEquals("kind", ICSettingEntry.MACRO, parsed.getKind());
+    assertEquals("name", name, parsed.getName());
+    assertEquals("value", val, parsed.getValue());
+  }
+
+  /**
+   * Test method for
+   * {@link ToolArgumentParsers.MacroDefine_C_POSIX#processArgument}.
+   */
+  @Test
+  public final void testProcessArgument_MacroWithArgs() {
+    final String more = " -g -MMD -MT CMakeFiles/execut1.dir/util1.c.o -MF \"CMakeFiles/execut1.dir/util1.c.o.d\""
+        + " -o CMakeFiles/execut1.dir/util1.c.o -c /testprojects/C-subsrc/src/src-sub/main1.c";
+    List<ICLanguageSettingEntry> entries = new ArrayList<ICLanguageSettingEntry>();
+    ICLanguageSettingEntry parsed;
+
+    // -DFOO=noWhiteSpace
+    final String name = "FOO";
+    final String args = "(a,b,c)";
+    String val = "(a)/((b)+(c))";
+
+    // -DFOO(a,b,c)=(a)/((b)+(c))
+    entries.clear();
+    assertEquals(2 + name.length() + args.length() + 1 + val.length(),
+        testee.processArgument(entries, "-D" + name + args + "=" + val + more));
+    assertEquals("#entries", 1, entries.size());
+    parsed = entries.get(0);
+    assertEquals("kind", ICSettingEntry.MACRO, parsed.getKind());
+    assertEquals("name", name, parsed.getName());
+    assertEquals("value", val, parsed.getValue());
+    // -D'FOO(a,b,c)=(a)/((b)+(c))'
+    entries.clear();
+    assertEquals(
+        2 + name.length() + args.length() + 1 + 2 + val.length(),
+        testee.processArgument(entries, "-D" + "'" + name + args + "=" + val
+            + "'" + more));
+    assertEquals("#entries", 1, entries.size());
+    parsed = entries.get(0);
+    assertEquals("kind", ICSettingEntry.MACRO, parsed.getKind());
+    assertEquals("name", name, parsed.getName());
+    assertEquals("value", val, parsed.getValue());
+    // -D"FOO(a,b,c)=(a)/((b)+(c))"
+    entries.clear();
+    assertEquals(
+        2 + name.length() + args.length() + 1 + 2 + val.length(),
+        testee.processArgument(entries, "-D" + "\"" + name + args + "=" + val
+            + "\"" + more));
+    assertEquals("#entries", 1, entries.size());
+    parsed = entries.get(0);
+    assertEquals("kind", ICSettingEntry.MACRO, parsed.getKind());
+    assertEquals("name", name, parsed.getName());
+    assertEquals("value", val, parsed.getValue());
+    // -D   FOO(a,b,c)=(a)/((b)+(c))
+    entries.clear();
+    assertEquals(
+        2 + name.length() + args.length() + 1 + 3 + val.length(),
+        testee.processArgument(entries, "-D   " + name + args + "=" + val
+            + more));
+    assertEquals("#entries", 1, entries.size());
+    parsed = entries.get(0);
+    assertEquals("kind", ICSettingEntry.MACRO, parsed.getKind());
+    assertEquals("name", name, parsed.getName());
+    assertEquals("value", val, parsed.getValue());
+    // -D   'FOO(a,b,c)=(a)/((b)+(c))'
+    entries.clear();
+    assertEquals(
+        2 + name.length() + args.length() + 1 + 2 + 3 + val.length(),
+        testee.processArgument(entries, "-D   " + "'" + name + args + "=" + val
+            + "'" + more));
+    assertEquals("#entries", 1, entries.size());
+    parsed = entries.get(0);
+    assertEquals("kind", ICSettingEntry.MACRO, parsed.getKind());
+    assertEquals("name", name, parsed.getName());
+    assertEquals("value", val, parsed.getValue());
+    // -D   "FOO(a,b,c)=(a)/((b)+(c))"
+    entries.clear();
+    assertEquals(
+        2 + name.length() + args.length() + 1 + 2 + 3 + val.length(),
+        testee.processArgument(entries, "-D   " + "\"" + name + args + "="
+            + val + "\"" + more));
+    assertEquals("#entries", 1, entries.size());
+    parsed = entries.get(0);
+    assertEquals("kind", ICSettingEntry.MACRO, parsed.getKind());
+    assertEquals("name", name, parsed.getName());
+    assertEquals("value", val, parsed.getValue());
   }
 }
