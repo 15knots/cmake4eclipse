@@ -1,16 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-    <extension
-          point="org.eclipse.core.contenttype.contentTypes">
-       <content-type
-             base-type="org.eclipse.core.runtime.text"
-             file-extensions="txt"
-             file-names="CMakeLists.txt"
-             id="de.marw.cdt.cmake.core.cmakelists.txt"
-             name="CMake script">
-       </content-type>
-    </extension>
 
    <extension
          point="org.eclipse.cdt.managedbuilder.core.buildDefinitions">
@@ -209,16 +199,5 @@
           id="de.marw.cdt.cmake.core.keyword.cmake"
           label="cmake">
     </keyword>
- </extension>
- <extension
-       point="org.eclipse.cdt.core.LanguageSettingsProvider">
-    <provider
-          class="de.marw.cdt.cmake.core.language.settings.providers.CmakeBuildOutputParser"
-          id="de.marw.cdt.cmake.core.language.settings.providers.CmakeBuildOutputParser"
-          name="CMake Build Output Parser"
-          prefer-non-shared="false">
-         <language-scope id="org.eclipse.cdt.core.gcc"/>
-         <language-scope id="org.eclipse.cdt.core.g++"/>
-    </provider>
  </extension>
 </plugin>
