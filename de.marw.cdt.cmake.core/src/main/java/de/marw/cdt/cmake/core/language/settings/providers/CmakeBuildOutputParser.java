@@ -38,8 +38,7 @@ import org.eclipse.core.runtime.Status;
 
 import de.marw.cdt.cmake.core.CMakePlugin;
 import de.marw.cdt.cmake.core.cmakecache.SimpleCMakeCacheTxt;
-import de.marw.cdt.cmake.core.language.settings.providers.ToolArgumentParsers.MacroDefine_C_POSIX;
-import de.marw.cdt.cmake.core.language.settings.providers.ToolArgumentParsers.MacroUndefine_C_POSIX;
+import de.marw.cdt.cmake.core.language.settings.providers.ToolArgumentParsers;
 
 /**
  * A build output parser capable to parse the output of the build tool for which
@@ -80,15 +79,22 @@ public class CmakeBuildOutputParser extends
   private static Map<String, IBuildOutputToolParser> knownCmdParsers = new HashMap<String, IBuildOutputToolParser>(
       4, 1.0f);
   static {
-    IToolArgumentParser[] posix_cc = { new MacroDefine_C_POSIX(),
-        new MacroUndefine_C_POSIX() };
+    IToolArgumentParser[] posix_cc_args = {
+        new ToolArgumentParsers.MacroDefine_C_POSIX(),
+        new ToolArgumentParsers.MacroUndefine_C_POSIX(),
+        new ToolArgumentParsers.IncludePath_C_POSIX(),
+        // not defined by POSIX, but does not harm..
+        new ToolArgumentParsers.SystemIncludePath_C(), };
     knownCmdParsers.put("cmake", skipOutput);
     knownCmdParsers.put("cpack", skipOutput);
     knownCmdParsers.put("ctest", skipOutput);
     // POSIX compatible C-compilers...
-    knownCmdParsers.put("cc", new BuildOutputToolParser(
-        "org.eclipse.cdt.core.gcc", posix_cc));
-//    knownCmdParsers.put("c++", new BuildOutputToolParser("org.eclipse.cdt.core.g++"));
+    BuildOutputToolParser gcc = new BuildOutputToolParser(
+        "org.eclipse.cdt.core.gcc", posix_cc_args);
+    knownCmdParsers.put("cc", gcc);
+    // POSIX compatible C-compilers...
+    knownCmdParsers.put("c++", new BuildOutputToolParser(
+        "org.eclipse.cdt.core.g++", posix_cc_args));
   }
 
   public CmakeBuildOutputParser() {
@@ -173,7 +179,7 @@ public class CmakeBuildOutputParser extends
         }
       }
     }
-    // add parser for the build tool (make, ninja, etc.)
+    // add parser for the build tool itself (make, ninja, etc.)
     Matcher cmdDetector = Pattern.compile(
         REGEX_CMD_HEAD + Pattern.quote(parsedCMakeCache.getBuildTool())
             + REGEX_CMD_TAIL).matcher("");
