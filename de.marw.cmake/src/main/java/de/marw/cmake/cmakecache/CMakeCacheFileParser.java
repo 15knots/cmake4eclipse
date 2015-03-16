@@ -9,7 +9,7 @@
  *      Martin Weber - Initial implementation
  *******************************************************************************/
 
-package de.marw.cdt.cmake.core.cmakecache;
+package de.marw.cmake.cmakecache;
 
 import java.io.IOException;
 import java.io.InputStream;
