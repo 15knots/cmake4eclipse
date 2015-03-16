@@ -12,14 +12,6 @@ package de.marw.cdt.cmake.core;
 
 import java.text.MessageFormat;
 
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IResourceChangeEvent;
-import org.eclipse.core.resources.IResourceChangeListener;
-import org.eclipse.core.resources.IResourceDelta;
-import org.eclipse.core.resources.IResourceDeltaVisitor;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -32,17 +24,9 @@ public class CMakePlugin extends AbstractUIPlugin {
   /** extension id of the cmake-generated makefile builder */
   public static final String BUILDER_ID = CMakePlugin.PLUGIN_ID
       + "." + "genmakebuilder"; //$NON-NLS-1$
-  /**
-   * name of the session property attached to {@code CMakeCache.txt} file
-   * resources. The property caches the parsed content of the CMake cache file (
-   * {@code CMakeCache.txt})
-   */
-  public static QualifiedName CMAKECACHE_PARSED_PROP = new QualifiedName(
-      CMakePlugin.PLUGIN_ID, "parsed-CMakeCache.txt");
 
   //The shared instance.
   private static CMakePlugin plugin;
-  private IResourceChangeListener cacheCleaner;
 
   /**
    * The constructor.
@@ -59,16 +43,12 @@ public class CMakePlugin extends AbstractUIPlugin {
       throw new RuntimeException(
           "BUG: PLUGIN_ID does not match Bundle-SymbolicName");
     plugin = this;
-    cacheCleaner = new CacheCleaner();
-    ResourcesPlugin.getWorkspace().addResourceChangeListener(cacheCleaner,
-        IResourceChangeEvent.PRE_BUILD);
   }
 
   /**
    * This method is called when the plug-in is stopped
    */
   public void stop(BundleContext context) throws Exception {
-    ResourcesPlugin.getWorkspace().removeResourceChangeListener(cacheCleaner);
     super.stop(context);
     plugin = null;
   }
@@ -111,41 +91,4 @@ public class CMakePlugin extends AbstractUIPlugin {
   public static String getFormattedString(String key, String[] args) {
     return MessageFormat.format(getResourceString(key), (Object[]) args);
   }
-
-  /**
-   * Invalidates the parsed content of a CMake cache file when the user edits
-   * and saves the file.
-   *
-   * @author Martin Weber
-   */
-  private static class CacheCleaner implements IResourceChangeListener {
-    @Override
-    public void resourceChanged(IResourceChangeEvent event) {
-      if (event == null || event.getDelta() == null) {
-        return;
-      }
-
-      try {
-        event.getDelta().accept(new IResourceDeltaVisitor() {
-          public boolean visit(final IResourceDelta delta) throws CoreException {
-            IResource resource = delta.getResource();
-            if (((resource.getType() & IResource.FILE) != 0)
-                && (delta.getKind() & (IResourceDelta.CHANGED )) != 0
-                && "CMakeCache.txt".equals(resource.getName())
-            ) {
-              System.out.println("del parsed cache; " + delta.getKind()
-                  + ", file " + resource.getFullPath());
-              resource.setSessionProperty(CMAKECACHE_PARSED_PROP, null);
-              return false;
-            }
-            return true;
-          }
-        });
-      } catch (CoreException ex) {
-        // TODO Auto-generated catch block
-        ex.printStackTrace();
-      }
-    }
-  }
-
 }

@@ -126,7 +126,7 @@ public class CmakeBuildRunner extends ExternalBuildRunner {
     final IFile cmakeCache = ResourcesPlugin.getWorkspace().getRoot()
         .getFile(builderCWD.append("CMakeCache.txt"));
     cmCache = (SimpleCMakeCacheTxt) cmakeCache
-        .getSessionProperty(CMakePlugin.CMAKECACHE_PARSED_PROP);
+        .getSessionProperty(de.marw.cmake.CMakePlugin.CMAKECACHE_PARSED_PROP);
 //    System.out.println("have cached CMakeCache: " + (cmCache != null));
     if (cmCache == null) { // must parse CMakeCache.txt
 
@@ -140,7 +140,7 @@ public class CmakeBuildRunner extends ExternalBuildRunner {
         // parse CMakeCache.txt...
         cmCache = new SimpleCMakeCacheTxt(file);
         // store parsed cache as resource property
-        cmakeCache.setSessionProperty(CMakePlugin.CMAKECACHE_PARSED_PROP,
+        cmakeCache.setSessionProperty(de.marw.cmake.CMakePlugin.CMAKECACHE_PARSED_PROP,
             cmCache);
 //        System.out.println("stored cached CMakeCache");
       } catch (IOException ex) {

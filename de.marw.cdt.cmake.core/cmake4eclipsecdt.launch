@@ -25,7 +25,7 @@
 <stringAttribute key="selected_workspace_plugins" value="de.marw.cdt.cmake.core@default:default,de.marw.cmake@default:default"/>
 <booleanAttribute key="show_selected_only" value="false"/>
 <stringAttribute key="templateConfig" value="${target_home}/configuration/config.ini"/>
-<stringAttribute key="timestamp" value="1426538422837"/>
+<stringAttribute key="timestamp" value="1426538969436"/>
 <booleanAttribute key="tracing" value="true"/>
 <booleanAttribute key="useCustomFeatures" value="false"/>
 <booleanAttribute key="useDefaultConfig" value="true"/>
