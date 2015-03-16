@@ -8,7 +8,7 @@
  * Contributors:
  *      Martin Weber - Initial implementation
  *******************************************************************************/
-package de.marw.cdt.cmake.core.language.settings.providers;
+package de.marw.cmake.cdt.language.settings.providers;
 
 import java.util.List;
 import java.util.regex.Matcher;
@@ -55,7 +55,7 @@ class ToolArgumentParsers {
             + "(?:=)((\\\\([\"']))(.*?)\\2)", 1, 2), };
 
     /*-
-     * @see de.marw.cdt.cmake.core.language.settings.providers.IToolArgumentParser#processArgs(java.lang.String)
+     * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgs(java.lang.String)
      */
     @Override
     public int processArgument(List<ICLanguageSettingEntry> returnedEntries,
@@ -114,7 +114,7 @@ class ToolArgumentParsers {
         .matcher("");
 
     /*-
-     * @see de.marw.cdt.cmake.core.language.settings.providers.IToolArgumentParser#processArgument(java.util.List, java.lang.String)
+     * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgument(java.util.List, java.lang.String)
      */
     @Override
     public int processArgument(List<ICLanguageSettingEntry> returnedEntries,
@@ -145,7 +145,7 @@ class ToolArgumentParsers {
     new IncludePathOptionParser("-I\\s*([^\\s\"']*?)", 1), };
 
     /*-
-     * @see de.marw.cdt.cmake.core.language.settings.providers.IToolArgumentParser#processArgs(java.lang.String)
+     * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgs(java.lang.String)
      */
     @Override
     public int processArgument(List<ICLanguageSettingEntry> returnedEntries,
@@ -197,7 +197,7 @@ class ToolArgumentParsers {
     new IncludePathOptionParser("-system\\s*([^\\s\"']*?)", 1), };
 
     /*-
-     * @see de.marw.cdt.cmake.core.language.settings.providers.IToolArgumentParser#processArgs(java.lang.String)
+     * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgs(java.lang.String)
      */
     @Override
     public int processArgument(List<ICLanguageSettingEntry> returnedEntries,

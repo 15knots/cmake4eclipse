@@ -8,7 +8,7 @@
  * Contributors:
  *      Martin Weber - Initial implementation
  *******************************************************************************/
-package de.marw.cdt.cmake.core.language.settings.providers;
+package de.marw.cmake.cdt.language.settings.providers;
 
 import static org.junit.Assert.*;
 
@@ -20,7 +20,7 @@ import org.eclipse.cdt.core.settings.model.ICSettingEntry;
 import org.junit.Before;
 import org.junit.Test;
 
-import de.marw.cdt.cmake.core.language.settings.providers.ToolArgumentParsers.MacroDefine_C_POSIX;
+import de.marw.cmake.cdt.language.settings.providers.ToolArgumentParsers.MacroDefine_C_POSIX;
 
 /**
  * @author Martin Weber

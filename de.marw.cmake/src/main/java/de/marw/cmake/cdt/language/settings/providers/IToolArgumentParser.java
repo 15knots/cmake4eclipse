@@ -8,7 +8,7 @@
  * Contributors:
  *      Martin Weber - Initial implementation
  *******************************************************************************/
-package de.marw.cdt.cmake.core.language.settings.providers;
+package de.marw.cmake.cdt.language.settings.providers;
 
 import java.util.List;
 

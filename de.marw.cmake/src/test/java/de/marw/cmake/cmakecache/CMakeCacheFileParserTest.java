@@ -8,7 +8,7 @@
  * Contributors:
  *      Martin Weber - Initial implementation
  *******************************************************************************/
-package de.marw.cdt.cmake.core.cmakecache;
+package de.marw.cmake.cmakecache;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -25,10 +25,12 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 
-import de.marw.cdt.cmake.core.cmakecache.CMakeCacheFileParser.EntryFilter;
+import de.marw.cmake.cmakecache.CMakeCacheFileParser;
+import de.marw.cmake.cmakecache.SimpleCMakeCacheEntry;
+import de.marw.cmake.cmakecache.CMakeCacheFileParser.EntryFilter;
 
 /**
- * Tests for {@link de.marw.cdt.cmake.core.cmakecache.CMakeCacheFileParser}.
+ * Tests for {@link de.marw.cmake.cmakecache.CMakeCacheFileParser}.
  *
  * @author Martin Weber
  */
@@ -46,7 +48,7 @@ public class CMakeCacheFileParserTest {
 
   /**
    * Test method for
-   * {@link de.marw.cdt.cmake.core.cmakecache.CMakeCacheFileParser#parse(java.io.InputStream, de.marw.cdt.cmake.core.cmakecache.CMakeCacheFileParser.EntryFilter, Collection, List)}
+   * {@link de.marw.cmake.cmakecache.CMakeCacheFileParser#parse(java.io.InputStream, de.marw.cmake.cmakecache.CMakeCacheFileParser.EntryFilter, Collection, List)}
    * .
    *
    * @throws Exception
@@ -144,7 +146,7 @@ public class CMakeCacheFileParserTest {
 
   /**
    * Test method for
-   * {@link de.marw.cdt.cmake.core.cmakecache.CMakeCacheFileParser#parse(java.io.InputStream, de.marw.cdt.cmake.core.cmakecache.CMakeCacheFileParser.EntryFilter, Collection, List)}
+   * {@link de.marw.cmake.cmakecache.CMakeCacheFileParser#parse(java.io.InputStream, de.marw.cmake.cmakecache.CMakeCacheFileParser.EntryFilter, Collection, List)}
    * .
    *
    * @throws Exception

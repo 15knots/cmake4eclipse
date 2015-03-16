@@ -47,10 +47,10 @@ import org.eclipse.core.runtime.Status;
 import org.osgi.framework.Version;
 
 import de.marw.cdt.cmake.core.CMakePlugin;
-import de.marw.cdt.cmake.core.cmakecache.SimpleCMakeCacheTxt;
 import de.marw.cdt.cmake.core.internal.settings.AbstractOsPreferences;
 import de.marw.cdt.cmake.core.internal.settings.CMakePreferences;
 import de.marw.cdt.cmake.core.internal.settings.ConfigurationManager;
+import de.marw.cmake.cmakecache.SimpleCMakeCacheTxt;
 
 /**
  * An ExternalBuildRunner that injects the build tool command to use and some of

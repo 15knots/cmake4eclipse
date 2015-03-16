@@ -8,7 +8,7 @@
  * Contributors:
  *      Martin Weber - Initial implementation
  *******************************************************************************/
-package de.marw.cdt.cmake.core.language.settings.providers;
+package de.marw.cmake.cdt.language.settings.providers;
 
 import static org.junit.Assert.*;
 
@@ -20,7 +20,7 @@ import org.eclipse.cdt.core.settings.model.ICSettingEntry;
 import org.junit.Before;
 import org.junit.Test;
 
-import de.marw.cdt.cmake.core.language.settings.providers.ToolArgumentParsers.MacroUndefine_C_POSIX;
+import de.marw.cmake.cdt.language.settings.providers.ToolArgumentParsers.MacroUndefine_C_POSIX;
 
 /**
  * @author Martin Weber
@@ -39,7 +39,7 @@ public class MacroUndefine_C_POSIXTest {
 
   /**
    * Test method for
-   * {@link de.marw.cdt.cmake.core.language.settings.providers.ToolArgumentParsers.MacroUndefine_C_POSIX#processArgument(java.util.List, java.lang.String)}
+   * {@link de.marw.cmake.cdt.language.settings.providers.ToolArgumentParsers.MacroUndefine_C_POSIX#processArgument(java.util.List, java.lang.String)}
    * .
    */
   @Test

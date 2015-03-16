@@ -8,7 +8,7 @@
  * Contributors:
  *      Martin Weber - Initial implementation
  *******************************************************************************/
-package de.marw.cdt.cmake.core.language.settings.providers;
+package de.marw.cmake.cdt.language.settings.providers;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,9 +36,8 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
-import de.marw.cdt.cmake.core.CMakePlugin;
-import de.marw.cdt.cmake.core.cmakecache.SimpleCMakeCacheTxt;
-import de.marw.cdt.cmake.core.language.settings.providers.ToolArgumentParsers;
+import de.marw.cmake.CMakePlugin;
+import de.marw.cmake.cmakecache.SimpleCMakeCacheTxt;
 
 /**
  * A build output parser capable to parse the output of the build tool for which
@@ -343,7 +342,7 @@ public class CmakeBuildOutputParser extends
     }
 
     /*-
-     * @see de.marw.cdt.cmake.core.language.settings.providers.CmakeBuildOutputParser.IBuildOutputToolParser#getLanguageId()
+     * @see de.marw.cmake.cdt.language.settings.providers.CmakeBuildOutputParser.IBuildOutputToolParser#getLanguageId()
      */
     @Override
     public String getLanguageId() {
@@ -365,7 +364,7 @@ public class CmakeBuildOutputParser extends
     }
 
     /*-
-     * @see de.marw.cdt.cmake.core.language.settings.providers.CmakeBuildOutputParser.IBuildOutputToolParser#getLanguageId()
+     * @see de.marw.cmake.cdt.language.settings.providers.CmakeBuildOutputParser.IBuildOutputToolParser#getLanguageId()
      */
     @Override
     public String getLanguageId() {
