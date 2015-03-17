@@ -30,6 +30,7 @@ public class SimpleCMakeCacheTxt {
 
   private String buildTool;
   private List<String> tools;
+  private List<String> commands;
 
   /**
    * Creates a new object by parsing the specified file.
@@ -40,7 +41,8 @@ public class SimpleCMakeCacheTxt {
    *         if the file could not be read
    */
   public SimpleCMakeCacheTxt(File file) throws IOException {
-    ArrayList<String> tools= new ArrayList<String>();
+    ArrayList<String> tools = new ArrayList<String>();
+    ArrayList<String> commands = new ArrayList<String>();
 
     // parse CMakeCache.txt...
     InputStream is = null;
@@ -51,27 +53,22 @@ public class SimpleCMakeCacheTxt {
       for (SimpleCMakeCacheEntry entry : entries) {
         final String toolKey = entry.getKey();
         final String tool = entry.getValue();
-        if ("CMAKE_BUILD_TOOL".equals(toolKey)){
+        if ("CMAKE_BUILD_TOOL".equals(toolKey)) {
           buildTool = tool;
-//          tools.add(tool);
-        }
-        else if ("CMAKE_COMMAND".equals(toolKey)){
+        } else if ("CMAKE_COMMAND".equals(toolKey)) {
+          commands.add(tool);
+        } else if ("CMAKE_CPACK_COMMAND".equals(toolKey)) {
+          commands.add(tool);
+        } else if ("CMAKE_CTEST_COMMAND".equals(toolKey)) {
+          commands.add(tool);
+        } else if ("CMAKE_C_COMPILER".equals(toolKey)) {
+          tools.add(tool);
+        } else if ("CMAKE_CXX_COMPILER".equals(toolKey)) {
           tools.add(tool);
         }
-        else if ("CMAKE_CPACK_COMMAND".equals(toolKey)){
-          tools.add(tool);
-        }
-        else if ("CMAKE_CTEST_COMMAND".equals(toolKey)){
-          tools.add(tool);
-        }
-        else if ("CMAKE_C_COMPILER".equals(toolKey)){
-          tools.add(tool);
-        }
-        else if ("CMAKE_CXX_COMPILER".equals(toolKey)){
-          tools.add(tool);
-        }
-        this.tools= Collections.unmodifiableList(tools);
       }
+      this.tools = Collections.unmodifiableList(tools);
+      this.commands = Collections.unmodifiableList(commands);
     } finally {
       if (is != null) {
         try {
@@ -83,9 +80,9 @@ public class SimpleCMakeCacheTxt {
   }
 
   /**
-   * Gets the name of the tool that will process the generated build scripts. In
+   * Gets the name of the tool that processes the generated build scripts. In
    * most cases, this method will return the absolute file system path of the
-   * tool, for example {@code /usr/bin/make}.
+   * tool, such as {@code /usr/bin/make}.
    *
    * @return the CMAKE_BUILD_TOOL entry from the CMakeCache.txt file or
    *         {@code null} if the file could not be parsed
@@ -94,7 +91,20 @@ public class SimpleCMakeCacheTxt {
     return buildTool;
   }
 
+  /**
+   * Gets the tools that process the source files to binary files (compilers,
+   * linkers). In most cases, this method will return the absolute file system
+   * paths of a tool, for example {@code /usr/bin/cc}.
+   */
   public List<String> getTools() {
     return tools;
+  }
+
+  /**
+   * Gets the tools provided by CMake itself (cmake, cpack, ctest). In most
+   * cases, this method will return the absolute file system paths of a tool.
+   */
+  public List<String> getCmakeCommands() {
+    return commands;
   }
 }

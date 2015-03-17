@@ -140,9 +140,62 @@ class ToolArgumentParsers {
   static class IncludePath_C_POSIX implements IToolArgumentParser {
     static final IncludePathOptionParser[] optionParsers = {
     /* quoted directory */
-    new IncludePathOptionParser("-I\\s*([\"'])(.*?)\\1", 2),
+    new IncludePathOptionParser("-I\\s*([\"'])(.+?)\\1", 2),
     /* unquoted directory */
-    new IncludePathOptionParser("-I\\s*([^\\s\"']*?)", 1), };
+    new IncludePathOptionParser("-I\\s*([^\\s]+)", 1), };
+
+    /*-
+     * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgs(java.lang.String)
+     */
+    @Override
+    public int processArgument(List<ICLanguageSettingEntry> returnedEntries,
+        String args) {
+      for (IncludePathOptionParser parser : optionParsers) {
+        final Matcher matcher = parser.matcher;
+
+        matcher.reset(args);
+        if (matcher.lookingAt()) {
+          final String name = matcher.group(parser.nameGroup);
+          final ICLanguageSettingEntry entry = CDataUtil
+              .createCIncludePathEntry(name, 0);
+          returnedEntries.add(entry);
+          final int end = matcher.end();
+          return end;
+        }
+      }
+      return 0;// no input consumed
+    }
+
+    static class IncludePathOptionParser {
+      private final Matcher matcher;
+      private final int nameGroup;
+
+      /**
+       * Constructor.
+       *
+       * @param pattern
+       *        - regular expression pattern being parsed by the parser.
+       * @param nameGroup
+       *        - capturing group number defining name of an entry.
+       */
+      public IncludePathOptionParser(String pattern, int nameGroup) {
+        this.matcher = Pattern.compile(pattern).matcher("");
+        this.nameGroup = nameGroup;
+      }
+    }
+  }
+
+  ////////////////////////////////////////////////////////////////////
+  /**
+   * A tool argument parser capable to parse a C-compiler system include path
+   * argument: {@code -system path}.
+   */
+  static class SystemIncludePath_C implements IToolArgumentParser {
+    static final IncludePathOptionParser[] optionParsers = {
+      /* quoted directory */
+      new IncludePathOptionParser("-system\\s+([\"'])(.+?)\\1", 2),
+      /* unquoted directory */
+      new IncludePathOptionParser("-system\\s+([^\\s]+)", 1), };
 
     /*-
      * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgs(java.lang.String)
@@ -185,56 +238,4 @@ class ToolArgumentParsers {
     }
   }
   ////////////////////////////////////////////////////////////////////
-  /**
-   * A tool argument parser capable to parse a C-compiler
-   * system include path argument: {@code -system path}.
-   */
-  static class SystemIncludePath_C implements IToolArgumentParser {
-    static final IncludePathOptionParser[] optionParsers = {
-    /* quoted directory */
-    new IncludePathOptionParser("-system\\s*([\"'])(.*?)\\1", 2),
-    /* unquoted directory */
-    new IncludePathOptionParser("-system\\s*([^\\s\"']*?)", 1), };
-
-    /*-
-     * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgs(java.lang.String)
-     */
-    @Override
-    public int processArgument(List<ICLanguageSettingEntry> returnedEntries,
-        String args) {
-      for (IncludePathOptionParser parser : optionParsers) {
-        final Matcher matcher = parser.matcher;
-
-        matcher.reset(args);
-        if (matcher.lookingAt()) {
-          final String name = matcher.group(parser.nameGroup);
-          final ICLanguageSettingEntry entry = CDataUtil
-              .createCIncludePathEntry(name, 0);
-          returnedEntries.add(entry);
-          final int end = matcher.end();
-          return end;
-        }
-      }
-      return 0;// no input consumed
-    }
-
-    static class IncludePathOptionParser {
-      private final Matcher matcher;
-      private final int nameGroup;
-
-      /**
-       * Constructor.
-       *
-       * @param pattern
-       *        - regular expression pattern being parsed by the parser.
-       * @param nameGroup
-       *        - capturing group number defining name of an entry.
-       */
-      public IncludePathOptionParser(String pattern, int nameGroup) {
-        this.matcher = Pattern.compile(pattern).matcher("");
-        this.nameGroup = nameGroup;
-      }
-    }
-  }
- ////////////////////////////////////////////////////////////////////
 }
