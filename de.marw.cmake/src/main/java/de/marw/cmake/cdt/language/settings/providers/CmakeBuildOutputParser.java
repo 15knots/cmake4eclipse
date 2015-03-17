@@ -84,14 +84,11 @@ public class CmakeBuildOutputParser extends
         new ToolArgumentParsers.IncludePath_C_POSIX(),
         // not defined by POSIX, but does not harm..
         new ToolArgumentParsers.SystemIncludePath_C(), };
-    knownCmdParsers.put("cmake", skipOutput);
-    knownCmdParsers.put("cpack", skipOutput);
-    knownCmdParsers.put("ctest", skipOutput);
-    // POSIX compatible C-compilers...
+    // POSIX compatible C compilers...
     BuildOutputToolParser gcc = new BuildOutputToolParser(
         "org.eclipse.cdt.core.gcc", posix_cc_args);
     knownCmdParsers.put("cc", gcc);
-    // POSIX compatible C-compilers...
+    // POSIX compatible C++ compilers...
     knownCmdParsers.put("c++", new BuildOutputToolParser(
         "org.eclipse.cdt.core.g++", posix_cc_args));
   }
@@ -153,10 +150,8 @@ public class CmakeBuildOutputParser extends
   @Override
   public void startup(ICConfigurationDescription cfgDescription,
       IWorkingDirectoryTracker cwdTracker) throws CoreException {
-    // TODO Auto-generated function stub
-//    this.cwdTracker = cwdTracker;
-    System.out.println("STARTUP Parser " + cfgDescription + ": CWD="
-        + cwdTracker.getWorkingDirectoryURI());
+//    System.out.println("STARTUP Parser " + cfgDescription + ": CWD="
+//        + cwdTracker.getWorkingDirectoryURI());
     this.currentCfgDescription = cfgDescription;
     this.currentProject = cfgDescription.getProjectDescription().getProject();
 
@@ -165,6 +160,7 @@ public class CmakeBuildOutputParser extends
     // determine the parsers for the tool invocations of interest
     currentBuildOutputToolParsers = new HashMap<Matcher, IBuildOutputToolParser>(
         4, 1.0f);
+    // compilers and linkers...
     for (String toolPath : parsedCMakeCache.getTools()) {
       final String toolName = new File(toolPath).getName();
       for (Entry<String, IBuildOutputToolParser> entry : knownCmdParsers
@@ -177,6 +173,13 @@ public class CmakeBuildOutputParser extends
           break;
         }
       }
+    }
+    // cmake, cpack, ctest. Only for skipping the output...
+    for (String toolPath : parsedCMakeCache.getCmakeCommands()) {
+      Matcher cmdDetector = Pattern.compile(
+          REGEX_CMD_HEAD + Pattern.quote(toolPath) + REGEX_CMD_TAIL)
+          .matcher("");
+      currentBuildOutputToolParsers.put(cmdDetector, skipOutput);
     }
     // add parser for the build tool itself (make, ninja, etc.)
     Matcher cmdDetector = Pattern.compile(
@@ -202,7 +205,7 @@ public class CmakeBuildOutputParser extends
         final IBuildOutputToolParser botp = entry.getValue();
         final List<ICLanguageSettingEntry> entries = botp.processArgs(args);
         // attach settings to project...
-        if (entries == null) {
+        if (entries != null && entries.size()>0) {
           super.setSettingEntries(currentCfgDescription, currentProject,
               botp.getLanguageId(), entries);
         }
