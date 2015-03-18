@@ -18,20 +18,15 @@ Annoyingly, these recommended out-of-source-builds impose some tedious tasks on 
 **cmake4eclipse** can be installed into an existing Eclipse installation using the "Install New Software..." dialog and entering the update site URL listed below.
 ## Update Site
 This composite update site contains the latest release as well as selected older releases.
-https://cmake4eclipsecdt.googlecode.com/git/releng/comp-update/
-
+https://github.com/15knots/cmake4eclipse/tree/master/releng/comp-update/
 ---
-
-
 ## Latest Release
 1.3.1 (2015-01-21)
 ### Repository URL
 `jar:https://googledrive.com/host/0B-QU1Qnto3huZUZ0QUdxM01pR0U/cmake4eclipsecdt-1.3.1.zip!/`
 ### System Requirements
 CDT v 8.1.0 or higher and Eclipse v 3.8.0 (Juno) or higher
-
 ---
-
 ## Archived Releases
 These releases are made available as a zipped p2 repository. To install, use the "Install New Software..." menu and paste the appropriate repository URL from below into the "Work with" input field.
 
@@ -52,10 +47,9 @@ Eclipse v 3.8.0 (Juno) or higher
 #### Repository URL
 `jar:https://googledrive.com/host/0B-QU1Qnto3huZUZ0QUdxM01pR0U/cmake4eclipsecdt-1.0.0.zip!/`
 #### System Requirements
-CDT v 8.1.0 or higher<br>
-Eclipse v 3.8.0 (Juno) or higher<br>
-<br>
-<hr />
-<h2>Older Releases</h2>
+CDT v 8.1.0 or higher
+Eclipse v 3.8.0 (Juno) or higher
+---
+## Ancient Releases
 Other revisions can be found at <a href='https://googledrive.com/host/0B-QU1Qnto3huZUZ0QUdxM01pR0U/'>https://googledrive.com/host/0B-QU1Qnto3huZUZ0QUdxM01pR0U/</a> .<br>
 Do not forget to add the trailing <b>!/</b> to the repository URL!<br>
