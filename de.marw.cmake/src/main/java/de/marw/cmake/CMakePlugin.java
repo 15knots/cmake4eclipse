@@ -19,7 +19,10 @@ import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.ILog;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.QualifiedName;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -130,8 +133,6 @@ public class CMakePlugin extends AbstractUIPlugin {
                 && (delta.getKind() & (IResourceDelta.CHANGED )) != 0
                 && "CMakeCache.txt".equals(resource.getName())
             ) {
-              System.out.println("del parsed cache; " + delta.getKind()
-                  + ", file " + resource.getFullPath());
               resource.setSessionProperty(CMAKECACHE_PARSED_PROP, null);
               return false;
             }
@@ -139,8 +140,8 @@ public class CMakePlugin extends AbstractUIPlugin {
           }
         });
       } catch (CoreException ex) {
-        // TODO Auto-generated catch block
-        ex.printStackTrace();
+        final ILog log = CMakePlugin.getDefault().getLog();
+        log.log(new Status(ex.getStatus().getSeverity(), CMakePlugin.PLUGIN_ID, "setSessionProperty", ex));
       }
     }
   }
