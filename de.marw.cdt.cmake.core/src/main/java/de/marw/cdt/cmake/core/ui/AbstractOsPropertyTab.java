@@ -37,7 +37,7 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Text;
 
-import de.marw.cdt.cmake.core.CMakePlugin;
+import de.marw.cdt.cmake.core.CdtPlugin;
 import de.marw.cdt.cmake.core.internal.CmakeGenerator;
 import de.marw.cdt.cmake.core.internal.settings.AbstractOsPreferences;
 import de.marw.cdt.cmake.core.internal.settings.CMakePreferences;
@@ -60,7 +60,7 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
     extends QuirklessAbstractCPropertyTab {
 
   /**  */
-  private static final ILog log = CMakePlugin.getDefault().getLog();
+  private static final ILog log = CdtPlugin.getDefault().getLog();
 
   /** the configuration we manage here. Initialized in {@link #updateData} */
   private ICConfigurationDescription cfgd;
@@ -147,7 +147,7 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
       b_cmdBrowseFiles.addSelectionListener(new SelectionAdapter() {
         @Override
         public void widgetSelected(SelectionEvent e) {
-          IDialogSettings settings = CMakePlugin.getDefault()
+          IDialogSettings settings = CdtPlugin.getDefault()
               .getDialogSettings();
           FileDialog dialog = new FileDialog(t_cmd.getShell());
           dialog.setFilterPath(settings.get("cmake_dir"));
@@ -222,7 +222,7 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
       CMakePreferences allPrefs = configMgr.getOrLoad(cfgd);
       prefs = getOsPreferences(allPrefs);
     } catch (CoreException ex) {
-      log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, null, ex));
+      log.log(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID, null, ex));
     }
 
     updateDisplay();
@@ -311,7 +311,7 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
         undefines.add(undef.clone());
       }
     } catch (CoreException ex) {
-      log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, null, ex));
+      log.log(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID, null, ex));
     }
   }
 
@@ -327,7 +327,7 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
           CMakePreferences.CFG_STORAGE_ID, true);
       prefs.saveToStorage(storage);
     } catch (CoreException ex) {
-      log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, null, ex));
+      log.log(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID, null, ex));
     }
   }
 

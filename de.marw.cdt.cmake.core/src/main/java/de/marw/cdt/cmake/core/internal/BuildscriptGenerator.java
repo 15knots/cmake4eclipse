@@ -53,7 +53,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.variables.IStringVariableManager;
 import org.eclipse.core.variables.VariablesPlugin;
 
-import de.marw.cdt.cmake.core.CMakePlugin;
+import de.marw.cdt.cmake.core.CdtPlugin;
 import de.marw.cdt.cmake.core.internal.settings.AbstractOsPreferences;
 import de.marw.cdt.cmake.core.internal.settings.CMakePreferences;
 import de.marw.cdt.cmake.core.internal.settings.CmakeDefine;
@@ -67,7 +67,7 @@ import de.marw.cdt.cmake.core.internal.settings.ConfigurationManager;
  * @author Martin Weber
  */
 public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
-  private static final ILog log = CMakePlugin.getDefault().getLog();
+  private static final ILog log = CdtPlugin.getDefault().getLog();
 
   /** CBuildConsole element id */
   private static final String CMAKE_CONSOLE_ID = "de.marw.cdt.cmake.core.cmakeConsole";
@@ -178,7 +178,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
         return regenerateMakefiles();
       }
     }
-    MultiStatus status = new MultiStatus(CMakePlugin.PLUGIN_ID, IStatus.OK, "",
+    MultiStatus status = new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.OK, "",
         null);
     return status;
   }
@@ -197,9 +197,9 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     if (!MULTIPLE_SOURCE_DIRS_SUPPORTED && srcEntries.length > 1) {
       final String msg = "Only a single source location supported by CMake";
       updateMonitor(msg);
-      status = new MultiStatus(CMakePlugin.PLUGIN_ID, IStatus.ERROR, "", null);
+      status = new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.ERROR, "", null);
       status
-          .add(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, 0, msg, null));
+          .add(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID, 0, msg, null));
       return status;
     }
 
@@ -208,8 +208,8 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       // Make sure there is something to build
       String msg = "No source directories in project " + project.getName();
       updateMonitor(msg);
-      status = new MultiStatus(CMakePlugin.PLUGIN_ID, IStatus.INFO, "", null);
-      status.add(new Status(IStatus.INFO, CMakePlugin.PLUGIN_ID,
+      status = new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.INFO, "", null);
+      status.add(new Status(IStatus.INFO, CdtPlugin.PLUGIN_ID,
           IManagedBuilderMakefileGenerator.NO_SOURCE_FOLDERS, msg, null));
       return status;
     } else {
@@ -218,7 +218,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       srcEntries = CDataUtil.resolveEntries(srcEntries, cfgDes);
     }
 
-    status = new MultiStatus(CMakePlugin.PLUGIN_ID, IStatus.OK, "", null);
+    status = new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.OK, "", null);
 
     final IConsole console = CCorePlugin.getDefault().getConsole(
         CMAKE_CONSOLE_ID);
@@ -346,19 +346,19 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       final int exitValue = proc.exitValue();
       if (exitValue == 0) {
         // success
-        status = new MultiStatus(CMakePlugin.PLUGIN_ID, IStatus.OK, null, null);
+        status = new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.OK, null, null);
       } else {
         // cmake had errors...
         errMsg = String.format(
             "%1$s exited with status %2$d. See CMake console for details.",
             cmd, exitValue);
-        status = new MultiStatus(CMakePlugin.PLUGIN_ID, IStatus.ERROR, errMsg,
+        status = new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.ERROR, errMsg,
             null);
       }
     } else {
       // process start failed
       errMsg = launcher.getErrorMessage();
-      status = new MultiStatus(CMakePlugin.PLUGIN_ID, IStatus.ERROR, errMsg,
+      status = new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.ERROR, errMsg,
           null);
     }
 
@@ -451,7 +451,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
           .extractOsPreferences(prefs);
       return osPrefs.getGenerator() != osPrefs.getGeneratedWith();
     } catch (CoreException ex) {
-      log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, null, ex));
+      log.log(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID, null, ex));
       return false;
     }
   }

@@ -18,20 +18,20 @@ import org.osgi.framework.BundleContext;
 /**
  * @author Martin Weber
  */
-public class CMakePlugin extends AbstractUIPlugin {
+public class CdtPlugin extends AbstractUIPlugin {
 
   public static final String PLUGIN_ID = "de.marw.cdt.cmake.core"; //$NON-NLS-1$
   /** extension id of the cmake-generated makefile builder */
-  public static final String BUILDER_ID = CMakePlugin.PLUGIN_ID
+  public static final String BUILDER_ID = CdtPlugin.PLUGIN_ID
       + "." + "genmakebuilder"; //$NON-NLS-1$
 
   //The shared instance.
-  private static CMakePlugin plugin;
+  private static CdtPlugin plugin;
 
   /**
    * The constructor.
    */
-  public CMakePlugin() {
+  public CdtPlugin() {
   }
 
   /**
@@ -56,7 +56,7 @@ public class CMakePlugin extends AbstractUIPlugin {
   /**
    * Returns the shared instance.
    */
-  public static CMakePlugin getDefault() {
+  public static CdtPlugin getDefault() {
     return plugin;
   }
 
@@ -69,7 +69,7 @@ public class CMakePlugin extends AbstractUIPlugin {
    * @return the resource bundle message
    */
   public static String getResourceString(String key) {
-//		ResourceBundle bundle = CMakePlugin.getDefault().getResourceBundle();
+//		ResourceBundle bundle = CdtPlugin.getDefault().getResourceBundle();
 //		try {
 //			return bundle.getString(key);
 //		} catch (MissingResourceException e) {

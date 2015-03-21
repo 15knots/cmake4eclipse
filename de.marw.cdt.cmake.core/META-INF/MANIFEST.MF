@@ -40,6 +40,6 @@ Import-Package: de.marw.cmake,
  org.eclipse.swt.widgets,
  org.eclipse.ui.plugin,
  org.osgi.framework
-Bundle-Activator: de.marw.cdt.cmake.core.CMakePlugin
+Bundle-Activator: de.marw.cdt.cmake.core.CdtPlugin
 Export-Package: de.marw.cdt.cmake.core
 Require-Bundle: org.eclipse.ui.workbench;bundle-version="3.8.0"

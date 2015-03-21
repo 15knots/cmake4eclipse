@@ -46,7 +46,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.osgi.framework.Version;
 
-import de.marw.cdt.cmake.core.CMakePlugin;
+import de.marw.cdt.cmake.core.CdtPlugin;
 import de.marw.cdt.cmake.core.internal.settings.AbstractOsPreferences;
 import de.marw.cdt.cmake.core.internal.settings.CMakePreferences;
 import de.marw.cdt.cmake.core.internal.settings.ConfigurationManager;
@@ -61,7 +61,7 @@ import de.marw.cmake.cmakecache.SimpleCMakeCacheTxt;
  * @author Martin Weber
  */
 public class CmakeBuildRunner extends ExternalBuildRunner {
-  private static final ILog log = CMakePlugin.getDefault().getLog();
+  private static final ILog log = CdtPlugin.getDefault().getLog();
 
   /*-
    * @see org.eclipse.cdt.managedbuilder.core.ExternalBuildRunner#invokeBuild(int, org.eclipse.core.resources.IProject, org.eclipse.cdt.managedbuilder.core.IConfiguration, org.eclipse.cdt.managedbuilder.core.IBuilder, org.eclipse.cdt.core.resources.IConsole, org.eclipse.cdt.core.IMarkerGenerator, org.eclipse.core.resources.IncrementalProjectBuilder, org.eclipse.core.runtime.IProgressMonitor)
@@ -146,7 +146,7 @@ public class CmakeBuildRunner extends ExternalBuildRunner {
       } catch (IOException ex) {
         // ignore, the build command will run cmake anyway.
         // So let cmake complain about its cache file
-        log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID,
+        log.log(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID,
             "Failed to read file " + file, ex));
       }
     }
