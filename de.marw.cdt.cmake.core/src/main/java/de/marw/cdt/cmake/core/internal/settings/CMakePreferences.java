@@ -15,7 +15,7 @@ import java.util.List;
 
 import org.eclipse.cdt.core.settings.model.ICStorageElement;
 
-import de.marw.cdt.cmake.core.CMakePlugin;
+import de.marw.cdt.cmake.core.CdtPlugin;
 import de.marw.cdt.cmake.core.internal.storage.CmakeDefineSerializer;
 import de.marw.cdt.cmake.core.internal.storage.CmakeUndefineSerializer;
 import de.marw.cdt.cmake.core.internal.storage.Util;
@@ -31,7 +31,7 @@ public class CMakePreferences {
    * storage ID used to store settings or preferences with a
    * ICConfigurationDescription
    */
-  public static final String CFG_STORAGE_ID = CMakePlugin.PLUGIN_ID
+  public static final String CFG_STORAGE_ID = CdtPlugin.PLUGIN_ID
       + ".settings";
   private static final String ATTR_WARN_NO_DEV = "warnNoDev";
   private static final String ATTR_DEBUG_TRYCOMPILE = "debugTryCompile";
