@@ -12,10 +12,12 @@ Bundle-ActivationPolicy: lazy
 Import-Package: org.eclipse.cdt.core.language.settings.providers,
  org.eclipse.cdt.core.settings.model,
  org.eclipse.cdt.core.settings.model.util,
+ org.eclipse.core.commands,
  org.eclipse.core.resources,
  org.eclipse.core.runtime,
  org.eclipse.core.runtime.jobs,
  org.eclipse.core.runtime.preferences;version="3.3.0",
+ org.eclipse.jface.viewers,
  org.eclipse.ui.plugin,
  org.osgi.framework
 Bundle-Activator: de.marw.cmake.CMakePlugin

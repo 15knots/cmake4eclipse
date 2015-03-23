@@ -23,4 +23,99 @@
          <language-scope id="org.eclipse.cdt.core.g++"/>
     </provider>
  </extension>
+ <extension
+       id="cmakeBuilder"
+       name="CMake Project Builder"
+       point="org.eclipse.core.resources.builders">
+    <builder
+          hasNature="true">
+       <run
+             class="de.marw.cmake.builder.CMakeBuilder">
+       </run>
+    </builder>
+ </extension>
+ <extension
+       id="cmakeBuildNature"
+       name="CMake build Nature"
+       point="org.eclipse.core.resources.natures">
+    <runtime>
+       <run
+             class="de.marw.cmake.builder.CMakeBuildNature">
+       </run>
+    </runtime>
+    <builder
+          id="de.marw.cmake.cmakeBuilder">
+    </builder>
+ </extension>
+ <extension
+       point="org.eclipse.ui.commands">
+    <category
+          id="de.marw.cmake.cmakeBuildNature.category"
+          name="CMake build Nature commands">
+    </category>
+    <command
+          categoryId="de.marw.cmake.cmakeBuildNature.category"
+          defaultHandler="de.marw.cmake.builder.AddRemoveCMakeBuildNatureHandler"
+          id="de.marw.cmake.addRemoveCMakeBuildNature"
+          name="Add/RemoveCMake build Nature">
+    </command>
+ </extension>
+ <extension
+       point="org.eclipse.ui.menus">
+    <menuContribution
+          locationURI="popup:org.eclipse.ui.projectConfigure?after=additions">
+       <command
+             commandId="de.marw.cmake.addRemoveCMakeBuildNature"
+             label="Disable Sample builder"
+             style="push">
+          <visibleWhen
+                checkEnabled="false">
+             <with
+                   variable="selection">
+                <count
+                      value="1">
+                </count>
+                <iterate>
+                   <and>
+                      <instanceof
+                            value="org.eclipse.core.resources.IProject">
+                      </instanceof>
+                      <test
+                            property="org.eclipse.core.resources.projectNature"
+                            value="de.marw.cmake.cmakeBuildNature">
+                      </test>
+                   </and>
+                </iterate>
+             </with>
+          </visibleWhen>
+       </command>
+       <command
+             commandId="de.marw.cmake.addRemoveCMakeBuildNature"
+             label="Enable Sample builder"
+             style="push">
+          <visibleWhen
+                checkEnabled="false">
+             <with
+                   variable="selection">
+                <count
+                      value="1">
+                </count>
+                <iterate>
+                   <and>
+                      <instanceof
+                            value="org.eclipse.core.resources.IProject">
+                      </instanceof>
+                      <not>
+                         <test
+                               property="org.eclipse.core.resources.projectNature"
+                               value="de.marw.cmake.cmakeBuildNature">
+                         </test>
+                      </not>
+                   </and>
+                </iterate>
+             </with>
+          </visibleWhen>
+       </command>
+    </menuContribution>
+ </extension>
 </plugin>
