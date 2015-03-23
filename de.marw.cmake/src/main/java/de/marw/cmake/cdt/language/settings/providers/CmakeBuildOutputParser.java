@@ -88,9 +88,12 @@ public class CmakeBuildOutputParser extends
     BuildOutputToolParser gcc = new BuildOutputToolParser(
         "org.eclipse.cdt.core.gcc", posix_cc_args);
     knownCmdParsers.put("cc", gcc);
+    knownCmdParsers.put("clang", gcc);
     // POSIX compatible C++ compilers...
-    knownCmdParsers.put("c++", new BuildOutputToolParser(
-        "org.eclipse.cdt.core.g++", posix_cc_args));
+    BuildOutputToolParser gpp = new BuildOutputToolParser(
+        "org.eclipse.cdt.core.g++", posix_cc_args);
+    knownCmdParsers.put("c++", gpp);
+    knownCmdParsers.put("clang++", gpp);
   }
 
   public CmakeBuildOutputParser() {
