@@ -212,7 +212,7 @@ public class CmakeBuildOutputParser extends
         return true; // skip other build output parsers
       }
     }
-    System.out.println(line);
+//    System.out.println(line);
     return false;
   }
 
