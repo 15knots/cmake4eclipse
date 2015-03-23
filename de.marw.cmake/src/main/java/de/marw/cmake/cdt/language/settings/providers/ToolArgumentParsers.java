@@ -193,9 +193,9 @@ class ToolArgumentParsers {
   static class SystemIncludePath_C implements IToolArgumentParser {
     static final IncludePathOptionParser[] optionParsers = {
       /* quoted directory */
-      new IncludePathOptionParser("-system\\s+([\"'])(.+?)\\1", 2),
+      new IncludePathOptionParser("-isystem\\s+([\"'])(.+?)\\1", 2),
       /* unquoted directory */
-      new IncludePathOptionParser("-system\\s+([^\\s]+)", 1), };
+      new IncludePathOptionParser("-isystem\\s+([^\\s]+)", 1), };
 
     /*-
      * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgs(java.lang.String)
