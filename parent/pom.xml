@@ -10,9 +10,8 @@
 
     <groupId>de.marw.cdt.cmake</groupId>
     <artifactId>cmake-parent</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.3</version>
     <packaging>pom</packaging>
-    <name>CDT CMake Parent</name>
 
     <properties>
         <tycho-version>0.22.0</tycho-version>
@@ -259,14 +258,14 @@
         </pluginManagement>
     </build>
 
-    <url>http://code.google.com/p/cmake4eclipsecdt/</url>
+    <url>https://github.com/15knots/cmake4eclipse</url>
     <scm>
-        <url>http://code.google.com/p/cmake4eclipsecdt/source/checkout</url>
-        <connection>scm:git:https://code.google.com/p/cmake4eclipsecdt/</connection>
-        <developerConnection>scm:git:https://code.google.com/p/cmake4eclipsecdt/</developerConnection>
+        <url>https://github.com/15knots/cmake4eclipse</url>
+        <connection>scm:git:https://github.com/15knots/cmake4eclipse.git</connection>
+        <developerConnection>scm:git:https://github.com/15knots/cmake4eclipse.git</developerConnection>
     </scm>
     <issueManagement>
-        <url>http://code.google.com/p/cmake4eclipsecdt/issues/list</url>
+        <url>https://github.com/15knots/cmake4eclipse/issues</url>
     </issueManagement>
 
     <inceptionYear>2013</inceptionYear>
