@@ -30,8 +30,7 @@ CDT v 8.1.0 or higher and Eclipse v 3.8.0 (Juno) or higher
 ## Archived Releases
 These releases are made available as a zipped p2 repository. To install, use the "Install New Software..." menu and paste the appropriate repository URL from below into the "Work with" input field.
 
-### Latest Release
-1.3.1 (2015-01-21)
+### 1.3.1 (2015-01-21)
 #### Repository URL
 `jar:https://googledrive.com/host/0B-QU1Qnto3huZUZ0QUdxM01pR0U/cmake4eclipsecdt-1.3.1.zip!/`
 #### System Requirements
