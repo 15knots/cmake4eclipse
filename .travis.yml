@@ -3,4 +3,4 @@ jdk:
   - openjdk6
   
 script:
-- mvn -Pretail -f de.marw.cdt-parent/pom.xml
+- mvn -Pretail -f releng/de.marw.cdt-parent/pom.xml
