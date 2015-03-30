@@ -3,4 +3,4 @@ jdk:
   - openjdk6
   
 script:
-- mvn -Pretail  de.marw.cdt-parent
+- mvn -Pretail -f de.marw.cdt-parent
