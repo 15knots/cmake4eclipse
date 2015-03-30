@@ -1,3 +1,4 @@
+[![Travis branch](https://img.shields.io/travis/joyent/node.svg)](https://travis-ci.org/15knots/cmake4eclipse)
 # Introduction
 This Eclipse plugin generates buildscripts for the Eclipse CDT manged build system from CMake scripts.
 
