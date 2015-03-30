@@ -3,4 +3,4 @@ jdk:
   - openjdk6
   
 script:
-- mvn -Pretail -f ./parent/pom.xml
+- mvn -Pretail -f ./parent/pom.xml package
