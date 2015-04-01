@@ -26,6 +26,7 @@
   <build>
     <plugins>
       <!-- eclipse-plugin packaging disables these, so re-enable -->
+      <!-- NOTE: our test classes do not require a running OSGI platform -->
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
       </plugin>
@@ -42,7 +43,6 @@
           <executions>
             <execution>
               <id>default-testCompile</id>
-              <phase>test-compile</phase>
               <goals>
                 <goal>testCompile</goal>
               </goals>
@@ -51,12 +51,10 @@
         </plugin>
         <plugin>
           <!-- eclipse-plugin packaging disables this, so re-enable -->
-          <!-- NOTE: our test classes do not require a running OSGI platform -->
           <artifactId>maven-surefire-plugin</artifactId>
           <executions>
             <execution>
               <id>default-test</id>
-              <phase>test</phase>
               <goals>
                 <goal>test</goal>
               </goals>
