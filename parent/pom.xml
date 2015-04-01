@@ -1,323 +1,322 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-    xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <modelVersion>4.0.0</modelVersion>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+  xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
 
-    <prerequisites>
-        <maven>3.0</maven>
-    </prerequisites>
+  <prerequisites>
+    <maven>3.0</maven>
+  </prerequisites>
 
-    <groupId>de.marw.cdt.cmake</groupId>
-    <artifactId>cmake-parent</artifactId>
-    <version>1.0.3</version>
-    <packaging>pom</packaging>
+  <groupId>de.marw.cdt.cmake</groupId>
+  <artifactId>cmake-parent</artifactId>
+  <version>1.0.3</version>
+  <packaging>pom</packaging>
 
-    <properties>
-        <tycho-version>0.22.0</tycho-version>
-        <platform.version>1.0.1</platform.version>
-    </properties>
+  <properties>
+    <tycho-version>0.22.0</tycho-version>
+    <platform.version>1.0.1</platform.version>
+  </properties>
 
-    <licenses>
-        <license>
-            <name>Eclipse Public License v1.0</name>
-            <comments>All rights reserved.
+  <licenses>
+    <license>
+      <name>Eclipse Public License v1.0</name>
+      <comments>All rights reserved.
 
        This program and the accompanying materials are made
        available under the terms of the Eclipse Public License v1.0
        which accompanies this distribution, and is available at
        http://www.eclipse.org/legal/epl-v10.htm
       </comments>
-        </license>
-    </licenses>
+    </license>
+  </licenses>
 
-    <modules>
-        <module>../releng/de.marw.cdt.cmake-target</module>
-        <module>../de.marw.cmake</module>
-        <module>../de.marw.cdt.cmake.core</module>
-        <module>../de.marw.cdt.cmake-feature</module>
-        <module>../releng/de.marw.cdt.cmake-repo</module>
-    </modules>
+  <modules>
+    <module>../releng/de.marw.cdt.cmake-target</module>
+    <module>../de.marw.cmake</module>
+    <module>../de.marw.cdt.cmake.core</module>
+    <module>../de.marw.cdt.cmake-feature</module>
+    <module>../releng/de.marw.cdt.cmake-repo</module>
+  </modules>
 
-    <dependencyManagement>
-      <dependencies>
-        <dependency>
-          <groupId>junit</groupId>
-          <artifactId>junit</artifactId>
-          <version>4.12</version>
-          <scope>test</scope>
-        </dependency>
-      </dependencies>
-    </dependencyManagement>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>4.12</version>
+        <scope>test</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
-    <profiles>
-        <profile>
-            <id>retail</id>
-            <build>
-                <pluginManagement>
-                    <plugins>
-                        <plugin>
-                            <groupId>org.apache.maven.plugins</groupId>
-                            <artifactId>maven-compiler-plugin</artifactId>
-                            <configuration>
-                                <!-- lines,source required for readable stack traces -->
-                                <debuglevel>lines,source</debuglevel>
-                                <optimize>true</optimize>
-                            </configuration>
-                        </plugin>
-                        <plugin>
-                            <groupId>org.eclipse.tycho</groupId>
-                            <artifactId>tycho-compiler-plugin</artifactId>
-                            <configuration>
-                                <!-- MWE: debuglevel scheint tycho 0.19.0 noch nicht
-                                    zu kennen.. -->
-                                <debuglevel>lines,source</debuglevel>
-                                <optimize>true</optimize>
-                            </configuration>
-                        </plugin>
-                    </plugins>
-                </pluginManagement>
-            </build>
-        </profile>
-        <profile>
-            <id>macosx</id>
-            <activation>
-                <os>
-                    <family>mac</family>
-                </os>
-            </activation>
-            <properties>
-                <base.ui.test.vmargs>-XstartOnFirstThread</base.ui.test.vmargs>
-            </properties>
-        </profile>
-        <profile>
-            <id>other-os</id>
-            <activation>
-                <os>
-                    <family>!mac</family>
-                </os>
-            </activation>
-            <properties>
-                <base.ui.test.vmargs></base.ui.test.vmargs>
-            </properties>
-        </profile>
-    </profiles>
-
-    <build>
-        <plugins>
-            <!-- enable tycho build extension -->
-            <plugin>
-                <groupId>org.eclipse.tycho</groupId>
-                <artifactId>tycho-maven-plugin</artifactId>
-                <extensions>true</extensions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.eclipse.tycho</groupId>
-                <artifactId>target-platform-configuration</artifactId>
-            </plugin>
-
-            <!-- enable source bundle generation -->
-            <plugin>
-                <groupId>org.eclipse.tycho</groupId>
-                <artifactId>tycho-source-plugin</artifactId>
-            </plugin>
-
-        </plugins>
-
+  <profiles>
+    <profile>
+      <id>retail</id>
+      <build>
         <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.eclipse.tycho</groupId>
-                    <artifactId>tycho-compiler-plugin</artifactId>
-                    <version>${tycho-version}</version>
-                    <configuration>
-                        <source>1.6</source>
-                        <target>1.6</target>
-                        <encoding>UTF-8</encoding>
-                    </configuration>
-                </plugin>
+          <plugins>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-compiler-plugin</artifactId>
+              <configuration>
+                <!-- lines,source required for readable stack traces -->
+                <debuglevel>lines,source</debuglevel>
+                <optimize>true</optimize>
+              </configuration>
+            </plugin>
+            <plugin>
+              <groupId>org.eclipse.tycho</groupId>
+              <artifactId>tycho-compiler-plugin</artifactId>
+              <configuration>
+                <!-- MWE: debuglevel scheint tycho 0.19.0 noch nicht
+                  zu kennen.. -->
+                <debuglevel>lines,source</debuglevel>
+                <optimize>true</optimize>
+              </configuration>
+            </plugin>
+          </plugins>
+        </pluginManagement>
+      </build>
+    </profile>
+    <profile>
+      <id>macosx</id>
+      <activation>
+        <os>
+          <family>mac</family>
+        </os>
+      </activation>
+      <properties>
+        <base.ui.test.vmargs>-XstartOnFirstThread</base.ui.test.vmargs>
+      </properties>
+    </profile>
+    <profile>
+      <id>other-os</id>
+      <activation>
+        <os>
+          <family>!mac</family>
+        </os>
+      </activation>
+      <properties>
+        <base.ui.test.vmargs></base.ui.test.vmargs>
+      </properties>
+    </profile>
+  </profiles>
+
+  <build>
+    <plugins>
+      <!-- enable tycho build extension -->
+      <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>tycho-maven-plugin</artifactId>
+        <extensions>true</extensions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>target-platform-configuration</artifactId>
+      </plugin>
+
+      <!-- enable source bundle generation -->
+      <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>tycho-source-plugin</artifactId>
+      </plugin>
+
+    </plugins>
+
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.eclipse.tycho</groupId>
+          <artifactId>tycho-compiler-plugin</artifactId>
+          <version>${tycho-version}</version>
+          <configuration>
+            <source>1.6</source>
+            <target>1.6</target>
+            <encoding>UTF-8</encoding>
+          </configuration>
+        </plugin>
 
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
           <version>3.3</version>
-                    <configuration>
-                        <encoding>UTF-8</encoding>
-                    </configuration>
-          </plugin>
+          <configuration>
+            <encoding>UTF-8</encoding>
+          </configuration>
+        </plugin>
 
-                <plugin>
-                    <artifactId>maven-resources-plugin</artifactId>
-                    <version>2.7</version>
-                    <configuration>
-                        <encoding>UTF-8</encoding>
-                    </configuration>
-                </plugin>
+        <plugin>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>2.7</version>
+          <configuration>
+            <encoding>UTF-8</encoding>
+          </configuration>
+        </plugin>
 
-                <plugin>
-                    <artifactId>maven-install-plugin</artifactId>
-                    <version>2.5.2</version>
-                </plugin>
-                <plugin>
-                    <artifactId>maven-deploy-plugin</artifactId>
-                    <version>2.8.2</version>
-                </plugin>
+        <plugin>
+          <artifactId>maven-install-plugin</artifactId>
+          <version>2.5.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>2.8.2</version>
+        </plugin>
         <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
           <version>2.18.1</version>
         </plugin>
 
-                <!-- enable source bundle generation -->
-                <plugin>
-                    <groupId>org.eclipse.tycho</groupId>
-                    <artifactId>tycho-source-plugin</artifactId>
-                    <version>${tycho-version}</version>
-                    <configuration>
-                        <!-- Don't add the generated Maven information to jar -->
-                        <archive>
-                            <addMavenDescriptor>false</addMavenDescriptor>
-                        </archive>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <id>default-plugin-source</id>
-                            <goals>
-                                <goal>plugin-source</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
+        <!-- enable source bundle generation -->
+        <plugin>
+          <groupId>org.eclipse.tycho</groupId>
+          <artifactId>tycho-source-plugin</artifactId>
+          <version>${tycho-version}</version>
+          <configuration>
+            <!-- Don't add the generated Maven information to jar -->
+            <archive>
+              <addMavenDescriptor>false</addMavenDescriptor>
+            </archive>
+          </configuration>
+          <executions>
+            <execution>
+              <id>default-plugin-source</id>
+              <goals>
+                <goal>plugin-source</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
 
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-jar-plugin</artifactId>
-                    <version>2.5</version>
-                    <configuration>
-                        <archive>
-                            <!-- Don't add the generated Maven information to the
-                                jar -->
-                            <addMavenDescriptor>false</addMavenDescriptor>
-                        </archive>
-                    </configuration>
-                </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>2.5</version>
+          <configuration>
+            <archive>
+              <!-- Don't add the generated Maven information to the
+                jar -->
+              <addMavenDescriptor>false</addMavenDescriptor>
+            </archive>
+          </configuration>
+        </plugin>
 
-                <plugin>
-                    <groupId>org.eclipse.tycho</groupId>
-                    <artifactId>tycho-packaging-plugin</artifactId>
-                    <version>${tycho-version}</version>
-         <configuration>
-           <timestampProvider>jgit</timestampProvider>
-           <jgit.ignore>
-             pom.xml
-             .settings/
-           </jgit.ignore>
-           <jgit.dirtyWorkingTree>warning</jgit.dirtyWorkingTree>
-                        <!-- Don't add the generated Maven information to jar -->
-                        <archive>
-                            <addMavenDescriptor>false</addMavenDescriptor>
-                        </archive>
-                    </configuration>
-         <dependencies>
-           <dependency>
-             <groupId>org.eclipse.tycho.extras</groupId>
-             <artifactId>tycho-buildtimestamp-jgit</artifactId>
-             <version>${tycho-version}</version>
-           </dependency>
-         </dependencies>
-                </plugin>
-           <plugin>
-                <groupId>org.eclipse.tycho</groupId>
-                <artifactId>tycho-maven-plugin</artifactId>
-                <version>${tycho-version}</version>
-            </plugin>
+        <plugin>
+          <groupId>org.eclipse.tycho</groupId>
+          <artifactId>tycho-packaging-plugin</artifactId>
+          <version>${tycho-version}</version>
+          <configuration>
+            <timestampProvider>jgit</timestampProvider>
+            <jgit.ignore>
+              pom.xml
+              .settings/
+            </jgit.ignore>
+            <jgit.dirtyWorkingTree>warning</jgit.dirtyWorkingTree>
+            <!-- Don't add the generated Maven information to jar -->
+            <archive>
+              <addMavenDescriptor>false</addMavenDescriptor>
+            </archive>
+          </configuration>
+          <dependencies>
+            <dependency>
+              <groupId>org.eclipse.tycho.extras</groupId>
+              <artifactId>tycho-buildtimestamp-jgit</artifactId>
+              <version>${tycho-version}</version>
+            </dependency>
+          </dependencies>
+        </plugin>
+        <plugin>
+          <groupId>org.eclipse.tycho</groupId>
+          <artifactId>tycho-maven-plugin</artifactId>
+          <version>${tycho-version}</version>
+        </plugin>
 
-            <plugin>
-                <groupId>org.eclipse.tycho</groupId>
-                <artifactId>target-platform-configuration</artifactId>
-                <version>${tycho-version}</version>
-                <configuration>
-                    <target>
-                        <artifact>
-                            <groupId>de.marw.cdt.cmake</groupId>
-                            <!-- use file de.marw.cdt.cmake-target.target -->
-                            <artifactId>de.marw.cdt.cmake-target</artifactId>
-                            <version>${platform.version}</version>
-                        </artifact>
-                    </target>
+        <plugin>
+          <groupId>org.eclipse.tycho</groupId>
+          <artifactId>target-platform-configuration</artifactId>
+          <version>${tycho-version}</version>
+          <configuration>
+            <target>
+              <artifact>
+                <groupId>de.marw.cdt.cmake</groupId>
+                <!-- use file de.marw.cdt.cmake-target.target -->
+                <artifactId>de.marw.cdt.cmake-target</artifactId>
+                <version>${platform.version}</version>
+              </artifact>
+            </target>
 
-                    <environments>
-                        <environment>
-                            <os>linux</os>
-                            <ws>gtk</ws>
-                            <arch>x86</arch>
-                        </environment>
-                        <environment>
-                            <os>linux</os>
-                            <ws>gtk</ws>
-                            <arch>x86_64</arch>
-                        </environment>
-                        <environment>
-                            <os>linux</os>
-                            <ws>gtk</ws>
-                            <arch>ppc64</arch>
-                        </environment>
-                        <environment>
-                            <os>win32</os>
-                            <ws>win32</ws>
-                            <arch>x86</arch>
-                        </environment>
-                        <environment>
-                            <os>win32</os>
-                            <ws>win32</ws>
-                            <arch>x86_64</arch>
-                        </environment>
-                        <environment>
-                            <os>macosx</os>
-                            <ws>cocoa</ws>
-                            <arch>x86</arch>
-                        </environment>
-                        <environment>
-                            <os>macosx</os>
-                            <ws>cocoa</ws>
-                            <arch>x86_64</arch>
-                        </environment>
-                        <environment>
-                            <os>aix</os>
-                            <ws>gtk</ws>
-                            <arch>ppc</arch>
-                        </environment>
-                        <environment>
-                            <os>solaris</os>
-                            <ws>gtk</ws>
-                            <arch>sparc</arch>
-                        </environment>
-                    </environments>
-                </configuration>
-            </plugin>
+            <environments>
+              <environment>
+                <os>linux</os>
+                <ws>gtk</ws>
+                <arch>x86</arch>
+              </environment>
+              <environment>
+                <os>linux</os>
+                <ws>gtk</ws>
+                <arch>x86_64</arch>
+              </environment>
+              <environment>
+                <os>linux</os>
+                <ws>gtk</ws>
+                <arch>ppc64</arch>
+              </environment>
+              <environment>
+                <os>win32</os>
+                <ws>win32</ws>
+                <arch>x86</arch>
+              </environment>
+              <environment>
+                <os>win32</os>
+                <ws>win32</ws>
+                <arch>x86_64</arch>
+              </environment>
+              <environment>
+                <os>macosx</os>
+                <ws>cocoa</ws>
+                <arch>x86</arch>
+              </environment>
+              <environment>
+                <os>macosx</os>
+                <ws>cocoa</ws>
+                <arch>x86_64</arch>
+              </environment>
+              <environment>
+                <os>aix</os>
+                <ws>gtk</ws>
+                <arch>ppc</arch>
+              </environment>
+              <environment>
+                <os>solaris</os>
+                <ws>gtk</ws>
+                <arch>sparc</arch>
+              </environment>
+            </environments>
+          </configuration>
+        </plugin>
 
-            </plugins>
-        </pluginManagement>
-    </build>
+      </plugins>
+    </pluginManagement>
+  </build>
 
+  <url>https://github.com/15knots/cmake4eclipse</url>
+  <scm>
     <url>https://github.com/15knots/cmake4eclipse</url>
-    <scm>
-        <url>https://github.com/15knots/cmake4eclipse</url>
-        <connection>scm:git:https://github.com/15knots/cmake4eclipse.git</connection>
-        <developerConnection>scm:git:https://github.com/15knots/cmake4eclipse.git</developerConnection>
-    </scm>
-    <issueManagement>
-        <url>https://github.com/15knots/cmake4eclipse/issues</url>
-    </issueManagement>
+    <connection>scm:git:https://github.com/15knots/cmake4eclipse.git</connection>
+    <developerConnection>scm:git:https://github.com/15knots/cmake4eclipse.git</developerConnection>
+  </scm>
+  <issueManagement>
+    <url>https://github.com/15knots/cmake4eclipse/issues</url>
+  </issueManagement>
 
-    <inceptionYear>2013</inceptionYear>
-    <developers>
-        <developer>
-            <name>15knots</name>
-            <email>fifteenknots505@gmail.com</email>
-            <roles>
-                <role>owner</role>
-                <role>developer</role>
-            </roles>
-        </developer>
-    </developers>
+  <inceptionYear>2013</inceptionYear>
+  <developers>
+    <developer>
+      <name>15knots</name>
+      <email>fifteenknots505@gmail.com</email>
+      <roles>
+        <role>owner</role>
+        <role>developer</role>
+      </roles>
+    </developer>
+  </developers>
 </project>
