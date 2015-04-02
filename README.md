@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/15knots/cmake4eclipse.svg?branch=master)](https://travis-ci.org/15knots/cmake4eclipse)
-[![GitHub issues](https://img.shields.io/github/issues/badges/shields.svg)](https://github.com/15knots/cmake4eclipse/issues)
+[![GitHub issues](https://img.shields.io/github/issues/15knots/cmake4eclipse.svg)](https://github.com/15knots/cmake4eclipse/issues)
 
 # Introduction
 This Eclipse plugin generates buildscripts for the Eclipse CDT manged build system from CMake scripts.
