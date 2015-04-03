@@ -23,6 +23,7 @@ Annoyingly, these recommended out-of-source-builds impose some tedious tasks on 
 ## Update Site
 This composite update site contains the latest release as well as selected older releases.
 https://raw.githubusercontent.com/15knots/cmake4eclipse/master/releng/comp-update/
+
 ---
 ## Latest Release
 1.3.2 (2015-03-27)
