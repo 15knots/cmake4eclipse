@@ -283,7 +283,8 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
   protected void performApply(ICResourceDescription src,
       ICResourceDescription dst) {
     // make sure the displayed values get applied
-    saveToModel();
+    if (visible)
+      saveToModel();
 
     ICConfigurationDescription srcCfg = src.getConfiguration();
     ICConfigurationDescription dstCfg = dst.getConfiguration();
@@ -311,15 +312,14 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
     try {
       CMakePreferences srcPrefs = configMgr.getOrLoad(srcCfg);
       CMakePreferences dstPrefs = configMgr.getOrCreate(dstCfg);
-      dstPrefs.setDebugTryCompile(srcPrefs.isDebugTryCompile());
-      dstPrefs.setDebugOutput(srcPrefs.isDebugOutput());
-      dstPrefs.setTrace(srcPrefs.isTrace());
-      dstPrefs.setWarnNoDev(srcPrefs.isWarnNoDev());
-      dstPrefs.setWarnUnitialized(srcPrefs.isWarnUnitialized());
-      dstPrefs.setWarnUnused(srcPrefs.isWarnUnused());
-//        ICStorageElement dstEl = dstCfg.getStorage(
-//            CMakePreferences.CFG_STORAGE_ID, true);
-//        srcPrefs.saveToStorage(dstEl);
+      if (srcPrefs != dstPrefs) {
+        dstPrefs.setDebugTryCompile(srcPrefs.isDebugTryCompile());
+        dstPrefs.setDebugOutput(srcPrefs.isDebugOutput());
+        dstPrefs.setTrace(srcPrefs.isTrace());
+        dstPrefs.setWarnNoDev(srcPrefs.isWarnNoDev());
+        dstPrefs.setWarnUnitialized(srcPrefs.isWarnUnitialized());
+        dstPrefs.setWarnUnused(srcPrefs.isWarnUnused());
+      }
     } catch (CoreException ex) {
       log.log(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID, null, ex));
     }
