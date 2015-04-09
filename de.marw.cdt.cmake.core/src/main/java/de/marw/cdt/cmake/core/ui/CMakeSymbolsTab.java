@@ -113,17 +113,19 @@ public class CMakeSymbolsTab extends QuirklessAbstractCPropertyTab {
     try {
       CMakePreferences srcPrefs = configMgr.getOrLoad(srcCfg);
       CMakePreferences dstPrefs = configMgr.getOrCreate(dstCfg);
+      if (srcPrefs != dstPrefs) {
 
-      final List<CmakeDefine> defines = dstPrefs.getDefines();
-      defines.clear();
-      for (CmakeDefine def : srcPrefs.getDefines()) {
-        defines.add(def.clone());
-      }
+        final List<CmakeDefine> defines = dstPrefs.getDefines();
+        defines.clear();
+        for (CmakeDefine def : srcPrefs.getDefines()) {
+          defines.add(def.clone());
+        }
 
-      final List<CmakeUnDefine> undefines = dstPrefs.getUndefines();
-      undefines.clear();
-      for (CmakeUnDefine undef : srcPrefs.getUndefines()) {
-        undefines.add(undef.clone());
+        final List<CmakeUnDefine> undefines = dstPrefs.getUndefines();
+        undefines.clear();
+        for (CmakeUnDefine undef : srcPrefs.getUndefines()) {
+          undefines.add(undef.clone());
+        }
       }
     } catch (CoreException ex) {
       log.log(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID, null, ex));
