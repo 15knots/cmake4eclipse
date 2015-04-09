@@ -147,8 +147,7 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
       b_cmdBrowseFiles.addSelectionListener(new SelectionAdapter() {
         @Override
         public void widgetSelected(SelectionEvent e) {
-          IDialogSettings settings = CdtPlugin.getDefault()
-              .getDialogSettings();
+          IDialogSettings settings = CdtPlugin.getDefault().getDialogSettings();
           FileDialog dialog = new FileDialog(t_cmd.getShell());
           dialog.setFilterPath(settings.get("cmake_dir"));
           String text = dialog.open();
@@ -250,8 +249,6 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
    * @see #updateDisplay()
    */
   private void saveToModel() {
-    if (prefs == null)
-      return; // nothing was edited
     prefs.setUseDefaultCommand(b_cmdFromPath.getSelection());
     String command = t_cmd.getText().trim();
     prefs.setCommand(command);
@@ -285,7 +282,8 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
   protected void performApply(ICResourceDescription src,
       ICResourceDescription dst) {
     // make sure the displayed values get applied
-    saveToModel();
+    if (visible)
+      saveToModel();
 
     ICConfigurationDescription srcCfg = src.getConfiguration();
     ICConfigurationDescription dstCfg = dst.getConfiguration();
@@ -294,21 +292,22 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
     try {
       P srcPrefs = getOsPreferences(configMgr.getOrLoad(srcCfg));
       P dstPrefs = getOsPreferences(configMgr.getOrCreate(dstCfg));
+      if (srcPrefs != dstPrefs) {
+        dstPrefs.setUseDefaultCommand(srcPrefs.getUseDefaultCommand());
+        dstPrefs.setCommand(srcPrefs.getCommand());
+        dstPrefs.setGenerator(srcPrefs.getGenerator());
 
-      dstPrefs.setUseDefaultCommand(srcPrefs.getUseDefaultCommand());
-      dstPrefs.setCommand(srcPrefs.getCommand());
-      dstPrefs.setGenerator(srcPrefs.getGenerator());
+        final List<CmakeDefine> defines = dstPrefs.getDefines();
+        defines.clear();
+        for (CmakeDefine def : srcPrefs.getDefines()) {
+          defines.add(def.clone());
+        }
 
-      final List<CmakeDefine> defines = dstPrefs.getDefines();
-      defines.clear();
-      for (CmakeDefine def : srcPrefs.getDefines()) {
-        defines.add(def.clone());
-      }
-
-      final List<CmakeUnDefine> undefines = dstPrefs.getUndefines();
-      undefines.clear();
-      for (CmakeUnDefine undef : srcPrefs.getUndefines()) {
-        undefines.add(undef.clone());
+        final List<CmakeUnDefine> undefines = dstPrefs.getUndefines();
+        undefines.clear();
+        for (CmakeUnDefine undef : srcPrefs.getUndefines()) {
+          undefines.add(undef.clone());
+        }
       }
     } catch (CoreException ex) {
       log.log(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID, null, ex));
