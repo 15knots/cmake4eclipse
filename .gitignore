@@ -1,5 +1,6 @@
 target/
 bin/
+build/
 *.jar
 .DS_Store
 .nfs*
