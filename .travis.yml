@@ -1,6 +1,15 @@
 language: java
 jdk:
-  - openjdk6
-  
+- openjdk6
 script:
 - mvn -Pretail -f ./parent/pom.xml verify
+env:
+  global:
+  - secure: WqLrhcL9sL1Z+yx0HeH10ev+nbf/JhUlBFkSRdpp88DFaf6E13vAcIYrzpoSgv+UFzLtARJLeb+PrtAZVYQMpGiuZ8PfmrZXTWlq0Zw+kycJZQXKT26vMKNCcfinekSYk5HgcoYlaiYcq9xq9n7F/SyJ+Aoqmpw30DSSWcfdp/8=
+  - secure: nem1vmNRc3BUgguMPSP/wdtNQbLlYwyLV0V8nnx3P7grJr/BPRdOR23rD2SZN2sSOalB1WXi3U+KYrnDa2ezMyAneXfdIwc3AZKwlxWl2/c/pVkg4fotzoquJGIaY4mVMfEXH4PUiGuOw4lbzOI+v5NAt1Qy0uIcaHeTZNqNHFM=
+
+after_success:
+  # extract persion from repo pom
+  - VERSION=$(xml_grep --text_only '//project/version' releng/de.marw.cdt.cmake-repo/pom.xml)
+  # upload p2 repo zip to bintray as a new version
+   - curl -T releng/de.marw.cdt.cmake-repo/target/cmake4eclipse*${VERSION}.zip -u${BINTRAY_USER}:${BINTRAY_API_KEY} https://api.bintray.com/content/${BINTRAY_USER}/p2-zip/;bt_package=cmake4eclipse;bt_version=${VERSION}
