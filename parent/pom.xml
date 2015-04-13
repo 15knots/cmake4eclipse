@@ -155,6 +155,7 @@
             <timestampProvider>jgit</timestampProvider>
             <jgit.ignore>
               pom.xml
+              .travis.yml
               .settings/
             </jgit.ignore>
             <jgit.dirtyWorkingTree>warning</jgit.dirtyWorkingTree>
