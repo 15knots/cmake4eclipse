@@ -12,12 +12,9 @@
     <!-- builds a zipped p2 update site -->
     <artifactId>de.marw.cdt.cmake-repo</artifactId>
     <packaging>eclipse-repository</packaging>
-    <version>1.3.2</version>
+    <version>1.3.3</version>
 
     <build>
-        <!-- rename zipped p2 repository -->
-        <finalName>cmake4eclipsecdt-${project.version}</finalName>
-
         <plugins>
             <plugin>
                 <!-- don't pollute repositories with useless stuff -->
@@ -41,7 +38,9 @@
                 <artifactId>tycho-p2-repository-plugin</artifactId>
                 <version>${tycho-version}</version>
                 <configuration>
-                    <repositoryName>CMake 4 Eclipse CDT</repositoryName>
+                    <repositoryName>CMake 4 Eclipse</repositoryName>
+                    <!-- rename zipped p2 repository -->
+                    <finalName>cmake4eclipse-${project.version}</finalName>
                 </configuration>
             </plugin>
         </plugins>
