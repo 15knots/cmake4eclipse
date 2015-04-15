@@ -13,6 +13,6 @@ script:
 after_success:
 - set -e
 # extract persion from repo pom
-- VERSION=$(ls releng/de.marw.cdt.cmake-repo/target/cmake4eclipse*.zip| sed -r -n 's/.+-([0-9]+(\.[0-9]+)*).zip$/\1/p)
+- VERSION=$(ls releng/de.marw.cdt.cmake-repo/target/cmake4eclipse*.zip| sed -r -n 's/.+-([0-9]+(\.[0-9]+)*).zip$/\1/p')
 # upload p2 repo zip to bintray as a new version
 - curl -v -T releng/de.marw.cdt.cmake-repo/target/cmake4eclipse*${VERSION}.zip -u${BINTRAY_USER}:${BINTRAY_API_KEY} https://api.bintray.com/content/${BINTRAY_USER}/p2-zip/;bt_package=cmake4eclipse;bt_version=${VERSION}
