@@ -291,7 +291,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
 
       // Now make the requested folder
       try {
-        folder.create(IResource.DERIVED | IResource.FORCE, true, monitor);
+        folder.create(IResource.DERIVED, true, monitor);
       } catch (CoreException e) {
         if (e.getStatus().getCode() == IResourceStatus.PATH_OCCUPIED)
           folder.refreshLocal(IResource.DEPTH_ZERO, monitor);
