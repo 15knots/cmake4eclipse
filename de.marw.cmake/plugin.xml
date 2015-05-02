@@ -18,7 +18,7 @@
           class="de.marw.cmake.cdt.language.settings.providers.CmakeBuildOutputParser"
           id="de.marw.cmake.cdt.language.settings.providers.CmakeBuildOutputParser"
           name="CMake Build Output Parser"
-          prefer-non-shared="false">
+          prefer-non-shared="true">
          <language-scope id="org.eclipse.cdt.core.gcc"/>
          <language-scope id="org.eclipse.cdt.core.g++"/>
     </provider>

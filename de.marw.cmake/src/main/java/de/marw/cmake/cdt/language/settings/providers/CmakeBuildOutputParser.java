@@ -22,6 +22,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.cdt.core.language.settings.providers.ICBuildOutputParser;
+import org.eclipse.cdt.core.language.settings.providers.ILanguageSettingsEditableProvider;
 import org.eclipse.cdt.core.language.settings.providers.ILanguageSettingsProvider;
 import org.eclipse.cdt.core.language.settings.providers.IWorkingDirectoryTracker;
 import org.eclipse.cdt.core.language.settings.providers.LanguageSettingsSerializableProvider;
@@ -50,7 +51,7 @@ import de.marw.cmake.cmakecache.SimpleCMakeCacheTxt;
  */
 public class CmakeBuildOutputParser extends
     LanguageSettingsSerializableProvider implements ILanguageSettingsProvider,
-    ICBuildOutputParser {
+    ILanguageSettingsEditableProvider, ICBuildOutputParser {
 
   /**
    * regex to match leading chars in a build output line. The full regex to
@@ -254,6 +255,17 @@ public class CmakeBuildOutputParser extends
       ICConfigurationDescription cfgDescription, IResource rc, String languageId) {
     // TODO Auto-generated function stub
     return super.getSettingEntries(cfgDescription, rc, languageId);
+  }
+
+  @Override
+  public CmakeBuildOutputParser cloneShallow()
+      throws CloneNotSupportedException {
+    return (CmakeBuildOutputParser) super.cloneShallow();
+  }
+
+  @Override
+  public CmakeBuildOutputParser clone() throws CloneNotSupportedException {
+    return (CmakeBuildOutputParser) super.clone();
   }
 
   ////////////////////////////////////////////////////////////////////
