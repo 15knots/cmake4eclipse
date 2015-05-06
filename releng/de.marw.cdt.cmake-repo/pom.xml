@@ -12,7 +12,7 @@
     <!-- builds a zipped p2 update site -->
     <artifactId>de.marw.cdt.cmake-repo</artifactId>
     <packaging>eclipse-repository</packaging>
-    <version>1.3.3</version>
+    <version>1.3.5</version>
 
     <build>
         <plugins>
