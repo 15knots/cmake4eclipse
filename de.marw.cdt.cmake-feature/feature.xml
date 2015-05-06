@@ -2,7 +2,7 @@
 <feature
       id="de.marw.cdt.cmake"
       label="CDT CMake build integration"
-      version="1.3.3.qualifier">
+      version="1.3.4.qualifier">
 
    <description url="https://github.com/15knots/cmake4eclipse">
       Integrates the CMake cross-platform buildscript generator into
