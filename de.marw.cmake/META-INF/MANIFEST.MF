@@ -17,11 +17,17 @@ Import-Package: org.eclipse.cdt.core.language.settings.providers,
  org.eclipse.core.runtime,
  org.eclipse.core.runtime.jobs,
  org.eclipse.core.runtime.preferences;version="3.3.0",
+ org.eclipse.debug.core,
+ org.eclipse.debug.core.model,
+ org.eclipse.debug.ui,
+ org.eclipse.debug.ui.console,
  org.eclipse.jface.viewers,
+ org.eclipse.ui.console,
  org.eclipse.ui.plugin,
  org.osgi.framework
 Bundle-Activator: de.marw.cmake.CMakePlugin
 Export-Package: de.marw.cmake,
  de.marw.cmake.cdt.language.settings.providers,
  de.marw.cmake.cmakecache
-Require-Bundle: org.eclipse.ui.workbench;bundle-version="3.8.0"
+Require-Bundle: org.eclipse.ui.workbench;bundle-version="3.8.0",
+ org.eclipse.core.externaltools;bundle-version="1.0.100"

@@ -118,4 +118,14 @@
        </command>
     </menuContribution>
  </extension>
+ <extension
+       point="org.eclipse.debug.core.launchConfigurationTypes">
+    <launchConfigurationType
+          delegate="de.marw.cmake.builder.ExternalProcessLaunchDelegate"
+          id="de.marw.cmake.externalProcessLaunchType"
+          modes="run"
+          name="External Process"
+          public="false">
+    </launchConfigurationType>
+ </extension>
 </plugin>

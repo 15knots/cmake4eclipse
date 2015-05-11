@@ -10,6 +10,8 @@
  *******************************************************************************/
 package de.marw.cmake.builder;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -26,18 +28,36 @@ import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.ILaunch;
+import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationType;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.debug.core.model.IProcess;
+import org.eclipse.debug.core.model.IStreamsProxy;
+import org.eclipse.debug.ui.DebugUITools;
+import org.eclipse.debug.ui.IDebugUIConstants;
+import org.eclipse.ui.console.ConsolePlugin;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import de.marw.cmake.CMakePlugin;
 
+/**
+ * This tool builder implementation will first run {@code cmake} to generate the
+ * build scripts and then invoke the build tool specified in CMakecache.txt
+ * during the build process.
+ *
+ * @author Martin Weber
+ */
 public class CMakeBuilder extends IncrementalProjectBuilder {
 
   class SampleDeltaVisitor implements IResourceDeltaVisitor {
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.eclipse.core.resources.IResourceDeltaVisitor#visit(org.eclipse.core
      * .resources.IResourceDelta)
@@ -120,28 +140,46 @@ public class CMakeBuilder extends IncrementalProjectBuilder {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see org.eclipse.core.internal.events.InternalBuilder#build(int,
    * java.util.Map, org.eclipse.core.runtime.IProgressMonitor)
    */
   protected IProject[] build(int kind, Map args, IProgressMonitor monitor)
       throws CoreException {
-    if (kind == FULL_BUILD) {
-      fullBuild(monitor);
-    } else {
-      IResourceDelta delta = getDelta(getProject());
-      if (delta == null) {
-        fullBuild(monitor);
-      } else {
-        incrementalBuild(delta, monitor);
-      }
+    switch (kind) {
+    case IncrementalProjectBuilder.CLEAN_BUILD:
+      clean(monitor);
+      break;
+    case IncrementalProjectBuilder.FULL_BUILD:
+      clean(monitor);
+      break;
+    case IncrementalProjectBuilder.AUTO_BUILD:
+      break;
+    case IncrementalProjectBuilder.INCREMENTAL_BUILD:
+      break;
     }
+
+    ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();
+    ILaunchConfigurationType type = manager
+        .getLaunchConfigurationType(ExternalProcessLaunchDelegate.ID);
+    ILaunchConfigurationWorkingCopy config = type.newInstance(null,
+        "Cmake Build");
+
+    List<String> cmdLine = Arrays.asList("ls", "-al");
+    config
+        .setAttribute(ExternalProcessLaunchDelegate.ATTR_COMMANDLINE, cmdLine);
+
+    // do not show this in launch history
+    config.setAttribute(  IDebugUIConstants.ATTR_PRIVATE,true);
+    launchBuild(config, monitor);
+
     return null;
   }
 
   protected void clean(IProgressMonitor monitor) throws CoreException {
     // delete markers set and files created
     getProject().deleteMarkers(MARKER_TYPE, true, IResource.DEPTH_INFINITE);
+//    launchBuild(IncrementalProjectBuilder.CLEAN_BUILD, config, null, monitor);
   }
 
   void checkXML(IResource resource) {
@@ -183,4 +221,34 @@ public class CMakeBuilder extends IncrementalProjectBuilder {
     // the visitor does the work.
     delta.accept(new SampleDeltaVisitor());
   }
+
+  private void launchBuild(ILaunchConfiguration config, IProgressMonitor monitor)
+      throws CoreException {
+    monitor.subTask(config.getName());
+    ILaunch launch = config.launch(ILaunchManager.RUN_MODE, monitor, false,
+        true);
+    IProcess[] processes = launch.getProcesses();
+
+    if (processes.length > 0) {
+      // get the IProcess instance from the launch
+      IProcess process = launch.getProcesses()[0];
+      // get the streamsproxy from the process
+      IStreamsProxy proxy = process.getStreamsProxy();
+      showConsole(process);
+    }
+  }
+
+  public void showConsole(IProcess process) {
+    if (process != null && process.getLaunch() != null) {
+      org.eclipse.ui.console.IConsole console = DebugUITools
+          .getConsole(process);
+      ConsolePlugin.getDefault().getConsoleManager().showConsoleView(console);
+//      IWorkbenchPage page = PlatformUI.getWorkbench()
+//          .getActiveWorkbenchWindow().getActivePage();
+//      IViewPart view = page.findView("org.eclipse.ui.console.ConsoleView");
+//      if (view != null)
+//        view.setFocus();
+    }
+  }
+
 }
