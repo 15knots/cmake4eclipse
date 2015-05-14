@@ -179,8 +179,8 @@ public class CMakeBuilder extends IncrementalProjectBuilder {
 
 //    config.setAttribute(ExternalProcessLaunchDelegate.ATTR_CONSOLE_TITLE,
 //        launchName);
-    List<String> cmdLine = Arrays.asList("cmake", "-al",
-        "/home/weber/devel/src/cmake4eclipsecdt/testprojects/C-subsrc");
+    List<String> cmdLine = Arrays.asList("cmake", "-G", "Unix Makefiles",
+        "/home/weber/devel/src/cmake4eclipsecdt/testprojects/C-subsrc/src");
     config
         .setAttribute(ExternalProcessLaunchDelegate.ATTR_COMMANDLINE, cmdLine);
     config
