@@ -10,7 +10,9 @@
  *******************************************************************************/
 package de.marw.cmake.builder;
 
+import java.io.File;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -18,6 +20,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import org.eclipse.core.externaltools.internal.IExternalToolConstants;
+import org.eclipse.core.externaltools.internal.launchConfigurations.ExternalToolsProgramMessages;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
@@ -28,17 +32,22 @@ import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.debug.core.Launch;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.core.model.IStreamsProxy;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.ui.console.ConsolePlugin;
+import org.eclipse.ui.console.IConsole;
+import org.eclipse.ui.console.IConsoleManager;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -159,27 +168,118 @@ public class CMakeBuilder extends IncrementalProjectBuilder {
       break;
     }
 
-    ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();
-    ILaunchConfigurationType type = manager
+    final ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();
+    final ILaunchConfigurationType type = manager
         .getLaunchConfigurationType(ExternalProcessLaunchDelegate.ID);
-    ILaunchConfigurationWorkingCopy config = type.newInstance(null,
-        "Cmake Build");
+    /* also used as console title */
+    String launchName = buildKindToText(kind) + " of project "
+        + getProject().getName();
+    final ILaunchConfigurationWorkingCopy config = type.newInstance(null,
+        launchName);
 
-    List<String> cmdLine = Arrays.asList("ls", "-al");
+//    config.setAttribute(ExternalProcessLaunchDelegate.ATTR_CONSOLE_TITLE,
+//        launchName);
+    List<String> cmdLine = Arrays.asList("cmake", "-al",
+        "/home/weber/devel/src/cmake4eclipsecdt/testprojects/C-subsrc");
     config
         .setAttribute(ExternalProcessLaunchDelegate.ATTR_COMMANDLINE, cmdLine);
+    config
+        .setAttribute(ExternalProcessLaunchDelegate.ATTR_WORKINDIR,
+            "/home/weber/devel/src/cmake4eclipsecdt/testprojects/C-subsrc/build/Debug");
 
     // do not show this in launch history
-    config.setAttribute(  IDebugUIConstants.ATTR_PRIVATE,true);
-    launchBuild(config, monitor);
-
+//    config.setAttribute(IDebugUIConstants.ATTR_PRIVATE, true);
+    if (false) {
+      ILaunch launch = new Launch(null, "run", null);
+      manager.addLaunch(launch);
+      launchProcess(launch, cmdLine, null, monitor);
+      cmdLine = Arrays.asList("echo", "ls", "-al");
+      launchProcess(launch, cmdLine, null, monitor);
+      IConsoleManager cmanager = ConsolePlugin.getDefault().getConsoleManager();
+      IConsole[] existing = cmanager.getConsoles();
+      for (IConsole iConsole : existing) {
+        System.out.println(iConsole);
+      }
+      manager.removeLaunch(launch);
+    } else {
+      launchBuild(config, monitor);
+    }
     return null;
+  }
+
+  public IProcess launchProcess(ILaunch launch, List<String> cmdLine,
+      File workingDir, IProgressMonitor monitor) throws CoreException {
+
+    String[] argv = cmdLine.toArray(new String[cmdLine.size()]);
+    Process p = DebugPlugin.exec(argv, workingDir, null);
+    IProcess process = null;
+    if (p != null) {
+// TODO      monitor.beginTask(config.getName(), IProgressMonitor.UNKNOWN);
+      // add process type to process attributes
+      Map<String, String> processAttributes = new HashMap<String, String>();
+      processAttributes.put(IProcess.ATTR_PROCESS_TYPE, argv[0]);
+      processAttributes.put(IProcess.ATTR_PROCESS_LABEL, "XXX" + argv[0]);
+      processAttributes.put(IProcess.ATTR_PROCESS_TYPE, "run"); // for line trackers
+      process = DebugPlugin.newProcess(launch, p, "CMake console",
+          processAttributes);
+    }
+    if (p == null || process == null) {
+      if (p != null)
+        p.destroy();
+      throw new CoreException(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID,
+          IExternalToolConstants.ERR_INTERNAL_ERROR,
+          ExternalToolsProgramMessages.ProgramLaunchDelegate_4, null));
+    }
+    launch.addProcess(process);
+    // wait for process to exit
+    while (!process.isTerminated()) {
+      try {
+        if (monitor.isCanceled()) {
+          process.terminate();
+          break;
+        }
+        Thread.sleep(50);
+      } catch (InterruptedException e) {
+      }
+    }
+    return process;
+  }
+
+  private void launchBuild(ILaunchConfiguration config, IProgressMonitor monitor)
+      throws CoreException {
+    monitor.subTask(config.getName());
+    ILaunch launch = config.launch(ILaunchManager.RUN_MODE, monitor, false,
+        true);
+    IProcess[] processes = launch.getProcesses();
+
+    if (processes.length > 0) {
+      // get the IProcess instance from the launch
+      IProcess process = launch.getProcesses()[0];
+      // get the streamsproxy from the process
+      IStreamsProxy proxy = process.getStreamsProxy();
+      showConsole(process);
+    }
   }
 
   protected void clean(IProgressMonitor monitor) throws CoreException {
     // delete markers set and files created
     getProject().deleteMarkers(MARKER_TYPE, true, IResource.DEPTH_INFINITE);
 //    launchBuild(IncrementalProjectBuilder.CLEAN_BUILD, config, null, monitor);
+  }
+
+  private String buildKindToText(int kind) {
+    switch (kind) {
+    case IncrementalProjectBuilder.CLEAN_BUILD:
+      return "Clean build";
+    case IncrementalProjectBuilder.FULL_BUILD:
+      return "Full build";
+    case IncrementalProjectBuilder.AUTO_BUILD:
+      return "Auto build";
+    case IncrementalProjectBuilder.INCREMENTAL_BUILD:
+      return "Incremental build";
+    default:
+      return kind + " build";
+    }
   }
 
   void checkXML(IResource resource) {
@@ -222,23 +322,7 @@ public class CMakeBuilder extends IncrementalProjectBuilder {
     delta.accept(new SampleDeltaVisitor());
   }
 
-  private void launchBuild(ILaunchConfiguration config, IProgressMonitor monitor)
-      throws CoreException {
-    monitor.subTask(config.getName());
-    ILaunch launch = config.launch(ILaunchManager.RUN_MODE, monitor, false,
-        true);
-    IProcess[] processes = launch.getProcesses();
-
-    if (processes.length > 0) {
-      // get the IProcess instance from the launch
-      IProcess process = launch.getProcesses()[0];
-      // get the streamsproxy from the process
-      IStreamsProxy proxy = process.getStreamsProxy();
-      showConsole(process);
-    }
-  }
-
-  public void showConsole(IProcess process) {
+  private void showConsole(IProcess process) {
     if (process != null && process.getLaunch() != null) {
       org.eclipse.ui.console.IConsole console = DebugUITools
           .getConsole(process);
