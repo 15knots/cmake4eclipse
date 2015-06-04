@@ -28,7 +28,9 @@
        name="CMake Project Builder"
        point="org.eclipse.core.resources.builders">
     <builder
-          hasNature="true">
+          callOnEmptyDelta="true"
+          hasNature="true"
+          isConfigurable="true">
        <run
              class="de.marw.cmake.builder.CMakeBuilder">
        </run>

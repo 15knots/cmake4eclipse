@@ -180,15 +180,17 @@ public class CMakeBuilder extends IncrementalProjectBuilder {
 //    config.setAttribute(ExternalProcessLaunchDelegate.ATTR_CONSOLE_TITLE,
 //        launchName);
     List<String> cmdLine = Arrays.asList("cmake", "-G", "Unix Makefiles",
-        "/home/weber/devel/src/cmake4eclipsecdt/testprojects/C-subsrc/src");
+        "--warn-uninitialized",
+        "testprojects-sav/C-subsrc/src");
     config
         .setAttribute(ExternalProcessLaunchDelegate.ATTR_COMMANDLINE, cmdLine);
     config
         .setAttribute(ExternalProcessLaunchDelegate.ATTR_WORKINDIR,
-            "/home/weber/devel/src/cmake4eclipsecdt/testprojects/C-subsrc/build/Debug");
+            "testprojects-sav/C-subsrc/build");
 
     // do not show this in launch history
-//    config.setAttribute(IDebugUIConstants.ATTR_PRIVATE, true);
+    config.setAttribute(IDebugUIConstants.ATTR_PRIVATE, true);
+
     if (false) {
       ILaunch launch = new Launch(null, "run", null);
       manager.addLaunch(launch);
