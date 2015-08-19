@@ -146,8 +146,8 @@ public class CmakeBuildRunner extends ExternalBuildRunner {
         // parse CMakeCache.txt...
         cmCache = new SimpleCMakeCacheTxt(file);
         // store parsed cache as resource property
-        cmakeCache.setSessionProperty(de.marw.cmake.CMakePlugin.CMAKECACHE_PARSED_PROP,
-            cmCache);
+        cmakeCache.setSessionProperty(
+            de.marw.cmake.CMakePlugin.CMAKECACHE_PARSED_PROP, cmCache);
 //        System.out.println("stored cached CMakeCache");
       } catch (IOException ex) {
         // ignore, the build command will run cmake anyway.
@@ -164,7 +164,7 @@ public class CmakeBuildRunner extends ExternalBuildRunner {
    */
   private static class CmakeBuildToolInjectorBuilder implements IBuilder {
     private final IBuilder delegate;
-    private final IPath cmakeBuildTool;
+    private final String cmakeBuildTool;
     private final CmakeGenerator generator;
 
     /**
@@ -178,35 +178,44 @@ public class CmakeBuildRunner extends ExternalBuildRunner {
     public CmakeBuildToolInjectorBuilder(IBuilder delegate,
         String cmakeBuildTool, CmakeGenerator generator) {
       this.delegate = delegate;
-      this.cmakeBuildTool = new Path(cmakeBuildTool);
+      this.cmakeBuildTool = cmakeBuildTool;
       this.generator = generator;
     }
 
     @Override
     public IPath getBuildCommand() {
-      return cmakeBuildTool;
-    }
-
-    @Override
-    public String getArguments() {
-      return this.delegate.getArguments();
+      return new Path(this.delegate.getBuildCommand().toString()
+          .replaceAll("CMAKE_BUILD_TOOL", cmakeBuildTool));
     }
 
     @Override
     public String getBuildArguments() {
-      final String args0 = delegate.getBuildArguments();
-      String ret = args0;
+      String args0 = delegate.getArguments();
+      // Handle ignore errors cmd...
+      final String ignoreErrOption = generator.getIgnoreErrOption();
+      if (ignoreErrOption != null) {
+        args0 = args0.replaceAll("CMAKE_BUILD_TOOL_IGN_ERR", ignoreErrOption);
+      }
 
       final String extraArg = generator.getBuildscriptProcessorExtraArg();
       if (extraArg != null) {
-        ret = extraArg;
-        if (args0 != null && args0.length() > 0) {
-          ret += " ";
-          ret += args0;
+        if (args0.length() > 0) {
+          args0 += " ";
+          args0 += extraArg;
         }
       }
-      // TODO Handle parallel build cmd & ignore err cmd
-      return ret;
+      // TODO Handle parallel build cmd
+      return args0;
+    }
+
+    @Override
+    public String getArguments() {
+      return delegate.getArguments();
+    }
+
+    @Override
+    public String getCommand() {
+      return this.delegate.getCommand();
     }
 
     @Override
@@ -535,11 +544,6 @@ public class CmakeBuildRunner extends ExternalBuildRunner {
     @Override
     public IManagedBuilderMakefileGenerator getBuildFileGenerator() {
       return this.delegate.getBuildFileGenerator();
-    }
-
-    @Override
-    public String getCommand() {
-      return this.delegate.getCommand();
     }
 
     @Override
