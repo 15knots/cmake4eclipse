@@ -25,7 +25,7 @@ public enum CmakeGenerator {
   // linux generators
   UnixMakefiles("Unix Makefiles"),
   // Ninja, experimental
-  Ninja("Ninja", "ninja", "-k 999999") {
+  Ninja("Ninja", "ninja", "-k 0") {
     @Override
     public String getMakefileName(){
       return "build.ninja";
