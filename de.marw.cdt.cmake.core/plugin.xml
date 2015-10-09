@@ -28,7 +28,7 @@
                command="CMAKE_BUILD_TOOL"
                errorParsers="de.marw.cdt.cmake.core.CMakeErrorParser;org.eclipse.cdt.core.MakeErrorParser"
                id="de.marw.cdt.cmake.core.genscriptbuilder"
-               ignoreErrCmd="-k"
+               ignoreErrCmd="CMAKE_BUILD_TOOL_IGN_ERR"
                incrementalBuildTarget="all"
                name="CMake Builder (portable)">
          </builder>
