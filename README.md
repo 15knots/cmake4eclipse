@@ -19,6 +19,9 @@ Annoyingly, these recommended out-of-source-builds impose some tedious tasks on 
 
 **Cmake4eclipse** aims to address these tasks: Co-workers can just check out the source and have all the tedious tasks automated.
 
+## Screenschots
+Screenshots can be found at the <a href="https://marketplace.eclipse.org/content/cmake4eclipse#group-screenshots" title="Screenshots">Eclipse Marketplace</a>.
+
 # Installation Instructions
 **cmake4eclipse** can be installed into an existing Eclipse installation using the "Install New Software..." dialog and entering the update site URL listed below.
 ## Update Site
