@@ -74,15 +74,14 @@ CDT v 8.1.0 or higher and Eclipse v 3.8.0 (Juno) or higher
 #### Repository URL
 `jar:https://googledrive.com/host/0B-QU1Qnto3huZUZ0QUdxM01pR0U/cmake4eclipsecdt-1.1.0.zip!/`
 #### System Requirements
-CDT v 8.1.0 or higher
-Eclipse v 3.8.0 (Juno) or higher
+CDT v 8.1.0 or higher and Eclipse v 3.8.0 (Juno) or higher
 
 ### 1.0.0 (2014-03-07)
 #### Repository URL
 `jar:https://googledrive.com/host/0B-QU1Qnto3huZUZ0QUdxM01pR0U/cmake4eclipsecdt-1.0.0.zip!/`
 #### System Requirements
-CDT v 8.1.0 or higher
-Eclipse v 3.8.0 (Juno) or higher
+ CDT v 8.1.0 or higher and Eclipse v 3.8.0 (Juno) or higher
+
 ---
 ## Ancient Releases
 Other revisions can be found at <a href='https://googledrive.com/host/0B-QU1Qnto3huZUZ0QUdxM01pR0U/'>https://googledrive.com/host/0B-QU1Qnto3huZUZ0QUdxM01pR0U/</a> .<br>
