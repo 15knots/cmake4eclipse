@@ -4,7 +4,7 @@ Bundle-Name: %bundleName
 Bundle-Description: CMake build integration
 Bundle-Copyright: 2013 Martin Weber
 Bundle-SymbolicName: de.marw.cmake;singleton:=true
-Bundle-Version: 1.0.1.qualifier
+Bundle-Version: 1.2.0.qualifier
 Bundle-Vendor: Martin Weber
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
@@ -16,6 +16,7 @@ Import-Package: org.eclipse.cdt.core.language.settings.providers,
  org.eclipse.core.runtime,
  org.eclipse.core.runtime.jobs,
  org.eclipse.core.runtime.preferences;version="3.3.0",
+ org.eclipse.jetty.util.ajax,
  org.eclipse.ui.plugin,
  org.osgi.framework
 Bundle-Activator: de.marw.cmake.CMakePlugin
