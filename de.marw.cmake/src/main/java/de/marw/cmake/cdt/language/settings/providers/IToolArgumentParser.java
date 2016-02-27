@@ -22,8 +22,8 @@ import org.eclipse.cdt.core.settings.model.ICLanguageSettingEntry;
 public interface IToolArgumentParser {
 
   /**
-   * Parses the first tool invocation argument from the build output that this
-   * object can parse and extracts all possible LanguageSettings objects.
+   * Parses the next command-line argument and extracts all detected
+   * LanguageSettings objects.
    *
    * @param returnedEntries
    *        the buffer that receives the new {@code LanguageSettings}
@@ -36,6 +36,5 @@ public interface IToolArgumentParser {
    *         processed. Return a value of {@code zero} or less, if this tool
    *         argument parser cannot process the first argument from the input.
    */
-  int processArgument(List<ICLanguageSettingEntry> returnedEntries,
-      String argsLine);
+  int processArgument(List<ICLanguageSettingEntry> returnedEntries, String argsLine);
 }
