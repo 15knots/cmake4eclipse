@@ -20,6 +20,8 @@ import java.util.List;
 import org.eclipse.cdt.core.CCorePlugin;
 import org.eclipse.cdt.core.ConsoleOutputStream;
 import org.eclipse.cdt.core.ICommandLauncher;
+import org.eclipse.cdt.core.language.settings.providers.ILanguageSettingsProvider;
+import org.eclipse.cdt.core.language.settings.providers.ILanguageSettingsProvidersKeeper;
 import org.eclipse.cdt.core.resources.IConsole;
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
 import org.eclipse.cdt.core.settings.model.ICSourceEntry;
@@ -87,8 +89,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
    * @see org.eclipse.cdt.managedbuilder.makegen.IManagedBuilderMakefileGenerator2#initialize(int, org.eclipse.cdt.managedbuilder.core.IConfiguration, org.eclipse.cdt.managedbuilder.core.IBuilder, org.eclipse.core.runtime.IProgressMonitor)
    */
   @Override
-  public void initialize(int buildKind, IConfiguration cfg, IBuilder builder,
-      IProgressMonitor monitor) {
+  public void initialize(int buildKind, IConfiguration cfg, IBuilder builder, IProgressMonitor monitor) {
     // Save the project so we can get path and member information
     this.project = cfg.getOwner().getProject();
     // Save the monitor reference for reporting back to the user
@@ -103,8 +104,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
    * @see org.eclipse.cdt.managedbuilder.makegen.IManagedBuilderMakefileGenerator#initialize(org.eclipse.core.resources.IProject, org.eclipse.cdt.managedbuilder.core.IManagedBuildInfo, org.eclipse.core.runtime.IProgressMonitor)
    */
   @Override
-  public void initialize(IProject project, IManagedBuildInfo info,
-      IProgressMonitor monitor) {
+  public void initialize(IProject project, IManagedBuildInfo info, IProgressMonitor monitor) {
     // 15kts; seems this is never called
     // Save the project so we can get path and member information
     this.project = project;
@@ -141,8 +141,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
    * Invoked on incremental build.
    */
   @Override
-  public MultiStatus generateMakefiles(IResourceDelta delta)
-      throws CoreException {
+  public MultiStatus generateMakefiles(IResourceDelta delta) throws CoreException {
     /*
      * Let's do a sanity check right now.
      *
@@ -156,8 +155,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       cacheFile.delete();
 //      System.out.println("DEL "+cacheFile);
       // tell the workspace about file removal
-      buildFolder.getFile("CMakeCache.txt").refreshLocal(IResource.DEPTH_ZERO,
-          monitor);
+      buildFolder.getFile("CMakeCache.txt").refreshLocal(IResource.DEPTH_ZERO, monitor);
     }
     final File makefile = new File(buildDir, getMakefileName());
     if (!buildDir.exists() || !cacheFile.exists() || !makefile.exists()) {
@@ -178,8 +176,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
         return regenerateMakefiles();
       }
     }
-    MultiStatus status = new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.OK, "",
-        null);
+    MultiStatus status = new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.OK, "", null);
     return status;
   }
 
@@ -198,8 +195,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       final String msg = "Only a single source location supported by CMake";
       updateMonitor(msg);
       status = new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.ERROR, "", null);
-      status
-          .add(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID, 0, msg, null));
+      status.add(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID, 0, msg, null));
       return status;
     }
 
@@ -209,19 +205,17 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       String msg = "No source directories in project " + project.getName();
       updateMonitor(msg);
       status = new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.INFO, "", null);
-      status.add(new Status(IStatus.INFO, CdtPlugin.PLUGIN_ID,
-          IManagedBuilderMakefileGenerator.NO_SOURCE_FOLDERS, msg, null));
+      status.add(
+          new Status(IStatus.INFO, CdtPlugin.PLUGIN_ID, IManagedBuilderMakefileGenerator.NO_SOURCE_FOLDERS, msg, null));
       return status;
     } else {
-      ICConfigurationDescription cfgDes = ManagedBuildManager
-          .getDescriptionForConfiguration(config);
+      ICConfigurationDescription cfgDes = ManagedBuildManager.getDescriptionForConfiguration(config);
       srcEntries = CDataUtil.resolveEntries(srcEntries, cfgDes);
     }
 
     status = new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.OK, "", null);
 
-    final IConsole console = CCorePlugin.getDefault().getConsole(
-        CMAKE_CONSOLE_ID);
+    final IConsole console = CCorePlugin.getDefault().getConsole(CMAKE_CONSOLE_ID);
     console.start(project);
 
     // create makefiles, assuming each source directory contains a CMakeLists.txt
@@ -230,8 +224,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       updateMonitor("Invoking CMake for " + srcEntry.getName());
       try {
         final ConsoleOutputStream cis = console.getInfoStream();
-        cis.write(SimpleDateFormat.getTimeInstance().format(new Date())
-            .getBytes());
+        cis.write(SimpleDateFormat.getTimeInstance().format(new Date()).getBytes());
         cis.write(" **** Buildscript generation of configuration ".getBytes());
         cis.write(config.getName().getBytes());
         cis.write(" for project ".getBytes());
@@ -258,8 +251,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       final IPath buildDirAbs = buildFolder.getLocation();
       MultiStatus status2 = invokeCMake(srcDir, buildDirAbs, console);
       // tell the workspace that this file exists
-      buildFolder.getFile("CMakeCache.txt").refreshLocal(IResource.DEPTH_ZERO,
-          monitor);
+      buildFolder.getFile("CMakeCache.txt").refreshLocal(IResource.DEPTH_ZERO, monitor);
 
       // NOTE: Commonbuilder reads getCode() to detect errors, not getSeverity()
       if (status2.getCode() == IStatus.ERROR) {
@@ -312,8 +304,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
    * @return a MultiStatus object, where .getCode() return the severity
    * @throws CoreException
    */
-  private MultiStatus invokeCMake(IPath srcDir, IPath buildDir, IConsole console)
-      throws CoreException {
+  private MultiStatus invokeCMake(IPath srcDir, IPath buildDir, IConsole console) throws CoreException {
     Assert.isLegal(srcDir.isAbsolute(), "srcDir");
     Assert.isLegal(buildDir.isAbsolute(), "buildDir");
 
@@ -327,17 +318,16 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     // run cmake..
     final ICommandLauncher launcher = builder.getCommandLauncher();
     launcher.showCommand(true);
-    final Process proc = launcher.execute(new Path(cmd),
-        argList.toArray(new String[argList.size()]), null, buildDir, monitor);
+    final Process proc = launcher.execute(new Path(cmd), argList.toArray(new String[argList.size()]), null, buildDir,
+        monitor);
     if (proc != null) {
       try {
         // Close the input of the process since we will never write to it
         proc.getOutputStream().close();
       } catch (IOException e) {
       }
-      int state = launcher.waitAndRead(console.getOutputStream(), console
-          .getErrorStream(), new SubProgressMonitor(monitor,
-          IProgressMonitor.UNKNOWN));
+      int state = launcher.waitAndRead(console.getOutputStream(), console.getErrorStream(),
+          new SubProgressMonitor(monitor, IProgressMonitor.UNKNOWN));
       if (state == ICommandLauncher.COMMAND_CANCELED) {
         throw new OperationCanceledException(launcher.getErrorMessage());
       }
@@ -349,17 +339,13 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
         status = new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.OK, null, null);
       } else {
         // cmake had errors...
-        errMsg = String.format(
-            "%1$s exited with status %2$d. See CMake console for details.",
-            cmd, exitValue);
-        status = new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.ERROR, errMsg,
-            null);
+        errMsg = String.format("%1$s exited with status %2$d. See CMake console for details.", cmd, exitValue);
+        status = new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.ERROR, errMsg, null);
       }
     } else {
       // process start failed
       errMsg = launcher.getErrorMessage();
-      status = new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.ERROR, errMsg,
-          null);
+      status = new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.ERROR, errMsg, null);
     }
 
     return status;
@@ -373,35 +359,58 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
    */
   private List<String> buildCommandline(IPath srcDir) throws CoreException {
     // load project properties..
-    final ICConfigurationDescription cfgd = ManagedBuildManager
-        .getDescriptionForConfiguration(config);
-    final CMakePreferences prefs = ConfigurationManager.getInstance()
-        .getOrLoad(cfgd);
+    final ICConfigurationDescription cfgd = ManagedBuildManager.getDescriptionForConfiguration(config);
+
+    boolean needExportComileCommands = false;
+    boolean needVerboseBuild = false;
+    {
+      final List<ILanguageSettingsProvider> lsps = ((ILanguageSettingsProvidersKeeper) cfgd)
+          .getLanguageSettingProviders();
+      for (ILanguageSettingsProvider lsp : lsps) {
+        if (!needExportComileCommands
+            && "de.marw.cmake.cdt.language.settings.providers.CompileCommandsJsonParser".equals(lsp.getId())) {
+          needExportComileCommands = true;
+          continue;
+        }
+        if (!needVerboseBuild && ("org.eclipse.cdt.managedbuilder.core.GCCBuildCommandParser".equals(lsp.getId())
+            || "de.marw.cmake.cdt.language.settings.providers.CmakeBuildOutputParser".equals(lsp.getId()))) {
+          needVerboseBuild = true;
+          continue;
+        }
+      }
+    }
+
+    final CMakePreferences prefs = ConfigurationManager.getInstance().getOrLoad(cfgd);
 
     List<String> args = new ArrayList<String>();
+
     /* add our defaults first */
     {
       // default for all OSes
       args.add("cmake");
       // set argument for debug or release build..
       IBuildObjectProperties buildProperties = config.getBuildProperties();
-      IBuildProperty property = buildProperties
-          .getProperty(ManagedBuildManager.BUILD_TYPE_PROPERTY_ID);
+      IBuildProperty property = buildProperties.getProperty(ManagedBuildManager.BUILD_TYPE_PROPERTY_ID);
       if (property != null) {
         IBuildPropertyValue value = property.getValue();
         if (ManagedBuildManager.BUILD_TYPE_PROPERTY_DEBUG.equals(value.getId())) {
           args.add("-DCMAKE_BUILD_TYPE:STRING=Debug");
-        } else if (ManagedBuildManager.BUILD_TYPE_PROPERTY_RELEASE.equals(value
-            .getId())) {
+        } else if (ManagedBuildManager.BUILD_TYPE_PROPERTY_RELEASE.equals(value.getId())) {
           args.add("-DCMAKE_BUILD_TYPE:STRING=Release");
         }
       }
-      // colored output during build is useless for build console (seems to affect rogress report only)
+      // colored output during build is useless for build console (seems to affect progress report only)
 //      args.add("-DCMAKE_COLOR_MAKEFILE:BOOL=OFF");
-      // speed up build output parsing by disabling progress report msgs
-      args.add("CMAKE_RULE_MESSAGES:BOOL=OFF");
-      // echo commands to the console during the make to give output parsers a chance
-      args.add("-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON");
+      if (needVerboseBuild) {
+        // echo commands to the console during the make to give output parsers a chance
+        args.add("-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON");
+        // speed up build output parsing by disabling progress report msgs
+        args.add("-DCMAKE_RULE_MESSAGES:BOOL=OFF");
+      }
+      // tell cmake to write compile commands to a JSON file
+      if (needExportComileCommands) {
+        args.add("-DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=ON");
+      }
     }
 
     /* add general settings */
@@ -422,8 +431,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     appendUndefines(args, prefs.getUndefines());
 
     /* add settings for the operating system we are running under */
-    final AbstractOsPreferences osPrefs = AbstractOsPreferences
-        .extractOsPreferences(prefs);
+    final AbstractOsPreferences osPrefs = AbstractOsPreferences.extractOsPreferences(prefs);
     appendAbstractOsPreferences(args, osPrefs);
     // TODO (does not belong here) remember last generator
     osPrefs.setGeneratedWith(osPrefs.getGenerator());
@@ -442,13 +450,11 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
    */
   private boolean isGeneratorChanged() {
     // load project properties..
-    final ICConfigurationDescription cfgd = ManagedBuildManager
-        .getDescriptionForConfiguration(config);
+    final ICConfigurationDescription cfgd = ManagedBuildManager.getDescriptionForConfiguration(config);
     CMakePreferences prefs;
     try {
       prefs = ConfigurationManager.getInstance().getOrLoad(cfgd);
-      AbstractOsPreferences osPrefs = AbstractOsPreferences
-          .extractOsPreferences(prefs);
+      AbstractOsPreferences osPrefs = AbstractOsPreferences.extractOsPreferences(prefs);
       return osPrefs.getGenerator() != osPrefs.getGeneratedWith();
     } catch (CoreException ex) {
       log.log(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID, null, ex));
@@ -468,8 +474,8 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
    * @throws CoreException
    *         if unable to resolve the value of one or more variables
    */
-  private static void appendAbstractOsPreferences(List<String> args,
-      final AbstractOsPreferences prefs) throws CoreException {
+  private static void appendAbstractOsPreferences(List<String> args, final AbstractOsPreferences prefs)
+      throws CoreException {
     // replace cmake command, if given
     if (!prefs.getUseDefaultCommand())
       args.set(0, prefs.getCommand());
@@ -489,8 +495,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
    * @param undefines
    *        the cmake defines to convert and append.
    */
-  private static void appendUndefines(List<String> args,
-      final List<CmakeUnDefine> undefines) {
+  private static void appendUndefines(List<String> args, final List<CmakeUnDefine> undefines) {
     for (CmakeUnDefine def : undefines) {
       args.add("-U" + def.getName());
     }
@@ -507,10 +512,8 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
    * @throws CoreException
    *         if unable to resolve the value of one or more variables
    */
-  private static void appendDefines(List<String> args,
-      final List<CmakeDefine> defines) throws CoreException {
-    final IStringVariableManager varMgr = VariablesPlugin.getDefault()
-        .getStringVariableManager();
+  private static void appendDefines(List<String> args, final List<CmakeDefine> defines) throws CoreException {
+    final IStringVariableManager varMgr = VariablesPlugin.getDefault().getStringVariableManager();
     for (CmakeDefine def : defines) {
       final StringBuilder sb = new StringBuilder("-D");
       sb.append(def.getName());
@@ -528,8 +531,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
   @Override
   public String getMakefileName() {
     // load project properties..
-    final ICConfigurationDescription cfgd = ManagedBuildManager
-        .getDescriptionForConfiguration(config);
+    final ICConfigurationDescription cfgd = ManagedBuildManager.getDescriptionForConfiguration(config);
     CMakePreferences prefs;
     try {
       prefs = ConfigurationManager.getInstance().getOrLoad(cfgd);
@@ -538,8 +540,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       ex.printStackTrace();
       return "Makefile"; // default
     }
-    AbstractOsPreferences osPrefs = AbstractOsPreferences
-        .extractOsPreferences(prefs);
+    AbstractOsPreferences osPrefs = AbstractOsPreferences.extractOsPreferences(prefs);
     // file generated by cmake
     return osPrefs.getGenerator().getMakefileName();
   }
