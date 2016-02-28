@@ -283,7 +283,6 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
       tryParseJson();
     } catch (CoreException ex) {
       log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, "tryParseJson()", ex));
-      ex.printStackTrace();
     }
     // release resources for garbage collector
     currentCfgDescription = null;
