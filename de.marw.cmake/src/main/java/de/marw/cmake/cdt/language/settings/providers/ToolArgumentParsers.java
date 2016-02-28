@@ -25,6 +25,24 @@ import org.eclipse.cdt.core.settings.model.util.CDataUtil;
  */
 class ToolArgumentParsers {
 
+  /** matches a macro name, with optional macro argument list */
+  private static final String REGEX_MACRO_NAME = "([\\w$]+)(?:\\(([\\w$, ]+)\\))?";
+  /**
+   * matches a macro name, skipping leading whitespace. Name in matcher group 1
+   */
+  private static final String REGEX_MACRO_NAME_SKIP_LEADING_WS = "\\s*" + REGEX_MACRO_NAME;
+  /**
+   * matches a macro name with quotes, skipping leading whitespace. Name in
+   * matcher group 2
+   */
+  private static final String REGEX_MACRO_NAME_QUOTED__SKIP_LEADING_WS = "\\s*([\"'])" + REGEX_MACRO_NAME;
+  /** matches an include path with quoted directory. Name in matcher group 2 */
+  private static final String REGEX_INCLUDEPATH_QUOTED_DIR = "\\s*([\"'])(.+?)\\1";
+  /**
+   * matches an include path with unquoted directory. Name in matcher group 1
+   */
+  private static final String REGEX_INCLUDEPATH_UNQUOTED_DIR = "\\s*([^\\s]+)";
+
   /**
    * nothing to instantiate
    */
@@ -32,43 +50,92 @@ class ToolArgumentParsers {
   }
 
   ////////////////////////////////////////////////////////////////////
+  // Matchers for options
+  ////////////////////////////////////////////////////////////////////
   /**
-   * A tool argument parser capable to parse a POSIX compatible C-compiler macro
-   * definition argument: {@code -DNAME=value}.
+   * A matcher for option names. Includes information of the matcher groups that
+   * hold the option name.
+   *
+   * @author Martin Weber
    */
-  static class MacroDefine_C_POSIX implements IToolArgumentParser {
-    /** matches a macro name, with optional macro argument list */
-    private static final String REGEX_NAME = "([\\w$]+)(?:\\(([\\w$, ]+)\\))?";
+  private static class NameOptionMatcher {
+    final Matcher matcher;
+    final int nameGroup;
 
-    static final MacroDefineOptionParser[] optionParsers = {
-        /* quoted value, whitespace in value, w/ macro arglist */
-        new MacroDefineOptionParser("-D\\s*" + REGEX_NAME
-            + "((?:=)([\"'])(.+?)\\4)", 1, 5),
-        /* w/ macro arglist */
-        new MacroDefineOptionParser("-D\\s*" + REGEX_NAME + "((?:=)(\\S+))?",
-            1, 4),
-        /* quoted, whitespace in value, w/ macro arglist */
-        new MacroDefineOptionParser("-D\\s*([\"'])" + REGEX_NAME
-            + "((?:=)(.+?))?\\1", 2, 5),
-        /* w/ macro arglist, shell escapes \' and \" in value */
-        new MacroDefineOptionParser("-D\\s*" + REGEX_NAME
-            + "(?:=)((\\\\([\"']))(.*?)\\2)", 1, 2), };
-
-    /*-
-     * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgs(java.lang.String)
+    /**
+     * Constructor.
+     *
+     * @param pattern
+     *        - regular expression pattern being parsed by the parser.
+     * @param nameGroup
+     *        - capturing group number defining name of an entry.
      */
+    public NameOptionMatcher(String pattern, int nameGroup) {
+      this.matcher = Pattern.compile(pattern).matcher("");
+      this.nameGroup = nameGroup;
+    }
+
     @Override
-    public int processArgument(List<ICLanguageSettingEntry> returnedEntries,
-        String args) {
-      for (MacroDefineOptionParser parser : optionParsers) {
-        final Matcher matcher = parser.matcher;
+    public String toString() {
+      return "NameOptionMatcher [matcher=" + this.matcher + ", nameGroup=" + this.nameGroup + "]";
+    }
+  }
+
+  /**
+   * A matcher for preprocessor define options. Includes information of the
+   * matcher groups that hold the macro name and value.
+   *
+   * @author Martin Weber
+   */
+  static class NameValueOptionMatcher extends NameOptionMatcher {
+    private final int valueGroup;
+
+    /**
+     * Constructor.
+     *
+     * @param pattern
+     *        - regular expression pattern being parsed by the parser.
+     * @param nameGroup
+     *        - capturing group number defining name of an entry.
+     * @param valueGroup
+     *        - capturing group number defining value of an entry.
+     */
+    /**
+     * @param pattern
+     * @param nameGroup
+     * @param valueGroup
+     */
+    public NameValueOptionMatcher(String pattern, int nameGroup, int valueGroup) {
+      super(pattern, nameGroup);
+      this.valueGroup = valueGroup;
+    }
+
+    @Override
+    public String toString() {
+      return "NameValueOptionMatcher [matcher=" + this.matcher + ", nameGroup=" + this.nameGroup + ", valueGroup="
+          + this.valueGroup + "]";
+    }
+  }
+
+  ////////////////////////////////////////////////////////////////////
+  // generic option parsers
+  ////////////////////////////////////////////////////////////////////
+  /**
+   * A tool argument parser capable to parse a C-compiler macro definition
+   * argument.
+   */
+  private static class MacroDefineGeneric {
+
+    protected final int processArgument(List<ICLanguageSettingEntry> returnedEntries, String args,
+        NameValueOptionMatcher[] optionMatchers) {
+      for (NameValueOptionMatcher oMatcher : optionMatchers) {
+        final Matcher matcher = oMatcher.matcher;
 
         matcher.reset(args);
         if (matcher.lookingAt()) {
-          final String name = matcher.group(parser.nameGroup);
-          final String value = matcher.group(parser.valueGroup);
-          final ICLanguageSettingEntry entry = CDataUtil.createCMacroEntry(
-              name, value, 0);
+          final String name = matcher.group(oMatcher.nameGroup);
+          final String value = matcher.group(oMatcher.valueGroup);
+          final ICLanguageSettingEntry entry = CDataUtil.createCMacroEntry(name, value, 0);
           returnedEntries.add(entry);
           final int end = matcher.end();
           return end;
@@ -76,29 +143,84 @@ class ToolArgumentParsers {
       }
       return 0;// no input consumed
     }
+  }
 
-    static class MacroDefineOptionParser {
-      private final Matcher matcher;
-      private final int nameGroup;
-      private final int valueGroup;
+  /**
+   * A tool argument parser capable to parse a C-compiler macro cancel argument.
+   */
+  private static class MacroUndefineGeneric {
 
-      /**
-       * Constructor.
-       *
-       * @param pattern
-       *        - regular expression pattern being parsed by the parser.
-       * @param nameGroup
-       *        - capturing group number defining name of an entry.
-       * @param valueGroup
-       *        - capturing group number defining value of an entry.
-       */
-      public MacroDefineOptionParser(String pattern, int nameGroup,
-          int valueGroup) {
-        this.matcher = Pattern.compile(pattern).matcher("");
-        this.nameGroup = nameGroup;
-        this.valueGroup = valueGroup;
+    /*-
+     * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgument(java.util.List, java.lang.String)
+     */
+    protected final int processArgument(List<ICLanguageSettingEntry> returnedEntries, String argsLine,
+        NameOptionMatcher optionMatcher) {
+      final Matcher oMatcher = optionMatcher.matcher;
+
+      oMatcher.reset(argsLine);
+      if (oMatcher.lookingAt()) {
+        final String name = oMatcher.group(1);
+        final ICLanguageSettingEntry entry = CDataUtil.createCMacroEntry(name, null, ICSettingEntry.UNDEFINED);
+        returnedEntries.add(entry);
+        final int end = oMatcher.end();
+        return end;
       }
+      return 0;// no input consumed
     }
+  }
+
+  /**
+   * A tool argument parser capable to parse a C-compiler include path argument.
+   */
+  private static class IncludePathGeneric {
+    /*-
+     * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgs(java.lang.String)
+     */
+    protected final int processArgument(List<ICLanguageSettingEntry> returnedEntries, String argsLine,
+        NameOptionMatcher[] optionMatchers) {
+      for (NameOptionMatcher oMatcher : optionMatchers) {
+        final Matcher matcher = oMatcher.matcher;
+
+        matcher.reset(argsLine);
+        if (matcher.lookingAt()) {
+          final String name = matcher.group(oMatcher.nameGroup);
+          final ICLanguageSettingEntry entry = CDataUtil.createCIncludePathEntry(name, 0);
+          returnedEntries.add(entry);
+          final int end = matcher.end();
+          return end;
+        }
+      }
+      return 0;// no input consumed
+    }
+  }
+
+  ////////////////////////////////////////////////////////////////////
+  // POSIX compatible option parsers
+  ////////////////////////////////////////////////////////////////////
+  /**
+   * A tool argument parser capable to parse a POSIX compatible C-compiler macro
+   * definition argument: {@code -DNAME=value}.
+   */
+  static class MacroDefine_C_POSIX extends MacroDefineGeneric implements IToolArgumentParser {
+
+    private static final NameValueOptionMatcher[] optionMatchers = {
+        /* quoted value, whitespace in value, w/ macro arglist */
+        new NameValueOptionMatcher("-D" + REGEX_MACRO_NAME_SKIP_LEADING_WS + "((?:=)([\"'])(.+?)\\4)", 1, 5),
+        /* w/ macro arglist */
+        new NameValueOptionMatcher("-D" + REGEX_MACRO_NAME_SKIP_LEADING_WS + "((?:=)(\\S+))?", 1, 4),
+        /* quoted name, whitespace in value, w/ macro arglist */
+        new NameValueOptionMatcher("-D" + REGEX_MACRO_NAME_QUOTED__SKIP_LEADING_WS + "((?:=)(.+?))?\\1", 2, 5),
+        /* w/ macro arglist, shell escapes \' and \" in value */
+        new NameValueOptionMatcher("-D" + REGEX_MACRO_NAME_SKIP_LEADING_WS + "(?:=)((\\\\([\"']))(.*?)\\2)", 1, 2) };
+
+    /*-
+     * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgs(java.lang.String)
+     */
+    @Override
+    public int processArgument(List<ICLanguageSettingEntry> returnedEntries, String argsLine) {
+      return processArgument(returnedEntries, argsLine, optionMatchers);
+    }
+
   }
 
   ////////////////////////////////////////////////////////////////////
@@ -106,29 +228,17 @@ class ToolArgumentParsers {
    * A tool argument parser capable to parse a POSIX compatible C-compiler macro
    * cancel argument: {@code -UNAME}.
    */
-  static class MacroUndefine_C_POSIX implements IToolArgumentParser {
-    /** matches a macro name */
-    private static final String REGEX_NAME = "([\\w$]+)(?:\\(([\\w$, ]+)\\))?";
+  static class MacroUndefine_C_POSIX extends MacroUndefineGeneric implements IToolArgumentParser {
 
-    private final Matcher matcher = Pattern.compile("-U\\s*" + REGEX_NAME)
-        .matcher("");
+    private static final NameOptionMatcher optionMatcher = new NameOptionMatcher(
+        "-U" + REGEX_MACRO_NAME_SKIP_LEADING_WS, 1);
 
     /*-
      * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgument(java.util.List, java.lang.String)
      */
     @Override
-    public int processArgument(List<ICLanguageSettingEntry> returnedEntries,
-        String argsLine) {
-      matcher.reset(argsLine);
-      if (matcher.lookingAt()) {
-        final String name = matcher.group(1);
-        final ICLanguageSettingEntry entry = CDataUtil.createCMacroEntry(name,
-            null, ICSettingEntry.UNDEFINED);
-        returnedEntries.add(entry);
-        final int end = matcher.end();
-        return end;
-      }
-      return 0;// no input consumed
+    public int processArgument(List<ICLanguageSettingEntry> returnedEntries, String argsLine) {
+      return processArgument(returnedEntries, argsLine, optionMatcher);
     }
   }
 
@@ -137,51 +247,19 @@ class ToolArgumentParsers {
    * A tool argument parser capable to parse a POSIX compatible C-compiler
    * include path argument: {@code -Ipath}.
    */
-  static class IncludePath_C_POSIX implements IToolArgumentParser {
-    static final IncludePathOptionParser[] optionParsers = {
-    /* quoted directory */
-    new IncludePathOptionParser("-I\\s*([\"'])(.+?)\\1", 2),
-    /* unquoted directory */
-    new IncludePathOptionParser("-I\\s*([^\\s]+)", 1), };
+  static class IncludePath_C_POSIX extends IncludePathGeneric implements IToolArgumentParser {
+    private static final NameOptionMatcher[] optionMatchers = {
+        /* quoted directory */
+        new NameOptionMatcher("-I" + REGEX_INCLUDEPATH_QUOTED_DIR, 2),
+        /* unquoted directory */
+        new NameOptionMatcher("-I" + REGEX_INCLUDEPATH_UNQUOTED_DIR, 1) };
 
     /*-
      * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgs(java.lang.String)
      */
     @Override
-    public int processArgument(List<ICLanguageSettingEntry> returnedEntries,
-        String args) {
-      for (IncludePathOptionParser parser : optionParsers) {
-        final Matcher matcher = parser.matcher;
-
-        matcher.reset(args);
-        if (matcher.lookingAt()) {
-          final String name = matcher.group(parser.nameGroup);
-          final ICLanguageSettingEntry entry = CDataUtil
-              .createCIncludePathEntry(name, 0);
-          returnedEntries.add(entry);
-          final int end = matcher.end();
-          return end;
-        }
-      }
-      return 0;// no input consumed
-    }
-
-    static class IncludePathOptionParser {
-      private final Matcher matcher;
-      private final int nameGroup;
-
-      /**
-       * Constructor.
-       *
-       * @param pattern
-       *        - regular expression pattern being parsed by the parser.
-       * @param nameGroup
-       *        - capturing group number defining name of an entry.
-       */
-      public IncludePathOptionParser(String pattern, int nameGroup) {
-        this.matcher = Pattern.compile(pattern).matcher("");
-        this.nameGroup = nameGroup;
-      }
+    public int processArgument(List<ICLanguageSettingEntry> returnedEntries, String argsLine) {
+      return processArgument(returnedEntries, argsLine, optionMatchers);
     }
   }
 
@@ -191,26 +269,29 @@ class ToolArgumentParsers {
    * argument: {@code -system path}.
    */
   static class SystemIncludePath_C implements IToolArgumentParser {
-    static final IncludePathOptionParser[] optionParsers = {
-      /* quoted directory */
-      new IncludePathOptionParser("-isystem\\s+([\"'])(.+?)\\1", 2),
-      /* unquoted directory */
-      new IncludePathOptionParser("-isystem\\s+([^\\s]+)", 1), };
+    static final NameOptionMatcher[] optionMatchers = {
+        /* quoted directory */
+        new NameOptionMatcher("-isystem" + "\\s+([\"'])(.+?)\\1", 2),
+        /* unquoted directory */
+        new NameOptionMatcher("-isystem" + "\\s+([^\\s]+)", 1), };
 
     /*-
      * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgs(java.lang.String)
      */
     @Override
-    public int processArgument(List<ICLanguageSettingEntry> returnedEntries,
-        String args) {
-      for (IncludePathOptionParser parser : optionParsers) {
-        final Matcher matcher = parser.matcher;
+    public int processArgument(List<ICLanguageSettingEntry> returnedEntries, String argsLine) {
+      return processArgument(returnedEntries, argsLine, optionMatchers);
+    }
 
-        matcher.reset(args);
+    protected final int processArgument(List<ICLanguageSettingEntry> returnedEntries, String argsLine,
+        NameOptionMatcher[] optionMatchers) {
+      for (NameOptionMatcher oMatcher : optionMatchers) {
+        final Matcher matcher = oMatcher.matcher;
+
+        matcher.reset(argsLine);
         if (matcher.lookingAt()) {
-          final String name = matcher.group(parser.nameGroup);
-          final ICLanguageSettingEntry entry = CDataUtil
-              .createCIncludePathEntry(name, 0);
+          final String name = matcher.group(oMatcher.nameGroup);
+          final ICLanguageSettingEntry entry = CDataUtil.createCIncludePathEntry(name, 0);
           returnedEntries.add(entry);
           final int end = matcher.end();
           return end;
@@ -218,24 +299,76 @@ class ToolArgumentParsers {
       }
       return 0;// no input consumed
     }
+  }
 
-    static class IncludePathOptionParser {
-      private final Matcher matcher;
-      private final int nameGroup;
+  ////////////////////////////////////////////////////////////////////
+  // POSIX compatible option parsers
+  ////////////////////////////////////////////////////////////////////
+  /**
+   * A tool argument parser capable to parse a cl (Microsoft c compiler)
+   * compatible C-compiler macro definition argument: {@code /DNAME=value}.
+   */
+  static class MacroDefine_C_CL extends MacroDefineGeneric implements IToolArgumentParser {
 
-      /**
-       * Constructor.
-       *
-       * @param pattern
-       *        - regular expression pattern being parsed by the parser.
-       * @param nameGroup
-       *        - capturing group number defining name of an entry.
-       */
-      public IncludePathOptionParser(String pattern, int nameGroup) {
-        this.matcher = Pattern.compile(pattern).matcher("");
-        this.nameGroup = nameGroup;
-      }
+    private static final NameValueOptionMatcher[] optionMatchers = {
+        /* quoted value, whitespace in value, w/ macro arglist */
+        new NameValueOptionMatcher("/D" + REGEX_MACRO_NAME_SKIP_LEADING_WS + "((?:=)([\"'])(.+?)\\4)", 1, 5),
+        /* w/ macro arglist */
+        new NameValueOptionMatcher("/D" + REGEX_MACRO_NAME_SKIP_LEADING_WS + "((?:=)(\\S+))?", 1, 4),
+        /* quoted name, whitespace in value, w/ macro arglist */
+        new NameValueOptionMatcher("/D" + REGEX_MACRO_NAME_QUOTED__SKIP_LEADING_WS + "((?:=)(.+?))?\\1", 2, 5),
+        /* w/ macro arglist, shell escapes \' and \" in value */
+        new NameValueOptionMatcher("/D" + REGEX_MACRO_NAME_SKIP_LEADING_WS + "(?:=)((\\\\([\"']))(.*?)\\2)", 1, 2), };
+
+    /*-
+     * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgs(java.lang.String)
+     */
+    @Override
+    public int processArgument(List<ICLanguageSettingEntry> returnedEntries, String argsLine) {
+      return processArgument(returnedEntries, argsLine, optionMatchers);
+    }
+
+  }
+
+  ////////////////////////////////////////////////////////////////////
+  /**
+   * A tool argument parser capable to parse a cl (Microsoft c compiler)
+   * compatible C-compiler macro cancel argument: {@code /UNAME}.
+   */
+  static class MacroUndefine_C_CL extends MacroUndefineGeneric implements IToolArgumentParser {
+
+    private static final NameOptionMatcher optionMatcher = new NameOptionMatcher(
+        "/U" + REGEX_MACRO_NAME_SKIP_LEADING_WS, 1);
+
+    /*-
+     * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgument(java.util.List, java.lang.String)
+     */
+    @Override
+    public int processArgument(List<ICLanguageSettingEntry> returnedEntries, String argsLine) {
+      return processArgument(returnedEntries, argsLine, optionMatcher);
     }
   }
+
+  ////////////////////////////////////////////////////////////////////
+  /**
+   * A tool argument parser capable to parse a cl (Microsoft c compiler)
+   * compatible C-compiler include path argument: {@code /Ipath}.
+   */
+  static class IncludePath_C_CL extends IncludePathGeneric implements IToolArgumentParser {
+    private static final NameOptionMatcher[] optionMatchers = {
+        /* quoted directory */
+        new NameOptionMatcher("/I" + REGEX_INCLUDEPATH_QUOTED_DIR, 2),
+        /* unquoted directory */
+        new NameOptionMatcher("/I" + REGEX_INCLUDEPATH_UNQUOTED_DIR, 1), };
+
+    /*-
+     * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgs(java.lang.String)
+     */
+    @Override
+    public int processArgument(List<ICLanguageSettingEntry> returnedEntries, String argsLine) {
+      return processArgument(returnedEntries, argsLine, optionMatchers);
+    }
+  }
+
   ////////////////////////////////////////////////////////////////////
 }
