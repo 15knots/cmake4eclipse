@@ -29,9 +29,9 @@ import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
 import org.eclipse.cdt.core.settings.model.ICLanguageSettingEntry;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.QualifiedName;
@@ -49,6 +49,7 @@ import de.marw.cmake.CMakePlugin;
  */
 public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvider
     implements ILanguageSettingsProvider, ICBuildOutputParser {
+  private static final ILog log = CMakePlugin.getDefault().getLog();
 
   /**
    * name of the session property attached to project resources. The property
@@ -64,7 +65,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
    * parsers for each tool of interest that takes part in the current build. The
    * Matcher detects whether a command line is an invocation of the tool.
    */
-  private HashMap<Matcher, IToolCommandlineParser> currentCmdlineParsers;
+  private final HashMap<Matcher, IToolCommandlineParser> currentCmdlineParsers;
 
   public CompileCommandsJsonParser() {
     currentCmdlineParsers = new HashMap<Matcher, IToolCommandlineParser>(4, 1.0f);
@@ -85,12 +86,33 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
     final ToolCommandlineParser cpp = new ToolCommandlineParser("org.eclipse.cdt.core.g++", posix_cc_args);
     knownCmdParsers.put("c++", cpp);
     knownCmdParsers.put("clang++", cpp);
-    // TODO add ms compiler and intel compilers
 
+    // ms C + C++ compiler...
+    final IToolArgumentParser[] cl_cc_args = { new ToolArgumentParsers.MacroDefine_C_CL(),
+        new ToolArgumentParsers.MacroUndefine_C_CL(), new ToolArgumentParsers.IncludePath_C_CL() };
+    final ToolCommandlineParser cl = new ToolCommandlineParser("org.eclipse.cdt.core.gcc", cl_cc_args);
+    knownCmdParsers.put("cl", cl);
+
+    // Intel C compilers
+    final ToolCommandlineParser icc = new ToolCommandlineParser("org.eclipse.cdt.core.gcc", posix_cc_args);
+    final ToolCommandlineParser icpc = new ToolCommandlineParser("org.eclipse.cdt.core.g++", posix_cc_args);
+
+    // Linux & OS X, EDG
+    knownCmdParsers.put("icc", icc);
+    // OS X, clang
+    knownCmdParsers.put("icl", icc);
+    // Intel C++ compiler
+    // Linux & OS X, EDG
+    knownCmdParsers.put("icpc", icpc);
+    // OS X, clang
+    knownCmdParsers.put("icl++", icpc);
+    // Windows C + C++ compiler...
+    knownCmdParsers.put("icl", cl);
+
+    // construct matchers that detect the tool name...
     final String REGEX_CMD_HEAD = "^(.*?" + Pattern.quote(File.separator) + ")(";
     final String REGEX_CMD_TAIL = ")";
     for (Entry<String, IToolCommandlineParser> entry : knownCmdParsers.entrySet()) {
-      // construct a matcher that detects the tool name
       // 'cc' -> matches
       // '/bin/cc' -> matches
       // '/usr/bin/cc' -> matches
@@ -101,6 +123,116 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
     }
   }
 
+  /**
+   * Parses the content of the 'compile_commands.json' file corresponding to the
+   * specified configuration, if timestamps differ.
+   *
+   * @throws CoreException
+   */
+  private void tryParseJson() throws CoreException {
+
+    /** cached file modification timestamp of last parse */
+    Long tsCached = null;
+
+    // If getBuilderCWD() returns a workspace relative path, it is garbled.
+    // If garbled, make sure de.marw.cdt.cmake.core.internal.BuildscriptGenerator.getBuildWorkingDir()
+    // returns a full, absolute path relative to the workspace.
+    final IPath builderCWD = currentCfgDescription.getBuildSetting().getBuilderCWD();
+
+    IPath jsonPath = builderCWD.append("compile_commands.json");
+    final IFile jsonFileRc = ResourcesPlugin.getWorkspace().getRoot().getFile(jsonPath);
+
+    IPath location = jsonFileRc.getLocation();
+    if (location != null) {
+      final File jsonFile = location.toFile();
+      if (jsonFile.exists()) {
+        // file exists on disk...
+        IProject project = currentCfgDescription.getProjectDescription().getProject();
+        // get cached timestamp
+        tsCached = (Long) project.getSessionProperty(JSON_PARSED_PROP);
+        final long tsJsonModified = jsonFile.lastModified();
+        if (tsCached == null || tsCached.longValue() < tsJsonModified) {
+          // must parse json file
+          try {
+            // parse file...
+            JSON parser = new JSON();
+            Reader in = new FileReader(jsonFile);
+            Object parsed = parser.parse(new JSON.ReaderSource(in), false);
+            if (parsed instanceof Object[]) {
+              for (Object o : (Object[]) parsed) {
+                if (o instanceof Map) {
+                  processEntry((Map<?, ?>) o, jsonPath);
+                } else {
+                  // expected Map object, skipping entry.toString()
+                  log.log(new Status(IStatus.WARNING, CMakePlugin.PLUGIN_ID,
+                      "File format error: " + jsonPath.toString() + ": unexpected entry '" + o + "', skipped", null));
+                }
+              }
+              // store timestamp as resource property
+              project.setSessionProperty(JSON_PARSED_PROP, tsJsonModified);
+//              System.out.println("stored cached compile_commands");
+            } else {
+              // file format error
+              log.log(new Status(IStatus.WARNING, CMakePlugin.PLUGIN_ID,
+                  "File format error: " + jsonPath.toString() + " does not seem to be JSON", null));
+            }
+          } catch (IOException ex) {
+            log.log(new Status(IStatus.WARNING, CMakePlugin.PLUGIN_ID, "Failed to read file " + jsonFile, ex));
+          }
+        }
+        return;
+      }
+    }
+    // no json file was produced in the build
+    log.log(new Status(IStatus.WARNING, CMakePlugin.PLUGIN_ID,
+        "No 'compile_commands.json' file was produced in the build", null));
+  }
+
+  /**
+   * Processes an entry from a {@code compile_commands.json} file and stores a
+   * {@link ICLanguageSettingEntry} for the file found in the specified map.
+   *
+   * @param sourceFileInfo
+   *        a Map of type Map<String,String>
+   * @param jsonPath
+   *        the JSON file being parsed (for logging only)
+   */
+  private void processEntry(Map<?, ?> sourceFileInfo, IPath jsonPath) {
+    if (sourceFileInfo.containsKey("file") && sourceFileInfo.containsKey("command")) {
+      final String file = sourceFileInfo.get("file").toString();
+      if (file != null && !file.isEmpty()) {
+        final String cmdLine = sourceFileInfo.get("command").toString();
+        if (cmdLine != null && !cmdLine.isEmpty()) {
+          final File path = new File(file);
+          final IFile[] files = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(path.toURI());
+          if (files.length > 0) {
+            if (!processCommandLine(files[0], cmdLine)) {
+              log.log(new Status(IStatus.WARNING, CMakePlugin.PLUGIN_ID,
+                  jsonPath.toString() + ": No parser for command '" + cmdLine + "', skipped", null));
+            }
+          }
+          return;
+        }
+      }
+    }
+    // unrecognized entry, skipping
+    log.log(new Status(IStatus.WARNING, CMakePlugin.PLUGIN_ID,
+        "File format error: " + jsonPath.toString() + ": 'file' or 'command' missing in JSON object, skipped", null));
+  }
+
+  /**
+   * Processes the command-line of an entry from a {@code compile_commands.json}
+   * file by trying each parser in {@link #currentCmdlineParsers} and stores a
+   * {@link ICLanguageSettingEntry} for the file found in the specified map.
+   *
+   * @param sourceFile
+   *        the source file resource corresponding to the source file being
+   *        processed by the tool
+   * @param line
+   *        the command line to parse
+   * @return {@code true} if a parser for the command-line could be found,
+   *         {@code false} if no parser could be found (nothing was processed)
+   */
   private boolean processCommandLine(IFile sourceFile, String line) {
     // try each tool..
     for (Entry<Matcher, IToolCommandlineParser> entry : currentCmdlineParsers.entrySet()) {
@@ -119,100 +251,8 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
         return true; // skip other parsers
       }
     }
-//    System.out.println(line);
-    return false;
-  }
-
-  /**
-   * Parses the content of the 'compile_commands.json' file corresponding to the
-   * specified configuration, if timestamps differ.
-   *
-   * @param cfgd
-   *        configuration
-   * @return the parsed content of the file
-   * @throws CoreException
-   */
-  private Long tryParseJson(ICConfigurationDescription cfgd) throws CoreException {
-
-    /** cached file modification timestamp of last parse */
-    Long tsCached = null;
-
-    // If getBuilderCWD() returns a workspace relative path, it is garbled.
-    // If garbled, make sure de.marw.cdt.cmake.core.internal.BuildscriptGenerator.getBuildWorkingDir()
-    // returns a full, absolute path relative to the workspace.
-    final IPath builderCWD = cfgd.getBuildSetting().getBuilderCWD();
-
-    IPath jsonPath = builderCWD.append("compile_commands.json");
-    final IFile jsonFileRc = ResourcesPlugin.getWorkspace().getRoot().getFile(jsonPath);
-
-    IPath location = jsonFileRc.getLocation();
-    if (location != null) {
-      final File jsonFile = location.toFile();
-      if (jsonFile.exists()) {
-        // file exists on disk...
-        IProject project = cfgd.getProjectDescription().getProject();
-        // get cached timestamp
-        tsCached = (Long) project.getSessionProperty(JSON_PARSED_PROP);
-        final long tsJsonModified = jsonFile.lastModified();
-        if (tsCached == null || tsCached.longValue() < tsJsonModified) {
-          // must parse json file
-          try {
-            // parse file...
-            JSON parser = new JSON();
-            Reader in = new FileReader(jsonFile);
-            Object parsed = parser.parse(new JSON.ReaderSource(in), false);
-            if (parsed instanceof Object[]) {
-              for (Object o : (Object[]) parsed) {
-                if (o instanceof Map) {
-                  processEntry((Map<?, ?>) o, cfgd);
-                } else {
-                  // TODO expected Map object, skipping entry.toString()
-                }
-              }
-              // store timestamp as resource property
-              project.setSessionProperty(JSON_PARSED_PROP, tsJsonModified);
-//              System.out.println("stored cached compile_commands");
-            } else {
-              // TODO file format error
-            }
-          } catch (IOException ex) {
-            throw new CoreException(
-                new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, "Failed to read file " + jsonFile, ex));
-          }
-        }
-      }
-    } else {
-      // no json file was produced in the build
-      // TODO
-    }
-    return tsCached;
-  }
-
-  /**
-   * Processes an entry from a {@code compile_commands.json} file and stores a
-   * {@link ICLanguageSettingEntry} for the file found in the specified map.
-   *
-   * @param sourceFileInfo
-   *        a Map of type Map<String,String>
-   * @param cfgd
-   *        configuration description for the parser.
-   */
-  private void processEntry(Map<?, ?> sourceFileInfo, ICConfigurationDescription cfgd) {
-    if (sourceFileInfo.containsKey("file") && sourceFileInfo.containsKey("command")) {
-      final String file = sourceFileInfo.get("file").toString();
-      if (file != null && !file.isEmpty()) {
-        final String cmdLine = sourceFileInfo.get("command").toString();
-        if (cmdLine != null && !cmdLine.isEmpty()) {
-          final File path = new File(file);
-          final IFile[] files = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(path.toURI());
-          if (files.length > 0) {
-            processCommandLine(files[0], cmdLine);
-          }
-          return;
-        }
-      }
-    }
-    // TODO unrecognized entry, skipping
+    //    System.out.println(line);
+    return false; // no matching parser found
   }
 
   /*-
@@ -240,22 +280,13 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
   @Override
   public void shutdown() {
     try {
-      tryParseJson(currentCfgDescription);
+      tryParseJson();
     } catch (CoreException ex) {
-      // TODO Auto-generated catch block
+      log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, "tryParseJson()", ex));
       ex.printStackTrace();
     }
     // release resources for garbage collector
     currentCfgDescription = null;
-  }
-
-  @Override
-  public List<ICLanguageSettingEntry> getSettingEntries(ICConfigurationDescription cfgDescription, IResource rc,
-      String languageId) {
-//    CDataUtil.createCMacroEntry()
-//    LanguageSettingsStorage.getPooledList(List)
-    // TODO Auto-generated function stub
-    return super.getSettingEntries(cfgDescription, rc, languageId);
   }
 
   @Override
