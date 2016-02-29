@@ -33,6 +33,6 @@ MESSAGE( STATUS "MYPROJ_VERSION_TXT =  ${MYPROJ_VERSION_TXT}" )
 # add the binary tree to the search path for include files
 # so that we will find config.h
 include_directories( "${PROJECT_BINARY_DIR}"})
-add_definitions(-DFOO -DBAR)
+add_definitions(-DFOO123=2 -DBAR123=1)
 add_executable(EXECUTABLE main.c)
 

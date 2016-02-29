@@ -3,7 +3,8 @@
 
 int main(void) {
 #if FOO
-	puts("!!!Hello World!!!  "); /* prints !!!Hello World!!! */
+	puts("FOO should not be defined.");
 #endif
+	puts("!!!Hello World!!!  ");
 	return EXIT_SUCCESS;
 }
