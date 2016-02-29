@@ -129,6 +129,15 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
   }
 
   /**
+   * Overridden to make sure nothing is stored on disk; this provider operates
+   * truly in memory.
+   */
+  @Override
+  public IStatus serializeLanguageSettings(ICConfigurationDescription cfgDescription) {
+    return Status.OK_STATUS;
+  }
+
+  /**
    * Parses the content of the 'compile_commands.json' file corresponding to the
    * specified configuration, if timestamps differ.
    *

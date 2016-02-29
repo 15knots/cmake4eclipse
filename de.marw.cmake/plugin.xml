@@ -17,7 +17,8 @@
     <provider
           class="de.marw.cmake.cdt.language.settings.providers.CompileCommandsJsonParser"
           id="de.marw.cmake.cdt.language.settings.providers.CompileCommandsJsonParser"
-          name="CMAKE_EXPORT_COMPILE_COMMANDS Parser">
+          name="CMAKE_EXPORT_COMPILE_COMMANDS Parser"
+          prefer-non-shared="true">
          <language-scope id="org.eclipse.cdt.core.gcc"/>
          <language-scope id="org.eclipse.cdt.core.g++"/>
     </provider>
