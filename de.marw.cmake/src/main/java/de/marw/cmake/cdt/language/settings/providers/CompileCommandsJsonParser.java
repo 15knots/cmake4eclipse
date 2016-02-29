@@ -77,23 +77,28 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
         new ToolArgumentParsers.MacroUndefine_C_POSIX(), new ToolArgumentParsers.IncludePath_C_POSIX(),
         // not defined by POSIX, but does not harm..
         new ToolArgumentParsers.SystemIncludePath_C(), };
-    // POSIX compatible C compilers...
+    // POSIX compatible C compilers =================================
     final ToolCommandlineParser gcc = new ToolCommandlineParser("org.eclipse.cdt.core.gcc", posix_cc_args);
     knownCmdParsers.put("cc", gcc);
+    knownCmdParsers.put("cc.exe", gcc);
     knownCmdParsers.put("gcc", gcc);
+    knownCmdParsers.put("gcc.exe", gcc);
     knownCmdParsers.put("clang", gcc);
-    // POSIX compatible C++ compilers...
+    knownCmdParsers.put("clang.exe", gcc);
+    // POSIX compatible C++ compilers ===============================
     final ToolCommandlineParser cpp = new ToolCommandlineParser("org.eclipse.cdt.core.g++", posix_cc_args);
     knownCmdParsers.put("c++", cpp);
+    knownCmdParsers.put("c++.exe", cpp);
     knownCmdParsers.put("clang++", cpp);
+    knownCmdParsers.put("clang++.exe", cpp);
 
-    // ms C + C++ compiler...
+    // ms C + C++ compiler ==========================================
     final IToolArgumentParser[] cl_cc_args = { new ToolArgumentParsers.MacroDefine_C_CL(),
         new ToolArgumentParsers.MacroUndefine_C_CL(), new ToolArgumentParsers.IncludePath_C_CL() };
     final ToolCommandlineParser cl = new ToolCommandlineParser("org.eclipse.cdt.core.gcc", cl_cc_args);
-    knownCmdParsers.put("cl", cl);
+    knownCmdParsers.put("cl.exe", cl);
 
-    // Intel C compilers
+    // Intel C compilers ============================================
     final ToolCommandlineParser icc = new ToolCommandlineParser("org.eclipse.cdt.core.gcc", posix_cc_args);
     final ToolCommandlineParser icpc = new ToolCommandlineParser("org.eclipse.cdt.core.g++", posix_cc_args);
 
@@ -106,8 +111,8 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
     knownCmdParsers.put("icpc", icpc);
     // OS X, clang
     knownCmdParsers.put("icl++", icpc);
-    // Windows C + C++ compiler...
-    knownCmdParsers.put("icl", cl);
+    // Windows C + C++, EDG
+    knownCmdParsers.put("icl.exe", cl);
 
     // construct matchers that detect the tool name...
     final String REGEX_CMD_HEAD = "^(.*?" + Pattern.quote(File.separator) + ")(";
@@ -246,6 +251,9 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
         final List<ICLanguageSettingEntry> entries = cmdlineParser.processArgs(args);
         // attach settings to sourceFile resource...
         if (entries != null && entries.size() > 0) {
+          //TODO Settings speichern per Project/Configuration (ICConfigurationDescription?): NEE, tut es nicht.
+          // TODO disable serialization/shared mode
+          // super speichert die global (ohne project zu berücksichtigen)
           super.setSettingEntries(currentCfgDescription, sourceFile, cmdlineParser.getLanguageId(), entries);
         }
         return true; // skip other parsers
