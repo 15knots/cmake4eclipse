@@ -13,4 +13,4 @@ include_directories( ../include)
 
 add_definitions(-DFOO=1 -DBAR)
 add_executable(execut2 main1.c)
-target_compile_definitions(execut2 PUBLIC "OHU=LOLL Oh! wo" )
+target_compile_definitions(execut2 PUBLIC "OHU=LOLL Oh! wo" MAGIC=12348765)
