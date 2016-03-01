@@ -62,8 +62,9 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
   private ICConfigurationDescription currentCfgDescription;
 
   /**
-   * parsers for each tool of interest that takes part in the current build. The
-   * Matcher detects whether a command line is an invocation of the tool.
+   * tool detector and their tool option parsers for each tool of interest that
+   * takes part in the current build. The Matcher detects whether a command line
+   * is an invocation of the tool.
    */
   private final HashMap<Matcher, IToolCommandlineParser> currentCmdlineParsers;
 
@@ -71,7 +72,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
    * last known working tool detector and its tool option parsers or
    * {@code null}, if unknown (to speed up parsing)
    */
-  private Entry<Matcher, IToolCommandlineParser> preferredDetector;
+  private Entry<Matcher, IToolCommandlineParser> preferredCmdlineParser;
 
   public CompileCommandsJsonParser() {
     currentCmdlineParsers = new HashMap<Matcher, IToolCommandlineParser>(18, 1.0f);
@@ -255,14 +256,14 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
    */
   private boolean processCommandLineAnyDetector(IFile sourceFile, String line) {
     // try last known matching detector first...
-    if (preferredDetector != null && processCommandLine(preferredDetector, sourceFile, line)) {
+    if (preferredCmdlineParser != null && processCommandLine(preferredCmdlineParser, sourceFile, line)) {
       return true; // could process command line
     }
     // try each tool..
     for (Entry<Matcher, IToolCommandlineParser> entry : currentCmdlineParsers.entrySet()) {
       if (processCommandLine(entry, sourceFile, line)) {
         // found a matching command-line parser
-        preferredDetector = entry;
+        preferredCmdlineParser = entry;
         return true; // could process command line
       }
     }
