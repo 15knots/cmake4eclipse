@@ -67,16 +67,22 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
    */
   private final HashMap<Matcher, IToolCommandlineParser> currentCmdlineParsers;
 
+  /**
+   * last known working tool detector and its tool option parsers or
+   * {@code null}, if unknown (to speed up parsing)
+   */
+  private Entry<Matcher, IToolCommandlineParser> preferredDetector;
+
   public CompileCommandsJsonParser() {
-    currentCmdlineParsers = new HashMap<Matcher, IToolCommandlineParser>(4, 1.0f);
+    currentCmdlineParsers = new HashMap<Matcher, IToolCommandlineParser>(18, 1.0f);
 
     /** Names of known tools along with their command line argument parsers */
-    final Map<String, IToolCommandlineParser> knownCmdParsers = new HashMap<String, IToolCommandlineParser>(4, 1.0f);
+    final Map<String, IToolCommandlineParser> knownCmdParsers = new HashMap<String, IToolCommandlineParser>(16, 1.0f);
 
-    final IToolArgumentParser[] posix_cc_args = { new ToolArgumentParsers.MacroDefine_C_POSIX(),
-        new ToolArgumentParsers.MacroUndefine_C_POSIX(), new ToolArgumentParsers.IncludePath_C_POSIX(),
+    final IToolArgumentParser[] posix_cc_args = { new ToolArgumentParsers.IncludePath_C_POSIX(),
+        new ToolArgumentParsers.MacroDefine_C_POSIX(), new ToolArgumentParsers.MacroUndefine_C_POSIX(),
         // not defined by POSIX, but does not harm..
-        new ToolArgumentParsers.SystemIncludePath_C(), };
+        new ToolArgumentParsers.SystemIncludePath_C() };
     // POSIX compatible C compilers =================================
     final ToolCommandlineParser gcc = new ToolCommandlineParser("org.eclipse.cdt.core.gcc", posix_cc_args);
     knownCmdParsers.put("cc", gcc);
@@ -93,8 +99,8 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
     knownCmdParsers.put("clang++.exe", cpp);
 
     // ms C + C++ compiler ==========================================
-    final IToolArgumentParser[] cl_cc_args = { new ToolArgumentParsers.MacroDefine_C_CL(),
-        new ToolArgumentParsers.MacroUndefine_C_CL(), new ToolArgumentParsers.IncludePath_C_CL() };
+    final IToolArgumentParser[] cl_cc_args = { new ToolArgumentParsers.IncludePath_C_CL(),
+        new ToolArgumentParsers.MacroDefine_C_CL(), new ToolArgumentParsers.MacroUndefine_C_CL() };
     final ToolCommandlineParser cl = new ToolCommandlineParser("org.eclipse.cdt.core.gcc", cl_cc_args);
     knownCmdParsers.put("cl.exe", cl);
 
@@ -220,7 +226,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
           final File path = new File(file);
           final IFile[] files = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(path.toURI());
           if (files.length > 0) {
-            if (!processCommandLine(files[0], cmdLine)) {
+            if (!processCommandLineAnyDetector(files[0], cmdLine)) {
               log.log(new Status(IStatus.WARNING, CMakePlugin.PLUGIN_ID,
                   jsonPath.toString() + ": No parser for command '" + cmdLine + "', skipped", null));
             }
@@ -243,33 +249,62 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
    *        the source file resource corresponding to the source file being
    *        processed by the tool
    * @param line
-   *        the command line to parse
+   *        the command line to process
    * @return {@code true} if a parser for the command-line could be found,
    *         {@code false} if no parser could be found (nothing was processed)
    */
-  private boolean processCommandLine(IFile sourceFile, String line) {
+  private boolean processCommandLineAnyDetector(IFile sourceFile, String line) {
+    // try last known matching detector first...
+    if (preferredDetector != null && processCommandLine(preferredDetector, sourceFile, line)) {
+      return true; // could process command line
+    }
     // try each tool..
     for (Entry<Matcher, IToolCommandlineParser> entry : currentCmdlineParsers.entrySet()) {
-      final Matcher cmdDetector = entry.getKey();
-      cmdDetector.reset(line);
-      if (cmdDetector.lookingAt()) {
+      if (processCommandLine(entry, sourceFile, line)) {
         // found a matching command-line parser
-        String args = line.substring(cmdDetector.end());
-        args = ToolCommandlineParser.trimLeadingWS(args);
-        final IToolCommandlineParser cmdlineParser = entry.getValue();
-        final List<ICLanguageSettingEntry> entries = cmdlineParser.processArgs(args);
-        // attach settings to sourceFile resource...
-        if (entries != null && entries.size() > 0) {
-          //TODO Settings speichern per Project/Configuration (ICConfigurationDescription?): NEE, tut es nicht.
-          // TODO disable serialization/shared mode
-          // super speichert die global (ohne project zu berücksichtigen)
-          super.setSettingEntries(currentCfgDescription, sourceFile, cmdlineParser.getLanguageId(), entries);
-        }
-        return true; // skip other parsers
+        preferredDetector = entry;
+        return true; // could process command line
       }
     }
     //    System.out.println(line);
     return false; // no matching parser found
+  }
+
+  /**
+   * Processes the command-line of an entry from a {@code compile_commands.json}
+   * file by trying the specified detector and stores a
+   * {@link ICLanguageSettingEntry} for the file found in the specified map.
+   *
+   * @param detectorInfo
+   *        the tool detector and its tool option parsers
+   * @param sourceFile
+   *        the source file resource corresponding to the source file being
+   *        processed by the tool
+   * @param line
+   *        the command line to process
+   * @return {@code true} if the specified detector matches the tool given on
+   *         the specified command-line, otherwise {@code false} (specified
+   *         command line was processed)
+   */
+  private boolean processCommandLine(Entry<Matcher, IToolCommandlineParser> detectorInfo, IFile sourceFile,
+      String line) {
+    final Matcher cmdDetector = detectorInfo.getKey();
+    cmdDetector.reset(line);
+    if (cmdDetector.lookingAt()) {
+      // found a matching command-line parser
+      String args = line.substring(cmdDetector.end());
+      args = ToolCommandlineParser.trimLeadingWS(args);
+      final IToolCommandlineParser cmdlineParser = detectorInfo.getValue();
+      final List<ICLanguageSettingEntry> entries = cmdlineParser.processArgs(args);
+      // attach settings to sourceFile resource...
+      if (entries != null && entries.size() > 0) {
+        //TODO Settings speichern per Project/Configuration (ICConfigurationDescription?): NEE, tut es nicht.
+        // super speichert die global (ohne project zu berücksichtigen): NEE, tut es nicht.
+        super.setSettingEntries(currentCfgDescription, sourceFile, cmdlineParser.getLanguageId(), entries);
+      }
+      return true; // skip other detectors
+    }
+    return false; // no matching detectors found
   }
 
   /*-
