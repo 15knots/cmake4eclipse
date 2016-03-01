@@ -21,7 +21,7 @@ ENDIF(CMAKE_COMPILER_IS_GNUCC)
 
 include_directories( "${PROJECT_BINARY_DIR}")
 
-add_executable(execut1 util1.c main1.c)
+add_executable(execut1 util1.c main.c)
 
 add_subdirectory(src-sub)
 
