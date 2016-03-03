@@ -71,7 +71,7 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
     // cmake options group...
     {
       Group gr = WidgetHelper.createGroup(usercomp, SWT.FILL, 2,
-          "Commandline Options", 2);
+          "CMake commandline options", 2);
 
       b_warnNoDev = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2,
           "Suppress developer &warnings \t(-Wno-dev)");
