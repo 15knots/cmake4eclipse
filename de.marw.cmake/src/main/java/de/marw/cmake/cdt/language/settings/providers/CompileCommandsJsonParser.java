@@ -299,7 +299,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
       final List<ICLanguageSettingEntry> entries = cmdlineParser.processArgs(args);
       // attach settings to sourceFile resource...
       if (entries != null && entries.size() > 0) {
-        //TODO Settings speichern per Project/Configuration (ICConfigurationDescription?): NEE, tut es nicht.
+        //TODO Settings speichern per Project/Configuration (ICConfigurationDescription?)
         // super speichert die global (ohne project zu berücksichtigen): NEE, tut es nicht.
         super.setSettingEntries(currentCfgDescription, sourceFile, cmdlineParser.getLanguageId(), entries);
       }
