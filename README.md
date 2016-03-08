@@ -30,12 +30,13 @@ https://raw.githubusercontent.com/15knots/cmake4eclipse/master/releng/comp-updat
 
 ---
 ## Latest Release
-1.4.0 (2016-03-05)
+1.4.1 (2016-03-08)
 ### Changes
 - Closes #9: Improve support for code-completion and symbol browsing in CDT source editors.
+- Closes #10: Can't install version 1.4.0 in eclipse mars.2 release 4.5.2
 
 ### Repository URL
-`jar:https://bintray.com/artifact/download/15knots/p2-zip/cmake4eclipse-1.4.0.zip!/`
+`jar:https://bintray.com/artifact/download/15knots/p2-zip/cmake4eclipse-1.4.1.zip!/`
 ### System Requirements
 CDT v 8.1.0 or higher and Eclipse v 3.8.0 (Juno) or higher
 
