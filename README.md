@@ -1,5 +1,4 @@
-[Install...](#Installation Instructions)
-<a href="http://marketplace.eclipse.org/marketplace-client-intro?mpc_install=2318334" class="drag" title="Drag to your running Eclipse workbench to install cmake4eclipse"><img src="https://marketplace.eclipse.org/sites/all/themes/solstice/_themes/solstice_marketplace/public/images/btn-install.png" alt="Drag to your running Eclipse workspace to install cmake4eclipse" /> </a>
+[Install...](#installation-instructions)
 [![Mailing-list](https://img.shields.io/badge/Mailing-list-blue.svg)](http://groups.google.com/d/forum/cmake4eclipse-users)
 [![Build Status](https://travis-ci.org/15knots/cmake4eclipse.svg?branch=master)](https://travis-ci.org/15knots/cmake4eclipse)
 [![GitHub issues](https://img.shields.io/github/issues/15knots/cmake4eclipse.svg)](https://github.com/15knots/cmake4eclipse/issues)
@@ -25,7 +24,11 @@ Annoyingly, these recommended out-of-source-builds impose some tedious tasks on 
 Screenshots can be found at the <a href="https://marketplace.eclipse.org/content/cmake4eclipse#group-screenshots" title="Screenshots">Eclipse Marketplace</a>.
 
 # Installation Instructions
-**cmake4eclipse** can be installed into an existing Eclipse installation using the "Install New Software..." dialog and entering the update site URL listed below.
+The easiest way is to drag this: <a href="http://marketplace.eclipse.org/marketplace-client-intro?mpc_install=2318334" class="drag" title="Drag to your running Eclipse workbench to install cmake4eclipse">
+<img class="img-responsive" src="https://marketplace.eclipse.org/sites/all/themes/solstice/_themes/solstice_marketplace/public/images/btn-install.png" alt="Drag to your running Eclipse workbench to install cmake4eclipse" /></a> to your running Eclipse workbench.
+
+Alternatively, **cmake4eclipse** can be installed into Eclipse using the "Install New Software..." dialog and entering the update site URL listed below.
+
 ## Update Site
 This composite update site contains the latest release as well as selected older releases.
 https://raw.githubusercontent.com/15knots/cmake4eclipse/master/releng/comp-update/
