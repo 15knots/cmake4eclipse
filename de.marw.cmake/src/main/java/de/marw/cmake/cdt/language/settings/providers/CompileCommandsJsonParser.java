@@ -163,12 +163,12 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
     IPath jsonPath = builderCWD.append("compile_commands.json");
     final IFile jsonFileRc = ResourcesPlugin.getWorkspace().getRoot().getFile(jsonPath);
 
-    IPath location = jsonFileRc.getLocation();
+    final IPath location = jsonFileRc.getLocation();
+    final IProject project = currentCfgDescription.getProjectDescription().getProject();
     if (location != null) {
       final File jsonFile = location.toFile();
       if (jsonFile.exists()) {
         // file exists on disk...
-        IProject project = currentCfgDescription.getProjectDescription().getProject();
         // get cached timestamp
         tsCached = (Long) project.getSessionProperty(JSON_PARSED_PROP);
         final long tsJsonModified = jsonFile.lastModified();
@@ -185,8 +185,8 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
                   processEntry((Map<?, ?>) o, jsonPath);
                 } else {
                   // expected Map object, skipping entry.toString()
-                  log.log(new Status(IStatus.WARNING, CMakePlugin.PLUGIN_ID,
-                      "File format error: " + jsonPath.toString() + ": unexpected entry '" + o + "', skipped", null));
+                  log.log(new Status(IStatus.WARNING, CMakePlugin.PLUGIN_ID, "'" + project.getName() + "' "
+                      + "File format error: " + jsonPath.toString() + ": unexpected entry '" + o + "', skipped", null));
                 }
               }
               // store timestamp as resource property
@@ -194,19 +194,20 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
 //              System.out.println("stored cached compile_commands");
             } else {
               // file format error
-              log.log(new Status(IStatus.WARNING, CMakePlugin.PLUGIN_ID,
-                  "File format error: " + jsonPath.toString() + " does not seem to be JSON", null));
+              log.log(new Status(IStatus.WARNING, CMakePlugin.PLUGIN_ID, "'" + project.getName() + "' "
+                  + "File format error: " + jsonPath.toString() + " does not seem to be JSON", null));
             }
           } catch (IOException ex) {
-            log.log(new Status(IStatus.WARNING, CMakePlugin.PLUGIN_ID, "Failed to read file " + jsonFile, ex));
+            log.log(new Status(IStatus.WARNING, CMakePlugin.PLUGIN_ID,
+                "'" + project.getName() + "' " + "Failed to read file " + jsonFile, ex));
           }
         }
         return;
       }
     }
     // no json file was produced in the build
-    log.log(new Status(IStatus.WARNING, CMakePlugin.PLUGIN_ID,
-        "No 'compile_commands.json' file was produced in the build", null));
+    log.log(
+        new Status(IStatus.WARNING, CMakePlugin.PLUGIN_ID, "'" + jsonPath + "' " + " not created in the build", null));
   }
 
   /**
