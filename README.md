@@ -5,7 +5,9 @@
 
 
 # Introduction
-This Eclipse plugin automatically generates buildscripts for the Eclipse CDT managed build system from CMake scripts.
+The [CMake Wiki](https://cmake.org/Wiki/CMake:Eclipse_UNIX_Tutorial#CMake_with_Eclipse) mentions three options to use CMake with Eclipse.
+This Eclipse plugin offers one more option to do that.
+It can automatically generate buildscripts for the Eclipse CDT managed build system from CMake scripts. 
 
 # Why cmake4eclipse?
 Blindly invoked, CMake will generate makefiles (or other build scripts) inside the source tree, cluttering it with lots of files and directories that have to be fleed out from version control: This practice might be ok for simple hello-world-projects, but for larger projects, the CMake developers recommend _You_ to set up a separate directory for building the source.
