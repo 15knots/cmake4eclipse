@@ -2,8 +2,8 @@
 #include <stdlib.h>
 
 int main(void) {
-#if FOO123 == 2
-	puts("!!!Hello World!!!" ); /* prints !!!Hello World!!! */
+#if C1SRC == 2
+	puts("!!!Hello World!!!" );
 #endif
 	return EXIT_SUCCESS;
 }
