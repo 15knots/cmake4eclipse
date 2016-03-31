@@ -4,12 +4,14 @@ Bundle-Name: %bundleName
 Bundle-Description: CMake build integration
 Bundle-Copyright: 2013 Martin Weber
 Bundle-SymbolicName: de.marw.cmake;singleton:=true
-Bundle-Version: 1.2.1.qualifier
+Bundle-Version: 1.2.2.qualifier
 Bundle-Vendor: Martin Weber
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
-Import-Package: org.eclipse.cdt.core.language.settings.providers,
+Import-Package: org.eclipse.cdt.build.core.scannerconfig,
+ org.eclipse.cdt.core,
+ org.eclipse.cdt.core.language.settings.providers,
  org.eclipse.cdt.core.settings.model,
  org.eclipse.cdt.core.settings.model.util,
  org.eclipse.core.resources,
