@@ -39,6 +39,7 @@ import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
 import org.eclipse.cdt.core.settings.model.ICLanguageSettingEntry;
 import org.eclipse.cdt.core.settings.model.ICProjectDescription;
 import org.eclipse.cdt.core.settings.model.ICSettingEntry;
+import org.eclipse.cdt.ui.PreferenceConstants;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -50,6 +51,14 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jetty.util.ajax.JSON;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchPartReference;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
 
 import de.marw.cmake.CMakePlugin;
 
@@ -71,7 +80,8 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
   /**
    * Storage to keep settings entries
    */
-  private PerConfigLanguageSettingsStorage storage = new PerConfigLanguageSettingsStorage();
+  private PerConfigLanguageSettingsStorage storage =
+      new PerConfigLanguageSettingsStorage();
 
   private ICConfigurationDescription currentCfgDescription;
 
@@ -82,17 +92,22 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
    */
   private static final HashMap<Matcher, IToolCommandlineParser> currentCmdlineParsers;
   static {
-    currentCmdlineParsers = new HashMap<Matcher, IToolCommandlineParser>(18, 1.0f);
+    currentCmdlineParsers =
+        new HashMap<Matcher, IToolCommandlineParser>(18, 1.0f);
 
     /** Names of known tools along with their command line argument parsers */
-    final Map<String, IToolCommandlineParser> knownCmdParsers = new HashMap<String, IToolCommandlineParser>(16, 1.0f);
+    final Map<String, IToolCommandlineParser> knownCmdParsers =
+        new HashMap<String, IToolCommandlineParser>(16, 1.0f);
 
-    final IToolArgumentParser[] posix_cc_args = { new ToolArgumentParsers.IncludePath_C_POSIX(),
-        new ToolArgumentParsers.MacroDefine_C_POSIX(), new ToolArgumentParsers.MacroUndefine_C_POSIX(),
-        // not defined by POSIX, but does not harm..
-        new ToolArgumentParsers.SystemIncludePath_C() };
+    final IToolArgumentParser[] posix_cc_args =
+        { new ToolArgumentParsers.IncludePath_C_POSIX(),
+            new ToolArgumentParsers.MacroDefine_C_POSIX(),
+            new ToolArgumentParsers.MacroUndefine_C_POSIX(),
+            // not defined by POSIX, but does not harm..
+            new ToolArgumentParsers.SystemIncludePath_C() };
     // POSIX compatible C compilers =================================
-    final ToolCommandlineParser gcc = new ToolCommandlineParser("org.eclipse.cdt.core.gcc", posix_cc_args);
+    final ToolCommandlineParser gcc =
+        new ToolCommandlineParser("org.eclipse.cdt.core.gcc", posix_cc_args);
     knownCmdParsers.put("cc", gcc);
     knownCmdParsers.put("cc.exe", gcc);
     knownCmdParsers.put("gcc", gcc);
@@ -100,21 +115,27 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
     knownCmdParsers.put("clang", gcc);
     knownCmdParsers.put("clang.exe", gcc);
     // POSIX compatible C++ compilers ===============================
-    final ToolCommandlineParser cpp = new ToolCommandlineParser("org.eclipse.cdt.core.g++", posix_cc_args);
+    final ToolCommandlineParser cpp =
+        new ToolCommandlineParser("org.eclipse.cdt.core.g++", posix_cc_args);
     knownCmdParsers.put("c++", cpp);
     knownCmdParsers.put("c++.exe", cpp);
     knownCmdParsers.put("clang++", cpp);
     knownCmdParsers.put("clang++.exe", cpp);
 
     // ms C + C++ compiler ==========================================
-    final IToolArgumentParser[] cl_cc_args = { new ToolArgumentParsers.IncludePath_C_CL(),
-        new ToolArgumentParsers.MacroDefine_C_CL(), new ToolArgumentParsers.MacroUndefine_C_CL() };
-    final ToolCommandlineParser cl = new ToolCommandlineParser("org.eclipse.cdt.core.gcc", cl_cc_args);
+    final IToolArgumentParser[] cl_cc_args =
+        { new ToolArgumentParsers.IncludePath_C_CL(),
+            new ToolArgumentParsers.MacroDefine_C_CL(),
+            new ToolArgumentParsers.MacroUndefine_C_CL() };
+    final ToolCommandlineParser cl =
+        new ToolCommandlineParser("org.eclipse.cdt.core.gcc", cl_cc_args);
     knownCmdParsers.put("cl.exe", cl);
 
     // Intel C compilers ============================================
-    final ToolCommandlineParser icc = new ToolCommandlineParser("org.eclipse.cdt.core.gcc", posix_cc_args);
-    final ToolCommandlineParser icpc = new ToolCommandlineParser("org.eclipse.cdt.core.g++", posix_cc_args);
+    final ToolCommandlineParser icc =
+        new ToolCommandlineParser("org.eclipse.cdt.core.gcc", posix_cc_args);
+    final ToolCommandlineParser icpc =
+        new ToolCommandlineParser("org.eclipse.cdt.core.g++", posix_cc_args);
 
     // Linux & OS X, EDG
     knownCmdParsers.put("icc", icc);
@@ -129,14 +150,18 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
     knownCmdParsers.put("icl.exe", cl);
 
     // construct matchers that detect the tool name...
-    final String REGEX_CMD_HEAD = "^(.*?" + Pattern.quote(File.separator) + ")(";
+    final String REGEX_CMD_HEAD =
+        "^(.*?" + Pattern.quote(File.separator) + ")(";
     final String REGEX_CMD_TAIL = ")";
-    for (Entry<String, IToolCommandlineParser> entry : knownCmdParsers.entrySet()) {
+    for (Entry<String, IToolCommandlineParser> entry : knownCmdParsers
+        .entrySet()) {
       // 'cc' -> matches
       // '/bin/cc' -> matches
       // '/usr/bin/cc' -> matches
       // 'C:\program files\mingw\bin\cc' -> matches
-      Matcher cmdDetector = Pattern.compile(REGEX_CMD_HEAD + Pattern.quote(entry.getKey()) + REGEX_CMD_TAIL)
+      Matcher cmdDetector = Pattern
+          .compile(
+              REGEX_CMD_HEAD + Pattern.quote(entry.getKey()) + REGEX_CMD_TAIL)
           .matcher("");
       currentCmdlineParsers.put(cmdDetector, entry.getValue());
     }
@@ -160,7 +185,8 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
    * are replaced with the same one instance.
    */
   @Override
-  public List<ICLanguageSettingEntry> getSettingEntries(ICConfigurationDescription cfgDescription, IResource rc,
+  public List<ICLanguageSettingEntry> getSettingEntries(
+      ICConfigurationDescription cfgDescription, IResource rc,
       String languageId) {
     if (cfgDescription == null || rc == null) {
       // speed up, we do not provide global (workspace) lang settings..
@@ -184,31 +210,39 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
    * Parses the content of the 'compile_commands.json' file corresponding to the
    * specified configuration, if timestamps differ.
    *
-   * @param ignoreMissingJsonFile
-   *        whether to complain if the "compile_commands.json" does not exist.
-   *        Specify {@code true} to ignore a missing file
+   * @param initializingWorkbench
+   *        {@code true} if the workbench is starting up. If {@code true}, this
+   *        method will not trigger UI update to show newly detected include
+   *        paths nor will it complain if a "compile_commands.json" file does
+   *        not exist.
    * @throws CoreException
    */
-  private void tryParseJson(boolean ignoreMissingJsonFile) throws CoreException {
+  private void tryParseJson(boolean initializingWorkbench)
+      throws CoreException {
 
     // If getBuilderCWD() returns a workspace relative path, it is garbled.
     // If garbled, make sure de.marw.cdt.cmake.core.internal.BuildscriptGenerator.getBuildWorkingDir()
     // returns a full, absolute path relative to the workspace.
-    final IPath builderCWD = currentCfgDescription.getBuildSetting().getBuilderCWD();
+    final IPath builderCWD =
+        currentCfgDescription.getBuildSetting().getBuilderCWD();
 
     IPath jsonPath = builderCWD.append("compile_commands.json");
-    final IFile jsonFileRc = ResourcesPlugin.getWorkspace().getRoot().getFile(jsonPath);
+    final IFile jsonFileRc =
+        ResourcesPlugin.getWorkspace().getRoot().getFile(jsonPath);
 
     final IPath location = jsonFileRc.getLocation();
-    final IProject project = currentCfgDescription.getProjectDescription().getProject();
+    final IProject project =
+        currentCfgDescription.getProjectDescription().getProject();
     if (location != null) {
       final File jsonFile = location.toFile();
       if (jsonFile.exists()) {
         // file exists on disk...
         final long tsJsonModified = jsonFile.lastModified();
 
-        final TimestampedLanguageSettingsStorage store = storage.getSettingsForConfig(currentCfgDescription);
-        final ProjectLanguageSettingEntries projectEntries = new ProjectLanguageSettingEntries();
+        final TimestampedLanguageSettingsStorage store =
+            storage.getSettingsForConfig(currentCfgDescription);
+        final ProjectLanguageSettingEntries projectEntries =
+            new ProjectLanguageSettingEntries();
 
         if (store.lastModified < tsJsonModified) {
           // must parse json file...
@@ -221,11 +255,15 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
             if (parsed instanceof Object[]) {
               for (Object o : (Object[]) parsed) {
                 if (o instanceof Map) {
-                  processJsonEntry(store, projectEntries, (Map<?, ?>) o, jsonPath);
+                  processJsonEntry(store, projectEntries, (Map<?, ?>) o,
+                      jsonPath);
                 } else {
                   // expected Map object, skipping entry.toString()
-                  log.log(new Status(IStatus.WARNING, CMakePlugin.PLUGIN_ID, "'" + project.getName() + "' "
-                      + "File format error: " + jsonPath.toString() + ": unexpected entry '" + o + "', skipped", null));
+                  log.log(new Status(IStatus.WARNING, CMakePlugin.PLUGIN_ID,
+                      "'" + project.getName() + "' " + "File format error: "
+                          + jsonPath.toString() + ": unexpected entry '" + o
+                          + "', skipped",
+                      null));
                 }
               }
               /*
@@ -237,24 +275,49 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
               store.addProjectLanguageSettingEntries(project, projectEntries);
               // store time-stamp
               store.lastModified = tsJsonModified;
-//              System.out.println("stored cached compile_commands");
+//                  System.out.println("stored cached compile_commands");
+
+              // trigger UI update to show newly detected include paths
+              // must run in UI thread
+              Display.getDefault().asyncExec(new Runnable() {
+
+                public void run() {
+                  IWorkbenchWindow activeWorkbenchWindow =
+                      PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+                  IWorkbenchPage activePage =
+                      activeWorkbenchWindow.getActivePage();
+                  IWorkbenchPartReference refs[] =
+                      activePage.getViewReferences();
+                  for (IWorkbenchPartReference ref : refs) {
+                    IWorkbenchPart part = ref.getPart(false);
+                    if (part instanceof IPropertyChangeListener)
+                      ((IPropertyChangeListener) part)
+                          .propertyChange(new PropertyChangeEvent(project,
+                              PreferenceConstants.PREF_SHOW_CU_CHILDREN, null,
+                              null));
+                  }
+                }
+              });
             } else {
               // file format error
-              log.log(new Status(IStatus.WARNING, CMakePlugin.PLUGIN_ID, "'" + project.getName() + "' "
-                  + "File format error: " + jsonPath.toString() + " does not seem to be JSON", null));
+              log.log(new Status(IStatus.WARNING, CMakePlugin.PLUGIN_ID,
+                  "'" + project.getName() + "' " + "File format error: "
+                      + jsonPath.toString() + " does not seem to be JSON",
+                  null));
             }
           } catch (IOException ex) {
-            log.log(new Status(IStatus.WARNING, CMakePlugin.PLUGIN_ID,
-                "'" + project.getName() + "' " + "Failed to read file " + jsonFile, ex));
+            log.log(new Status(IStatus.WARNING, CMakePlugin.PLUGIN_ID, "'"
+                + project.getName() + "' " + "Failed to read file " + jsonFile,
+                ex));
           }
         }
         return;
       }
     }
-    if (!ignoreMissingJsonFile) {
+    if (!initializingWorkbench) {
       // no json file was produced in the build
-      log.log(new Status(IStatus.WARNING, CMakePlugin.PLUGIN_ID, "'" + jsonPath + "' " + " not created in the build",
-          null));
+      log.log(new Status(IStatus.WARNING, CMakePlugin.PLUGIN_ID,
+          "'" + jsonPath + "' " + " not created in the build", null));
     }
   }
 
@@ -272,18 +335,24 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
    *        the JSON file being parsed (for logging only)
    */
   private void processJsonEntry(TimestampedLanguageSettingsStorage storage,
-      ProjectLanguageSettingEntries projectEntries, Map<?, ?> sourceFileInfo, IPath jsonPath) {
-    if (sourceFileInfo.containsKey("file") && sourceFileInfo.containsKey("command")) {
+      ProjectLanguageSettingEntries projectEntries, Map<?, ?> sourceFileInfo,
+      IPath jsonPath) {
+    if (sourceFileInfo.containsKey("file")
+        && sourceFileInfo.containsKey("command")) {
       final String file = sourceFileInfo.get("file").toString();
       if (file != null && !file.isEmpty()) {
         final String cmdLine = sourceFileInfo.get("command").toString();
         if (cmdLine != null && !cmdLine.isEmpty()) {
           final File path = new File(file);
-          final IFile[] files = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(path.toURI());
+          final IFile[] files = ResourcesPlugin.getWorkspace().getRoot()
+              .findFilesForLocationURI(path.toURI());
           if (files.length > 0) {
-            if (!processCommandLineAnyDetector(storage, projectEntries, files[0], cmdLine)) {
-              log.log(new Status(IStatus.WARNING, CMakePlugin.PLUGIN_ID,
-                  jsonPath.toString() + ": No parser for command '" + cmdLine + "', skipped", null));
+            if (!processCommandLineAnyDetector(storage, projectEntries,
+                files[0], cmdLine)) {
+              log.log(new Status(IStatus.WARNING,
+                  CMakePlugin.PLUGIN_ID, jsonPath.toString()
+                      + ": No parser for command '" + cmdLine + "', skipped",
+                  null));
             }
           }
           return;
@@ -291,8 +360,11 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
       }
     }
     // unrecognized entry, skipping
-    log.log(new Status(IStatus.WARNING, CMakePlugin.PLUGIN_ID,
-        "File format error: " + jsonPath.toString() + ": 'file' or 'command' missing in JSON object, skipped", null));
+    log.log(
+        new Status(IStatus.WARNING, CMakePlugin.PLUGIN_ID,
+            "File format error: " + jsonPath.toString()
+                + ": 'file' or 'command' missing in JSON object, skipped",
+            null));
   }
 
   /**
@@ -312,16 +384,20 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
    * @return {@code true} if a parser for the command-line could be found,
    *         {@code false} if no parser could be found (nothing was processed)
    */
-  private boolean processCommandLineAnyDetector(TimestampedLanguageSettingsStorage storage,
-      ProjectLanguageSettingEntries projectEntries, IFile sourceFile, String line) {
+  private boolean processCommandLineAnyDetector(
+      TimestampedLanguageSettingsStorage storage,
+      ProjectLanguageSettingEntries projectEntries, IFile sourceFile,
+      String line) {
     // try last known matching detector first...
-    if (preferredCmdlineParser != null
-        && processCommandLine(storage, projectEntries, preferredCmdlineParser, sourceFile, line)) {
+    if (preferredCmdlineParser != null && processCommandLine(storage,
+        projectEntries, preferredCmdlineParser, sourceFile, line)) {
       return true; // could process command line
     }
     // try each tool..
-    for (Entry<Matcher, IToolCommandlineParser> entry : currentCmdlineParsers.entrySet()) {
-      if (processCommandLine(storage, projectEntries, entry, sourceFile, line)) {
+    for (Entry<Matcher, IToolCommandlineParser> entry : currentCmdlineParsers
+        .entrySet()) {
+      if (processCommandLine(storage, projectEntries, entry, sourceFile,
+          line)) {
         // found a matching command-line parser
         preferredCmdlineParser = entry;
         return true; // could process command line
@@ -352,8 +428,9 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
    *         command line was processed)
    */
   private boolean processCommandLine(TimestampedLanguageSettingsStorage storage,
-      ProjectLanguageSettingEntries projectEntries, Entry<Matcher, IToolCommandlineParser> detectorInfo,
-      IFile sourceFile, String line) {
+      ProjectLanguageSettingEntries projectEntries,
+      Entry<Matcher, IToolCommandlineParser> detectorInfo, IFile sourceFile,
+      String line) {
     final Matcher cmdDetector = detectorInfo.getKey();
     cmdDetector.reset(line);
     if (cmdDetector.lookingAt()) {
@@ -361,7 +438,8 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
       String args = line.substring(cmdDetector.end());
       args = ToolCommandlineParser.trimLeadingWS(args);
       final IToolCommandlineParser cmdlineParser = detectorInfo.getValue();
-      final List<ICLanguageSettingEntry> entries = cmdlineParser.processArgs(args);
+      final List<ICLanguageSettingEntry> entries =
+          cmdlineParser.processArgs(args);
       // attach settings to sourceFile resource...
       if (entries != null && entries.size() > 0) {
         /*
@@ -370,13 +448,16 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
          * the project resource to make them show up in the UI in the includes
          * folder...
          */
-        for (Iterator<ICLanguageSettingEntry> iter = entries.iterator(); iter.hasNext();) {
+        for (Iterator<ICLanguageSettingEntry> iter = entries.iterator(); iter
+            .hasNext();) {
           ICLanguageSettingEntry entry = iter.next();
           if (entry.getKind() == ICSettingEntry.INCLUDE_PATH) {
-            projectEntries.addSettingEntry(cmdlineParser.getLanguageId(), entry);
+            projectEntries.addSettingEntry(cmdlineParser.getLanguageId(),
+                entry);
           }
         }
-        storage.setSettingEntries(sourceFile, cmdlineParser.getLanguageId(), entries);
+        storage.setSettingEntries(sourceFile, cmdlineParser.getLanguageId(),
+            entries);
       }
       return true; // skip other detectors
     }
@@ -387,8 +468,8 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
    * interface ICBuildOutputParser
    */
   @Override
-  public void startup(ICConfigurationDescription cfgDescription, IWorkingDirectoryTracker cwdTracker)
-      throws CoreException {
+  public void startup(ICConfigurationDescription cfgDescription,
+      IWorkingDirectoryTracker cwdTracker) throws CoreException {
     currentCfgDescription = cfgDescription;
   }
 
@@ -410,7 +491,8 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
     try {
       tryParseJson(false);
     } catch (CoreException ex) {
-      log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, "tryParseJson()", ex));
+      log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, "tryParseJson()",
+          ex));
     }
     // release resources for garbage collector
     currentCfgDescription = null;
@@ -434,15 +516,20 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
     // parse JSOn file for any opened project that has a ScannerConfigNature...
     for (IProject project : projects) {
       try {
-        if (project.isOpen() && project.hasNature(ScannerConfigNature.NATURE_ID)) {
-          ICProjectDescription projectDescription = ccp.getProjectDescription(project, false);
+        if (project.isOpen()
+            && project.hasNature(ScannerConfigNature.NATURE_ID)) {
+          ICProjectDescription projectDescription =
+              ccp.getProjectDescription(project, false);
           if (projectDescription != null) {
-            ICConfigurationDescription activeConfiguration = projectDescription.getActiveConfiguration();
+            ICConfigurationDescription activeConfiguration =
+                projectDescription.getActiveConfiguration();
             if (activeConfiguration instanceof ILanguageSettingsProvidersKeeper) {
-              final List<ILanguageSettingsProvider> lsps = ((ILanguageSettingsProvidersKeeper) activeConfiguration)
-                  .getLanguageSettingProviders();
+              final List<ILanguageSettingsProvider> lsps =
+                  ((ILanguageSettingsProvidersKeeper) activeConfiguration)
+                      .getLanguageSettingProviders();
               for (ILanguageSettingsProvider lsp : lsps) {
-                if ("de.marw.cmake.cdt.language.settings.providers.CompileCommandsJsonParser".equals(lsp.getId())) {
+                if ("de.marw.cmake.cdt.language.settings.providers.CompileCommandsJsonParser"
+                    .equals(lsp.getId())) {
                   currentCfgDescription = activeConfiguration;
                   tryParseJson(true);
                   break;
@@ -452,7 +539,8 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
           }
         }
       } catch (CoreException ex) {
-        log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, "tryParseJson()", ex));
+        log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID,
+            "tryParseJson()", ex));
       }
     }
     // release resources for garbage collector
@@ -469,7 +557,8 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
   ////////////////////////////////////////////////////////////////////
   // inner classes
   ////////////////////////////////////////////////////////////////////
-  private static class TimestampedLanguageSettingsStorage extends LanguageSettingsStorage {
+  private static class TimestampedLanguageSettingsStorage
+      extends LanguageSettingsStorage {
     /** cached file modification time-stamp of last parse */
     long lastModified = 0;
 
@@ -484,22 +573,28 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
      * @param entries
      *        language settings entries to set.
      */
-    public void setSettingEntries(IResource rc, String languageId, List<ICLanguageSettingEntry> entries) {
+    public void setSettingEntries(IResource rc, String languageId,
+        List<ICLanguageSettingEntry> entries) {
       final String rcPath = rc != null ? rc.toString() : null;
 //      System.out.println("#> setSettingEntries( " + rc + ", " + languageId + ")");
 //      System.out.println("\t" + entries);
       super.setSettingEntries(rcPath, languageId, entries);
     }
 
-    public void addProjectLanguageSettingEntries(IProject project, ProjectLanguageSettingEntries projectEntries) {
-      for (Entry<String, Set<ICLanguageSettingEntry>> entry : projectEntries.languages.entrySet()) {
-        List<ICLanguageSettingEntry> lses = Arrays.asList(entry.getValue().toArray(new ICLanguageSettingEntry[0]));
+    public void addProjectLanguageSettingEntries(IProject project,
+        ProjectLanguageSettingEntries projectEntries) {
+      for (Entry<String, Set<ICLanguageSettingEntry>> entry : projectEntries.languages
+          .entrySet()) {
+        List<ICLanguageSettingEntry> lses = Arrays
+            .asList(entry.getValue().toArray(new ICLanguageSettingEntry[0]));
         setSettingEntries(project, entry.getKey(), lses);
       }
     }
 
-    public TimestampedLanguageSettingsStorage clone() throws CloneNotSupportedException {
-      TimestampedLanguageSettingsStorage cloned = (TimestampedLanguageSettingsStorage) super.clone();
+    public TimestampedLanguageSettingsStorage clone()
+        throws CloneNotSupportedException {
+      TimestampedLanguageSettingsStorage cloned =
+          (TimestampedLanguageSettingsStorage) super.clone();
       cloned.lastModified = this.lastModified;
       return cloned;
     }
@@ -510,15 +605,19 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
      * Storage to keep settings entries. Key is
      * {@link ICConfigurationDescription#getId()}
      */
-    private Map<String, TimestampedLanguageSettingsStorage> storages = new WeakHashMap<String, TimestampedLanguageSettingsStorage>();
+    private Map<String, TimestampedLanguageSettingsStorage> storages =
+        new WeakHashMap<String, TimestampedLanguageSettingsStorage>();
 
-    public List<ICLanguageSettingEntry> getSettingEntries(ICConfigurationDescription cfgDescription, IResource rc,
+    public List<ICLanguageSettingEntry> getSettingEntries(
+        ICConfigurationDescription cfgDescription, IResource rc,
         String languageId) {
 //      System.out.println("#< getSettingEntries( " + cfgDescription + ", " + rc + ", " + languageId + ")\t");
-      final LanguageSettingsStorage store = storages.get(cfgDescription.getId());
+      final LanguageSettingsStorage store =
+          storages.get(cfgDescription.getId());
       if (store != null) {
         final String rcPath = rc.toString();
-        List<ICLanguageSettingEntry> entries = store.getSettingEntries(rcPath, languageId);
+        List<ICLanguageSettingEntry> entries =
+            store.getSettingEntries(rcPath, languageId);
         if (entries == null && languageId != null) {
           entries = store.getSettingEntries(rcPath, null);
         }
@@ -534,8 +633,10 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
      *
      * @return the storages never {@code null}
      */
-    public TimestampedLanguageSettingsStorage getSettingsForConfig(ICConfigurationDescription cfgDescription) {
-      TimestampedLanguageSettingsStorage store = storages.get(cfgDescription.getId());
+    public TimestampedLanguageSettingsStorage getSettingsForConfig(
+        ICConfigurationDescription cfgDescription) {
+      TimestampedLanguageSettingsStorage store =
+          storages.get(cfgDescription.getId());
       if (store == null) {
         store = new TimestampedLanguageSettingsStorage();
         storages.put(cfgDescription.getId(), store);
@@ -543,9 +644,12 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
       return store;
     }
 
-    public PerConfigLanguageSettingsStorage clone() throws CloneNotSupportedException {
-      PerConfigLanguageSettingsStorage cloned = new PerConfigLanguageSettingsStorage();
-      for (Entry<String, TimestampedLanguageSettingsStorage> entry : storages.entrySet()) {
+    public PerConfigLanguageSettingsStorage clone()
+        throws CloneNotSupportedException {
+      PerConfigLanguageSettingsStorage cloned =
+          new PerConfigLanguageSettingsStorage();
+      for (Entry<String, TimestampedLanguageSettingsStorage> entry : storages
+          .entrySet()) {
         cloned.storages.put(entry.getKey(), entry.getValue().clone());
       }
       return cloned;
@@ -562,8 +666,8 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
      * Storage to keep settings entries. Key is
      * {@link ICConfigurationDescription#getId()}
      */
-    private final Map<String, Set<ICLanguageSettingEntry>> languages = new HashMap<String, Set<ICLanguageSettingEntry>>(
-        2, 1.0f);
+    private final Map<String, Set<ICLanguageSettingEntry>> languages =
+        new HashMap<String, Set<ICLanguageSettingEntry>>(2, 1.0f);
 
     /**
      * Adds a language settings entry for the current project.
@@ -573,7 +677,8 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
      * @param entry
      *        language setting entry to set.
      */
-    public void addSettingEntry(String languageId, ICLanguageSettingEntry entry) {
+    public void addSettingEntry(String languageId,
+        ICLanguageSettingEntry entry) {
       Set<ICLanguageSettingEntry> langEntries = languages.get(languageId);
       if (langEntries == null) {
         langEntries = new HashSet<ICLanguageSettingEntry>(8);
