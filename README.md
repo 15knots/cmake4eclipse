@@ -31,12 +31,22 @@ The easiest way is to drag this: <a href="http://marketplace.eclipse.org/marketp
 
 Alternatively, **cmake4eclipse** can be installed into Eclipse using the "Install New Software..." dialog and entering the update site URL listed below.
 
-## Update Site
+### Update Site
 This composite update site contains the latest release as well as selected older releases.
 https://raw.githubusercontent.com/15knots/cmake4eclipse/master/releng/comp-update/
 
 ---
 ## Latest Release
+
+1.4.2 (no due date)
+### Changes
+- CMAKE_EXPORT_COMPILE_COMMANDS Parser triggers UI update to show newly detected include paths in project explorer view.
+
+### Repository URL
+`jar:https://bintray.com/artifact/download/15knots/p2-zip/cmake4eclipse-1.4.1.zip!/`
+### System Requirements
+CDT v 8.1.0 or higher and Eclipse v 3.8.0 (Juno) or higher
+
 1.4.1 (2016-03-08)
 ### Changes
 - Closes #9: Improve support for code-completion and symbol browsing in CDT source editors.
