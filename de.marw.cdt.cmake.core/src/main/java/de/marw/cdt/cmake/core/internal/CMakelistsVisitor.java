@@ -41,6 +41,8 @@ import org.eclipse.core.runtime.CoreException;
     case IResourceDelta.CHANGED: // handle changed resource
       cmakelistsAffected |= checkCMakeLists(resource);
       break;
+    default:
+      break;
     }
     //return true to continue visiting children.
     return cmakelistsAffected ? false : true;
