@@ -74,7 +74,8 @@ import de.marw.cmake.CMakePlugin;
  * @author Martin Weber
  */
 public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
-    implements ILanguageSettingsProvider, ICListenerAgent, ICBuildOutputParser {
+    implements ILanguageSettingsProvider, ICListenerAgent, ICBuildOutputParser,
+    Cloneable {
   private static final ILog log = CMakePlugin.getDefault().getLog();
 
   /**

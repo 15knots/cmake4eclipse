@@ -35,7 +35,7 @@ import org.eclipse.core.runtime.IPath;
 public class CMakeErrorParser extends AbstractErrorParser implements
     IErrorParser2, IErrorParser3 {
 
-  public static String CMAKE_PROBLEM_MARKER_ID = CdtPlugin.PLUGIN_ID
+  public static final String CMAKE_PROBLEM_MARKER_ID = CdtPlugin.PLUGIN_ID
       + ".problem"; //$NON-NLS-1$
 
   /**

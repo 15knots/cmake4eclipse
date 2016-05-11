@@ -36,8 +36,8 @@ public class CMakePlugin extends AbstractUIPlugin {
    * resources. The property caches the parsed content of the CMake cache file (
    * {@code CMakeCache.txt})
    */
-  public static QualifiedName CMAKECACHE_PARSED_PROP = new QualifiedName(
-      CMakePlugin.PLUGIN_ID, "parsed-CMakeCache.txt");
+  public static final QualifiedName CMAKECACHE_PARSED_PROP =
+      new QualifiedName(CMakePlugin.PLUGIN_ID, "parsed-CMakeCache.txt");
 
   //The shared instance.
   private static CMakePlugin plugin;
@@ -126,12 +126,12 @@ public class CMakePlugin extends AbstractUIPlugin {
 
       try {
         event.getDelta().accept(new IResourceDeltaVisitor() {
-          public boolean visit(final IResourceDelta delta) throws CoreException {
+          public boolean visit(final IResourceDelta delta)
+              throws CoreException {
             IResource resource = delta.getResource();
             if (((resource.getType() & IResource.FILE) != 0)
-                && (delta.getKind() & (IResourceDelta.CHANGED )) != 0
-                && "CMakeCache.txt".equals(resource.getName())
-            ) {
+                && (delta.getKind() & (IResourceDelta.CHANGED)) != 0
+                && "CMakeCache.txt".equals(resource.getName())) {
               resource.setSessionProperty(CMAKECACHE_PARSED_PROP, null);
               return false;
             }
@@ -140,7 +140,8 @@ public class CMakePlugin extends AbstractUIPlugin {
         });
       } catch (CoreException ex) {
         final ILog log = CMakePlugin.getDefault().getLog();
-        log.log(new Status(ex.getStatus().getSeverity(), CMakePlugin.PLUGIN_ID, "setSessionProperty", ex));
+        log.log(new Status(ex.getStatus().getSeverity(), CMakePlugin.PLUGIN_ID,
+            "setSessionProperty", ex));
       }
     }
   }

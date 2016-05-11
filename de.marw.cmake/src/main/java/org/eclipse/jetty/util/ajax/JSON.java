@@ -665,6 +665,8 @@ public class JSON
     protected Convertor getConvertor(Class forClass)
     {
         Class cls = forClass;
+        if(cls==null)
+          return null;
         Convertor convertor = _convertors.get(cls.getName());
         if (convertor == null && this != DEFAULT)
             convertor = DEFAULT.getConvertor(cls);

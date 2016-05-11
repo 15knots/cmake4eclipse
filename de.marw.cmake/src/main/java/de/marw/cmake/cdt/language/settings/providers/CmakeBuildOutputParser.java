@@ -46,7 +46,7 @@ import de.marw.cmake.cmakecache.SimpleCMakeCacheTxt;
  * @author Martin Weber
  */
 public class CmakeBuildOutputParser extends LanguageSettingsSerializableProvider
-    implements ILanguageSettingsProvider, ICBuildOutputParser {
+    implements ILanguageSettingsProvider, ICBuildOutputParser, Cloneable {
 
   /**
    * regex to match leading chars in a build output line. The full regex to
