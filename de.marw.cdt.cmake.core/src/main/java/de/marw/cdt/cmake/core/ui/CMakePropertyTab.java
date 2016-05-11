@@ -371,7 +371,7 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
    *        the button to query
    */
   private static boolean shouldSaveButtonSelection(Button button) {
-    if (button.getData() == Boolean.TRUE && button.getGrayed()) {
+    if (button.getData().equals( Boolean.TRUE) && button.getGrayed()) {
       // if button is in tri-state mode and grayed, do not save
       return false;
     }
@@ -418,7 +418,7 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
     @Override
     public void handleEvent(Event event) {
       final Button btn = (Button) event.widget;
-      if (btn.getData() == Boolean.TRUE) {
+      if (btn.getData().equals(Boolean.TRUE)) {
         // button is in tri-state mode
         if (btn.getSelection()) {
           if (!btn.getGrayed()) {
