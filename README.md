@@ -39,9 +39,8 @@ This composite update site contains the latest release as well as selected older
 https://raw.githubusercontent.com/15knots/cmake4eclipse/master/releng/comp-update/
 
 ---
-## Latest Release
-
-1.4.2 (no due date)
+# Release History
+## 1.4.2 (no due date)
 ### Changes
 - CMAKE_EXPORT_COMPILE_COMMANDS Parser triggers UI update to show newly detected include paths in project explorer view.
 
@@ -50,7 +49,7 @@ https://raw.githubusercontent.com/15knots/cmake4eclipse/master/releng/comp-updat
 ### System Requirements
 CDT v 8.1.0 or higher and Eclipse v 3.8.0 (Juno) or higher
 
-1.4.1 (2016-03-08)
+## 1.4.1 (2016-03-08)
 ### Changes
 - Closes #9: Improve support for code-completion and symbol browsing in CDT source editors.
 - Closes #10: Can't install version 1.4.0 in eclipse mars.2 release 4.5.2
