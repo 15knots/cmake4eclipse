@@ -25,6 +25,9 @@ Annoyingly, these recommended out-of-source-builds impose some tedious tasks on 
 ## Screenshots
 Screenshots can be found at the <a href="https://marketplace.eclipse.org/content/cmake4eclipse#group-screenshots" title="Screenshots">Eclipse Marketplace</a>.
 
+## License
+The plugin is licensed uner the <a href="http://www.eclipse.org/legal/epl-v10.html">Eclipse Public License Version 1.0 ("EPL")</a>.
+
 # Installation Instructions
 The easiest way is to drag this: <a href="http://marketplace.eclipse.org/marketplace-client-intro?mpc_install=2318334" class="drag" title="Drag to your running Eclipse workbench to install cmake4eclipse">
 <img class="img-responsive" src="https://marketplace.eclipse.org/sites/all/themes/solstice/_themes/solstice_marketplace/public/images/btn-install.png" alt="Drag to your running Eclipse workbench to install cmake4eclipse" /></a> to your running Eclipse workbench.
