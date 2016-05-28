@@ -20,6 +20,7 @@ import java.util.List;
 import org.eclipse.cdt.core.CCorePlugin;
 import org.eclipse.cdt.core.ConsoleOutputStream;
 import org.eclipse.cdt.core.ICommandLauncher;
+import org.eclipse.cdt.core.envvar.IEnvironmentVariable;
 import org.eclipse.cdt.core.language.settings.providers.ILanguageSettingsProvider;
 import org.eclipse.cdt.core.language.settings.providers.ILanguageSettingsProvidersKeeper;
 import org.eclipse.cdt.core.resources.IConsole;
@@ -315,11 +316,21 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     // extract cmake command
     final String cmd = argList.get(0);
     argList.remove(0);
+    // Set the environment
+    IEnvironmentVariable[] variables = ManagedBuildManager.getEnvironmentVariableProvider().getVariables(config, true);
+    String[] envp = null;
+    ArrayList<String> envList = new ArrayList<String>();
+    if (variables != null) {
+      for (int i = 0; i < variables.length; i++) {
+        envList.add(variables[i].getName() + "=" + variables[i].getValue()); //$NON-NLS-1$
+      }
+      envp = envList.toArray(new String[envList.size()]);
+    }
     // run cmake..
     final ICommandLauncher launcher = builder.getCommandLauncher();
     launcher.showCommand(true);
-    final Process proc = launcher.execute(new Path(cmd), argList.toArray(new String[argList.size()]), null, buildDir,
-        monitor);
+    final Process proc =
+        launcher.execute(new Path(cmd), argList.toArray(new String[argList.size()]), envp, buildDir, monitor);
     if (proc != null) {
       try {
         // Close the input of the process since we will never write to it
@@ -364,8 +375,8 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     boolean needExportComileCommands = false;
     boolean needVerboseBuild = false;
     {
-      final List<ILanguageSettingsProvider> lsps = ((ILanguageSettingsProvidersKeeper) cfgd)
-          .getLanguageSettingProviders();
+      final List<ILanguageSettingsProvider> lsps =
+          ((ILanguageSettingsProvidersKeeper) cfgd).getLanguageSettingProviders();
       for (ILanguageSettingsProvider lsp : lsps) {
         if (!needExportComileCommands
             && "de.marw.cmake.cdt.language.settings.providers.CompileCommandsJsonParser".equals(lsp.getId())) {
