@@ -40,10 +40,10 @@ https://raw.githubusercontent.com/15knots/cmake4eclipse/master/releng/comp-updat
 
 ---
 # Release History
-## 1.4.2 (no due date)
+## 1.4.2 (2016-05-30)
 ### Changes
 - CMAKE_EXPORT_COMPILE_COMMANDS Parser triggers UI update to show newly detected include paths in project explorer view.
-- Closed #14: Pass varibles given in C++ Build->Environment to the cmake process.
+- Closed #14: Pass variables given in C++ Build->Environment to the cmake process.
 
 ### Repository URL
 `jar:https://bintray.com/artifact/download/15knots/p2-zip/cmake4eclipse-1.4.1.zip!/`
