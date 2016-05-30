@@ -9,7 +9,7 @@
 
   <groupId>de.marw.cdt.cmake</groupId>
   <artifactId>cmake-parent</artifactId>
-  <version>1.0.3</version>
+  <version>1.0.4</version>
   <packaging>pom</packaging>
 
   <properties>
@@ -111,6 +111,12 @@
         <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
           <version>2.18.1</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>findbugs-maven-plugin</artifactId>
+          <version>3.0.3</version>
         </plugin>
 
         <!-- enable source bundle generation -->
@@ -297,6 +303,37 @@
         </pluginManagement>
       </build>
     </profile>
+
+    <profile>
+      <id>findbugs</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>findbugs-maven-plugin</artifactId>
+            <configuration>
+              <failOnError>${findbugs.failOnError}</failOnError>
+            </configuration>
+            <executions>
+              <execution>
+                <id>findbugs</id>
+                <goals>
+                  <goal>check</goal>
+                </goals>
+                <phase>verify</phase>
+                <configuration>
+                  <!-- Do not define excludeFilterFile here as it will force a plugin to provide a file -->
+                  <!-- Instead we configure this in a profile -->
+                  <xmlOutput>true</xmlOutput>
+                  <findbugsXmlOutput>false</findbugsXmlOutput>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
     <profile>
       <id>macosx</id>
       <activation>
