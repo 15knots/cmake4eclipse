@@ -46,7 +46,7 @@ https://raw.githubusercontent.com/15knots/cmake4eclipse/master/releng/comp-updat
 - Closed #14: Pass variables given in C++ Build->Environment to the cmake process.
 
 ### Repository URL
-`jar:https://bintray.com/artifact/download/15knots/p2-zip/cmake4eclipse-1.4.1.zip!/`
+`jar:https://bintray.com/artifact/download/15knots/p2-zip/cmake4eclipse-1.4.2.zip!/`
 ### System Requirements
 CDT v 8.1.0 or higher and Eclipse v 3.8.0 (Juno) or higher
 
