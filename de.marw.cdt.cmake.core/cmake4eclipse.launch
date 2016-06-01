@@ -16,7 +16,7 @@
 <stringAttribute key="location" value="${system_property:user.home}/.cache/runtime-cmake4eclipsecdt"/>
 <booleanAttribute key="org.eclipse.jdt.launching.ATTR_USE_START_ON_FIRST_THREAD" value="true"/>
 <stringAttribute key="org.eclipse.jdt.launching.JRE_CONTAINER" value="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-consoleLog -console -noExit"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="-consoleLog -console"/>
 <stringAttribute key="org.eclipse.jdt.launching.SOURCE_PATH_PROVIDER" value="org.eclipse.pde.ui.workbenchClasspathProvider"/>
 <stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xms40m -Xmx384m"/>
 <stringAttribute key="pde.version" value="3.3"/>
@@ -25,7 +25,7 @@
 <stringAttribute key="selected_workspace_plugins" value="de.marw.cdt.cmake.core@default:default,de.marw.cmake@default:default"/>
 <booleanAttribute key="show_selected_only" value="false"/>
 <stringAttribute key="templateConfig" value="${target_home}/configuration/config.ini"/>
-<stringAttribute key="timestamp" value="1457124162259"/>
+<stringAttribute key="timestamp" value="1464454604073"/>
 <booleanAttribute key="tracing" value="true"/>
 <booleanAttribute key="useCustomFeatures" value="false"/>
 <booleanAttribute key="useDefaultConfig" value="true"/>
