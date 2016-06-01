@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %bundleName
-Bundle-Description: CMake build integration
+Bundle-Description: cmake4eclipse support for CDT Indexer (include path providers)
 Bundle-Copyright: 2013 Martin Weber
 Bundle-SymbolicName: de.marw.cmake;singleton:=true
 Bundle-Version: 1.2.2.qualifier
