@@ -1,22 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-  xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-
-  <prerequisites>
-    <maven>3.0</maven>
-  </prerequisites>
 
   <groupId>de.marw.cdt.cmake</groupId>
   <artifactId>cmake-parent</artifactId>
   <version>1.0.4</version>
   <packaging>pom</packaging>
 
-  <properties>
-    <tycho-version>0.22.0</tycho-version>
-    <platform.version>1.0.1</platform.version>
-  </properties>
-
+  <url>https://github.com/15knots/cmake4eclipse</url>
+  <inceptionYear>2013</inceptionYear>
   <licenses>
     <license>
       <name>Eclipse Public License v1.0</name>
@@ -30,6 +22,21 @@
     </license>
   </licenses>
 
+  <developers>
+    <developer>
+      <name>15knots</name>
+      <email>fifteenknots505@gmail.com</email>
+      <roles>
+        <role>owner</role>
+        <role>developer</role>
+      </roles>
+    </developer>
+  </developers>
+
+  <prerequisites>
+    <maven>3.0</maven>
+  </prerequisites>
+
   <modules>
     <module>../releng/de.marw.cdt.cmake-target</module>
     <module>../de.marw.cmake</module>
@@ -37,6 +44,20 @@
     <module>../de.marw.cdt.cmake-feature</module>
     <module>../releng/de.marw.cdt.cmake-repo</module>
   </modules>
+
+  <scm>
+    <url>https://github.com/15knots/cmake4eclipse</url>
+    <connection>scm:git:https://github.com/15knots/cmake4eclipse.git</connection>
+    <developerConnection>scm:git:https://github.com/15knots/cmake4eclipse.git</developerConnection>
+  </scm>
+  <issueManagement>
+    <url>https://github.com/15knots/cmake4eclipse/issues</url>
+  </issueManagement>
+
+  <properties>
+    <tycho-version>0.22.0</tycho-version>
+    <platform.version>1.0.1</platform.version>
+  </properties>
 
   <dependencyManagement>
     <dependencies>
@@ -251,28 +272,6 @@
       </plugins>
     </pluginManagement>
   </build>
-
-  <url>https://github.com/15knots/cmake4eclipse</url>
-  <scm>
-    <url>https://github.com/15knots/cmake4eclipse</url>
-    <connection>scm:git:https://github.com/15knots/cmake4eclipse.git</connection>
-    <developerConnection>scm:git:https://github.com/15knots/cmake4eclipse.git</developerConnection>
-  </scm>
-  <issueManagement>
-    <url>https://github.com/15knots/cmake4eclipse/issues</url>
-  </issueManagement>
-
-  <inceptionYear>2013</inceptionYear>
-  <developers>
-    <developer>
-      <name>15knots</name>
-      <email>fifteenknots505@gmail.com</email>
-      <roles>
-        <role>owner</role>
-        <role>developer</role>
-      </roles>
-    </developer>
-  </developers>
 
   <profiles>
     <profile>
