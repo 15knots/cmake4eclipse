@@ -11,21 +11,19 @@
 
     <!-- builds a zipped p2 update site -->
     <artifactId>de.marw.cdt.cmake-repo</artifactId>
-    <packaging>eclipse-repository</packaging>
     <version>1.4.2</version>
+    <packaging>eclipse-repository</packaging>
 
     <build>
         <plugins>
-            <plugin>
-                <!-- don't pollute repositories with useless stuff -->
+            <plugin><!-- don't pollute repositories with useless stuff -->
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-install-plugin</artifactId>
                 <configuration>
                     <skip>true</skip>
                 </configuration>
             </plugin>
-            <plugin>
-                <!-- don't pollute repositories with useless stuff -->
+            <plugin><!-- don't pollute repositories with useless stuff -->
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>
                 <configuration>
