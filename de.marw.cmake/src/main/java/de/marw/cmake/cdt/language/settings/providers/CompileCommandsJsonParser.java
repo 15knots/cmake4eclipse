@@ -91,9 +91,9 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
    * takes part in the current build. The Matcher detects whether a command line
    * is an invocation of the tool.
    */
-  private static final HashMap<Matcher, IToolCommandlineParser> currentCmdlineParsers;
+  private static final HashMap<Matcher, IToolCommandlineParser> detectorParserMap;
   static {
-    currentCmdlineParsers =
+    detectorParserMap =
         new HashMap<Matcher, IToolCommandlineParser>(18, 1.0f);
 
     /** Names of known tools along with their command line argument parsers */
@@ -110,18 +110,23 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
     final ToolCommandlineParser gcc =
         new ToolCommandlineParser("org.eclipse.cdt.core.gcc", posix_cc_args);
     knownCmdParsers.put("cc", gcc);
-    knownCmdParsers.put("cc.exe", gcc);
+    knownCmdParsers.put("cc\\.exe", gcc);
     knownCmdParsers.put("gcc", gcc);
-    knownCmdParsers.put("gcc.exe", gcc);
+    knownCmdParsers.put("gcc\\.exe", gcc);
     knownCmdParsers.put("clang", gcc);
-    knownCmdParsers.put("clang.exe", gcc);
+    knownCmdParsers.put("clang\\.exe", gcc);
     // POSIX compatible C++ compilers ===============================
     final ToolCommandlineParser cpp =
         new ToolCommandlineParser("org.eclipse.cdt.core.g++", posix_cc_args);
-    knownCmdParsers.put("c++", cpp);
-    knownCmdParsers.put("c++.exe", cpp);
-    knownCmdParsers.put("clang++", cpp);
-    knownCmdParsers.put("clang++.exe", cpp);
+    knownCmdParsers.put("c\\+\\+", cpp);
+    knownCmdParsers.put("c\\+\\+\\.exe", cpp);
+    knownCmdParsers.put("clang\\+\\+", cpp);
+    knownCmdParsers.put("clang\\+\\+\\.exe", cpp);
+    // GNU C and C++ cross compilers, e.g. arm-none-eabi-gcc.exe ====
+    knownCmdParsers.put(".+-gcc", gcc);
+    knownCmdParsers.put(".+-gcc\\.exe", gcc);
+    knownCmdParsers.put(".+-g\\+\\+", gcc);
+    knownCmdParsers.put(".+-g\\+\\+\\.exe", gcc);
 
     // ms C + C++ compiler ==========================================
     final IToolArgumentParser[] cl_cc_args =
@@ -130,7 +135,7 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
             new ToolArgumentParsers.MacroUndefine_C_CL() };
     final ToolCommandlineParser cl =
         new ToolCommandlineParser("org.eclipse.cdt.core.gcc", cl_cc_args);
-    knownCmdParsers.put("cl.exe", cl);
+    knownCmdParsers.put("cl\\.exe", cl);
 
     // Intel C compilers ============================================
     final ToolCommandlineParser icc =
@@ -146,7 +151,7 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
     // Linux & OS X, EDG
     knownCmdParsers.put("icpc", icpc);
     // OS X, clang
-    knownCmdParsers.put("icl++", icpc);
+    knownCmdParsers.put("icl\\+\\+", icpc);
     // Windows C + C++, EDG
     knownCmdParsers.put("icl.exe", cl);
 
@@ -162,9 +167,9 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
       // 'C:\program files\mingw\bin\cc' -> matches
       Matcher cmdDetector = Pattern
           .compile(
-              REGEX_CMD_HEAD + Pattern.quote(entry.getKey()) + REGEX_CMD_TAIL)
+              REGEX_CMD_HEAD + entry.getKey() + REGEX_CMD_TAIL)
           .matcher("");
-      currentCmdlineParsers.put(cmdDetector, entry.getValue());
+      detectorParserMap.put(cmdDetector, entry.getValue());
     }
   }
 
@@ -370,7 +375,7 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
 
   /**
    * Processes the command-line of an entry from a {@code compile_commands.json}
-   * file by trying each parser in {@link #currentCmdlineParsers} and stores a
+   * file by trying each parser in {@link #detectorParserMap} and stores a
    * {@link ICLanguageSettingEntry} for the file found in the specified map.
    *
    * @param storage
@@ -395,12 +400,12 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
       return true; // could process command line
     }
     // try each tool..
-    for (Entry<Matcher, IToolCommandlineParser> entry : currentCmdlineParsers
+    for (Entry<Matcher, IToolCommandlineParser> cmdlineParser : detectorParserMap
         .entrySet()) {
-      if (processCommandLine(storage, projectEntries, entry, sourceFile,
+      if (processCommandLine(storage, projectEntries, cmdlineParser, sourceFile,
           line)) {
         // found a matching command-line parser
-        preferredCmdlineParser = entry;
+        preferredCmdlineParser = cmdlineParser;
         return true; // could process command line
       }
     }
