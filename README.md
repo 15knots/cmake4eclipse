@@ -40,6 +40,16 @@ https://raw.githubusercontent.com/15knots/cmake4eclipse/master/releng/comp-updat
 
 ---
 # Release History
+## 1.4.3 (2016-08-30)
+### Changes
+- Closed #16: The CMAKE_EXPORT_COMPILE_COMMANDS parser now knows about GCC cross compilers for C and C++ if the compiler executable follows the naming convention of
+`<target_triplet>-gcc` or `<target_triplet>-g++`. 
+
+### Repository URL
+`jar:https://bintray.com/artifact/download/15knots/p2-zip/cmake4eclipse-1.4.3.zip!/`
+### System Requirements
+CDT v 8.1.0 or higher and Eclipse v 3.8.0 (Juno) or higher
+
 ## 1.4.2 (2016-05-30)
 ### Changes
 - CMAKE_EXPORT_COMPILE_COMMANDS Parser triggers UI update to show newly detected include paths in project explorer view.
