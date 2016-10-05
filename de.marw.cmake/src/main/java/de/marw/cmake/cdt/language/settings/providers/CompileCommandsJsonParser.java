@@ -120,6 +120,8 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
         new ToolCommandlineParser("org.eclipse.cdt.core.g++", posix_cc_args);
     knownCmdParsers.put("c\\+\\+", cpp);
     knownCmdParsers.put("c\\+\\+\\.exe", cpp);
+    knownCmdParsers.put("g\\+\\+", cpp);
+    knownCmdParsers.put("g\\+\\+\\.exe", cpp);
     knownCmdParsers.put("clang\\+\\+", cpp);
     knownCmdParsers.put("clang\\+\\+\\.exe", cpp);
     // GNU C and C++ cross compilers, e.g. arm-none-eabi-gcc.exe ====
