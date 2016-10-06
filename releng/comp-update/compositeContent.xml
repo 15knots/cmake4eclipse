@@ -4,7 +4,7 @@
   type='org.eclipse.equinox.internal.p2.metadata.repository.CompositeMetadataRepository' version='1.0.0'>
   <properties size='1'>
     <!-- get new time w/ `date +%s000` -->
-    <property name='p2.timestamp' value='date +%s000' />
+    <property name='p2.timestamp' value='1475692474000' />
     <property name='p2.name' value='cmake4eclipse Updates' />
   </properties>
   <children size='2'>
