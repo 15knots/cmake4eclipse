@@ -179,7 +179,7 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
    * last known working tool detector and its tool option parsers or
    * {@code null}, if unknown (to speed up parsing)
    */
-  private Entry<Matcher, IToolCommandlineParser> preferredCmdlineParser;
+  private ParserLookupResult preferredCmdlineParser;
 
   public CompileCommandsJsonParser() {
   }
@@ -397,24 +397,40 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
       ProjectLanguageSettingEntries projectEntries, IFile sourceFile,
       String line) {
     // try last known matching detector first...
-    if (preferredCmdlineParser != null && processCommandLine(storage,
-        projectEntries, preferredCmdlineParser, sourceFile, line)) {
-      return true; // could process command line
+    if (preferredCmdlineParser == null || !preferredCmdlineParser.canParse(line)){
+      // try each tool..
+      preferredCmdlineParser= determineParserForCommandline(line);
     }
-    // try each tool..
-    for (Entry<Matcher, IToolCommandlineParser> cmdlineParser : detectorParserMap
-        .entrySet()) {
-      if (processCommandLine(storage, projectEntries, cmdlineParser, sourceFile,
-          line)) {
-        // found a matching command-line parser
-        preferredCmdlineParser = cmdlineParser;
-        return true; // could process command line
-      }
+    if (preferredCmdlineParser == null) {
+      return false; // no matching parser found
     }
-    //    System.out.println(line);
-    return false; // no matching parser found
+    // found a matching command-line parser
+    processCommandLine(storage, projectEntries, preferredCmdlineParser.parser, sourceFile,
+          preferredCmdlineParser.getReducedCommandLine());
+    return true; // could process command line
   }
 
+  /**
+   * Determines a C-compiler-command line parser that is able to parse the relevant arguments
+   * in the specified command line.
+   *
+   * @return the {@code ParserLookupResult} which describes the result of this operation
+   * or {@code null} if no command line parser for the specified command-line was found.
+   */
+  // has package scope for unittest purposes
+  ParserLookupResult determineParserForCommandline(String commandLine){
+    for (Entry<Matcher, IToolCommandlineParser> detectorInfo : detectorParserMap
+        .entrySet()) {
+      final Matcher matcher = detectorInfo.getKey();
+      matcher.reset(commandLine);
+      if (matcher.lookingAt()) {
+        // found a matching command-line parser
+        final String newArgs = commandLine.substring(matcher.end());
+        return new ParserLookupResult(matcher, detectorInfo.getValue(), newArgs);
+      }
+    }
+    return null;
+  }
   /**
    * Processes the command-line of an entry from a {@code compile_commands.json}
    * file by trying the specified detector and stores a
@@ -424,30 +440,21 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
    *        where to store language settings
    * @param projectEntries
    *        where to store project wide setting entries
-   * @param detectorInfo
+   * @param cmdlineParser
    *        the tool detector and its tool option parsers
    * @param sourceFile
    *        the source file resource corresponding to the source file being
    *        processed by the tool
    * @param line
    *        the command line to process
-   * @return {@code true} if the specified detector matches the tool given on
-   *         the specified command-line, otherwise {@code false} (specified
-   *         command line was processed)
    */
-  private boolean processCommandLine(TimestampedLanguageSettingsStorage storage,
+  private void processCommandLine(TimestampedLanguageSettingsStorage storage,
       ProjectLanguageSettingEntries projectEntries,
-      Entry<Matcher, IToolCommandlineParser> detectorInfo, IFile sourceFile,
+      IToolCommandlineParser cmdlineParser, IFile sourceFile,
       String line) {
-    final Matcher cmdDetector = detectorInfo.getKey();
-    cmdDetector.reset(line);
-    if (cmdDetector.lookingAt()) {
-      // found a matching command-line parser
-      String args = line.substring(cmdDetector.end());
-      args = ToolCommandlineParser.trimLeadingWS(args);
-      final IToolCommandlineParser cmdlineParser = detectorInfo.getValue();
+      line = ToolCommandlineParser.trimLeadingWS(line);
       final List<ICLanguageSettingEntry> entries =
-          cmdlineParser.processArgs(args);
+          cmdlineParser.processArgs(line);
       // attach settings to sourceFile resource...
       if (entries != null && entries.size() > 0) {
         /*
@@ -467,9 +474,6 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
         storage.setSettingEntries(sourceFile, cmdlineParser.getLanguageId(),
             entries);
       }
-      return true; // skip other detectors
-    }
-    return false; // no matching detectors found
   }
 
   /*-
@@ -693,6 +697,61 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
         languages.put(languageId, langEntries);
       }
       langEntries.add(entry);
+    }
+
+  }
+
+  // has package scope for unittest purposes
+  static class ParserLookupResult {
+    /**
+     * the Matcher that matched the name of the tool on a given command-line
+     */
+    private final Matcher toolNameMatcher;
+    /**
+     * the parser for the tool arguments
+     */
+    public final IToolCommandlineParser parser;
+    /**
+     * the remaining arguments of the command-line, after the matcher has
+     * matched the tool name
+     */
+    private String reducedCommandLine;
+
+    /**
+     * @param toolNameMatcher  a Matcher that matches the name of the tool on a given command-line
+     * @param parser  the parser for the tool arguments
+     * @param reducedCommandLine  the remaining arguments from the command-line, after the matcher has
+     *  matched the tool name
+     */
+    public ParserLookupResult(Matcher toolNameMatcher, IToolCommandlineParser parser, String reducedCommandLine) {
+      this.parser = parser;
+      this.reducedCommandLine = reducedCommandLine;
+      this.toolNameMatcher=toolNameMatcher;
+    }
+
+    /** Gets, whether the parser for the tool arguments can properly parse the
+     * specified command-line string. If so, the remaining arguments of the command-line {@link #getReducedCommandLine}
+     * will be updated from the specified {@code commandLine} value.
+     *
+     * @return {@code true} if the matcher successfully matches the tool name in
+     * the command-line string, otherwise {@code false}.
+     */
+    public boolean canParse(String commandLine) {
+      toolNameMatcher.reset(commandLine);
+      if (toolNameMatcher.lookingAt()) {
+        // found a matching command-line parser
+        reducedCommandLine = commandLine.substring(toolNameMatcher.end());
+        return true;
+      }
+      return false;
+    }
+
+    /**
+     * Gets the remaining arguments of the command-line, after the matcher has
+     * matched the tool name
+     */
+    public String getReducedCommandLine() {
+      return this.reducedCommandLine;
     }
 
   }
