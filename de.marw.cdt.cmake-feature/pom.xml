@@ -12,6 +12,6 @@
   <artifactId>de.marw.cdt.cmake</artifactId>
   <!-- always use .qualifier in manifest, we do not plan to publish this plugin
     to a maven repo. (The repository version is a different thing) -->
-  <version>1.4.4-SNAPSHOT</version>
+  <version>1.4.5-SNAPSHOT</version>
   <packaging>eclipse-feature</packaging>
 </project>
