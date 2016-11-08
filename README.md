@@ -40,12 +40,21 @@ https://raw.githubusercontent.com/15knots/cmake4eclipse/master/releng/comp-updat
 
 ---
 # Release History
+## 1.4.5 (2016-11-??) [UPcoming]
+### Changes
+- Closed #20: CMAKE_EXPORT_COMPILE_COMMANDS Parser treats clang++ as a C compiler.
+
+### Repository URL
+`jar:https://bintray.com/artifact/download/15knots/p2-zip/cmake4eclipse-1.4.5.zip!/`
+### System Requirements
+CDT v 8.1.0 or higher and Eclipse v 3.8.0 (Juno) or higher
+
 ## 1.4.4 (2016-10-05)
 ### Changes
 - Closed #17: CMAKE_EXPORT_COMPILE_COMMANDS parser doesn't recognize g++ as a C++ compiler.
 
 ### Repository URL
-`jar:https://bintray.com/artifact/download/15knots/p2-zip/cmake4eclipse-1.4.3.zip!/`
+`jar:https://bintray.com/artifact/download/15knots/p2-zip/cmake4eclipse-1.4.4.zip!/`
 ### System Requirements
 CDT v 8.1.0 or higher and Eclipse v 3.8.0 (Juno) or higher
 
