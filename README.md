@@ -40,7 +40,7 @@ https://raw.githubusercontent.com/15knots/cmake4eclipse/master/releng/comp-updat
 
 ---
 # Release History
-## 1.4.5 (2016-11-??) [UPcoming]
+## 1.4.5 (2016-11-6)
 ### Changes
 - Closed #20: CMAKE_EXPORT_COMPILE_COMMANDS Parser treats clang++ as a C compiler.
 
