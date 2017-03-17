@@ -354,12 +354,12 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
   }
 
   /**
-   * Overridden to the displayed values in the model when this tab becomes
+   * Overridden to store the displayed values in the model when this tab becomes
    * invisible.
    */
   @Override
   public void setVisible(boolean visible) {
-    if (!visible)
+    if (super.visible && !visible)
       saveToModel();
     super.setVisible(visible);
   }
