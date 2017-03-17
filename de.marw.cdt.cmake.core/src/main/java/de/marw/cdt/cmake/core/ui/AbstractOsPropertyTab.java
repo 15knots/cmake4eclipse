@@ -336,7 +336,7 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
    */
   @Override
   public void setVisible(boolean visible) {
-    if (!visible)
+    if (super.visible && !visible)
       saveToModel();
     super.setVisible(visible);
   }
