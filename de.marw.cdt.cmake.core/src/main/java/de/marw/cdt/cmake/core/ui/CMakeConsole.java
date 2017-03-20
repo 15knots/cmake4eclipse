@@ -39,7 +39,7 @@ public class CMakeConsole implements IConsole {
 
   /**
    * Starts the console for a given project.
-   * 
+   *
    * @param project
    *        - the project to start the console.
    */

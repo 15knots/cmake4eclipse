@@ -14,7 +14,7 @@ import org.eclipse.cdt.ui.newui.AbstractPage;
 
 /**
  * Page for CMake project settings.
- * 
+ *
  * @author Martin Weber
  */
 public class CMakePropertyPage extends AbstractPage {

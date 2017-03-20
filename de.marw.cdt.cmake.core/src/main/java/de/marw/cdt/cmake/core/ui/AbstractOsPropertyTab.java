@@ -225,7 +225,7 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
       updateDisplay();
     }
   }
-  
+
   /**
    * Updates displayed values according to the preferences edited by this tab.
    */

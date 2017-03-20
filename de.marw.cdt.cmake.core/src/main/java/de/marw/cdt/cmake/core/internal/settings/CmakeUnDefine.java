@@ -12,7 +12,7 @@ package de.marw.cdt.cmake.core.internal.settings;
 
 /**
  * Represents a cmake variable to undefine.
- * 
+ *
  * @author Martin Weber
  */
 public class CmakeUnDefine implements Cloneable {
@@ -20,7 +20,7 @@ public class CmakeUnDefine implements Cloneable {
 
   /**
    * Creates a new object.
-   * 
+   *
    * @param name
    *        the variable name, must not be empty.
    * @throws IllegalArgumentException
@@ -34,7 +34,7 @@ public class CmakeUnDefine implements Cloneable {
 
   /**
    * Gets the name property.
-   * 
+   *
    * @return the current name property.
    */
   public String getName() {
@@ -43,7 +43,7 @@ public class CmakeUnDefine implements Cloneable {
 
   /**
    * Sets the name property.
-   * 
+   *
    * @throws IllegalArgumentException
    *         if {@code name} is empty
    * @throws NullPointerException

@@ -94,7 +94,7 @@ public abstract class QuirklessAbstractCPropertyTab extends AbstractCPropertyTab
   /**
    * Notified, when the user had chosen to edit a/some different build
    * configuration(s). Also invoked when the dialog opens.
-   * 
+   *
    * @param lastConfig
    *          the last configuration being edited or <code>null</code> if the
    *          dialog is opening.
@@ -103,7 +103,7 @@ public abstract class QuirklessAbstractCPropertyTab extends AbstractCPropertyTab
    *          {@link AbstractCPropertyTab#getResDesc()} will return the new
    *          build configuration when this method is invoked, we just pass it
    *          to be in sync with {@link AbstractCPropertyTab#updateData}.
-   * 
+   *
    */
   protected abstract void configSelectionChanged(ICResourceDescription lastConfig, ICResourceDescription newConfig);
 

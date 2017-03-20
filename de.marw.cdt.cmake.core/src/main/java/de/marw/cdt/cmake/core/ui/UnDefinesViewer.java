@@ -48,7 +48,7 @@ import de.marw.cdt.cmake.core.internal.settings.CmakeUnDefine;
 /**
  * Displays a table for the Cmake undefines. The created table will be displayed
  * in a group, together with buttons to add, edit and delete table entries.
- * 
+ *
  * @author Martin Weber
  */
 /* package */class UnDefinesViewer {
@@ -115,7 +115,7 @@ import de.marw.cdt.cmake.core.internal.settings.CmakeUnDefine;
 
   /**
    * Creates the columns for the table.
-   * 
+   *
    * @param parent
    * @param viewer
    */
@@ -285,7 +285,7 @@ import de.marw.cdt.cmake.core.internal.settings.CmakeUnDefine;
 
   /**
    * Converts the list of CmakeUnDefine objects.
-   * 
+   *
    * @author Martin Weber
    */
   private static class CmakeUnDefineTableContentProvider implements
