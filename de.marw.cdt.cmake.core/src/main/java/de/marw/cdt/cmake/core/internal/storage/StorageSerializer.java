@@ -15,7 +15,7 @@ import org.eclipse.cdt.core.settings.model.ICStorageElement;
 /**
  * Responsible for serialization/de-serialization of objects to/from
  * {@link ICStorageElement}s.
- * 
+ *
  * @author Martin Weber
  * @param <T>
  *        the type of the object to serialize/de-serialize
@@ -23,7 +23,7 @@ import org.eclipse.cdt.core.settings.model.ICStorageElement;
 public interface StorageSerializer<T> {
   /**
    * Converts a {@code T} object to an {@link ICStorageElement}.
-   * 
+   *
    * @param parent
    *        the parent storage lement, must not be {@code null}.
    * @param item
@@ -33,7 +33,7 @@ public interface StorageSerializer<T> {
 
   /**
    * Converts an {@link ICStorageElement} to a {@code T} object.
-   * 
+   *
    * @param item
    *        the storage element for the object to read, must not be {@code null}
    *        .

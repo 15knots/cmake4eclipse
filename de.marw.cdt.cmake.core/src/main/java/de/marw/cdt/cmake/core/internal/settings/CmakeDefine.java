@@ -12,7 +12,7 @@ package de.marw.cdt.cmake.core.internal.settings;
 
 /**
  * Represents a cmake variable to define.
- * 
+ *
  * @author Martin Weber
  */
 public class CmakeDefine implements Cloneable {
@@ -22,7 +22,7 @@ public class CmakeDefine implements Cloneable {
 
   /**
    * Creates a new object with type STRING and an empty value.
-   * 
+   *
    * @param name
    *        the variable name, must not be empty.
    * @throws IllegalArgumentException
@@ -36,7 +36,7 @@ public class CmakeDefine implements Cloneable {
 
   /**
    * Creates a new object with the specified values.
-   * 
+   *
    * @param name
    *        the variable name, must not be empty.
    * @param type
@@ -60,7 +60,7 @@ public class CmakeDefine implements Cloneable {
 
   /**
    * Gets the type.
-   * 
+   *
    * @return the current type.
    */
   public CmakeVariableType getType() {
@@ -69,7 +69,7 @@ public class CmakeDefine implements Cloneable {
 
   /**
    * Sets the type.
-   * 
+   *
    * @throws NullPointerException
    *         if {@code type} is {@code null}
    */
@@ -82,7 +82,7 @@ public class CmakeDefine implements Cloneable {
 
   /**
    * Gets the name property.
-   * 
+   *
    * @return the current name property.
    */
   public String getName() {
@@ -91,7 +91,7 @@ public class CmakeDefine implements Cloneable {
 
   /**
    * Sets the name property.
-   * 
+   *
    * @throws IllegalArgumentException
    *         if {@code name} is empty
    * @throws NullPointerException
@@ -109,7 +109,7 @@ public class CmakeDefine implements Cloneable {
 
   /**
    * Gets the value.
-   * 
+   *
    * @return the current value.
    */
   public String getValue() {
@@ -118,7 +118,7 @@ public class CmakeDefine implements Cloneable {
 
   /**
    * Sets the value.
-   * 
+   *
    * @throws NullPointerException
    *         if {@code value} is {@code null}
    */

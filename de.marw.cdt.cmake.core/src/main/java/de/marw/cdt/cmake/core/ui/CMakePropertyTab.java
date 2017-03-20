@@ -123,7 +123,7 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
     }
     updateDisplay();
   }
-  
+
   /**
    * Updates displayed values according to the preferences edited by this tab.
    */

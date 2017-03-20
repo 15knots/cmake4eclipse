@@ -19,7 +19,7 @@ import org.eclipse.swt.widgets.Group;
 
 /**
  * Static methods for unified creation of widgets.
- * 
+ *
  * @author Martin Weber
  */
 /* package */class WidgetHelper {
@@ -30,7 +30,7 @@ import org.eclipse.swt.widgets.Group;
 
   /**
    * Creates a button.
-   * 
+   *
    * @param parent
    * @param text
    *        button text
@@ -50,7 +50,7 @@ import org.eclipse.swt.widgets.Group;
 
   /**
    * Creates a checkbox button.
-   * 
+   *
    * @param parent
    * @param horizontalAlignment
    *        how control will be positioned horizontally within a cell of the
@@ -74,7 +74,7 @@ import org.eclipse.swt.widgets.Group;
 
   /**
    * Creates a group with a grid layout.
-   * 
+   *
    * @param parent
    * @param horizontalAlignment
    *        how control will be positioned horizontally within a cell of the
