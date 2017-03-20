@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 Martin Weber.
+ * Copyright (c) 2014-2017 Martin Weber.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -62,11 +62,9 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
   /**  */
   private static final ILog log = CdtPlugin.getDefault().getLog();
 
-  /** the configuration we manage here. Initialized in {@link #updateData} */
-  private ICConfigurationDescription cfgd;
   /**
    * the preferences associated with our configuration to manage. Initialized in
-   * {@link #updateData}
+   * {@link #configSelectionChanged}
    */
   private P prefs;
 
@@ -200,33 +198,34 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
     undefinesViewer = new UnDefinesViewer(usercomp);
   }
 
-  /**
-   * Invoked when this tab is going to display. Call that 'initialize'!
-   */
   @Override
-  protected void updateData(ICResourceDescription resd) {
-    if (resd == null)
+  protected void configSelectionChanged(ICResourceDescription lastConfig, ICResourceDescription newConfig) {
+    if (lastConfig != null) {
+      saveToModel();
+    }
+    if (newConfig == null)
       return;
 
     if (page.isMultiCfg()) {
+      // we are editing multiple configurations...
       setAllVisible(false, null);
       return;
     } else {
       setAllVisible(true, null);
-    }
 
-    cfgd = resd.getConfiguration();
-    final ConfigurationManager configMgr = ConfigurationManager.getInstance();
-    try {
-      CMakePreferences allPrefs = configMgr.getOrLoad(cfgd);
-      prefs = getOsPreferences(allPrefs);
-    } catch (CoreException ex) {
-      log.log(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID, null, ex));
-    }
+      ICConfigurationDescription cfgd = newConfig.getConfiguration();
+      final ConfigurationManager configMgr = ConfigurationManager.getInstance();
+      try {
+        CMakePreferences allPrefs = configMgr.getOrLoad(cfgd);
+        prefs = getOsPreferences(allPrefs);
+      } catch (CoreException ex) {
+        log.log(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID, null, ex));
+      }
 
-    updateDisplay();
+      updateDisplay();
+    }
   }
-
+  
   /**
    * Updates displayed values according to the preferences edited by this tab.
    */
@@ -249,6 +248,8 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
    * @see #updateDisplay()
    */
   private void saveToModel() {
+    if (prefs == null)
+      return;
     prefs.setUseDefaultCommand(b_cmdFromPath.getSelection());
     String command = t_cmd.getText().trim();
     prefs.setCommand(command);
@@ -282,8 +283,7 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
   protected void performApply(ICResourceDescription src,
       ICResourceDescription dst) {
     // make sure the displayed values get applied
-    if (visible)
-      saveToModel();
+    saveToModel();
 
     ICConfigurationDescription srcCfg = src.getConfiguration();
     ICConfigurationDescription dstCfg = dst.getConfiguration();
@@ -316,10 +316,12 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
 
   @Override
   protected void performOK() {
-    if (cfgd == null)
-      return; // YES, the CDT framework invokes us even if it did not call updateData()!!!
+    final ICResourceDescription resDesc = getResDesc();
+    if (resDesc == null)
+      return;
 
     saveToModel();
+    ICConfigurationDescription cfgd= resDesc.getConfiguration();
     try {
       // save as project settings..
       ICStorageElement storage = cfgd.getStorage(
@@ -330,21 +332,8 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
     }
   }
 
-  /**
-   * Overridden to save the displayed values in the model when this tab becomes
-   * invisible.
-   */
-  @Override
-  public void setVisible(boolean visible) {
-    if (super.visible && !visible)
-      saveToModel();
-    super.setVisible(visible);
-  }
-
   @Override
   protected void performDefaults() {
-    if (cfgd == null)
-      return; // YES, the CDT framework invokes us even if it did not call updateData()!!!
     prefs.reset();
     updateDisplay();
   }
