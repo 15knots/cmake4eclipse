@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 Martin Weber.
+ * Copyright (c) 2014-2017 Martin Weber.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -39,14 +39,6 @@ public class CMakeSymbolsTab extends QuirklessAbstractCPropertyTab {
   /**  */
   private static final ILog log = CdtPlugin.getDefault().getLog();
 
-  /** the configuration we manage here. Initialized in {@link #updateData} */
-  private ICConfigurationDescription cfgd;
-  /**
-   * the preferences associated with our configuration to manage. Initialized in
-   * {@link #updateData}
-   */
-//  private CMakePreferences prefs;
-
   /** the table showing the cmake defines */
   private DefinesViewer definesViewer;
   /** the table showing the cmake undefines */
@@ -72,28 +64,30 @@ public class CMakeSymbolsTab extends QuirklessAbstractCPropertyTab {
     undefinesViewer = new UnDefinesViewer(usercomp);
   }
 
-  /*-
-   * @see org.eclipse.cdt.ui.newui.AbstractCPropertyTab#updateData(org.eclipse.cdt.core.settings.model.ICResourceDescription)
-   */
   @Override
-  protected void updateData(ICResourceDescription resd) {
-    if (resd == null)
+  protected void configSelectionChanged(ICResourceDescription lastConfig, ICResourceDescription newConfig) {
+    // nothing to save here: defines & undefines are modified by the widget
+    // listeners directly
+    // if (lastConfig != null) {
+    // saveToModel();
+    // }
+
+    if (newConfig == null)
       return;
     if (page.isMultiCfg()) {
       setAllVisible(false, null);
-      return;
     } else {
       setAllVisible(true, null);
-    }
 
-    cfgd = resd.getConfiguration();
-    final ConfigurationManager configMgr = ConfigurationManager.getInstance();
-    try {
-      configMgr.getOrLoad(cfgd);
-    } catch (CoreException ex) {
-      log.log(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID, null, ex));
+      ICConfigurationDescription cfgd = newConfig.getConfiguration();
+      final ConfigurationManager configMgr = ConfigurationManager.getInstance();
+      try {
+        CMakePreferences prefs = configMgr.getOrLoad(cfgd);
+        updateDisplay(prefs);
+      } catch (CoreException ex) {
+        log.log(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID, null, ex));
+      }
     }
-    updateDisplay();
   }
 
   /**
@@ -134,8 +128,10 @@ public class CMakeSymbolsTab extends QuirklessAbstractCPropertyTab {
 
   @Override
   protected void performOK() {
-    if (cfgd == null)
-      return; // YES, the CDT framework invokes us even if it did not call updateData()!!!
+    final ICResourceDescription resDesc = getResDesc();
+    if (resDesc == null)
+      return;
+    final ICConfigurationDescription cfgd= resDesc.getConfiguration();
     try {
       // NB: defines & undefines are modified by the widget listeners directly
       CMakePreferences prefs = ConfigurationManager.getInstance().get(cfgd);
@@ -155,19 +151,24 @@ public class CMakeSymbolsTab extends QuirklessAbstractCPropertyTab {
    */
   @Override
   protected void performDefaults() {
-    if (cfgd == null)
-      return; // YES, the CDT framework invokes us even if it did not call updateData()!!!
-    ConfigurationManager.getInstance().get(cfgd).reset();
-    updateDisplay();
+    final ICResourceDescription resDesc = getResDesc();
+    if (resDesc == null)
+      return;
+    final ICConfigurationDescription cfgd= resDesc.getConfiguration();
+    final CMakePreferences prefs = ConfigurationManager.getInstance().get(cfgd);
+    prefs.reset();
+    updateDisplay(prefs);
   }
 
   /**
    * Updates displayed values according to the preferences edited by this tab.
+   * 
+   * @param cMakePreferences
+   *          the CMakePreferences to display, never <code>null</code>
    */
-  private void updateDisplay() {
-    CMakePreferences prefs = ConfigurationManager.getInstance().get(cfgd);
-    definesViewer.setInput(prefs.getDefines());
-    undefinesViewer.setInput(prefs.getUndefines());
+  private void updateDisplay(CMakePreferences cMakePreferences) {
+    definesViewer.setInput(cMakePreferences.getDefines());
+    undefinesViewer.setInput(cMakePreferences.getUndefines());
   }
 
   /*-

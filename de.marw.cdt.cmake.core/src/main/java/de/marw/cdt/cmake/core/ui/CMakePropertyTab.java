@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013-2014 Martin Weber.
+ * Copyright (c) 2013-2017 Martin Weber.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -51,8 +51,6 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
   private Button b_warnUnitialized;
   private Button b_warnUnused;
 
-  /** the configuration we manage here. Initialized in {@link #updateData} */
-  private ICConfigurationDescription cfgd;
   /**
    * the preferences associated with our configurations to manage. Initialized
    * in {@link #updateData}
@@ -95,15 +93,15 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
 
   }
 
-  /*-
-   * @see org.eclipse.cdt.ui.newui.AbstractCPropertyTab#updateData(org.eclipse.cdt.core.settings.model.ICResourceDescription)
-   */
   @Override
-  protected void updateData(ICResourceDescription resd) {
-    if (resd == null)
+  protected void configSelectionChanged(ICResourceDescription lastConfig, ICResourceDescription newConfig){
+    if (lastConfig != null) {
+      saveToModel();
+    }
+    if (newConfig == null)
       return;
 
-    cfgd = resd.getConfiguration();
+    ICConfigurationDescription cfgd = newConfig.getConfiguration();
     final ConfigurationManager configMgr = ConfigurationManager.getInstance();
     try {
       if (cfgd instanceof ICMultiConfigDescription) {
@@ -125,7 +123,7 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
     }
     updateDisplay();
   }
-
+  
   /**
    * Updates displayed values according to the preferences edited by this tab.
    */
@@ -283,8 +281,8 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
   protected void performApply(ICResourceDescription src,
       ICResourceDescription dst) {
     // make sure the displayed values get applied
-    if (visible)
-      saveToModel();
+    // AFAICS, src is always == getResDesc(). so saveToModel() effectively stores to src
+    saveToModel();
 
     ICConfigurationDescription srcCfg = src.getConfiguration();
     ICConfigurationDescription dstCfg = dst.getConfiguration();
@@ -326,10 +324,12 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
   }
 
   protected void performOK() {
-    if (cfgd == null)
-      return; // YES, the CDT framework invokes us even if it did not call updateData()!!!
+    final ICResourceDescription resDesc = getResDesc();
+    if (resDesc == null)
+      return;
 
     saveToModel();
+    ICConfigurationDescription cfgd= resDesc.getConfiguration();
     // save project properties..
     try {
       if (prefs.length > 1) {
@@ -354,17 +354,6 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
   }
 
   /**
-   * Overridden to store the displayed values in the model when this tab becomes
-   * invisible.
-   */
-  @Override
-  public void setVisible(boolean visible) {
-    if (super.visible && !visible)
-      saveToModel();
-    super.setVisible(visible);
-  }
-
-  /**
    * Gets whether the value of the specified button should be saved.
    *
    * @param button
@@ -383,8 +372,6 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
    */
   @Override
   protected void performDefaults() {
-    if (cfgd == null)
-      return; // YES, the CDT framework invokes us even if it did not call updateData()!!!
     for (CMakePreferences pref : prefs) {
       pref.reset();
     }
