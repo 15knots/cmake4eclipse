@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Martin Weber.
+ * Copyright (c) 2015-2017 Martin Weber.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -53,7 +53,9 @@ public class SimpleCMakeCacheTxt {
       for (SimpleCMakeCacheEntry entry : entries) {
         final String toolKey = entry.getKey();
         final String tool = entry.getValue();
-        if ("CMAKE_BUILD_TOOL".equals(toolKey)) {
+        if ("CMAKE_MAKE_PROGRAM".equals(toolKey) ||
+            "CMAKE_BUILD_TOOL".equals(toolKey) // deprecated since cmake 3.0
+            ) {
           buildTool = tool;
         } else if ("CMAKE_COMMAND".equals(toolKey)) {
           commands.add(tool);
