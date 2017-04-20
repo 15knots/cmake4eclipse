@@ -466,7 +466,7 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
         for (Iterator<ICLanguageSettingEntry> iter = entries.iterator(); iter
             .hasNext();) {
           ICLanguageSettingEntry entry = iter.next();
-          if (entry.getKind() == ICSettingEntry.INCLUDE_PATH) {
+          if (entry.getKind() == ICSettingEntry.INCLUDE_PATH || entry.getKind() == ICSettingEntry.MACRO) {
             projectEntries.addSettingEntry(cmdlineParser.getLanguageId(),
                 entry);
           }
