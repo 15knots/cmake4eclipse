@@ -203,17 +203,6 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
     return storage.getSettingEntries(cfgDescription, rc, languageId);
   }
 
-//  // interface ILanguageSettingsBroadcastingProvider
-//  @Override
-//  public LanguageSettingsStorage copyStorage() {
-//    try {
-//      return storage.clone();
-//    } catch (CloneNotSupportedException ex) {
-//      log.log(new Status(IStatus.WARNING, CMakePlugin.PLUGIN_ID, ex.getLocalizedMessage(), ex));
-//    }
-//    return null;
-//  }
-
   /**
    * Parses the content of the 'compile_commands.json' file corresponding to the
    * specified configuration, if timestamps differ.
