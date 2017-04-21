@@ -107,28 +107,28 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
             // not defined by POSIX, but does not harm..
             new ToolArgumentParsers.SystemIncludePath_C() };
     // POSIX compatible C compilers =================================
-    final ToolCommandlineParser gcc =
+    final ToolCommandlineParser cc =
         new ToolCommandlineParser("org.eclipse.cdt.core.gcc", posix_cc_args);
-    knownCmdParsers.put("cc", gcc);
-    knownCmdParsers.put("cc\\.exe", gcc);
-    knownCmdParsers.put("gcc", gcc);
-    knownCmdParsers.put("gcc\\.exe", gcc);
-    knownCmdParsers.put("clang", gcc);
-    knownCmdParsers.put("clang\\.exe", gcc);
+    knownCmdParsers.put("cc", cc);
+    knownCmdParsers.put("cc\\.exe", cc);
+    knownCmdParsers.put("gcc", cc);
+    knownCmdParsers.put("gcc\\.exe", cc);
+    knownCmdParsers.put("clang", cc);
+    knownCmdParsers.put("clang\\.exe", cc);
     // POSIX compatible C++ compilers ===============================
-    final ToolCommandlineParser cpp =
+    final ToolCommandlineParser cxx =
         new ToolCommandlineParser("org.eclipse.cdt.core.g++", posix_cc_args);
-    knownCmdParsers.put("c\\+\\+", cpp);
-    knownCmdParsers.put("c\\+\\+\\.exe", cpp);
-    knownCmdParsers.put("g\\+\\+", cpp);
-    knownCmdParsers.put("g\\+\\+\\.exe", cpp);
-    knownCmdParsers.put("clang\\+\\+", cpp);
-    knownCmdParsers.put("clang\\+\\+\\.exe", cpp);
+    knownCmdParsers.put("c\\+\\+", cxx);
+    knownCmdParsers.put("c\\+\\+\\.exe", cxx);
+    knownCmdParsers.put("g\\+\\+", cxx);
+    knownCmdParsers.put("g\\+\\+\\.exe", cxx);
+    knownCmdParsers.put("clang\\+\\+", cxx);
+    knownCmdParsers.put("clang\\+\\+\\.exe", cxx);
     // GNU C and C++ cross compilers, e.g. arm-none-eabi-gcc.exe ====
-    knownCmdParsers.put(".+-gcc", gcc);
-    knownCmdParsers.put(".+-gcc\\.exe", gcc);
-    knownCmdParsers.put(".+-g\\+\\+", gcc);
-    knownCmdParsers.put(".+-g\\+\\+\\.exe", gcc);
+    knownCmdParsers.put(".+-gcc", cc);
+    knownCmdParsers.put(".+-gcc\\.exe", cc);
+    knownCmdParsers.put(".+-g\\+\\+", cxx);
+    knownCmdParsers.put(".+-g\\+\\+\\.exe", cxx);
 
     // ms C + C++ compiler ==========================================
     final IToolArgumentParser[] cl_cc_args =
