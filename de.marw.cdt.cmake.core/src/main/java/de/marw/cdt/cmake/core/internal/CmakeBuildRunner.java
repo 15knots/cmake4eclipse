@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 Martin Weber.
+ * Copyright (c) 2014-2017 Martin Weber.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -81,6 +81,17 @@ public class CmakeBuildRunner extends ExternalBuildRunner {
     if (builder.getBaseId().equals("de.marw.cdt.cmake.core.genscriptbuilder")) {
       final ICConfigurationDescription cfgd = ManagedBuildManager
           .getDescriptionForConfiguration(configuration);
+
+      if (kind == IncrementalProjectBuilder.CLEAN_BUILD) {
+        // avoid calling 'rm -rf' if it is a clean build and the build dir was
+        // deleted
+        final IPath builderCWD = cfgd.getBuildSetting().getBuilderCWD();
+        final IPath location = ResourcesPlugin.getWorkspace().getRoot().getFile(builderCWD).getLocation();
+        if (location == null || !location.toFile().exists()) {
+          return true; // is clean
+        }
+      }
+
       final CMakePreferences prefs = ConfigurationManager.getInstance()
           .getOrLoad(cfgd);
       final AbstractOsPreferences osPrefs = AbstractOsPreferences
