@@ -11,8 +11,14 @@
 package de.marw.cdt.cmake.core.internal;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
+import java.util.WeakHashMap;
 
 import org.eclipse.cdt.core.ICommandLauncher;
 import org.eclipse.cdt.core.IMarkerGenerator;
@@ -32,9 +38,7 @@ import org.eclipse.cdt.managedbuilder.core.ManagedBuildManager;
 import org.eclipse.cdt.managedbuilder.macros.IFileContextBuildMacroValues;
 import org.eclipse.cdt.managedbuilder.macros.IReservedMacroNameSupplier;
 import org.eclipse.cdt.managedbuilder.makegen.IManagedBuilderMakefileGenerator;
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -43,16 +47,17 @@ import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.osgi.framework.Version;
 
 import de.marw.cdt.cmake.core.CdtPlugin;
+import de.marw.cdt.cmake.core.cmakecache.CMakeCacheFileParser;
+import de.marw.cdt.cmake.core.cmakecache.CMakeCacheFileParser.EntryFilter;
+import de.marw.cdt.cmake.core.cmakecache.SimpleCMakeCacheEntry;
 import de.marw.cdt.cmake.core.internal.settings.AbstractOsPreferences;
 import de.marw.cdt.cmake.core.internal.settings.CMakePreferences;
 import de.marw.cdt.cmake.core.internal.settings.ConfigurationManager;
-import de.marw.cmake.cmakecache.SimpleCMakeCacheTxt;
 
 /**
  * An ExternalBuildRunner that injects the build tool command to use and some of
@@ -64,6 +69,10 @@ import de.marw.cmake.cmakecache.SimpleCMakeCacheTxt;
  */
 public class CmakeBuildRunner extends ExternalBuildRunner {
   private static final ILog log = CdtPlugin.getDefault().getLog();
+
+  /** caches CMakeCacheFileInfo by ICConfigurationDescription.ID */
+  private WeakHashMap<String, CMakeCacheFileInfo> map = new WeakHashMap<String, CMakeCacheFileInfo>(
+      2);
 
   /*-
    * @see org.eclipse.cdt.managedbuilder.core.ExternalBuildRunner#invokeBuild(int, org.eclipse.core.resources.IProject, org.eclipse.cdt.managedbuilder.core.IConfiguration, org.eclipse.cdt.managedbuilder.core.IBuilder, org.eclipse.cdt.core.resources.IConsole, org.eclipse.cdt.core.IMarkerGenerator, org.eclipse.core.resources.IncrementalProjectBuilder, org.eclipse.core.runtime.IProgressMonitor)
@@ -99,7 +108,8 @@ public class CmakeBuildRunner extends ExternalBuildRunner {
 
       // try to get CMAKE_BUILD_TOOL entry from CMakeCache.txt...
       final CmakeGenerator generator = osPrefs.getGenerator();
-      String buildscriptProcessorCmd = getCommandFromCMakeCache(cfgd);
+      String buildscriptProcessorCmd = getCommandFromCMakeCache(cfgd,
+          generator != osPrefs.getGeneratedWith());
       if (buildscriptProcessorCmd == null) {
         // fall back to values from OS preferences
         buildscriptProcessorCmd = osPrefs.getBuildscriptProcessorCommand();
@@ -123,52 +133,91 @@ public class CmakeBuildRunner extends ExternalBuildRunner {
    *
    * @param cfgd
    *        configuration
-   * @return a value for the {@code "cmake_build_cmd"} macro or {@code null}, if
-   *         none could be determined
-   * @throws CoreException
-   */
-  private String getCommandFromCMakeCache(ICConfigurationDescription cfgd)
-      throws CoreException {
-    SimpleCMakeCacheTxt cmCache = null;
+    * @param forceParsing
+    *        {@code true} to force parsing of the cmake cache file without
+    *        checking its time-stamp, otherwise {@code false}.
+    * @return a value for the {@code "cmake_build_cmd"} macro or {@code null}, if
+    *         none could be determined
+    */
+   private String getCommandFromCMakeCache(ICConfigurationDescription cfgd,
+       boolean forceParsing) {
+     CMakeCacheFileInfo fi = map.get(cfgd.getId());
+     if (fi == null) {
+       fi = new CMakeCacheFileInfo();
+       map.put(cfgd.getId(), fi);
+     }
 
     // If getBuilderCWD() returns a workspace relative path, it gets garbled by CDT.
     // If garbled, make sure de.marw.cdt.cmake.core.internal.BuildscriptGenerator.getBuildWorkingDir()
     // returns a full, absolute path relative to the workspace.
     final IPath builderCWD = cfgd.getBuildSetting().getBuilderCWD();
 
-    final IFile cmakeCache = ResourcesPlugin.getWorkspace().getRoot()
-        .getFile(builderCWD.append("CMakeCache.txt"));
-    if (!cmakeCache.exists()) {
-      // avoid 'Resource does not exist' exception
-      cmakeCache.refreshLocal(IResource.DEPTH_ZERO, new NullProgressMonitor());
+    IPath location = ResourcesPlugin.getWorkspace().getRoot().getFolder(builderCWD).getLocation();
+    if (location == null) {
+      // fall back to built-in from generator
+      return null;
     }
-    cmCache = (SimpleCMakeCacheTxt) cmakeCache
-        .getSessionProperty(de.marw.cmake.CMakePlugin.CMAKECACHE_PARSED_PROP);
-//    System.out.println("have cached CMakeCache: " + (cmCache != null));
-    if (cmCache == null) { // must parse CMakeCache.txt
+    final File file = location.append("CMakeCache.txt").toFile();
 
-      IPath location = cmakeCache.getLocation();
-      if (location == null) {
-        return null; // fall back to built-in from generator
-      }
-      final File file = location.toFile();
+    if (file.isFile()) {
+      final long lastModified = file.lastModified();
+      if (forceParsing || fi.cmCacheFileLastModified == 0
+          || lastModified > fi.cmCacheFileLastModified) {
+        // internally cached value is outdated, must parse CMakeCache.txt
+        fi.cmCacheFileLastModified = lastModified;
+        fi.cachedCmakeBuildTool = null; // invalidate cache
 
-      try {
         // parse CMakeCache.txt...
-        cmCache = new SimpleCMakeCacheTxt(file);
-        // store parsed cache as resource property
-        cmakeCache.setSessionProperty(
-            de.marw.cmake.CMakePlugin.CMAKECACHE_PARSED_PROP, cmCache);
-//        System.out.println("stored cached CMakeCache");
-      } catch (IOException ex) {
-        // ignore, the build command will run cmake anyway.
-        // So let cmake complain about its cache file
-        log.log(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID,
-            "Failed to read file " + file, ex));
+        InputStream is = null;
+        try {
+          is = new FileInputStream(file);
+          final Set<SimpleCMakeCacheEntry> entries = new HashSet<SimpleCMakeCacheEntry>();
+          final EntryFilter filter = new EntryFilter() {
+            @Override
+            public boolean accept(String key) {
+              return "CMAKE_MAKE_PROGRAM".equals(key);
+            }
+          };
+          new CMakeCacheFileParser().parse(is, filter, entries, null);
+          final Iterator<SimpleCMakeCacheEntry> iter = entries.iterator();
+          if (iter.hasNext()) {
+            // got a CMAKE_BUILD_TOOL entry, update internally cached value
+            fi.cachedCmakeBuildTool = iter.next().getValue();
+          }
+        } catch (IOException ex) {
+          // ignore, the build command will run cmake anyway.
+          // So let cmake complain about its cache file
+          log.log(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID,
+              "Failed to parse file " + file, ex));
+        } finally {
+          if (is != null) {
+            try {
+              is.close();
+            } catch (IOException ignore) {
+            }
+          }
+        }
       }
     }
-    return cmCache == null ? null : cmCache.getBuildTool();
+    return fi.cachedCmakeBuildTool;
   }
+
+   ////////////////////////////////////////////////////////////////////
+   // inner classes
+   ////////////////////////////////////////////////////////////////////
+   /**
+    * Info about cached CMAKE_BUILD_TOOL entry parsed from from CMakeCache.txt
+    *
+    * @author Martin Weber
+    */
+   private static class CMakeCacheFileInfo {
+     /**
+      * cached CMAKE_BUILD_TOOL entry from CMakeCache.txt or {@code null} if
+      * CMakeCache.txt could not be parsed
+      */
+     private String cachedCmakeBuildTool;
+     private long cmCacheFileLastModified;
+   }
 
   /**
    * @author Martin Weber
