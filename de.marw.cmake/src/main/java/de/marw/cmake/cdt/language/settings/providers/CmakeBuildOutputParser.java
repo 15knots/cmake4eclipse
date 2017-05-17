@@ -33,8 +33,8 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
+import de.marw.cdt.cmake.core.cmakecache.SimpleCMakeCacheTxt;
 import de.marw.cmake.CMakePlugin;
-import de.marw.cmake.cmakecache.SimpleCMakeCacheTxt;
 
 /**
  * A build output parser capable to parse the output of the build tool for which
