@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 Martin Weber.
+ * Copyright (c) 2013-2017 Martin Weber.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -143,13 +143,17 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
    */
   @Override
   public MultiStatus generateMakefiles(IResourceDelta delta) throws CoreException {
-    /*
-     * Let's do a sanity check right now.
-     *
-     * If this is an incremental build, so if the build directory is not there,
-     * then a full build is needed.
-     */
-    File buildDir = buildFolder.getLocation().toFile();
+    return regenerateMakefiles();
+  }
+
+  /**
+   * Invoked on full build.
+   */
+  @Override
+  public MultiStatus regenerateMakefiles() throws CoreException {
+    boolean mustGenerate= false;
+
+    final File buildDir = buildFolder.getLocation().toFile();
     final File cacheFile = new File(buildDir, "CMakeCache.txt");
     if (isGeneratorChanged() && cacheFile.exists()) {
       // The user changed the generator, remove cache file to avoid cmake's complaints..
@@ -160,33 +164,12 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     }
     final File makefile = new File(buildDir, getMakefileName());
     if (!buildDir.exists() || !cacheFile.exists() || !makefile.exists()) {
-      return regenerateMakefiles();
+      mustGenerate= true;
     }
 
-    if (false) {
-      // Visit the CMakeLists.txt in the delta and detect whether to regenerate
-      // normally, the cmake-generated makefiles detect changes in CMake scripts
-      // and regenerate the makefiles. But this seems not to be the case, when
-      // someone writes CTests in a CMakeLists.txt.
-      // So regenerate the makefiles...
-      final CMakelistsVisitor visitor = new CMakelistsVisitor();
-      updateMonitor("Visiting CMakeLists.txt");
-      delta.accept(visitor);
-      // TODO detect removed/renamed source dir.. see GnuMakefileGenerator.ResourceDeltaVisitor
-      if (visitor.isCmakelistsAffected()) {
-        return regenerateMakefiles();
-      }
+    if( !mustGenerate){
+      return new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.OK, "", null);
     }
-    MultiStatus status = new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.OK, "", null);
-    return status;
-  }
-
-  /**
-   * Invoked on full build.
-   */
-  @Override
-  public MultiStatus regenerateMakefiles() throws CoreException {
-    MultiStatus status; // Return value
 
     // See if the user has cancelled the build
     checkCancel();
@@ -195,7 +178,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     if (!MULTIPLE_SOURCE_DIRS_SUPPORTED && srcEntries.length > 1) {
       final String msg = "Only a single source location supported by CMake";
       updateMonitor(msg);
-      status = new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.ERROR, "", null);
+      MultiStatus status = new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.ERROR, "", null);
       status.add(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID, 0, msg, null));
       return status;
     }
@@ -205,7 +188,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       // Make sure there is something to build
       String msg = "No source directories in project " + project.getName();
       updateMonitor(msg);
-      status = new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.INFO, "", null);
+      MultiStatus status = new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.INFO, "", null);
       status.add(
           new Status(IStatus.INFO, CdtPlugin.PLUGIN_ID, IManagedBuilderMakefileGenerator.NO_SOURCE_FOLDERS, msg, null));
       return status;
@@ -213,8 +196,6 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       ICConfigurationDescription cfgDes = ManagedBuildManager.getDescriptionForConfiguration(config);
       srcEntries = CDataUtil.resolveEntries(srcEntries, cfgDes);
     }
-
-    status = new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.OK, "", null);
 
     final IConsole console = CCorePlugin.getDefault().getConsole(CMAKE_CONSOLE_ID);
     console.start(project);
@@ -251,18 +232,14 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       checkCancel();
       final IPath buildDirAbs = buildFolder.getLocation();
       MultiStatus status2 = invokeCMake(srcDir, buildDirAbs, console);
-      // tell the workspace that this file exists
-      buildFolder.getFile("CMakeCache.txt").refreshLocal(IResource.DEPTH_ZERO, monitor);
-
       // NOTE: Commonbuilder reads getCode() to detect errors, not getSeverity()
       if (status2.getCode() == IStatus.ERROR) {
         // failed to generate
         return status2;
       }
-// nutzlos:      status= status2; // return last success status
     }
 
-    return status;
+    return new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.OK, "", null);
   }
 
   /**
