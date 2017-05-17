@@ -9,7 +9,8 @@ Bundle-Vendor: Martin Weber
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
-Import-Package: org.eclipse.cdt.build.core.scannerconfig,
+Import-Package: de.marw.cdt.cmake.core.cmakecache,
+ org.eclipse.cdt.build.core.scannerconfig,
  org.eclipse.cdt.core,
  org.eclipse.cdt.core.language.settings.providers,
  org.eclipse.cdt.core.settings.model,
@@ -25,7 +26,5 @@ Import-Package: org.eclipse.cdt.build.core.scannerconfig,
  org.eclipse.ui.plugin,
  org.osgi.framework
 Bundle-Activator: de.marw.cmake.CMakePlugin
-Export-Package: de.marw.cmake,
- de.marw.cmake.cdt.language.settings.providers,
- de.marw.cmake.cmakecache
+Export-Package: de.marw.cmake.cdt.language.settings.providers
 Require-Bundle: org.eclipse.ui.workbench;bundle-version="3.8.0"

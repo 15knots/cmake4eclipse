@@ -8,7 +8,7 @@
  * Contributors:
  *      Martin Weber - Initial implementation
  *******************************************************************************/
-package de.marw.cmake.cmakecache;
+package de.marw.cdt.cmake.core.cmakecache;
 
 import java.io.File;
 import java.io.FileInputStream;
