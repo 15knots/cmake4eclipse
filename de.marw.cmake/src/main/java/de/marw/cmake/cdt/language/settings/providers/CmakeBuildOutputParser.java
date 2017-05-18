@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Martin Weber.
+ * Copyright (c) 2015-2017 Martin Weber.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -31,6 +31,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.Status;
 
 import de.marw.cdt.cmake.core.cmakecache.SimpleCMakeCacheTxt;
@@ -47,6 +48,14 @@ import de.marw.cmake.CMakePlugin;
  */
 public class CmakeBuildOutputParser extends LanguageSettingsSerializableProvider
     implements ILanguageSettingsProvider, ICBuildOutputParser, Cloneable {
+
+   /**
+     * name of the session property attached to {@code CMakeCache.txt} file
+     * resources. The property caches the parsed content of the CMake cache file (
+     * {@code CMakeCache.txt})
+     */
+    private static final QualifiedName CMAKECACHE_PARSED_PROP =
+        new QualifiedName(CMakePlugin.PLUGIN_ID, "parsed-CMakeCache.txt");
 
   /**
    * regex to match leading chars in a build output line. The full regex to
@@ -112,7 +121,7 @@ public class CmakeBuildOutputParser extends LanguageSettingsSerializableProvider
     final IPath builderCWD = cfgd.getBuildSetting().getBuilderCWD();
 
     final IFile cmakeCache = ResourcesPlugin.getWorkspace().getRoot().getFile(builderCWD.append("CMakeCache.txt"));
-    cmCache = (SimpleCMakeCacheTxt) cmakeCache.getSessionProperty(CMakePlugin.CMAKECACHE_PARSED_PROP);
+    cmCache = (SimpleCMakeCacheTxt) cfgd.getSessionProperty(CMAKECACHE_PARSED_PROP);
 //    System.out.println("have cached CMakeCache: " + (cmCache != null));
     if (cmCache == null) { // must parse CMakeCache.txt
 
@@ -126,7 +135,7 @@ public class CmakeBuildOutputParser extends LanguageSettingsSerializableProvider
         // parse CMakeCache.txt...
         cmCache = new SimpleCMakeCacheTxt(file);
         // store parsed cache as resource property
-        cmakeCache.setSessionProperty(CMakePlugin.CMAKECACHE_PARSED_PROP, cmCache);
+        cfgd.setSessionProperty(CMAKECACHE_PARSED_PROP, cmCache);
 //        System.out.println("stored cached CMakeCache");
       } catch (IOException ex) {
         throw new CoreException(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, "Failed to read file " + file, ex));
