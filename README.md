@@ -26,7 +26,7 @@ Annoyingly, these recommended out-of-source-builds impose some tedious tasks on 
 Screenshots can be found at the <a href="https://marketplace.eclipse.org/content/cmake4eclipse#group-screenshots" title="Screenshots">Eclipse Marketplace</a>.
 
 ## License
-The plugin is licensed uner the <a href="http://www.eclipse.org/legal/epl-v10.html">Eclipse Public License Version 1.0 ("EPL")</a>.
+The plugin is licensed under the <a href="http://www.eclipse.org/legal/epl-v10.html">Eclipse Public License Version 1.0 ("EPL")</a>.
 
 # Installation Instructions
 The easiest way is to drag this: <a href="http://marketplace.eclipse.org/marketplace-client-intro?mpc_install=2318334" class="drag" title="Drag to your running Eclipse workbench to install cmake4eclipse">
@@ -44,11 +44,14 @@ https://raw.githubusercontent.com/15knots/cmake4eclipse/master/releng/comp-updat
 ### Changes
 - Closed #26: CMakeFiles, cache and others generated into wrong directory
 - Closed #31: CMAKE_EXPORT_COMPILE_COMMANDS Parser fails if compiler executable has a MSDOS "Short path" name
+- Requires Java 7 or newer
 
 ### Repository URL
 `jar:https://bintray.com/artifact/download/15knots/p2-zip/cmake4eclipse-1.4.8.zip!/`
 ### System Requirements
 CDT v 8.1.0 or higher and Eclipse v 3.8.0 (Juno) or higher
+
+Java 7 or newer
 
 ## 1.4.7 (2017-04-11)
 ### Changes
