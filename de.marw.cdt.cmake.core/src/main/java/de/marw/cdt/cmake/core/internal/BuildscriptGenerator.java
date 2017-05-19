@@ -356,7 +356,8 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
           ((ILanguageSettingsProvidersKeeper) cfgd).getLanguageSettingProviders();
       for (ILanguageSettingsProvider lsp : lsps) {
         if (!needExportComileCommands
-            && "de.marw.cmake.cdt.language.settings.providers.CompileCommandsJsonParser".equals(lsp.getId())) {
+            && ("de.marw.cmake.cdt.language.settings.providers.CompileCommandsJsonParser".equals(lsp.getId())
+                || "de.marw.cmake.cdt.language.settings.providers.CompileCommandsJsonParserSFN".equals(lsp.getId()))) {
           needExportComileCommands = true;
           continue;
         }
