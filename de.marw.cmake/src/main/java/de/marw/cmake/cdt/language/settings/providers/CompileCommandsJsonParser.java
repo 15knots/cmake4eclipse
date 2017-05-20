@@ -49,6 +49,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jetty.util.ajax.JSON;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -390,6 +391,10 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
       // try each tool..
       preferredCmdlineParser= determineParserForCommandline(line);
     }
+    if (preferredCmdlineParser == null && Platform.getOS() == Platform.OS_WIN32) {
+      // try workaround
+      preferredCmdlineParser= determineParserForCommandline(expandShortFileName(line));
+    }
     if (preferredCmdlineParser == null) {
       return false; // no matching parser found
     }
@@ -420,6 +425,38 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
     }
     return null;
   }
+
+  /**
+   * Tries to convert windows short file names for the compiler executable (like
+   * <code>AVR-G_~1.EXE</code>) into their long representation. This is a
+   * workaround for a
+   * <a href="https://gitlab.kitware.com/cmake/cmake/issues/16138">bug in CMake
+   * under windows</a>.<br>
+   * See <a href="https://github.com/15knots/cmake4eclipse/issues/31">issue #31
+   */
+  private String expandShortFileName(String commandLine) {
+    String command;
+    // split at first space character
+    StringBuilder commandLine2 = new StringBuilder();
+    int idx = commandLine.indexOf(' ');
+    if (idx != -1) {
+      command = commandLine.substring(0, idx);
+      commandLine2.append(commandLine.substring(idx));
+    } else {
+      command = commandLine;
+    }
+    // convert to long file name and retry lookup
+    try {
+      command = new File(command).getCanonicalPath();
+      commandLine2.insert(0, command);
+      return commandLine2.toString();
+    } catch (IOException e) {
+      log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID,
+          "CompileCommandsJsonParserFSN#determineParserForCommandline()", e));
+    }
+    return null;
+  }
+
   /**
    * Processes the command-line of an entry from a {@code compile_commands.json}
    * file by trying the specified detector and stores a

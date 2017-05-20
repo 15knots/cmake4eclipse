@@ -23,14 +23,6 @@
          <language-scope id="org.eclipse.cdt.core.g++"/>
     </provider>
     <provider
-          class="de.marw.cmake.cdt.language.settings.providers.CompileCommandsJsonParserSFN"
-          id="de.marw.cmake.cdt.language.settings.providers.CompileCommandsJsonParserSFN"
-          name="CMAKE_EXPORT_COMPILE_COMMANDS Parser SFN-proof"
-          prefer-non-shared="true">
-         <language-scope id="org.eclipse.cdt.core.gcc"/>
-         <language-scope id="org.eclipse.cdt.core.g++"/>
-    </provider>
-    <provider
           class="de.marw.cmake.cdt.language.settings.providers.CmakeBuildOutputParser"
           id="de.marw.cmake.cdt.language.settings.providers.CmakeBuildOutputParser"
           name="CMake Build Output Parser (deprecated)">
