@@ -20,25 +20,6 @@
 	Parsing is done at most once per build since the cache is invalidated when the
 	file`s time-stamp is newer, so it should be reasonably fast.
 	</p>
-
-	<h3>CMAKE_EXPORT_COMPILE_COMMANDS Parser SFN-proof</h3>
-	<p>This provider basically acts the same as the provider above, but it has a workaround for a 
-	<a href="https://gitlab.kitware.com/cmake/cmake/issues/16138">bug in CMake under windows</a>.
-	That bug produces <em>short file names</em> (like <code>AVR-G_~1.EXE</code>). The 
- 	provider mentioned above cannot recognize these	file names as a
-	C-compiler name	or a C++ compiler name.<br>
-	The workaround transforms file names to their long representation but this comes with some
-	build performance penalty.<br>
-	You would <strong>only need this provider, if and only if</strong>
-	<ul>
-	 <li>You intend to run the build under windows, and</li>
-  	 <li>your version of cmake has the bug mentioned above, and</li>
-  	 <li>the absolute file system path pointing to one of the compiler-executables (/C, C++)
-  	 on your machines might contain <strong>whitespace characters</strong>.</li>
-	</ul>
-	</p>
-	<p>See <a href="https://github.com/15knots/cmake4eclipse/issues/31">issue #31</a>.
-	</p>
 	
 	<h3>CMake Build Output Parser (deprecated)</h3>
 	<p>
