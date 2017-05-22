@@ -5,7 +5,7 @@ env:
 
 language: java
 jdk:
-- openjdk6
+- openjdk7
 
 script:
 - mvn -Pretail -f ./parent/pom.xml verify
