@@ -40,10 +40,10 @@ https://raw.githubusercontent.com/15knots/cmake4eclipse/master/releng/comp-updat
 
 ---
 # Release History
-## 1.4.8 Upcoming (2017-??)
+## 1.4.8 (2017-05-22)
 ### Changes
 - Closed #26: CMakeFiles, cache and others generated into wrong directory
-- Closed #31: CMAKE_EXPORT_COMPILE_COMMANDS Parser fails if compiler executable has a MSDOS "Short path" name
+- Closed #31: CMAKE_EXPORT_COMPILE_COMMANDS Parser fails if compiler executable has a MSDOS "Short path" name. Thanks to @nolange for reproting and testing under windows
 - Requires Java 7 or newer
 
 ### Repository URL
