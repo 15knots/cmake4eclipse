@@ -20,6 +20,8 @@ import java.util.List;
 import org.eclipse.cdt.core.CCorePlugin;
 import org.eclipse.cdt.core.ConsoleOutputStream;
 import org.eclipse.cdt.core.ICommandLauncher;
+import org.eclipse.cdt.core.cdtvariables.CdtVariableException;
+import org.eclipse.cdt.core.cdtvariables.ICdtVariableManager;
 import org.eclipse.cdt.core.envvar.IEnvironmentVariable;
 import org.eclipse.cdt.core.language.settings.providers.ILanguageSettingsProvider;
 import org.eclipse.cdt.core.language.settings.providers.ILanguageSettingsProvidersKeeper;
@@ -462,11 +464,17 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
    * @throws CoreException
    *         if unable to resolve the value of one or more variables
    */
-  private static void appendAbstractOsPreferences(List<String> args, final AbstractOsPreferences prefs)
+  private void appendAbstractOsPreferences(List<String> args, final AbstractOsPreferences prefs)
       throws CoreException {
     // replace cmake command, if given
-    if (!prefs.getUseDefaultCommand())
-      args.set(0, prefs.getCommand());
+    if (!prefs.getUseDefaultCommand()){
+      ICdtVariableManager varManager = CCorePlugin.getDefault().getCdtVariableManager();
+      String cmd = varManager.resolveValue(prefs.getCommand(), "<undefined variable here, but CDT does not allow"
+          + " to pass it unexpanded; thus its name is lost>"
+          , null,
+          ManagedBuildManager.getDescriptionForConfiguration(config));
+      args.set(0, cmd);
+    }
     args.add("-G");
     final CmakeGenerator generator = prefs.getGenerator();
     args.add(generator.getCmakeName());
