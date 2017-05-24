@@ -16,6 +16,7 @@ import java.util.List;
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
 import org.eclipse.cdt.core.settings.model.ICResourceDescription;
 import org.eclipse.cdt.core.settings.model.ICStorageElement;
+import org.eclipse.cdt.ui.newui.AbstractCPropertyTab;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
@@ -74,6 +75,8 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
   private Text t_cmd;
   /** browse files for cmake executable */
   private Button b_cmdBrowseFiles;
+  /** variables in cmake executable text field */
+  private Button b_cmdVariables;
   /** Combo that shows the generator names for cmake */
   private ComboViewer c_generator;
 
@@ -156,6 +159,21 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
         }
       });
 
+      b_cmdVariables = WidgetHelper.createButton(buttonBar, "Variables...",
+          true);
+      b_cmdVariables.addSelectionListener(new SelectionAdapter() {
+        @Override
+        public void widgetSelected(SelectionEvent e) {
+          final ICResourceDescription resDesc = getResDesc();
+          if (resDesc == null)
+            return;
+          ICConfigurationDescription cfgd= resDesc.getConfiguration();
+        String text = AbstractCPropertyTab.getVariableDialog(t_cmd.getShell(), cfgd);
+          if (text != null) {
+            t_cmd.insert(text);
+          }
+        }
+      });
       // to adjust sensitivity...
       b_cmdFromPath.addSelectionListener(new SelectionAdapter() {
         @Override
@@ -270,6 +288,7 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
   private void handleCommandEnabled(boolean enabled) {
     t_cmd.setEnabled(enabled);
     b_cmdBrowseFiles.setEnabled(enabled);
+    b_cmdVariables.setEnabled(enabled);
   }
 
   /**
