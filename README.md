@@ -43,6 +43,7 @@ https://raw.githubusercontent.com/15knots/cmake4eclipse/master/releng/comp-updat
 ## 1.4.9 (2017-??-??)
 ### Changes
 - Closed #36: Variable substitution for CMake executable
+- Added documentation on project builders
 
 ## 1.4.8 (2017-05-22)
 ### Changes
