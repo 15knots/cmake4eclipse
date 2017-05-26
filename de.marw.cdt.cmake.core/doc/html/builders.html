@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Project Builders</title>
+</head>
+<body>
+	<h1>Project Builders</h1>
+	<p>The CMake for CDT plugin provides the following <strong>Project Builders</strong>. 
+	(selectable in the <a href="PLUGINS_ROOT/org.eclipse.cdt.doc.user/reference/cdt_u_prop_build_toolchain.htm">
+	Tool Chain Editor tab</a>):</p>
+
+	<h3>CMake Builder (portable)</h3>
+	<p>This builder retrieves the name of the build tool from the cache file written
+	by cmake during build-script-generation. This approach has some benefits:
+	<ul>
+  <li>It allows you to build with tools other than <code>make</code>, 
+  for example <code>ninja</code>.</li>
+  <li>Since cmake does a fairly good job to detect the <strong>absolute</strong> file system path
+   of the build tool, you are not forced to put the tool into $PATH.</li>
+<li>It makes your Eclipse project being a cross-platform project: Build using make under Linux,
+build with MSYS make under windows; without adjusting the Eclipse project files.</li>
+</ul>
+This is the recommended builder.
+	</p>
+	
+	<h3>CMake Make Builder</h3>
+	<p>This builder simply invokes the <code>make</code> command from the executable search
+	path ($PATH) to build the project. This builder originates from the original states of this plugin
+	and is kept for compatibility reasons only.
+	</p>
+
+</body>
+</html>
