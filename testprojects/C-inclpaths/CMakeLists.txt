@@ -19,4 +19,6 @@ IF(CMAKE_COMPILER_IS_GNUCC)
   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fmessage-length=0 ")
 ENDIF(CMAKE_COMPILER_IS_GNUCC)
 
+include_directories( "${PROJECT_BINARY_DIR}")
+
 add_subdirectory(src)
