@@ -160,7 +160,7 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
 
     // construct matchers that detect the tool name...
     final String REGEX_CMD_HEAD =
-        "^(.*?" + Pattern.quote(File.separator) + ")(";
+        "^(.*?" + Pattern.quote(File.separator) + ")?(";
     final String REGEX_CMD_TAIL = ")\\s";
     for (Entry<String, IToolCommandlineParser> entry : knownCmdParsers
         .entrySet()) {

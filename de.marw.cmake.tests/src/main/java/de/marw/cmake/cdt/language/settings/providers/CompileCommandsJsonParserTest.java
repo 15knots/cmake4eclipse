@@ -52,6 +52,14 @@ public class CompileCommandsJsonParserTest {
     assertEquals("C++", "org.eclipse.cdt.core.g++", result.parser.getLanguageId());
   }
 
+  @Test
+  public void testDetermineParserForCommandline_clangplusplus_basename() {
+    ParserLookupResult result = testee.determineParserForCommandline("clang++ -C blah.c");
+    assertNotNull(result);
+    // verify that we got a C++ parser
+    assertEquals("C++", "org.eclipse.cdt.core.g++", result.parser.getLanguageId());
+  }
+
   /**
    * Test method for
    * {@link de.marw.cmake.cdt.language.settings.providers.CompileCommandsJsonParser#determineParserForCommandline(java.lang.String)}
