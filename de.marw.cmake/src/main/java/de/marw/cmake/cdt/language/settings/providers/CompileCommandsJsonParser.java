@@ -399,8 +399,7 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
       return false; // no matching parser found
     }
     // found a matching command-line parser
-    processCommandLine(storage, projectEntries, preferredCmdlineParser.parser, sourceFile,
-          preferredCmdlineParser.getReducedCommandLine());
+    processCommandLine(storage, projectEntries, preferredCmdlineParser.parser, sourceFile, line);
     return true; // could process command line
   }
 
