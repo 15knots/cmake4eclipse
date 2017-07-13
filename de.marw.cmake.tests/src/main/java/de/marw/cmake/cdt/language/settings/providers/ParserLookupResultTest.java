@@ -64,9 +64,16 @@ public class ParserLookupResultTest {
     assertNotNull(result);
     // verify that we got a C++ parser
     assertEquals("C++", "org.eclipse.cdt.core.g++", result.parser.getLanguageId());
+    assertEquals("reducedCommandLine", args, result.getReducedCommandLine());
 
-    String rest = result.getReducedCommandLine();
-    assertEquals("reducedCommandLine", args, rest);
+    // test without leading path
+    compiler = "c++";
+    cmd = compiler + " " + args;
+    result = parser.determineParserForCommandline(cmd);
+    assertNotNull(result);
+    // verify that we got a C++ parser
+    assertEquals("C++", "org.eclipse.cdt.core.g++", result.parser.getLanguageId());
+    assertEquals("reducedCommandLine", args, result.getReducedCommandLine());
   }
 
 }
