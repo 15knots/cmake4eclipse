@@ -351,17 +351,12 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     // load project properties..
     final ICConfigurationDescription cfgd = ManagedBuildManager.getDescriptionForConfiguration(config);
 
-    boolean needExportComileCommands = false;
+    boolean needExportComileCommands = true;
     boolean needVerboseBuild = false;
     {
       final List<ILanguageSettingsProvider> lsps =
           ((ILanguageSettingsProvidersKeeper) cfgd).getLanguageSettingProviders();
       for (ILanguageSettingsProvider lsp : lsps) {
-        if (!needExportComileCommands
-            && "de.marw.cmake.cdt.language.settings.providers.CompileCommandsJsonParser".equals(lsp.getId())) {
-          needExportComileCommands = true;
-          continue;
-        }
         if (!needVerboseBuild && ("org.eclipse.cdt.managedbuilder.core.GCCBuildCommandParser".equals(lsp.getId())
             || "de.marw.cmake.cdt.language.settings.providers.CmakeBuildOutputParser".equals(lsp.getId()))) {
           needVerboseBuild = true;
