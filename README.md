@@ -45,6 +45,7 @@ https://raw.githubusercontent.com/15knots/cmake4eclipse/master/releng/comp-updat
 - Fixed #36: Variable substitution for CMake executable
 - Added documentation on project builders
 - Fixed #41: CMAKE_EXPORT_COMPILE_COMMANDS Parser doesn't work if compiler command doesn't contain full path
+- Fixed #39: Enabling build output parser does not pass necessary arguments to cmake
 
 ## 1.4.8 (2017-05-22)
 ### Changes
