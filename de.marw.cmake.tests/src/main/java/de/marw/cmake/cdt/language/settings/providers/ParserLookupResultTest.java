@@ -1,11 +1,19 @@
-/**
+/*******************************************************************************
+ * Copyright (c) 2016-2017 Martin Weber.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  *
- */
+ * Contributors:
+ *      Martin Weber - Initial implementation
+ *******************************************************************************/
 package de.marw.cmake.cdt.language.settings.providers;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -16,13 +24,6 @@ import de.marw.cmake.cdt.language.settings.providers.CompileCommandsJsonParser.P
  *
  */
 public class ParserLookupResultTest {
-
-  private CompileCommandsJsonParser parser;
-
-  @Before
-  public void setUp() throws Exception {
-    parser = new CompileCommandsJsonParser();
-  }
 
   /**
    * @throws java.lang.Exception
@@ -43,7 +44,7 @@ public class ParserLookupResultTest {
         + " -g -fPIC -std=gnu++11 -o CMakeFiles/foo.dir/foo_automoc.cpp.o"
         + " -c /home/self/shared/qt5-project/build/Debug/foo_automoc.cpp";
     String cmd = compiler + " " + args;
-    ParserLookupResult result = parser.determineParserForCommandline(cmd);
+    ParserLookupResult result = CompileCommandsJsonParser.determineParserForCommandline(cmd);
     assertNotNull(result);
     assertTrue(result.canParse(cmd));
   }
@@ -60,7 +61,7 @@ public class ParserLookupResultTest {
         + " -g -fPIC -std=gnu++11 -o CMakeFiles/foo.dir/foo_automoc.cpp.o"
         + " -c /home/self/shared/qt5-project/build/Debug/foo_automoc.cpp";
     String cmd = compiler + " " + args;
-    ParserLookupResult result = parser.determineParserForCommandline(cmd);
+    ParserLookupResult result = CompileCommandsJsonParser.determineParserForCommandline(cmd);
     assertNotNull(result);
     // verify that we got a C++ parser
     assertEquals("C++", "org.eclipse.cdt.core.g++", result.parser.getLanguageId());
@@ -69,7 +70,7 @@ public class ParserLookupResultTest {
     // test without leading path
     compiler = "c++";
     cmd = compiler + " " + args;
-    result = parser.determineParserForCommandline(cmd);
+    result = CompileCommandsJsonParser.determineParserForCommandline(cmd);
     assertNotNull(result);
     // verify that we got a C++ parser
     assertEquals("C++", "org.eclipse.cdt.core.g++", result.parser.getLanguageId());

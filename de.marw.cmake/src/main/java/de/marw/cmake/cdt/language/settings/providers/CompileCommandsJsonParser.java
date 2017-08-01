@@ -49,7 +49,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jetty.util.ajax.JSON;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -92,10 +91,16 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
    * takes part in the current build. The Matcher detects whether a command line
    * is an invocation of the tool.
    */
-  private static final HashMap<Matcher, IToolCommandlineParser> detectorParserMap;
+  private static final Map<Matcher, IToolCommandlineParser> detectorParserMap;
+  /**
+   * same as {@link #detectorParserMap}, but for windows where cmake places a
+   * backslash in the command path. Unused (<code>null</code>), when running
+   * under *nix.
+   */
+  private static Map<Matcher, IToolCommandlineParser> winDetectorParserMap;
   static {
     detectorParserMap =
-        new HashMap<Matcher, IToolCommandlineParser>(18, 1.0f);
+        new HashMap<Matcher, IToolCommandlineParser>(22, 1.0f);
 
     /** Names of known tools along with their command line argument parsers */
     final Map<String, IToolCommandlineParser> knownCmdParsers =
@@ -159,20 +164,30 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
     knownCmdParsers.put("icl.exe", cl);
 
     // construct matchers that detect the tool name...
-    final String REGEX_CMD_HEAD =
-        "^(.*?" + Pattern.quote(File.separator) + ")??(";
+    final String REGEX_CMD_HEAD = "^(.*?/)??(";
+    final String REGEX_CMD_HEAD_LEGACY = "^(.*?" + Pattern.quote("\\") + ")??(";
     final String REGEX_CMD_TAIL = ")\\s";
     for (Entry<String, IToolCommandlineParser> entry : knownCmdParsers
         .entrySet()) {
       // 'cc' -> matches
       // '/bin/cc' -> matches
       // '/usr/bin/cc' -> matches
-      // 'C:\program files\mingw\bin\cc' -> matches
+      // 'C:/program files/mingw/bin/cc' -> matches
       Matcher cmdDetector = Pattern
           .compile(
               REGEX_CMD_HEAD + entry.getKey() + REGEX_CMD_TAIL)
           .matcher("");
       detectorParserMap.put(cmdDetector, entry.getValue());
+    }
+
+    if (File.separatorChar == '\\') {
+      winDetectorParserMap= new HashMap<Matcher, IToolCommandlineParser>();
+      // add matchers for windows NTFS
+      for (Entry<String, IToolCommandlineParser> entry : knownCmdParsers.entrySet()) {
+        // 'C:\program files\mingw\bin\cc' -> matches
+        Matcher cmdDetector = Pattern.compile(REGEX_CMD_HEAD_LEGACY + entry.getKey() + REGEX_CMD_TAIL).matcher("");
+        winDetectorParserMap.put(cmdDetector, entry.getValue());
+      }
     }
   }
 
@@ -391,9 +406,20 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
       // try each tool..
       preferredCmdlineParser= determineParserForCommandline(line);
     }
-    if (preferredCmdlineParser == null && Platform.getOS() == Platform.OS_WIN32) {
-      // try workaround
-      preferredCmdlineParser= determineParserForCommandline(expandShortFileName(line));
+    if (preferredCmdlineParser == null && File.separatorChar == '\\') {
+      // try with backslash as file separator on windows
+      if (winDetectorParserMap!=null){
+        preferredCmdlineParser = determineParserForCommandline(line, winDetectorParserMap);
+      }
+      if (preferredCmdlineParser == null) {
+        // try workaround for windows short file names
+        final String shortPathExpanded = expandShortFileName(line);
+        preferredCmdlineParser= determineParserForCommandline(shortPathExpanded, winDetectorParserMap);
+        if (preferredCmdlineParser == null) {
+          // try for cmake from mingw suite with short file names under windows
+          preferredCmdlineParser= determineParserForCommandline(shortPathExpanded);
+        }
+      }
     }
     if (preferredCmdlineParser == null) {
       return false; // no matching parser found
@@ -412,7 +438,11 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
    * or {@code null} if no command line parser for the specified command-line was found.
    */
   // has package scope for unittest purposes
-  ParserLookupResult determineParserForCommandline(String commandLine){
+  static ParserLookupResult determineParserForCommandline(String commandLine){
+    return determineParserForCommandline(commandLine, detectorParserMap);
+  }
+
+  private static ParserLookupResult determineParserForCommandline(String commandLine,Map<Matcher, IToolCommandlineParser> detectorParserMap){
     for (Entry<Matcher, IToolCommandlineParser> detectorInfo : detectorParserMap
         .entrySet()) {
       final Matcher matcher = detectorInfo.getKey();
@@ -452,7 +482,7 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
       return commandLine2.toString();
     } catch (IOException e) {
       log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID,
-          "CompileCommandsJsonParserFSN#determineParserForCommandline()", e));
+          "CompileCommandsJsonParser#expandShortFileName()", e));
     }
     return null;
   }
@@ -529,7 +559,7 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
     try {
       tryParseJson(false);
     } catch (CoreException ex) {
-      log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, "tryParseJson()",
+      log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, "shutdown()",
           ex));
     }
     // release resources for garbage collector
@@ -578,7 +608,7 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
         }
       } catch (CoreException ex) {
         log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID,
-            "tryParseJson()", ex));
+            "registerListener()", ex));
       }
     }
     // release resources for garbage collector
