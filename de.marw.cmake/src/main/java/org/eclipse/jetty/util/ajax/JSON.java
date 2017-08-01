@@ -90,7 +90,7 @@ public class JSON
     static final Logger LOG = Log.getLogger(JSON.class);
     public final static JSON DEFAULT = new JSON();
 
-    private Map<String, Convertor> _convertors = new ConcurrentHashMap<String, Convertor>();
+    private Map<String, Convertor> _convertors = new ConcurrentHashMap<>();
     private int _stringBufferSize = 1024;
 
     public JSON()
@@ -127,7 +127,7 @@ public class JSON
      * @param convertor
      *            the convertor
      */
-    public static void registerConvertor(Class forClass, Convertor convertor)
+    public static void registerConvertor(Class<?> forClass, Convertor convertor)
     {
         DEFAULT.addConvertor(forClass,convertor);
     }
@@ -153,7 +153,7 @@ public class JSON
     }
 
     /* ------------------------------------------------------------ */
-    public static String toString(Map object)
+    public static String toString(Map<?, ?> object)
     {
         StringBuilder buffer = new StringBuilder(DEFAULT.getStringBufferSize());
         DEFAULT.appendMap(buffer,object);
@@ -299,9 +299,9 @@ public class JSON
             else if (object instanceof Generator)
                 appendJSON(buffer,(Generator)object);
             else if (object instanceof Map)
-                appendMap(buffer,(Map)object);
+                appendMap(buffer,(Map<?, ?>)object);
             else if (object instanceof Collection)
-                appendArray(buffer,(Collection)object);
+                appendArray(buffer,(Collection<?>)object);
             else if (object.getClass().isArray())
                 appendArray(buffer,object);
             else if (object instanceof Number)
@@ -359,7 +359,7 @@ public class JSON
     {
         appendJSON(buffer,new Convertible()
         {
-            public void fromJSON(Map object)
+            public void fromJSON(Map<String, Object> object)
             {
             }
 
@@ -438,13 +438,13 @@ public class JSON
 
     /* ------------------------------------------------------------ */
     @Deprecated
-    public void appendArray(StringBuffer buffer, Collection collection)
+    public void appendArray(StringBuffer buffer, Collection<?> collection)
     {
         appendArray((Appendable)buffer,collection);
     }
 
     /* ------------------------------------------------------------ */
-    public void appendArray(Appendable buffer, Collection collection)
+    public void appendArray(Appendable buffer, Collection<?> collection)
     {
         try
         {
@@ -455,7 +455,7 @@ public class JSON
             }
 
             buffer.append('[');
-            Iterator iter = collection.iterator();
+            Iterator<?> iter = collection.iterator();
             boolean first = true;
             while (iter.hasNext())
             {
@@ -590,7 +590,7 @@ public class JSON
     /* ------------------------------------------------------------ */
     protected Map<String, Object> newMap()
     {
-        return new HashMap<String, Object>();
+        return new HashMap<>();
     }
 
     /* ------------------------------------------------------------ */
@@ -612,7 +612,7 @@ public class JSON
     }
 
     /* ------------------------------------------------------------ */
-    protected Object convertTo(Class type, Map map)
+    protected Object convertTo(Class<?> type, Map<String, Object> map)
     {
         if (type != null && Convertible.class.isAssignableFrom(type))
         {
@@ -645,7 +645,7 @@ public class JSON
      * @param convertor
      *            the convertor
      */
-    public void addConvertor(Class forClass, Convertor convertor)
+    public void addConvertor(Class<?> forClass, Convertor convertor)
     {
         _convertors.put(forClass.getName(),convertor);
     }
@@ -662,18 +662,18 @@ public class JSON
      *            The class
      * @return a {@link JSON.Convertor} or null if none were found.
      */
-    protected Convertor getConvertor(Class forClass)
+    protected Convertor getConvertor(Class<?> forClass)
     {
-        Class cls = forClass;
+        Class<?> cls = forClass;
         if(cls==null)
           return null;
         Convertor convertor = _convertors.get(cls.getName());
         if (convertor == null && this != DEFAULT)
             convertor = DEFAULT.getConvertor(cls);
 
-        while (convertor == null && cls != null && cls != Object.class)
+        while (convertor == null && cls != Object.class)
         {
-            Class[] ifs = cls.getInterfaces();
+            Class<?>[] ifs = cls.getInterfaces();
             int i = 0;
             while (convertor == null && ifs != null && i < ifs.length)
                 convertor = _convertors.get(ifs[i++].getName());
@@ -948,7 +948,7 @@ public class JSON
         {
             try
             {
-                Class c = Loader.loadClass(JSON.class,classname);
+                Class<?> c = Loader.loadClass(JSON.class,classname);
                 return convertTo(c,map);
             }
             catch (ClassNotFoundException e)
@@ -966,7 +966,7 @@ public class JSON
             throw new IllegalStateException();
 
         int size = 0;
-        ArrayList list = null;
+        ArrayList<Object> list = null;
         Object item = null;
         boolean coma = true;
 
@@ -1006,7 +1006,7 @@ public class JSON
                             item = contextForArray().parse(source);
                         else if (list == null)
                         {
-                            list = new ArrayList();
+                            list = new ArrayList<>();
                             list.add(item);
                             item = contextForArray().parse(source);
                             list.add(item);
@@ -1338,7 +1338,7 @@ public class JSON
             c = 0;
         }
 
-        public void addClass(Class type)
+        public void addClass(Class<?> type)
         {
             try
             {
@@ -1557,7 +1557,7 @@ public class JSON
      */
     public interface Output
     {
-        public void addClass(Class c);
+        public void addClass(Class<?> c);
 
         public void add(Object obj);
 
@@ -1588,7 +1588,7 @@ public class JSON
     {
         public void toJSON(Output out);
 
-        public void fromJSON(Map object);
+        public void fromJSON(Map<String, Object> object);
     }
 
     /* ------------------------------------------------------------ */
@@ -1607,7 +1607,7 @@ public class JSON
     {
         public void toJSON(Object obj, Output out);
 
-        public Object fromJSON(Map object);
+        public Object fromJSON(Map<String, Object> object);
     }
 
     /* ------------------------------------------------------------ */
@@ -1633,7 +1633,7 @@ public class JSON
         /* ------------------------------------------------------------ */
         /**
          * Construct a literal JSON instance for use by
-         * {@link JSON#toString(Object)}. If {@link Log#isDebugEnabled()} is
+         * {@link JSON#toString(Object)}. If {@link Logger#isDebugEnabled()} is
          * true, the JSON will be parsed to check validity
          *
          * @param json
