@@ -144,7 +144,7 @@ public class CMakeCacheFileParserTest {
 
   /**
    * Test method for
-   * {@link de.marw.cmake.cmakecache.CMakeCacheFileParser#parse(java.io.InputStream, de.marw.cmake.cmakecache.CMakeCacheFileParser.EntryFilter, Collection, List)}
+   * {@link de.marw.cdt.cmake.core.cmakecache.CMakeCacheFileParser#parse(java.io.InputStream, de.marw.cdt.cmake.core.cmakecache.CMakeCacheFileParser.EntryFilter, Collection, List)}
    * .
    *
    * @throws Exception

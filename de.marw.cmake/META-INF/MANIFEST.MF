@@ -7,7 +7,7 @@ Bundle-SymbolicName: de.marw.cmake;singleton:=true
 Bundle-Version: 1.2.10.qualifier
 Bundle-Vendor: Martin Weber
 Bundle-Localization: plugin
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Import-Package: de.marw.cdt.cmake.core.cmakecache,
  org.eclipse.cdt.build.core.scannerconfig,

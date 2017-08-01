@@ -20,7 +20,6 @@ import java.util.List;
 import org.eclipse.cdt.core.CCorePlugin;
 import org.eclipse.cdt.core.ConsoleOutputStream;
 import org.eclipse.cdt.core.ICommandLauncher;
-import org.eclipse.cdt.core.cdtvariables.CdtVariableException;
 import org.eclipse.cdt.core.cdtvariables.ICdtVariableManager;
 import org.eclipse.cdt.core.envvar.IEnvironmentVariable;
 import org.eclipse.cdt.core.language.settings.providers.ILanguageSettingsProvider;
