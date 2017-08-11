@@ -41,6 +41,7 @@ import org.eclipse.cdt.core.settings.model.ICProjectDescription;
 import org.eclipse.cdt.core.settings.model.ICSettingEntry;
 import org.eclipse.cdt.ui.PreferenceConstants;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -49,6 +50,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jetty.util.ajax.JSON;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -76,8 +78,11 @@ import de.marw.cmake.CMakePlugin;
 public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
     implements ILanguageSettingsProvider, ICListenerAgent, ICBuildOutputParser,
     Cloneable {
+  private static final String WORKBENCH_WILL_NOT_KNOW_ALL_MSG = "Your workbench will not know all include paths and preprocessor defines.";
+
   private static final ILog log = CMakePlugin.getDefault().getLog();
 
+  private static final String MARKER_ID= CMakePlugin.PLUGIN_ID +".CompileCommandsJsonParserMarker";
   /**
    * Storage to keep settings entries
    */
@@ -100,11 +105,11 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
   private static Map<Matcher, IToolCommandlineParser> winDetectorParserMap;
   static {
     detectorParserMap =
-        new HashMap<Matcher, IToolCommandlineParser>(22, 1.0f);
+        new HashMap<>(22, 1.0f);
 
     /** Names of known tools along with their command line argument parsers */
     final Map<String, IToolCommandlineParser> knownCmdParsers =
-        new HashMap<String, IToolCommandlineParser>(16, 1.0f);
+        new HashMap<>(16, 1.0f);
 
     final IToolArgumentParser[] posix_cc_args =
         { new ToolArgumentParsers.IncludePath_C_POSIX(),
@@ -181,7 +186,7 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
     }
 
     if (File.separatorChar == '\\') {
-      winDetectorParserMap= new HashMap<Matcher, IToolCommandlineParser>();
+      winDetectorParserMap= new HashMap<>();
       // add matchers for windows NTFS
       for (Entry<String, IToolCommandlineParser> entry : knownCmdParsers.entrySet()) {
         // 'C:\program files\mingw\bin\cc' -> matches
@@ -259,24 +264,25 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
 
         if (store.lastModified < tsJsonModified) {
           // must parse json file...
+          project.deleteMarkers(MARKER_ID, false, IResource.DEPTH_INFINITE);
           try {
+            final String msg0 = "File format error: unexpected entry '" + "asdas"
+                + "'. " + WORKBENCH_WILL_NOT_KNOW_ALL_MSG;
+        createMarker(jsonFileRc, msg0);
             // parse file...
             JSON parser = new JSON();
             Reader in = new FileReader(jsonFile);
-
             Object parsed = parser.parse(new JSON.ReaderSource(in), false);
             if (parsed instanceof Object[]) {
               for (Object o : (Object[]) parsed) {
                 if (o instanceof Map) {
                   processJsonEntry(store, projectEntries, (Map<?, ?>) o,
-                      jsonPath);
+                      jsonFileRc);
                 } else {
                   // expected Map object, skipping entry.toString()
-                  log.log(new Status(IStatus.WARNING, CMakePlugin.PLUGIN_ID,
-                      "'" + project.getName() + "' " + "File format error: "
-                          + jsonPath.toString() + ": unexpected entry '" + o
-                          + "', skipped",
-                      null));
+                  final String msg = "File format error: unexpected entry '" + o
+                          + "'. " + WORKBENCH_WILL_NOT_KNOW_ALL_MSG;
+                  createMarker(jsonFileRc, msg);
                 }
               }
               /*
@@ -313,15 +319,14 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
               });
             } else {
               // file format error
-              log.log(new Status(IStatus.WARNING, CMakePlugin.PLUGIN_ID,
-                  "'" + project.getName() + "' " + "File format error: "
-                      + jsonPath.toString() + " does not seem to be JSON",
-                  null));
+              final String msg = "File does not seem to be in JSON format. "
+                  + WORKBENCH_WILL_NOT_KNOW_ALL_MSG;
+              createMarker(jsonFileRc, msg);
             }
           } catch (IOException ex) {
-            log.log(new Status(IStatus.WARNING, CMakePlugin.PLUGIN_ID, "'"
-                + project.getName() + "' " + "Failed to read file " + jsonFile,
-                ex));
+            final String msg = "Failed to read file " + jsonFile+". "
+                + WORKBENCH_WILL_NOT_KNOW_ALL_MSG;
+            createMarker(jsonFileRc, msg);
           }
         }
         return;
@@ -329,8 +334,9 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
     }
     if (!initializingWorkbench) {
       // no json file was produced in the build
-      log.log(new Status(IStatus.WARNING, CMakePlugin.PLUGIN_ID,
-          "'" + jsonPath + "' " + " not created in the build", null));
+      final String msg = "File '" + jsonPath +"' was not created in the build. "
+          + WORKBENCH_WILL_NOT_KNOW_ALL_MSG;
+      createMarker(jsonFileRc, msg);
     }
   }
 
@@ -344,12 +350,13 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
    *        where to store project wide setting entries
    * @param sourceFileInfo
    *        a Map of type Map<String,String>
-   * @param jsonPath
+   * @param jsonFile
    *        the JSON file being parsed (for logging only)
+   * @throws CoreException if marker creation failed
    */
   private void processJsonEntry(TimestampedLanguageSettingsStorage storage,
       ProjectLanguageSettingEntries projectEntries, Map<?, ?> sourceFileInfo,
-      IPath jsonPath) {
+      IFile jsonFile) throws CoreException {
     if (sourceFileInfo.containsKey("file")
         && sourceFileInfo.containsKey("command")) {
       final String file = sourceFileInfo.get("file").toString();
@@ -362,10 +369,9 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
           if (files.length > 0) {
             if (!processCommandLineAnyDetector(storage, projectEntries,
                 files[0], cmdLine)) {
-              log.log(new Status(IStatus.WARNING,
-                  CMakePlugin.PLUGIN_ID, jsonPath.toString()
-                      + ": No parser for command '" + cmdLine + "', skipped",
-                  null));
+              String message="No parser for command '" + cmdLine + "'. "
+                  + WORKBENCH_WILL_NOT_KNOW_ALL_MSG;
+              createMarker(jsonFile, message);
             }
           }
           return;
@@ -373,11 +379,28 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
       }
     }
     // unrecognized entry, skipping
-    log.log(
-        new Status(IStatus.WARNING, CMakePlugin.PLUGIN_ID,
-            "File format error: " + jsonPath.toString()
-                + ": 'file' or 'command' missing in JSON object, skipped",
-            null));
+    final String msg = "File format error: "
+        + ": 'file' or 'command' missing in JSON object. "
+        + WORKBENCH_WILL_NOT_KNOW_ALL_MSG;
+    createMarker(jsonFile, msg);
+  }
+
+  private static void createMarker(IFile file, String message) throws CoreException {
+    IMarker marker;
+    try {
+      marker = file.createMarker(MARKER_ID);
+    } catch (CoreException ex) {
+      // resource is not (yet) known by the workbench
+      file.refreshLocal(IResource.DEPTH_ZERO, new NullProgressMonitor());
+      try {
+        marker = file.createMarker(MARKER_ID);
+      } catch (CoreException ex2) {
+        // resource is not known by the workbench, use project instead of file
+        marker = file.getProject().createMarker(MARKER_ID);
+      }
+    }
+    marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_INFO);
+    marker.setAttribute(IMarker.MESSAGE, message);
   }
 
   /**
@@ -674,7 +697,7 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
      * {@link ICConfigurationDescription#getId()}
      */
     private Map<String, TimestampedLanguageSettingsStorage> storages =
-        new WeakHashMap<String, TimestampedLanguageSettingsStorage>();
+        new WeakHashMap<>();
 
     public List<ICLanguageSettingEntry> getSettingEntries(
         ICConfigurationDescription cfgDescription, IResource rc,
@@ -735,7 +758,7 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
      * {@link ICConfigurationDescription#getId()}
      */
     private final Map<String, Set<ICLanguageSettingEntry>> languages =
-        new HashMap<String, Set<ICLanguageSettingEntry>>(2, 1.0f);
+        new HashMap<>(2, 1.0f);
 
     /**
      * Adds a language settings entry for the current project.
@@ -749,7 +772,7 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
         ICLanguageSettingEntry entry) {
       Set<ICLanguageSettingEntry> langEntries = languages.get(languageId);
       if (langEntries == null) {
-        langEntries = new HashSet<ICLanguageSettingEntry>(8);
+        langEntries = new HashSet<>(8);
         languages.put(languageId, langEntries);
       }
       langEntries.add(entry);
