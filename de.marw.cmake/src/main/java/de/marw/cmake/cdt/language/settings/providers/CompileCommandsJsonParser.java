@@ -266,9 +266,6 @@ public class CompileCommandsJsonParser extends AbstractExecutableExtensionBase
           // must parse json file...
           project.deleteMarkers(MARKER_ID, false, IResource.DEPTH_INFINITE);
           try {
-            final String msg0 = "File format error: unexpected entry '" + "asdas"
-                + "'. " + WORKBENCH_WILL_NOT_KNOW_ALL_MSG;
-        createMarker(jsonFileRc, msg0);
             // parse file...
             JSON parser = new JSON();
             Reader in = new FileReader(jsonFile);
