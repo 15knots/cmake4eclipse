@@ -19,8 +19,12 @@
           id="de.marw.cmake.cdt.language.settings.providers.CompileCommandsJsonParser"
           name="CMAKE_EXPORT_COMPILE_COMMANDS Parser"
           prefer-non-shared="true">
-         <language-scope id="org.eclipse.cdt.core.gcc"/>
-         <language-scope id="org.eclipse.cdt.core.g++"/>
+       <language-scope
+             id="org.eclipse.cdt.core.gcc">
+       </language-scope>
+       <language-scope
+             id="org.eclipse.cdt.core.g++">
+       </language-scope>
     </provider>
     <provider
           class="de.marw.cmake.cdt.language.settings.providers.CmakeBuildOutputParser"
@@ -35,5 +39,12 @@
        name="CMAKE_EXPORT_COMPILE_COMMANDS Parser Problem"
        point="org.eclipse.core.resources.markers">
 	<super type="org.eclipse.core.resources.problemmarker"/>
+ </extension>
+ <extension
+       point="org.eclipse.cdt.ui.LanguageSettingsProviderAssociation">
+    <class-association
+          class="de.marw.cmake.cdt.language.settings.providers.CompileCommandsJsonParser"
+          page="de.marw.cmake.cdt.ui.language.settings.providers.CompileCommandsJsonParserOptionPage">
+    </class-association>
  </extension>
 </plugin>

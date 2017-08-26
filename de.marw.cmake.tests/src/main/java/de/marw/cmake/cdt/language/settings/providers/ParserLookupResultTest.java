@@ -12,12 +12,10 @@ package de.marw.cmake.cdt.language.settings.providers;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
-import org.junit.BeforeClass;
 import org.junit.Test;
 
-import de.marw.cmake.cdt.language.settings.providers.CompileCommandsJsonParser.ParserLookupResult;
+import de.marw.cmake.cdt.language.settings.providers.CompileCommandsJsonParser.ParserDetectionResult;
 
 /**
  * @author weber
@@ -25,16 +23,11 @@ import de.marw.cmake.cdt.language.settings.providers.CompileCommandsJsonParser.P
  */
 public class ParserLookupResultTest {
 
-  /**
-   * @throws java.lang.Exception
-   */
-  @BeforeClass
-  public static void setUpBeforeClass() throws Exception {
-  }
+  CompileCommandsJsonParser testee= new CompileCommandsJsonParser();
 
   /**
    * Test method for
-   * {@link de.marw.cmake.cdt.language.settings.providers.CompileCommandsJsonParser.ParserLookupResult#canParse(java.lang.String)}.
+   * {@link de.marw.cmake.cdt.language.settings.providers.CompileCommandsJsonParser#determineDetector(String, boolean)}
    */
   @Test
   public void testCanParse() {
@@ -44,14 +37,13 @@ public class ParserLookupResultTest {
         + " -g -fPIC -std=gnu++11 -o CMakeFiles/foo.dir/foo_automoc.cpp.o"
         + " -c /home/self/shared/qt5-project/build/Debug/foo_automoc.cpp";
     String cmd = compiler + " " + args;
-    ParserLookupResult result = CompileCommandsJsonParser.determineParserForCommandline(cmd);
+    ParserDetectionResult result = testee.determineDetector(cmd, false);
     assertNotNull(result);
-    assertTrue(result.canParse(cmd));
   }
 
   /**
    * Test method for
-   * {@link de.marw.cmake.cdt.language.settings.providers.CompileCommandsJsonParser.ParserLookupResult#getReducedCommandLine()}.
+   * {@link de.marw.cmake.cdt.language.settings.providers.CompileCommandsJsonParser.ParserDetectionResult#getReducedCommandLine()}.
    */
   @Test
   public void testGetReducedCommandLine() {
@@ -61,19 +53,19 @@ public class ParserLookupResultTest {
         + " -g -fPIC -std=gnu++11 -o CMakeFiles/foo.dir/foo_automoc.cpp.o"
         + " -c /home/self/shared/qt5-project/build/Debug/foo_automoc.cpp";
     String cmd = compiler + " " + args;
-    ParserLookupResult result = CompileCommandsJsonParser.determineParserForCommandline(cmd);
+    ParserDetectionResult result = testee.determineDetector(cmd, false);
     assertNotNull(result);
     // verify that we got a C++ parser
-    assertEquals("C++", "org.eclipse.cdt.core.g++", result.parser.getLanguageId());
+    assertEquals("C++", "org.eclipse.cdt.core.g++", result.detectorWMethod.detector.parser.getLanguageId());
     assertEquals("reducedCommandLine", args, result.getReducedCommandLine());
 
     // test without leading path
     compiler = "c++";
     cmd = compiler + " " + args;
-    result = CompileCommandsJsonParser.determineParserForCommandline(cmd);
+    result = testee.determineDetector(cmd, false);
     assertNotNull(result);
     // verify that we got a C++ parser
-    assertEquals("C++", "org.eclipse.cdt.core.g++", result.parser.getLanguageId());
+    assertEquals("C++", "org.eclipse.cdt.core.g++", result.detectorWMethod.detector.parser.getLanguageId());
     assertEquals("reducedCommandLine", args, result.getReducedCommandLine());
   }
 
