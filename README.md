@@ -40,7 +40,7 @@ https://raw.githubusercontent.com/15knots/cmake4eclipse/master/releng/comp-updat
 
 ---
 # Release History
-## 1.5.0 (2017-08-upcoming)
+## 1.5.0 (2017-08-26)
 ### Changes
 - fixed #43 CMAKE_EXPORT_COMPILE_COMMANDS Parser should support different versions of compilers
 - Fixed #44: CMAKE_EXPORT_COMPILE_COMMANDS Parser fails for command paths using a forward slash
