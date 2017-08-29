@@ -66,7 +66,6 @@ public class CompileCommandsJsonParserTest {
   @Test
   public void testDetermineParserForCommandline_withVersion() {
     testee.setVersionPatternEnabled(true);
-    testee.setVersionPattern("-?\\d+(\\.\\d+)*");
     ParserDetectionResult result = testee.determineDetector("/usr/bin/cc-4.1 -C blah.c", false);
     assertNotNull(result);
     // verify that we got a C++ parser
@@ -76,6 +75,14 @@ public class CompileCommandsJsonParserTest {
     assertNotNull(result);
     // verify that we got a C++ parser
     assertEquals("C", "org.eclipse.cdt.core.gcc", result.detectorWMethod.detector.parser.getLanguageId());
+
+    result = testee.determineDetector("/apps/tools/cent_os72/binlinks/g++-7.1 "
+        + "-I/apps/tools/cent_os72/thirdparty/boost/boost_1_64_0/include "
+        + "-I/home/XXX/repositories/bepa/common/include -g -Wall "
+        + "-c /home/XXX/repositories/bepa/common/settings/src/settings.cpp", true);
+    assertNotNull(result);
+    // verify that we got a C++ parser
+    assertEquals("C", "org.eclipse.cdt.core.g++", result.detectorWMethod.detector.parser.getLanguageId());
 }
 
 }
