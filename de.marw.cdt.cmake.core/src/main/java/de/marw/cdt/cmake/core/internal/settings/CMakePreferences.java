@@ -44,12 +44,14 @@ public class CMakePreferences {
   /**  */
   static final String ELEM_UNDEFINES = "undefs";
   private static final String ELEM_OPTIONS = "options";
+  private static final String ATTR_CACHE_FILE = "cacheEntriesFile";
 
   private boolean warnNoDev, debugTryCompile, debugOutput, trace,
       warnUnitialized, warnUnused;
 
-  private List<CmakeDefine> defines = new ArrayList<CmakeDefine>(0);
-  private List<CmakeUnDefine> undefines = new ArrayList<CmakeUnDefine>(0);
+  private List<CmakeDefine> defines = new ArrayList<>(0);
+  private List<CmakeUnDefine> undefines = new ArrayList<>(0);
+  private String cacheFile;
 
   private LinuxPreferences linuxPreferences = new LinuxPreferences();
 
@@ -74,6 +76,7 @@ public class CMakePreferences {
     warnUnused = false;
     defines.clear();
     undefines.clear();
+    cacheFile= null;
 
 //    linuxPreferences.reset();
 //    windowsPreferences.reset();
@@ -103,6 +106,7 @@ public class CMakePreferences {
         warnUnitialized = Boolean.parseBoolean(child
             .getAttribute(ATTR_WARN_UNITIALIZED));
         warnUnused = Boolean.parseBoolean(child.getAttribute(ATTR_WARN_UNUSED));
+        cacheFile = child.getAttribute(ATTR_CACHE_FILE);
       } else if (ELEM_DEFINES.equals(child.getName())) {
         // defines...
         Util.deserializeCollection(defines, new CmakeDefineSerializer(), child);
@@ -158,6 +162,11 @@ public class CMakePreferences {
       pOpts.setAttribute(ATTR_WARN_UNUSED, String.valueOf(warnUnused));
     } else {
       pOpts.removeAttribute(ATTR_WARN_UNUSED);
+    }
+    if (cacheFile != null) {
+      pOpts.setAttribute(ATTR_CACHE_FILE, cacheFile);
+    } else {
+      pOpts.removeAttribute(ATTR_CACHE_FILE);
     }
 
     // defines...
@@ -278,6 +287,29 @@ public class CMakePreferences {
 
   public WindowsPreferences getWindowsPreferences() {
     return windowsPreferences;
+  }
+
+  /**
+   * Gets the name of the file that is used to pre-populate the cmake cache.
+   * {@code -C}
+   *
+   * @return the file name or <code>null</code> if the cmake cache shall not be
+   *         pre-populated.
+   */
+  public String getCacheFile() {
+    return cacheFile;
+  }
+
+  /**
+   * Sets the name of the file that is used to pre-populate the cmake cache.
+   * {@code -C}
+   *
+   * @param cacheFile
+   *          the file name or <code>null</code> if the cmake cache shall not be
+   *          pre-populated.
+   */
+  public void setCacheFile(String cacheFile) {
+    this.cacheFile= cacheFile;
   }
 
 }

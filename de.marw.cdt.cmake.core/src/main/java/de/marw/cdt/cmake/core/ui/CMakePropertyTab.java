@@ -16,17 +16,25 @@ import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
 import org.eclipse.cdt.core.settings.model.ICMultiConfigDescription;
 import org.eclipse.cdt.core.settings.model.ICResourceDescription;
 import org.eclipse.cdt.core.settings.model.ICStorageElement;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.dialogs.FilteredItemsSelectionDialog;
+import org.eclipse.ui.dialogs.FilteredResourcesSelectionDialog;
 
 import de.marw.cdt.cmake.core.CdtPlugin;
 import de.marw.cdt.cmake.core.internal.settings.CMakePreferences;
@@ -50,6 +58,10 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
   private Button b_trace;
   private Button b_warnUnitialized;
   private Button b_warnUnused;
+  /** browse files for cache file */
+  private Button b_prePopBrowseFiles;
+  /** pre-populate cache from file */
+  private Text t_cacheFile;
 
   /**
    * the preferences associated with our configurations to manage. Initialized
@@ -89,6 +101,37 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
       b_warnUnused = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2,
           "Warn about un&used variables \t(--warn-unused-vars)");
       b_warnUnused.addListener(SWT.Selection, tsl);
+
+      // cmake prepopulate cache group...
+      {
+        Group gr2 = WidgetHelper.createGroup(gr, SWT.FILL, 2,
+            "Pre-populate CMake cache entries from file (-C)", 3);
+
+        setupLabel(gr2, "&File", 1, SWT.BEGINNING);
+
+        t_cacheFile = setupText(gr2, 1, GridData.FILL_HORIZONTAL);
+        // "Browse..."  dialog launcher buttons...
+        b_prePopBrowseFiles = WidgetHelper.createButton(gr2, "&Browse...",
+            true);
+        b_prePopBrowseFiles.addSelectionListener(new SelectionAdapter() {
+          @Override
+          public void widgetSelected(SelectionEvent e) {
+            FilteredResourcesSelectionDialog dialog = new FilteredResourcesSelectionDialog(t_cacheFile.getShell(), false,
+                page.getProject(), IResource.FILE);
+            dialog.setTitle("Select file");
+            dialog.setInitialPattern("c*.txt", FilteredItemsSelectionDialog.FULL_SELECTION);
+            dialog.open();
+            Object[] file = dialog.getResult();
+            if (file != null) {
+              // insert selected resource name
+              if (file[0] instanceof IFile) {
+                t_cacheFile.insert(((IFile) file[0]).getProjectRelativePath().toPortableString());
+              }
+            }
+          }
+        });
+
+      } // cmake prepopulate cache group
     } // cmake options group
 
   }
@@ -122,6 +165,19 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
       log.log(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID, null, ex));
     }
     updateDisplay();
+  }
+
+  /**
+   * Sets whether the user can edit the cache-file input field.
+   *
+   * @param cacheFileName
+   *          the text to display in the cache-file field
+   */
+  private void setCacheFileEditable(boolean editable, String cacheFileName) {
+    t_cacheFile.setText(cacheFileName == null ? "" : cacheFileName);
+    t_cacheFile.setEditable(editable);
+    t_cacheFile.setEnabled(editable);
+    b_prePopBrowseFiles.setEnabled(editable);
   }
 
   /**
@@ -174,6 +230,29 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
         bs.set(i, prefs[i].isWarnUnused());
       }
       enterTristateOrToggleMode(b_warnUnused, bs, prefs.length);
+
+      // t_cacheFile
+      /*
+       * make t_cacheFile disabled, if its settings are not the same in all
+       * configurations
+       */
+      boolean cacheFileEditable= true;
+      final String cf0 = prefs[0].getCacheFile();
+      for (int i = 1; i < prefs.length; i++) {
+        String cf = prefs[i].getCacheFile();
+        if (cf0 != null) {
+          if (!cf0.equals(cf)) {
+            // configurations differ
+            cacheFileEditable=false;
+            break;
+          }
+        } else if(cf!= null){
+          // configurations differ
+          cacheFileEditable=false;
+          break;
+        }
+      }
+      setCacheFileEditable(cacheFileEditable, cacheFileEditable ? cf0 : " <configurations differ> ");
     } else {
       // we are editing a single configuration...
       // all buttons are in toggle mode
@@ -183,6 +262,8 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
       enterToggleMode(b_trace, pref.isTrace());
       enterToggleMode(b_warnUnitialized, pref.isWarnUnitialized());
       enterToggleMode(b_warnUnused, pref.isWarnUnused());
+      final String cacheFileName= pref.getCacheFile();
+      setCacheFileEditable(true, cacheFileName);
     }
   }
 
@@ -209,6 +290,10 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
           pref.setWarnUnitialized(b_warnUnitialized.getSelection());
         if (shouldSaveButtonSelection(b_warnUnused))
           pref.setWarnUnused(b_warnUnused.getSelection());
+        if (t_cacheFile.getEditable()) {
+          final String cacheFileName = t_cacheFile.getText();
+          pref.setCacheFile(cacheFileName.trim().isEmpty() ? null : cacheFileName);
+        }
       }
     } else {
       // we are editing a single configuration...
@@ -219,6 +304,8 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
       pref.setTrace(b_trace.getSelection());
       pref.setWarnUnitialized(b_warnUnitialized.getSelection());
       pref.setWarnUnused(b_warnUnused.getSelection());
+      final String cacheFileName = t_cacheFile.getText();
+      pref.setCacheFile(cacheFileName.trim().isEmpty() ? null : cacheFileName);
     }
   }
 
@@ -317,6 +404,7 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
         dstPrefs.setWarnNoDev(srcPrefs.isWarnNoDev());
         dstPrefs.setWarnUnitialized(srcPrefs.isWarnUnitialized());
         dstPrefs.setWarnUnused(srcPrefs.isWarnUnused());
+        dstPrefs.setCacheFile(srcPrefs.getCacheFile());
       }
     } catch (CoreException ex) {
       log.log(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID, null, ex));
