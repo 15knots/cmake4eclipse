@@ -297,7 +297,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     // Set the environment
     IEnvironmentVariable[] variables = ManagedBuildManager.getEnvironmentVariableProvider().getVariables(config, true);
     String[] envp = null;
-    ArrayList<String> envList = new ArrayList<String>();
+    ArrayList<String> envList = new ArrayList<>();
     if (variables != null) {
       for (int i = 0; i < variables.length; i++) {
         envList.add(variables[i].getName() + "=" + variables[i].getValue()); //$NON-NLS-1$
@@ -366,7 +366,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
 
     final CMakePreferences prefs = ConfigurationManager.getInstance().getOrLoad(cfgd);
 
-    List<String> args = new ArrayList<String>();
+    List<String> args = new ArrayList<>();
 
     /* add our defaults first */
     {
@@ -410,6 +410,10 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       args.add("--warn-unitialized");
     if (prefs.isWarnUnused())
       args.add("--warn-unused");
+    if (prefs.getCacheFile() != null) {
+      args.add("-C");
+      args.add(prefs.getCacheFile());
+    }
 
     appendDefines(args, prefs.getDefines());
     appendUndefines(args, prefs.getUndefines());
