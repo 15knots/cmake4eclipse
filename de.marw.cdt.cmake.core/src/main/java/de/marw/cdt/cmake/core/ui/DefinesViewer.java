@@ -163,7 +163,7 @@ import de.marw.cdt.cmake.core.internal.settings.CmakeDefine;
    */
   private void createEditor(Composite parent) {
     final Group gr = WidgetHelper.createGroup(parent, SWT.FILL, 2,
-        "CMake cache entries to define (-D)", 2);
+        "CMake cache entries to &define (-D)", 2);
 
     tableViewer = createViewer(gr);
 

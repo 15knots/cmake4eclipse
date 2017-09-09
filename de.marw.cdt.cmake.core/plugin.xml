@@ -116,21 +116,21 @@
       <tab
             class="de.marw.cdt.cmake.core.ui.CMakePropertyTab"
             helpId="de.marw.cdt.cmake.core.t_cmake_options_general"
-            name="General"
+            name="&amp;General"
             parent="de.marw.cdt.cmake.core.ui.CMakePropertyPage"
             tooltip="Properties applied under each OS">
       </tab>
       <tab
             class="de.marw.cdt.cmake.core.ui.CMakeSymbolsTab"
             helpId="de.marw.cdt.cmake.core.t_cmake_symbols_general"
-            name="Symbols"
+            name="&amp;Symbols"
             parent="de.marw.cdt.cmake.core.ui.CMakePropertyPage"
             tooltip="Applied under each OS">
       </tab>
       <tab
             class="de.marw.cdt.cmake.core.ui.LinuxPropertyTab"
             helpId="de.marw.cdt.cmake.core.t_cmake_options_OS"
-            name="Linux/default"
+            name="&amp;Linux/default"
             parent="de.marw.cdt.cmake.core.ui.HostOSPropertyPage"
             tooltip="Properties applied under Linux or unkown OS"
             weight="10">
@@ -138,7 +138,7 @@
       <tab
             class="de.marw.cdt.cmake.core.ui.WindowsPropertyTab"
             helpId="de.marw.cdt.cmake.core.t_cmake_options_OS"
-            name="Windows"
+            name="&amp;Windows"
             parent="de.marw.cdt.cmake.core.ui.HostOSPropertyPage"
             tooltip="Properties applied under windows"
             weight="80">

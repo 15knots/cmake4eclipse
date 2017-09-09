@@ -43,6 +43,7 @@ https://raw.githubusercontent.com/15knots/cmake4eclipse/master/releng/comp-updat
 ## 1.6.0 (2017-??-??)
 ### Changes
 - Enhancement #46 Populate CMake cache entries from a file
+- Enhancement: Added mnemonics to UI
 
 ## 1.5.0 (2017-08-26)
 ### Changes
