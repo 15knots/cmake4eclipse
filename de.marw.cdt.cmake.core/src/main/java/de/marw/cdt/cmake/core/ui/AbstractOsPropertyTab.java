@@ -119,10 +119,10 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
     usercomp.setLayout(new GridLayout(2, false));
 //    usercomp.setBackground(BACKGROUND_FOR_USER_VAR);
 
-    GridLayout layout;
 
     // cmake executable group...
     {
+      GridLayout layout;
       Group gr = WidgetHelper.createGroup(usercomp, SWT.FILL, 2,
           "CMake Executable", 2);
 
@@ -143,7 +143,7 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
         layout.marginWidth = 0;
         buttonBar.setLayout(layout);
       }
-      b_cmdBrowseFiles = WidgetHelper.createButton(buttonBar, "File System...",
+      b_cmdBrowseFiles = WidgetHelper.createButton(buttonBar, "F&ile System...",
           true);
       b_cmdBrowseFiles.addSelectionListener(new SelectionAdapter() {
         @Override
@@ -159,7 +159,7 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
         }
       });
 
-      b_cmdVariables = WidgetHelper.createButton(buttonBar, "Variables...",
+      b_cmdVariables = WidgetHelper.createButton(buttonBar, "&Variables...",
           true);
       b_cmdVariables.addSelectionListener(new SelectionAdapter() {
         @Override
