@@ -220,6 +220,13 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
 //      createFolder(MULTIPLE_SOURCE_DIRS_SUPPORTED ? buildFolder
 //          .getFolder(srcPath) : buildFolder);
       createFolder(buildFolder);
+      final IPath buildDirAbs = buildFolder.getLocation();
+      /* the make sure the directory REALLY exists in the file system. If it doesn't,
+       * the (buggy?) ICommandLauncher instance will create will cd to the current working
+       * directory, which is plainly wrong,
+       * NOTE: resource.refreshLocal() does not work here.
+       */
+      buildDirAbs.toFile().mkdirs();
 
       IPath srcDir;
       if (srcPath.isEmpty()) {
@@ -231,7 +238,6 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       }
 
       checkCancel();
-      final IPath buildDirAbs = buildFolder.getLocation();
       MultiStatus status2 = invokeCMake(srcDir, buildDirAbs, console);
       // NOTE: Commonbuilder reads getCode() to detect errors, not getSeverity()
       if (status2.getCode() == IStatus.ERROR) {
