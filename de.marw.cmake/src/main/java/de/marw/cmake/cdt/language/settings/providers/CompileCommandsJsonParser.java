@@ -290,7 +290,9 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
 
         if (store.lastModified < tsJsonModified) {
           // must parse json file...
-          project.deleteMarkers(MARKER_ID, false, IResource.DEPTH_INFINITE);
+          if (!initializingWorkbench) {
+            project.deleteMarkers(MARKER_ID, false, IResource.DEPTH_INFINITE);
+          }
           try {
             // parse file...
             JSON parser = new JSON();
