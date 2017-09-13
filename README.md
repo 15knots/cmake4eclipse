@@ -45,6 +45,7 @@ https://raw.githubusercontent.com/15knots/cmake4eclipse/master/releng/comp-updat
 - Enhancement #46 Populate CMake cache entries from a file
 - Enhancement: Added mnemonics to UI
 - Fixed: "ResourceException: The resource tree is locked for modifications" when opening project.
+- Fixed #38: Build occurs in eclipse install directory.
 
 ## 1.5.0 (2017-08-26)
 ### Changes
