@@ -17,11 +17,13 @@ import org.eclipse.cdt.core.settings.model.ICMultiConfigDescription;
 import org.eclipse.cdt.core.settings.model.ICResourceDescription;
 import org.eclipse.cdt.core.settings.model.ICStorageElement;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -35,6 +37,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.FilteredItemsSelectionDialog;
 import org.eclipse.ui.dialogs.FilteredResourcesSelectionDialog;
+import org.eclipse.ui.dialogs.NewFolderDialog;
 
 import de.marw.cdt.cmake.core.CdtPlugin;
 import de.marw.cdt.cmake.core.internal.settings.CMakePreferences;
@@ -58,10 +61,14 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
   private Button b_trace;
   private Button b_warnUnitialized;
   private Button b_warnUnused;
-  /** browse files for cache file */
-  private Button b_prePopBrowseFiles;
   /** pre-populate cache from file */
   private Text t_cacheFile;
+  /** browse files for cache file */
+  private Button b_browseCacheFile;
+  /** build directory */
+  private Text t_outputFolder;
+  private Button b_browseOutputFolder;
+  private Button b_createOutputFolder;
 
   /**
    * the preferences associated with our configurations to manage. Initialized
@@ -73,27 +80,23 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
   private TriStateButtonListener tsl = new TriStateButtonListener();
 
   @Override
-  protected void createControls(Composite parent) {
+  protected void createControls(final Composite parent) {
     super.createControls(parent);
     usercomp.setLayout(new GridLayout(2, false));
 //    usercomp.setBackground(BACKGROUND_FOR_USER_VAR);
 
     // cmake options group...
     {
-      Group gr = WidgetHelper.createGroup(usercomp, SWT.FILL, 2,
-          "CMake commandline options", 2);
+      Group gr = WidgetHelper.createGroup(usercomp, SWT.FILL, 2, "CMake commandline options", 2);
 
-      b_warnNoDev = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2,
-          "Suppress developer &warnings \t(-Wno-dev)");
+      b_warnNoDev = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2, "Suppress developer &warnings \t(-Wno-dev)");
       b_warnNoDev.addListener(SWT.Selection, tsl);
       b_debugTryCompile = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2,
           "Do not delete the t&ry_compile build tree (--debug-trycompile)");
       b_debugTryCompile.addListener(SWT.Selection, tsl);
-      b_debug = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2,
-          "Put cmake in a &debug mode \t(--debug-output)");
+      b_debug = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2, "Put cmake in a &debug mode \t(--debug-output)");
       b_debug.addListener(SWT.Selection, tsl);
-      b_trace = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2,
-          "Put cmake in &trace mode \t\t(--trace)");
+      b_trace = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2, "Put cmake in &trace mode \t\t(--trace)");
       b_trace.addListener(SWT.Selection, tsl);
       b_warnUnitialized = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2,
           "Warn about un&initialized values \t(--warn-uninitialized)");
@@ -104,29 +107,27 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
 
       // cmake prepopulate cache group...
       {
-        Group gr2 = WidgetHelper.createGroup(gr, SWT.FILL, 2,
-            "Pre-populate CMake cache entries from file (-C)", 3);
+        Group gr2 = WidgetHelper.createGroup(gr, SWT.FILL, 2, "Pre-populate CMake cache entries from file (-C)", 2);
 
         setupLabel(gr2, "&File", 1, SWT.BEGINNING);
 
         t_cacheFile = setupText(gr2, 1, GridData.FILL_HORIZONTAL);
-        // "Browse..."  dialog launcher buttons...
-        b_prePopBrowseFiles = WidgetHelper.createButton(gr2, "&Browse...",
-            true);
-        b_prePopBrowseFiles.addSelectionListener(new SelectionAdapter() {
+        // "Browse..." dialog launcher buttons...
+        b_browseCacheFile = WidgetHelper.createButton(gr2, "&Browse...", true);
+        b_browseCacheFile.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false, 2, 1));
+
+        b_browseCacheFile.addSelectionListener(new SelectionAdapter() {
           @Override
           public void widgetSelected(SelectionEvent e) {
-            FilteredResourcesSelectionDialog dialog = new FilteredResourcesSelectionDialog(t_cacheFile.getShell(), false,
-                page.getProject(), IResource.FILE);
+            FilteredResourcesSelectionDialog dialog = new FilteredResourcesSelectionDialog(t_cacheFile.getShell(),
+                false, page.getProject(), IResource.FILE);
             dialog.setTitle("Select file");
             dialog.setInitialPattern("c*.txt", FilteredItemsSelectionDialog.FULL_SELECTION);
             dialog.open();
-            Object[] file = dialog.getResult();
+            IFile file = (IFile) dialog.getFirstResult();
             if (file != null) {
               // insert selected resource name
-              if (file[0] instanceof IFile) {
-                t_cacheFile.insert(((IFile) file[0]).getProjectRelativePath().toPortableString());
-              }
+              t_cacheFile.insert(file.getProjectRelativePath().toPortableString());
             }
           }
         });
@@ -137,7 +138,7 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
   }
 
   @Override
-  protected void configSelectionChanged(ICResourceDescription lastConfig, ICResourceDescription newConfig){
+  protected void configSelectionChanged(ICResourceDescription lastConfig, ICResourceDescription newConfig) {
     if (lastConfig != null) {
       saveToModel();
     }
@@ -149,8 +150,7 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
     try {
       if (cfgd instanceof ICMultiConfigDescription) {
         // we are editing multiple configurations...
-        ICConfigurationDescription[] cfgs = (ICConfigurationDescription[]) ((ICMultiConfigDescription) cfgd)
-            .getItems();
+        ICConfigurationDescription[] cfgs = (ICConfigurationDescription[]) ((ICMultiConfigDescription) cfgd).getItems();
 
         prefs = new CMakePreferences[cfgs.length];
         for (int i = 0; i < cfgs.length; i++) {
@@ -168,22 +168,43 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
   }
 
   /**
-   * Sets whether the user can edit the cache-file input field.
+   * Sets the value of the cache file entry field and whether the user can edit
+   * that input field.
    *
-   * @param cacheFileName
+   * @param text
    *          the text to display in the cache-file field
    */
-  private void setCacheFileEditable(boolean editable, String cacheFileName) {
-    t_cacheFile.setText(cacheFileName == null ? "" : cacheFileName);
+  private void setCacheFileEditable(boolean editable, String text) {
+    text= editable ? text : " <configurations differ> ";
+    t_cacheFile.setText(text == null ? "" : text);
     t_cacheFile.setEditable(editable);
     t_cacheFile.setEnabled(editable);
-    b_prePopBrowseFiles.setEnabled(editable);
+    b_browseCacheFile.setEnabled(editable);
+  }
+
+  /**
+   * Sets the value of the build folder entry field and whether the user can edit
+   * that input field.
+   *
+   * @param text
+   *          the text to display in the cache-file field
+   */
+  private void setBuildFolderEditable(boolean editable, String text) {
+    text= editable ? text : " <configurations differ> ";
+    t_outputFolder.setText(text == null ? "" : text);
+    t_outputFolder.setEditable(editable);
+    t_outputFolder.setEnabled(editable);
+    b_browseOutputFolder.setEnabled(editable);
+    b_createOutputFolder.setEnabled(editable);
   }
 
   /**
    * Updates displayed values according to the preferences edited by this tab.
    */
   private void updateDisplay() {
+    boolean cacheFileEditable = true;
+    boolean buildFolderEditable = true;
+
     if (prefs.length > 1) {
       // we are editing multiple configurations...
       /*
@@ -236,23 +257,43 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
        * make t_cacheFile disabled, if its settings are not the same in all
        * configurations
        */
-      boolean cacheFileEditable= true;
+      {
       final String cf0 = prefs[0].getCacheFile();
       for (int i = 1; i < prefs.length; i++) {
         String cf = prefs[i].getCacheFile();
         if (cf0 != null) {
           if (!cf0.equals(cf)) {
             // configurations differ
-            cacheFileEditable=false;
+            cacheFileEditable = false;
             break;
           }
-        } else if(cf!= null){
+        } else if (cf != null) {
           // configurations differ
-          cacheFileEditable=false;
+          cacheFileEditable = false;
           break;
         }
-      }
-      setCacheFileEditable(cacheFileEditable, cacheFileEditable ? cf0 : " <configurations differ> ");
+      }}
+      // TODO buildFolderEditable
+      /*
+       * make t_outputFolder disabled, if its settings are not the same in all
+       * configurations
+       */
+      {
+      final String cf0 = prefs[0].getBuildDirectory();
+      for (int i = 1; i < prefs.length; i++) {
+        String cf = prefs[i].getBuildDirectory();
+        if (cf0 != null) {
+          if (!cf0.equals(cf)) {
+            // configurations differ
+            buildFolderEditable = false;
+            break;
+          }
+        } else if (cf != null) {
+          // configurations differ
+          buildFolderEditable = false;
+          break;
+        }
+      }}
     } else {
       // we are editing a single configuration...
       // all buttons are in toggle mode
@@ -262,9 +303,10 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
       enterToggleMode(b_trace, pref.isTrace());
       enterToggleMode(b_warnUnitialized, pref.isWarnUnitialized());
       enterToggleMode(b_warnUnused, pref.isWarnUnused());
-      final String cacheFileName= pref.getCacheFile();
-      setCacheFileEditable(true, cacheFileName);
     }
+
+    setCacheFileEditable(cacheFileEditable, prefs[0].getCacheFile());
+    setBuildFolderEditable(buildFolderEditable, prefs[0].getBuildDirectory());
   }
 
   /**
@@ -294,6 +336,10 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
           final String cacheFileName = t_cacheFile.getText();
           pref.setCacheFile(cacheFileName.trim().isEmpty() ? null : cacheFileName);
         }
+        if (t_outputFolder.getEditable()) {
+          final String dir = t_outputFolder.getText();
+          pref.setBuildDirectory(dir.trim().isEmpty() ? null : dir);
+        }
       }
     } else {
       // we are editing a single configuration...
@@ -304,8 +350,10 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
       pref.setTrace(b_trace.getSelection());
       pref.setWarnUnitialized(b_warnUnitialized.getSelection());
       pref.setWarnUnused(b_warnUnused.getSelection());
-      final String cacheFileName = t_cacheFile.getText();
-      pref.setCacheFile(cacheFileName.trim().isEmpty() ? null : cacheFileName);
+      final String cacheFileName = t_cacheFile.getText().trim();
+      pref.setCacheFile(cacheFileName.isEmpty() ? null : cacheFileName);
+      final String dir = t_outputFolder.getText().trim();
+      pref.setBuildDirectory(dir.isEmpty() ? null : dir);
     }
   }
 
@@ -313,9 +361,9 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
    * Switches the specified button behavior from tri-state mode to toggle mode.
    *
    * @param button
-   *        the button to modify
+   *          the button to modify
    * @param buttonSelected
-   *        the selection of the button
+   *          the selection of the button
    */
   private static void enterToggleMode(Button button, boolean buttonSelected) {
     button.setData(null); // mark toggle mode
@@ -327,10 +375,9 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
    * Switches the specified button behavior from toggle mode to tri-state mode.
    *
    * @param button
-   *        the button to modify
+   *          the button to modify
    */
-  private static void enterTristateOrToggleMode(Button button, BitSet bs,
-      int numBits) {
+  private static void enterTristateOrToggleMode(Button button, BitSet bs, int numBits) {
     if (needsTri(bs, numBits)) {
       enterTristateMode(button);
     } else {
@@ -342,7 +389,7 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
    * Switches the specified button behavior to toggle mode or to tri-state mode.
    *
    * @param button
-   *        the button to modify
+   *          the button to modify
    */
   private static void enterTristateMode(Button button) {
     button.setData(Boolean.TRUE); // mark in tri-state mode
@@ -365,10 +412,10 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
    *      org.eclipse.cdt.core.settings.model.ICResourceDescription)
    */
   @Override
-  protected void performApply(ICResourceDescription src,
-      ICResourceDescription dst) {
+  protected void performApply(ICResourceDescription src, ICResourceDescription dst) {
     // make sure the displayed values get applied
-    // AFAICS, src is always == getResDesc(). so saveToModel() effectively stores to src
+    // AFAICS, src is always == getResDesc(). so saveToModel() effectively
+    // stores to src
     saveToModel();
 
     ICConfigurationDescription srcCfg = src.getConfiguration();
@@ -391,8 +438,7 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
    * @param srcCfg
    * @param dstCfg
    */
-  private static void applyConfig(ICConfigurationDescription srcCfg,
-      ICConfigurationDescription dstCfg) {
+  private static void applyConfig(ICConfigurationDescription srcCfg, ICConfigurationDescription dstCfg) {
     final ConfigurationManager configMgr = ConfigurationManager.getInstance();
     try {
       CMakePreferences srcPrefs = configMgr.getOrLoad(srcCfg);
@@ -417,23 +463,20 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
       return;
 
     saveToModel();
-    ICConfigurationDescription cfgd= resDesc.getConfiguration();
+    ICConfigurationDescription cfgd = resDesc.getConfiguration();
     // save project properties..
     try {
       if (prefs.length > 1) {
         // we are editing multiple configurations...
-        ICConfigurationDescription[] cfgs = (ICConfigurationDescription[]) ((ICMultiConfigDescription) cfgd)
-            .getItems();
+        ICConfigurationDescription[] cfgs = (ICConfigurationDescription[]) ((ICMultiConfigDescription) cfgd).getItems();
 
         for (int i = 0; i < prefs.length; i++) {
-          ICStorageElement storage = cfgs[i].getStorage(
-              CMakePreferences.CFG_STORAGE_ID, true);
+          ICStorageElement storage = cfgs[i].getStorage(CMakePreferences.CFG_STORAGE_ID, true);
           prefs[i].saveToStorage(storage);
         }
       } else {
         // we are editing a single configuration...
-        ICStorageElement storage = cfgd.getStorage(
-            CMakePreferences.CFG_STORAGE_ID, true);
+        ICStorageElement storage = cfgd.getStorage(CMakePreferences.CFG_STORAGE_ID, true);
         prefs[0].saveToStorage(storage);
       }
     } catch (CoreException ex) {
@@ -445,7 +488,7 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
    * Gets whether the value of the specified button should be saved.
    *
    * @param button
-   *        the button to query
+   *          the button to query
    */
   private static boolean shouldSaveButtonSelection(Button button) {
     if (button != null && Boolean.TRUE.equals(button.getData()) && button.getGrayed()) {

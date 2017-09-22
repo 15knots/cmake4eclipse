@@ -79,7 +79,8 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
 
   private IProject project;
   private IProgressMonitor monitor;
-  private IFolder buildFolder; // build folder - relative to the project
+  /** build folder - relative to the project */
+  private IFolder buildFolder;
   private IConfiguration config;
   private IBuilder builder;
 
@@ -120,8 +121,23 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
 
   private void initBuildFolder() {
     // set the top build dir path for the current configuration
-    // TODO MWE allow user to customize the root common to all configs
-    IPath buildP = new Path("build").append(config.getName());
+    String buildDirStr = null;
+    final ICConfigurationDescription cfgd = ManagedBuildManager.getDescriptionForConfiguration(config);
+    try {
+      CMakePreferences prefs = ConfigurationManager.getInstance().getOrLoad(cfgd);
+      buildDirStr = prefs.getBuildDirectory();
+    } catch (CoreException e) {
+      // storage base is null; treat as bug in CDT..
+      log.log(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID,
+          "falling back to hard coded build directory", e));
+    }
+    IPath buildP;
+    if (buildDirStr == null) {
+      // not configured: fall back to legacy behavior
+      buildP = new Path("build").append(config.getName());
+    } else {
+      buildP = new Path(buildDirStr);
+    }
     this.buildFolder = project.getFolder(buildP);
   }
 
@@ -208,10 +224,12 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       try {
         final ConsoleOutputStream cis = console.getInfoStream();
         cis.write(SimpleDateFormat.getTimeInstance().format(new Date()).getBytes());
-        cis.write(" **** Buildscript generation of configuration ".getBytes());
-        cis.write(config.getName().getBytes());
-        cis.write(" for project ".getBytes());
+        cis.write(" Buildscript generation: ".getBytes());
         cis.write(project.getName().getBytes());
+        cis.write("::".getBytes());
+        cis.write(config.getName().getBytes());
+        cis.write(" in ".getBytes());
+        cis.write(buildDir.getAbsolutePath().getBytes());
         cis.write("\n".getBytes());
       } catch (IOException ignore) {
       }
