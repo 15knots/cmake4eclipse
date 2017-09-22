@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013 Martin Weber.
+ * Copyright (c) 2013-2017 Martin Weber.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,7 +21,7 @@ import de.marw.cdt.cmake.core.internal.storage.CmakeUndefineSerializer;
 import de.marw.cdt.cmake.core.internal.storage.Util;
 
 /**
- * Holds preferences or project settings.
+ * Holds per-configuration project settings.
  *
  * @author Martin Weber
  */
@@ -45,12 +45,14 @@ public class CMakePreferences {
   static final String ELEM_UNDEFINES = "undefs";
   private static final String ELEM_OPTIONS = "options";
   private static final String ATTR_CACHE_FILE = "cacheEntriesFile";
+  private static final String ATTR_BUILD_DIR = "buildDir";
 
   private boolean warnNoDev, debugTryCompile, debugOutput, trace,
       warnUnitialized, warnUnused;
 
   private List<CmakeDefine> defines = new ArrayList<>(0);
   private List<CmakeUnDefine> undefines = new ArrayList<>(0);
+  private String buildDirectory;
   private String cacheFile;
 
   private LinuxPreferences linuxPreferences = new LinuxPreferences();
@@ -107,6 +109,7 @@ public class CMakePreferences {
             .getAttribute(ATTR_WARN_UNITIALIZED));
         warnUnused = Boolean.parseBoolean(child.getAttribute(ATTR_WARN_UNUSED));
         cacheFile = child.getAttribute(ATTR_CACHE_FILE);
+        buildDirectory= parent.getAttribute(ATTR_BUILD_DIR);
       } else if (ELEM_DEFINES.equals(child.getName())) {
         // defines...
         Util.deserializeCollection(defines, new CmakeDefineSerializer(), child);
@@ -167,6 +170,11 @@ public class CMakePreferences {
       pOpts.setAttribute(ATTR_CACHE_FILE, cacheFile);
     } else {
       pOpts.removeAttribute(ATTR_CACHE_FILE);
+    }
+    if (buildDirectory!= null) {
+      parent.setAttribute(ATTR_BUILD_DIR, buildDirectory);
+    } else {
+      parent.removeAttribute(ATTR_CACHE_FILE);
     }
 
     // defines...
@@ -310,6 +318,27 @@ public class CMakePreferences {
    */
   public void setCacheFile(String cacheFile) {
     this.cacheFile= cacheFile;
+  }
+
+  /**
+   * Gets the name of the build directory.
+   *
+   * @return the build directory name or <code>null</code> if the hard-coded default shall be
+   *         used.
+   */
+  public String getBuildDirectory() {
+    return buildDirectory;
+  }
+
+  /**
+   * Sets the name of the build directory.
+   *
+   * @param buildDirectory
+   *          the build directory name or <code>null</code> if the hard-coded
+   *          default shall be used.
+   */
+  public void setBuildDirectory(String buildDirectory) {
+    this.buildDirectory = buildDirectory;
   }
 
 }
