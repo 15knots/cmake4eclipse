@@ -13,6 +13,7 @@ package de.marw.cdt.cmake.core.ui;
 import java.util.List;
 
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
+import org.eclipse.cdt.core.settings.model.ICMultiConfigDescription;
 import org.eclipse.cdt.core.settings.model.ICResourceDescription;
 import org.eclipse.cdt.core.settings.model.ICStorageElement;
 import org.eclipse.core.runtime.CoreException;
@@ -132,6 +133,10 @@ public class CMakeSymbolsTab extends QuirklessAbstractCPropertyTab {
     if (resDesc == null)
       return;
     final ICConfigurationDescription cfgd= resDesc.getConfiguration();
+    if(cfgd instanceof ICMultiConfigDescription){
+      // this tab does not support editing of multiple configurations
+      return;
+    }
     try {
       // NB: defines & undefines are modified by the widget listeners directly
       CMakePreferences prefs = ConfigurationManager.getInstance().get(cfgd);
