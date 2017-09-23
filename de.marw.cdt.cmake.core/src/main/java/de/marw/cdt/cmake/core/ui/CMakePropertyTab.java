@@ -17,11 +17,13 @@ import org.eclipse.cdt.core.settings.model.ICMultiConfigDescription;
 import org.eclipse.cdt.core.settings.model.ICResourceDescription;
 import org.eclipse.cdt.core.settings.model.ICStorageElement;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -35,6 +37,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.FilteredItemsSelectionDialog;
 import org.eclipse.ui.dialogs.FilteredResourcesSelectionDialog;
+import org.eclipse.ui.dialogs.NewFolderDialog;
 
 import de.marw.cdt.cmake.core.CdtPlugin;
 import de.marw.cdt.cmake.core.internal.settings.CMakePreferences;
@@ -82,6 +85,51 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
     usercomp.setLayout(new GridLayout(2, false));
 //    usercomp.setBackground(BACKGROUND_FOR_USER_VAR);
 
+    // output folder group
+    {
+      Group gr = WidgetHelper.createGroup(usercomp, SWT.FILL, 2, "Build output location", 2);
+
+      setupLabel(gr, "F&older", 1, SWT.BEGINNING);
+
+      t_outputFolder = setupText(gr, 1, GridData.FILL_HORIZONTAL);
+
+      // "Browse", "Create" dialog launcher buttons...
+      Composite buttonBar = new Composite(gr, SWT.NONE);
+      {
+        buttonBar.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false, 3, 1));
+        GridLayout layout = new GridLayout(2, false);
+        layout.marginHeight = 0;
+        layout.marginWidth = 0;
+        buttonBar.setLayout(layout);
+      }
+      b_createOutputFolder = WidgetHelper.createButton(buttonBar, "&Create...", true);
+      b_createOutputFolder.addSelectionListener(new SelectionAdapter() {
+        @Override
+        public void widgetSelected(SelectionEvent e) {
+          NewFolderDialog dialog = new NewFolderDialog(parent.getShell(), page.getProject());
+          if (dialog.open() == Window.OK) {
+            IFolder f = (IFolder) dialog.getFirstResult();
+            t_outputFolder.setText(f.getProjectRelativePath().toPortableString());
+          }
+        }
+      });
+
+      b_browseOutputFolder = WidgetHelper.createButton(buttonBar, "B&rowse...", true);
+      b_browseOutputFolder.addSelectionListener(new SelectionAdapter() {
+        @Override
+        public void widgetSelected(SelectionEvent e) {
+          FilteredResourcesSelectionDialog dialog = new FilteredResourcesSelectionDialog(t_cacheFile.getShell(), false,
+              page.getProject(), IResource.FOLDER);
+          dialog.setTitle("Select output folder");
+          dialog.open();
+          IFolder folder = (IFolder) dialog.getFirstResult();
+          if (folder != null) {
+            // insert selected resource name
+            t_outputFolder.setText(folder.getProjectRelativePath().toPortableString());
+          }
+        }
+      });
+    }
     // cmake options group...
     {
       Group gr = WidgetHelper.createGroup(usercomp, SWT.FILL, 2, "CMake commandline options", 2);
