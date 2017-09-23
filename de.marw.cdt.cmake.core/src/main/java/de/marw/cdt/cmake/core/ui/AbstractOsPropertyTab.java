@@ -14,6 +14,7 @@ import java.util.EnumSet;
 import java.util.List;
 
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
+import org.eclipse.cdt.core.settings.model.ICMultiConfigDescription;
 import org.eclipse.cdt.core.settings.model.ICResourceDescription;
 import org.eclipse.cdt.core.settings.model.ICStorageElement;
 import org.eclipse.cdt.ui.newui.AbstractCPropertyTab;
@@ -339,8 +340,12 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
     if (resDesc == null)
       return;
 
-    saveToModel();
     ICConfigurationDescription cfgd= resDesc.getConfiguration();
+    if(cfgd instanceof ICMultiConfigDescription){
+      // this tab does not support editing of multiple configurations
+      return;
+    }
+    saveToModel();
     try {
       // save as project settings..
       ICStorageElement storage = cfgd.getStorage(
