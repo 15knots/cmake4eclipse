@@ -40,6 +40,11 @@ https://raw.githubusercontent.com/15knots/cmake4eclipse/master/releng/comp-updat
 
 ---
 # Release History
+## 1.7.0 (2017-09-26)
+### Changes
+- Enhancement #29: make the Output directory configurable
+- Fixed #48 NPE in project configuration when OK button is clicked
+
 ## 1.6.0 (2017-09-13)
 ### Changes
 - Enhancement #46 Populate CMake cache entries from a file
