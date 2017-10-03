@@ -1,16 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-    <extension
-          point="org.eclipse.core.contenttype.contentTypes">
-       <content-type
-             base-type="org.eclipse.core.runtime.text"
-             file-extensions="txt"
-             file-names="CMakeLists.txt"
-             id="de.marw.cmake.cmakelists.txt"
-             name="CMake script">
-       </content-type>
-    </extension>
 
  <extension
        point="org.eclipse.cdt.core.LanguageSettingsProvider">
