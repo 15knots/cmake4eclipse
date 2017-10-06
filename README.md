@@ -37,6 +37,9 @@ Alternatively, **cmake4eclipse** can be installed into Eclipse using the "Instal
 This composite update site contains the latest release as well as selected older releases.
 https://raw.githubusercontent.com/15knots/cmake4eclipse/master/releng/comp-update/
 
+### Build
+Invoke `mvn -f ./parent/pom.xml verify` to build the plugin.
+
 ---
 # Release History
 ## 1.7.0 (2017-09-26)
