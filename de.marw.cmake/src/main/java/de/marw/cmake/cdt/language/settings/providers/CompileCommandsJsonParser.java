@@ -39,6 +39,7 @@ import org.eclipse.cdt.core.language.settings.providers.LanguageSettingsSerializ
 import org.eclipse.cdt.core.language.settings.providers.LanguageSettingsStorage;
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
 import org.eclipse.cdt.core.settings.model.ICLanguageSettingEntry;
+import org.eclipse.cdt.core.settings.model.ICOutputEntry;
 import org.eclipse.cdt.core.settings.model.ICProjectDescription;
 import org.eclipse.cdt.core.settings.model.ICSettingEntry;
 import org.eclipse.cdt.ui.PreferenceConstants;
@@ -269,12 +270,14 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
   private void tryParseJson(boolean initializingWorkbench) throws CoreException {
 
     // If getBuilderCWD() returns a workspace relative path, it is garbled.
-    // If garbled, make sure
-    // de.marw.cdt.cmake.core.internal.BuildscriptGenerator.getBuildWorkingDir()
-    // returns a full, absolute path relative to the workspace.
-    final IPath builderCWD = currentCfgDescription.getBuildSetting().getBuilderCWD();
-
-    IPath jsonPath = builderCWD.append("compile_commands.json");
+    // It returns '${workspace_loc:/my-project-name}'. Additionally, it returns null on a project with makeNature.
+    // In contrast, getResolvedOutputDirectories() does it right, it returns '/my-project-name}'
+//     IPath builderCWD = currentCfgDescription.getBuildSetting().getBuilderCWD();
+    final ICOutputEntry[] resolvedOutputDirectories = currentCfgDescription.getBuildSetting()
+        .getResolvedOutputDirectories();
+    // cmake creates a single output dir only.
+    final IPath buildRoot = resolvedOutputDirectories[0].getFullPath();
+    final IPath jsonPath = buildRoot.append("compile_commands.json");
     final IFile jsonFileRc = ResourcesPlugin.getWorkspace().getRoot().getFile(jsonPath);
 
     final IPath location = jsonFileRc.getLocation();
