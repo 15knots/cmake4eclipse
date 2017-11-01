@@ -155,12 +155,12 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
           String text = dialog.open();
           settings.put("cmake_dir", dialog.getFilterPath());
           if (text != null) {
-            t_cmd.insert(text);
+            t_cmd.setText(text);
           }
         }
       });
 
-      b_cmdVariables = WidgetHelper.createButton(buttonBar, "&Variables...",
+      b_cmdVariables = WidgetHelper.createButton(buttonBar, "Insert &Variable...",
           true);
       b_cmdVariables.addSelectionListener(new SelectionAdapter() {
         @Override
