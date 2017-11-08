@@ -281,13 +281,13 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
     final IFile jsonFileRc = ResourcesPlugin.getWorkspace().getRoot().getFile(jsonPath);
 
     final IPath location = jsonFileRc.getLocation();
-    final IProject project = currentCfgDescription.getProjectDescription().getProject();
     if (location != null) {
       final File jsonFile = location.toFile();
       if (jsonFile.exists()) {
         // file exists on disk...
         final long tsJsonModified = jsonFile.lastModified();
 
+        final IProject project = currentCfgDescription.getProjectDescription().getProject();
         final TimestampedLanguageSettingsStorage store = storage.getSettingsForConfig(currentCfgDescription);
         final ProjectLanguageSettingEntries projectEntries = new ProjectLanguageSettingEntries();
 
@@ -370,7 +370,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
    * @param sourceFileInfo
    *          a Map of type Map<String,String>
    * @param jsonFile
-   *          the JSON file being parsed (for logging only)
+   *          the JSON file being parsed (for marker creation only)
    * @throws CoreException
    *           if marker creation failed
    */
