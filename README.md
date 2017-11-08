@@ -42,6 +42,11 @@ Invoke `mvn -f ./parent/pom.xml verify` to build the plugin.
 
 ---
 # Release History
+## 1.8.0 (upcoming)
+### Changes
+- Enhancement #54: Support variable expansion in build output location.
+- Fixed #55: NPE if project is of plain makeNature (no managed build).
+
 ## 1.7.0 (2017-09-26)
 ### Changes
 - Enhancement #29: make the Output directory configurable
