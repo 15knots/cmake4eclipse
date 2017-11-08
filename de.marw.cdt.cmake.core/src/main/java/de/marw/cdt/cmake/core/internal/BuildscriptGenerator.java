@@ -20,6 +20,7 @@ import java.util.List;
 import org.eclipse.cdt.core.CCorePlugin;
 import org.eclipse.cdt.core.ConsoleOutputStream;
 import org.eclipse.cdt.core.ICommandLauncher;
+import org.eclipse.cdt.core.cdtvariables.CdtVariableException;
 import org.eclipse.cdt.core.cdtvariables.ICdtVariableManager;
 import org.eclipse.cdt.core.envvar.IEnvironmentVariable;
 import org.eclipse.cdt.core.language.settings.providers.ILanguageSettingsProvider;
@@ -75,14 +76,13 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
 
   /** CBuildConsole element id */
   private static final String CMAKE_CONSOLE_ID = "de.marw.cdt.cmake.core.cmakeConsole";
-  private static final boolean MULTIPLE_SOURCE_DIRS_SUPPORTED = false;
 
   private IProject project;
   private IProgressMonitor monitor;
-  /** build folder - relative to the project */
-  private IFolder buildFolder;
   private IConfiguration config;
   private IBuilder builder;
+  /** build folder - relative to the project. Lazily instantiated */
+  private IFolder buildFolder;
 
   /**   */
   public BuildscriptGenerator() {
@@ -100,7 +100,6 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     // Cache the build tools
     this.config = cfg;
     this.builder = builder;
-    initBuildFolder();
   }
 
   /*-
@@ -116,10 +115,9 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     // Cache the build tools
     config = info.getDefaultConfiguration();
     builder = config.getEditableBuilder();
-    initBuildFolder();
   }
 
-  private void initBuildFolder() {
+  private IFolder getBuildFolder() {
     // set the top build dir path for the current configuration
     String buildDirStr = null;
     final ICConfigurationDescription cfgd = ManagedBuildManager.getDescriptionForConfiguration(config);
@@ -138,7 +136,25 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     } else {
       buildP = new Path(buildDirStr);
     }
-    this.buildFolder = project.getFolder(buildP);
+
+    // Note that IPath from ICBuildSetting#getBuilderCWD() holding variables is mis-constructed,
+    // i.e. ${workspace_loc:/path} gets split into 2 path segments.
+    // MBS does that and we need to handle that
+
+    // So resolve variables here and return an workspace relative path to not give CTD a chance to garble it up..
+    ICdtVariableManager mngr = CCorePlugin.getDefault().getCdtVariableManager();
+    try {
+      String buildPathString = buildP.toString();
+      buildPathString = mngr.resolveValue(buildPathString, "", "",
+          ManagedBuildManager.getDescriptionForConfiguration(config));
+      buildP= new Path(buildPathString);
+    } catch (CdtVariableException e) {
+      log.log(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID,
+          "variable expansion for build directory failed", e));
+    }
+
+    buildFolder = project.getFolder(buildP);
+    return buildFolder;
   }
 
   /*-
@@ -151,8 +167,8 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     // return a relative path here.
 
     // So return workspace path (absolute) or absolute file system path,
-    // since CDT does weird thing with relative paths
-    return buildFolder.getFullPath();
+    // since CDT Builder#getDefaultBuildPath() does weird thing with relative paths
+    return getBuildFolder().getFullPath();
   }
 
   /**
@@ -168,8 +184,36 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
    */
   @Override
   public MultiStatus regenerateMakefiles() throws CoreException {
+
+    ICSourceEntry[] srcEntries = config.getSourceEntries();
+    { // do a sanity check: only one source entry allowed for project
+      if (srcEntries.length == 0) {
+        // no source folders specified in project
+        // Make sure there is something to build
+        String msg = "No source directories in project " + project.getName();
+        updateMonitor(msg);
+        MultiStatus status = new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.INFO, "", null);
+        status.add(new Status(IStatus.INFO, CdtPlugin.PLUGIN_ID, IManagedBuilderMakefileGenerator.NO_SOURCE_FOLDERS,
+            msg, null));
+        return status;
+      } else if (srcEntries.length > 1) {
+        final String msg = "Only a single source location supported by CMake";
+        updateMonitor(msg);
+        MultiStatus status = new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.ERROR, "", null);
+        status.add(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID, 0, msg, null));
+        return status;
+      } else {
+        ICConfigurationDescription cfgDes = ManagedBuildManager.getDescriptionForConfiguration(config);
+        srcEntries = CDataUtil.resolveEntries(srcEntries, cfgDes);
+      }
+    }
+
+    // See if the user has cancelled the build
+    checkCancel();
+
     boolean mustGenerate= false;
 
+    final IFolder buildFolder = getBuildFolder();
     final File buildDir = buildFolder.getLocation().toFile();
     final File cacheFile = new File(buildDir, "CMakeCache.txt");
     if (isGeneratorChanged() && cacheFile.exists()) {
@@ -188,80 +232,47 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       return new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.OK, "", null);
     }
 
+    // Create the top-level directory for the build output
+    createFolder(buildFolder);
+    /*
+     * the make sure the directory REALLY exists in the file system. If it
+     * doesn't, the (buggy?) ICommandLauncher instance will create will cd to
+     * the current working directory, which is plainly wrong, NOTE:
+     * resource.refreshLocal() does not work here.
+     */
+    buildDir.mkdirs();
+
     // See if the user has cancelled the build
     checkCancel();
-
-    ICSourceEntry[] srcEntries = config.getSourceEntries();
-    if (!MULTIPLE_SOURCE_DIRS_SUPPORTED && srcEntries.length > 1) {
-      final String msg = "Only a single source location supported by CMake";
-      updateMonitor(msg);
-      MultiStatus status = new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.ERROR, "", null);
-      status.add(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID, 0, msg, null));
-      return status;
-    }
-
-    if (srcEntries.length == 0) {
-      // no source folders specified in project
-      // Make sure there is something to build
-      String msg = "No source directories in project " + project.getName();
-      updateMonitor(msg);
-      MultiStatus status = new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.INFO, "", null);
-      status.add(
-          new Status(IStatus.INFO, CdtPlugin.PLUGIN_ID, IManagedBuilderMakefileGenerator.NO_SOURCE_FOLDERS, msg, null));
-      return status;
-    } else {
-      ICConfigurationDescription cfgDes = ManagedBuildManager.getDescriptionForConfiguration(config);
-      srcEntries = CDataUtil.resolveEntries(srcEntries, cfgDes);
-    }
 
     final IConsole console = CCorePlugin.getDefault().getConsole(CMAKE_CONSOLE_ID);
     console.start(project);
 
-    // create makefiles, assuming each source directory contains a CMakeLists.txt
-    for (int i = 0; i < srcEntries.length; i++) {
-      ICSourceEntry srcEntry = srcEntries[i];
-      updateMonitor("Invoking CMake for " + srcEntry.getName());
-      try {
-        final ConsoleOutputStream cis = console.getInfoStream();
-        cis.write(SimpleDateFormat.getTimeInstance().format(new Date()).getBytes());
-        cis.write(" Buildscript generation: ".getBytes());
-        cis.write(project.getName().getBytes());
-        cis.write("::".getBytes());
-        cis.write(config.getName().getBytes());
-        cis.write(" in ".getBytes());
-        cis.write(buildDir.getAbsolutePath().getBytes());
-        cis.write("\n".getBytes());
-      } catch (IOException ignore) {
-      }
-      final IPath srcPath = srcEntry.getFullPath(); // project relative
-      // Create the top-level directory for the build output
-//      createFolder(MULTIPLE_SOURCE_DIRS_SUPPORTED ? buildFolder
-//          .getFolder(srcPath) : buildFolder);
-      createFolder(buildFolder);
-      final IPath buildDirAbs = buildFolder.getLocation();
-      /* the make sure the directory REALLY exists in the file system. If it doesn't,
-       * the (buggy?) ICommandLauncher instance will create will cd to the current working
-       * directory, which is plainly wrong,
-       * NOTE: resource.refreshLocal() does not work here.
-       */
-      buildDirAbs.toFile().mkdirs();
+    // create makefile, assuming the first source directory contains a
+    // CMakeLists.txt
+    final ICSourceEntry srcEntry = srcEntries[0]; // project relative
+    updateMonitor("Invoking CMake for " + srcEntry.getName());
+    try {
+      final ConsoleOutputStream cis = console.getInfoStream();
+      cis.write(SimpleDateFormat.getTimeInstance().format(new Date()).getBytes());
+      cis.write(" Buildscript generation: ".getBytes());
+      cis.write(project.getName().getBytes());
+      cis.write("::".getBytes());
+      cis.write(config.getName().getBytes());
+      cis.write(" in ".getBytes());
+      cis.write(buildDir.getAbsolutePath().getBytes());
+      cis.write("\n".getBytes());
+    } catch (IOException ignore) {
+    }
+    final IPath srcPath = srcEntry.getFullPath();
+    IResource srcDir = srcPath.isEmpty() ? project : project.getFolder(srcPath);
 
-      IPath srcDir;
-      if (srcPath.isEmpty()) {
-        // source folder is project folder
-        srcDir = project.getLocation();
-      } else {
-        // source folder is a folder below project
-        srcDir = project.getFolder(srcPath).getLocation();
-      }
-
-      checkCancel();
-      MultiStatus status2 = invokeCMake(srcDir, buildDirAbs, console);
-      // NOTE: Commonbuilder reads getCode() to detect errors, not getSeverity()
-      if (status2.getCode() == IStatus.ERROR) {
-        // failed to generate
-        return status2;
-      }
+    checkCancel();
+    MultiStatus status = invokeCMake(srcDir.getLocation(), buildFolder.getLocation(), console);
+    // NOTE: Commonbuilder reads getCode() to detect errors, not getSeverity()
+    if (status.getCode() == IStatus.ERROR) {
+      // failed to generate
+      return status;
     }
 
     return new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.OK, "", null);
@@ -571,7 +582,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     // Is this a generated directory ...
     IPath path = resource.getProjectRelativePath();
     // It is if it is a root of the resource pathname
-    if (buildFolder.getFullPath().isPrefixOf(path))
+    if (getBuildFolder().getFullPath().isPrefixOf(path))
       return true;
 
     return false;

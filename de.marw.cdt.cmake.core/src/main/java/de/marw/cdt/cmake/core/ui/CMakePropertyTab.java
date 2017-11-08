@@ -16,6 +16,7 @@ import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
 import org.eclipse.cdt.core.settings.model.ICMultiConfigDescription;
 import org.eclipse.cdt.core.settings.model.ICResourceDescription;
 import org.eclipse.cdt.core.settings.model.ICStorageElement;
+import org.eclipse.cdt.ui.newui.AbstractCPropertyTab;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
@@ -69,6 +70,8 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
   private Text t_outputFolder;
   private Button b_browseOutputFolder;
   private Button b_createOutputFolder;
+  /** variables in output folder text field */
+  private Button b_cmdVariables;
 
   /**
    * the preferences associated with our configurations to manage. Initialized
@@ -87,7 +90,7 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
 
     // output folder group
     {
-      Group gr = WidgetHelper.createGroup(usercomp, SWT.FILL, 2, "Build output location", 2);
+      Group gr = WidgetHelper.createGroup(usercomp, SWT.FILL, 2, "Build output location (relative to project root)", 2);
 
       setupLabel(gr, "F&older", 1, SWT.BEGINNING);
 
@@ -97,23 +100,11 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
       Composite buttonBar = new Composite(gr, SWT.NONE);
       {
         buttonBar.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false, 3, 1));
-        GridLayout layout = new GridLayout(2, false);
+        GridLayout layout = new GridLayout(3, false);
         layout.marginHeight = 0;
         layout.marginWidth = 0;
         buttonBar.setLayout(layout);
       }
-      b_createOutputFolder = WidgetHelper.createButton(buttonBar, "&Create...", true);
-      b_createOutputFolder.addSelectionListener(new SelectionAdapter() {
-        @Override
-        public void widgetSelected(SelectionEvent e) {
-          NewFolderDialog dialog = new NewFolderDialog(parent.getShell(), page.getProject());
-          if (dialog.open() == Window.OK) {
-            IFolder f = (IFolder) dialog.getFirstResult();
-            t_outputFolder.setText(f.getProjectRelativePath().toPortableString());
-          }
-        }
-      });
-
       b_browseOutputFolder = WidgetHelper.createButton(buttonBar, "B&rowse...", true);
       b_browseOutputFolder.addSelectionListener(new SelectionAdapter() {
         @Override
@@ -126,6 +117,33 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
           if (folder != null) {
             // insert selected resource name
             t_outputFolder.setText(folder.getProjectRelativePath().toPortableString());
+          }
+        }
+      });
+      b_createOutputFolder = WidgetHelper.createButton(buttonBar, "&Create...", true);
+      b_createOutputFolder.addSelectionListener(new SelectionAdapter() {
+        @Override
+        public void widgetSelected(SelectionEvent e) {
+          NewFolderDialog dialog = new NewFolderDialog(parent.getShell(), page.getProject());
+          if (dialog.open() == Window.OK) {
+            IFolder f = (IFolder) dialog.getFirstResult();
+            t_outputFolder.setText(f.getProjectRelativePath().toPortableString());
+          }
+        }
+      });
+
+      b_cmdVariables = WidgetHelper.createButton(buttonBar, "Insert &Variable...",
+          true);
+      b_cmdVariables.addSelectionListener(new SelectionAdapter() {
+        @Override
+        public void widgetSelected(SelectionEvent e) {
+          final ICResourceDescription resDesc = getResDesc();
+          if (resDesc == null)
+            return;
+          ICConfigurationDescription cfgd= resDesc.getConfiguration();
+        String text = AbstractCPropertyTab.getVariableDialog(t_outputFolder.getShell(), cfgd);
+          if (text != null) {
+            t_outputFolder.insert(text);
           }
         }
       });
@@ -241,6 +259,7 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
     t_outputFolder.setEnabled(editable);
     b_browseOutputFolder.setEnabled(editable);
     b_createOutputFolder.setEnabled(editable);
+    b_cmdVariables.setEnabled(editable);
   }
 
   /**
@@ -350,7 +369,8 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
     }
 
     setCacheFileEditable(cacheFileEditable, prefs[0].getCacheFile());
-    setBuildFolderEditable(buildFolderEditable, prefs[0].getBuildDirectory());
+    String text = prefs[0].getBuildDirectory();
+    setBuildFolderEditable(buildFolderEditable, text == null ? "build/${ConfigName}" : text);
   }
 
   /**
