@@ -46,6 +46,7 @@ Invoke `mvn -f ./parent/pom.xml verify` to build the plugin.
 ### Changes
 - Enhancement #54: Support variable expansion in build output location.
 - Fixed #55: NPE if project is of plain make-nature (no managed build).
+- Fixed #51: No error message in build log, when cmake executable could not be found.
 
 ## 1.7.0 (2017-09-26)
 ### Changes
