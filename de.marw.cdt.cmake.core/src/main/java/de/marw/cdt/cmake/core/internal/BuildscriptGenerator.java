@@ -40,6 +40,7 @@ import org.eclipse.cdt.managedbuilder.makegen.IManagedBuilderMakefileGenerator;
 import org.eclipse.cdt.managedbuilder.makegen.IManagedBuilderMakefileGenerator2;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
@@ -76,6 +77,8 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
 
   /** CBuildConsole element id */
   private static final String CMAKE_CONSOLE_ID = "de.marw.cdt.cmake.core.cmakeConsole";
+  /** buildscript generation error marker ID */
+  private static final String MARKER_ID = CdtPlugin.PLUGIN_ID + ".BuildscriptGenerationError";
 
   private IProject project;
   private IProgressMonitor monitor;
@@ -185,22 +188,24 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
   @Override
   public MultiStatus regenerateMakefiles() throws CoreException {
 
+    project.deleteMarkers(MARKER_ID, false, IResource.DEPTH_ZERO);
+
     ICSourceEntry[] srcEntries = config.getSourceEntries();
     { // do a sanity check: only one source entry allowed for project
       if (srcEntries.length == 0) {
         // no source folders specified in project
         // Make sure there is something to build
         String msg = "No source directories in project " + project.getName();
-        updateMonitor(msg);
         MultiStatus status = new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.INFO, "", null);
-        status.add(new Status(IStatus.INFO, CdtPlugin.PLUGIN_ID, IManagedBuilderMakefileGenerator.NO_SOURCE_FOLDERS,
+        status.add(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID, IManagedBuilderMakefileGenerator.NO_SOURCE_FOLDERS,
             msg, null));
         return status;
       } else if (srcEntries.length > 1) {
-        final String msg = "Only a single source location supported by CMake";
-        updateMonitor(msg);
-        MultiStatus status = new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.ERROR, "", null);
-        status.add(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID, 0, msg, null));
+        final String msg = "Only a single source location is supported";
+        MultiStatus status = new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.ERROR, msg, null);
+        // if multiple projects are build, this information is lost when the a new console is opened.
+        // So create a problem marker to show up in the problem view
+        createErrorMarker(project, status.getMessage());
         return status;
       } else {
         ICConfigurationDescription cfgDes = ManagedBuildManager.getDescriptionForConfiguration(config);
@@ -251,7 +256,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     // create makefile, assuming the first source directory contains a
     // CMakeLists.txt
     final ICSourceEntry srcEntry = srcEntries[0]; // project relative
-    updateMonitor("Invoking CMake for " + srcEntry.getName());
+    updateMonitor("Invoking CMake for " + project.getName());
     try {
       final ConsoleOutputStream cis = console.getInfoStream();
       cis.write(SimpleDateFormat.getTimeInstance().format(new Date()).getBytes());
@@ -272,6 +277,9 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     // NOTE: Commonbuilder reads getCode() to detect errors, not getSeverity()
     if (status.getCode() == IStatus.ERROR) {
       // failed to generate
+      // if multiple projects are build, this information is lost when the a new console is opened.
+      // So create a problem marker to show up in the problem view
+      createErrorMarker(project, status.getMessage());
       return status;
     }
 
@@ -624,4 +632,14 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     }
   }
 
+  private static void createErrorMarker(IProject project, String message) throws CoreException {
+    try {
+      IMarker marker = project.createMarker(MARKER_ID);
+      marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
+      marker.setAttribute(IMarker.MESSAGE, message);
+    } catch (CoreException ex) {
+      // resource is not (yet) known by the workbench
+      // ignore
+    }
+  }
 }
