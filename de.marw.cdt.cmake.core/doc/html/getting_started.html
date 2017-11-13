@@ -9,45 +9,49 @@
 <body>
   <h1>Getting Started</h1>
   <p>
-    CMake for CDT requires an existing C/C++ project to work with.<br>It allows
+    CMake for CDT requires an existing C/C++ project to work with.<br/>It allows
     to use <code>cmake</code> as the generator for the makefiles instead of the
     generator built-in to CDT.
     See <a href="t_enable_generator.html">Enabling CMake buildscript generation</a>
     for details.
   </p>
   
+  <p>As a first start, you may want to try out one of the 
+  <a href="https://github.com/15knots/cmake4eclipse/tree/master/testprojects">example projects</a>.
+  </p>
+  
   <p>
-  To set up a new project with existing source code, please follow these steps:
+  To set up your own project with existing source code, please follow these steps:
   <ol>
 <li>Check out your source code.</li>
-<li>Open the new C/C++ project wizard (<kbd>File&#10146; New&#10146; C Project</kbd>
+<li>Open the <kbd>New C/C++ project</kbd> wizard (<kbd>File&#10146; New&#10146; C Project</kbd>
 or <kbd>File&#10146; New&#10146; C++ Project</kbd>).</li>
 <li>Make sure the project location points to root directory of your checked out files</li>
 <li>For the project type, select <kbd>Executable</kbd>. 
 You may also select <kbd>Shared Library</kbd> or <kbd>Static Library</kbd>,
-it does not matter, that information comes from your <em>CMakeLists.txt</em>, but CDT requires it.
-<strong>Do not select <kbd>Makefile project</kbd> here!</strong>
+it does not matter. Your <em>CMakeLists.txt</em> is the source of truth.
+<strong>So do not select <kbd>Makefile project</kbd> here!</strong>
 </li>
 <li>Finish project creation.</li>
 <li>Open the <a class="command-link" href='javascript:executeCommand("org.eclipse.ui.project.properties")'>
-   <img src="PLUGINS_ROOT/org.eclipse.help/command_link.png"><b>Project Properties</b></a>
+   <img src="PLUGINS_ROOT/org.eclipse.help/command_link.png"/><b>Project Properties</b></a>
    dialog.
 </li>
 <li>Select the <kbd>C/C++ Build</kbd> node and the <kbd>Builder Settings</kbd> tab 
    and make sure <kbd>Generate Makefiles automatically</kbd> is checked.
 </li>
 <li>Select the <kbd>Tool Chain Editor</kbd> node and set 
-<kbd>CMake Make Builder</kbd> as the current builder.</li>
+<kbd>CMake Builder (portable)</kbd> as the current builder.</li>
 <li>If your top level <em>CMakeLists.txt</em> does not reside in the root directory
-of your checked out files, select the<br><kbd>C/C++ General&#10146; Path and Symbols</kbd> node
+of your checked out files, select the <kbd>C/C++ General&#10146; Path and Symbols</kbd> node
  and the <kbd>Source Location</kbd> tab.
- Then adjust the source folder to point to the directory containing your <em>CMakeLists.txt</em>
- file. This will tell the CDT indexer to scan the header files in your project.<br>
+ Then adjust the source folder to point to the directory containing your top level <em>CMakeLists.txt</em>
+ file. This will tell the CDT indexer to scan the header files in your project.<br/>
  <strong>Pro Tip</strong>: Add a CMakeLists.txt file in the root directory of your checked out files, if
  you miss the <code>Binaries</code> or <code>Archives</code> folder in the C/C++ Projects View. 
 </li>
 <li>Build the project. This will invoke cmake to generate the build scripts, if 
-necessary, and then will invoke make.</li>
+necessary, and then will invoke make.
 </li>
 </ol>
   </p>

@@ -33,12 +33,23 @@
     <li>re-enter eclipse workbench, configure the checked out project to
       use the generated buildscripts.</li>
   </ol>
+  </p>
   <p>CMake for CDT aims to address these tasks: Co-workers can just check
     out the source and have all the tedious tasks automated.</p>
+  <h2>Features</h2>
+    <ul>
+	<li>Automatic generation of build scripts. No need to manually invoke <code>cmake</code>.</li>
+	<li>Takes your <em>CMakeLists.txt</em> as the source of truth.</li>
+	<li>Supports the <code><a href="https://github.com/ninja-build/ninja">ninja</a></code> build system.</li>
+	<li>Aims to make Eclipse project cross-platform compatible without the need to change platform-specifc project settings.</li>
+	<li>Its Language Settings Provider can feed include paths and pre-processor symbols frrom cmake to the CDT-Indexer.</li>
+    </ul>
   <h2>Project Home</h2>
   <p>
+   If you have any question, please <b>do not raise issues</b> in the github tracker, but consult the 
+   <b><a href="http://groups.google.com/d/forum/cmake4eclipse-users">mailing list</a> first</b>!<br/>
     Source code, mailing list and issue tracker can be found at <a
-      href="https://github.com/15knots/cmake4eclipse">https://github.com/15knots/cmake4eclipse</a>
+      href="https://github.com/15knots/cmake4eclipse">https://github.com/15knots/cmake4eclipse</a>.
   </p>
 </body>
 </html>

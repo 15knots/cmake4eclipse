@@ -1,32 +1,43 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8"/>
 <title>Project Builders</title>
 </head>
 <body>
 	<h1>Project Builders</h1>
-	<p>The CMake for CDT plugin provides the following <strong>Project Builders</strong>. 
+	<p>The CMake for CDT plugin provides the following <strong>Project Builders</strong>
 	(selectable in the <a href="PLUGINS_ROOT/org.eclipse.cdt.doc.user/reference/cdt_u_prop_build_toolchain.htm">
 	Tool Chain Editor tab</a>):</p>
 
-	<h3>CMake Builder (portable)</h3>
-	<p>This builder retrieves the name of the build tool from the cache file written
-	by cmake during build-script-generation. This approach has some benefits:
+	<h3 id="portable">CMake Builder (portable)</h3>
+	  <p>This builder allows you to customize the build tool to be used on the
+    <a href="t_cmake_options_general.html">OS-specific property</a> tabs
+    and makes CMake generate the build scripts for the tool of your choice.
+  </p>
+	<p>The builder retrieves the name of the actual build tool from the cache file written
+	by cmake during build-script-generation. It has some benefits compared to the CMake Make Builder:
 	<ul>
   <li>It allows you to build with tools other than <code>make</code>, 
-  for example <code>ninja</code>.</li>
-  <li>Since cmake does a fairly good job to detect the <strong>absolute</strong> file system path
-   of the build tool, you are not forced to put the tool into $PATH.</li>
-<li>It makes your Eclipse project being a cross-platform project: Build using make under Linux,
-build with MSYS make under windows; without adjusting the Eclipse project files.</li>
+  for example <code>ninja</code>, <code>nmake</code> and others.</li>
+  <li>You are not forced to put the build tool into $PATH on your machine, since cmake does a fairly good job to
+   detect the <strong>absolute</strong> file system path of the build tool.</li>
+<li>It makes your Eclipse project being a cross-platform project: You can configure it to build using <code>make</code>
+under Linux, and build with <code>MSYS make</code> under windows; without the need to change platform-specifc
+ project settings after checkout.</li>
 </ul>
 This is the recommended builder.
-	</p>
-	
-	<h3>CMake Make Builder</h3>
-	<p>This builder simply invokes the <code>make</code> command from the executable search
-	path ($PATH) to build the project. This builder originates from the original states of this plugin
+</p>
+
+<h3 id="make">CMake Make Builder</h3>
+  <p>
+    This builder is nearly identical to the built-in <i>Gnu Make Builder</i>,
+    except that it uses the information found in the <code>CMakeLists.txt</code> file
+    to generate the buildscripts.
+    It will always generate makefiles and then simply invoke the <code>make</code> tool
+    found in the system's executable search path ($PATH) to build the project.
+  </p>
+	<p>Please note that this builder originates from the original states of this plugin
 	and is kept for compatibility reasons only.
 	</p>
 

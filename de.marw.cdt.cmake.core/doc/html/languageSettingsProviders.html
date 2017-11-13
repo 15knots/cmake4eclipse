@@ -1,35 +1,35 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8"/>
 <title>Available Language Settings Providers</title>
 </head>
 <body>
 	<h1>Preprocessor Include Paths, Macros, etc.</h1>
 	<P>Include paths and preprocessor macros for the C/C++ indexer are supplied by
-	<strong>Language Settings Providers</strong> using 
+	<strong>Language Settings Providers</strong> using the
 	<a href="PLUGINS_ROOT/org.eclipse.cdt.doc.user/concepts/cdt_c_scanner_discovery.htm">Scanner Discovery</a> mechanism.
 	</P>
 	<p>The CMake for CDT plugin provides these <strong>Settings Providers</strong>:</p>
 
 	<h3>CMAKE_EXPORT_COMPILE_COMMANDS Parser</h3>
-	<p>This provider instructs CMake to generate a file that contains the compiler commands-lines
-	which will be executed when a project is build.
-	It parses that file and provides the preprocessor include paths, macros definitions and 
-	macros undefines to the indexer. 
-	Parsing is done at most once per build since the cache is invalidated when the
+	<p>This provider instructs CMake to generate a file that contains all the compiler commands-lines
+	which will be executed when a project is build.<br/>
+	The plugin will parse that file and feed any preprocessor include path, macros definition or 
+	macros undefine that originates from your <em>CMakeLists.txt</em> files to the indexer.<br/>
+	Parsing is done rarely, since its internal cache is invalidated only when the
 	file`s time-stamp is newer, so it should be reasonably fast.
 	</p>
 	
 	<h3>CMake Build Output Parser (deprecated)</h3>
 	<p>
 	<strong>Do not use, it will be removed in future versions.</strong> 
-	It is just my first implementation of a<code>LanguageSettingsProvider</code>.<br>
+	It is just my first implementation of a <code>LanguageSettingsProvider</code>.<br/>
 	This provider parses each line of the build output and tries to find compiler command-lines.
 	To do so, it instructs CMake to generate build scripts that produce verbose build output.	
 	As a cause, it will not work with the <code>ninja</code> build tool, because ninja builds do not print any
-	compiler command lines by default.<br>
-	Build output parsing degrades build performance, so this provider tries to cache its 
+	compiler command lines by default.<br/>
+	Build output parsing also degrades build performance, so this provider tries to cache its 
 	findings -- unfortunately its caching is somehow unreliable.
 	</p>
 </body>
