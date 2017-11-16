@@ -18,21 +18,17 @@ package de.marw.cdt.cmake.core.internal;
  */
 public enum CmakeGenerator {
   /*
-   * Implementaion Note: Please not include generators for IDE project files,
+   * Implementation Note: Please not include generators for IDE project files,
    * such as "Eclipse CDT4 - Unix Makefiles".
    */
 
   // linux generators
   UnixMakefiles("Unix Makefiles"),
-  // Ninja, experimental
+  // Ninja
   Ninja("Ninja", "ninja", "-k 0") {
     @Override
     public String getMakefileName(){
       return "build.ninja";
-    }
-    @Override
-    public String getBuildscriptProcessorExtraArg() {
-      return "-v";
     }
   },
   // windows generators
