@@ -261,8 +261,8 @@ public class CmakeBuildRunner extends ExternalBuildRunner {
       if (extraArg != null) {
         if (args0.length() > 0) {
           args0 += " ";
-          args0 += extraArg;
         }
+        args0 += extraArg;
       }
       // TODO Handle parallel build cmd
       return args0;
