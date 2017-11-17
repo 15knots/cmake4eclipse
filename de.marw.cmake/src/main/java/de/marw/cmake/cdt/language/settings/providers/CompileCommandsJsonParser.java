@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -42,6 +41,7 @@ import org.eclipse.cdt.core.settings.model.ICLanguageSettingEntry;
 import org.eclipse.cdt.core.settings.model.ICOutputEntry;
 import org.eclipse.cdt.core.settings.model.ICProjectDescription;
 import org.eclipse.cdt.core.settings.model.ICSettingEntry;
+import org.eclipse.cdt.core.settings.model.util.CDataUtil;
 import org.eclipse.cdt.ui.PreferenceConstants;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -54,6 +54,7 @@ import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jetty.util.ajax.JSON;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -376,18 +377,28 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
    */
   private void processJsonEntry(TimestampedLanguageSettingsStorage storage,
       ProjectLanguageSettingEntries projectEntries, Map<?, ?> sourceFileInfo, IFile jsonFile) throws CoreException {
-    if (sourceFileInfo.containsKey("file") && sourceFileInfo.containsKey("command")) {
+
+    if (sourceFileInfo.containsKey("file") && sourceFileInfo.containsKey("command")
+        && sourceFileInfo.containsKey("directory")) {
       final String file = sourceFileInfo.get("file").toString();
       if (file != null && !file.isEmpty()) {
         final String cmdLine = sourceFileInfo.get("command").toString();
         if (cmdLine != null && !cmdLine.isEmpty()) {
-          final File path = new File(file);
-          final IFile[] files = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(path.toURI());
+          final IFile[] files = ResourcesPlugin.getWorkspace().getRoot()
+              .findFilesForLocationURI(new File(file).toURI());
           if (files.length > 0) {
             ParserDetectionResult pdr= fastDetermineDetector(cmdLine);
             if (pdr != null) {
               // found a matching command-line parser
-              processCommandLine(storage, projectEntries, pdr.detectorWMethod.detector.parser, files[0],
+
+              // cwdStr is the absolute working directory of the compiler in
+              // CMake-notation (fileSep are forward slashes)
+              final String cwdStr = sourceFileInfo.get("directory").toString();
+              IPath cwd = null;
+              if (cwdStr != null) {
+                cwd = Path.fromOSString(cwdStr);
+              }
+              processCommandLine(storage, projectEntries, pdr.detectorWMethod.detector.parser, files[0], cwd,
                   pdr.getReducedCommandLine());
             } else {
               // no matching parser found
@@ -400,7 +411,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
       }
     }
     // unrecognized entry, skipping
-    final String msg = "File format error: " + ": 'file' or 'command' missing in JSON object. "
+    final String msg = "File format error: " + ": 'file', 'command' or 'directory' missing in JSON object. "
         + WORKBENCH_WILL_NOT_KNOW_ALL_MSG;
     createMarker(jsonFile, msg);
   }
@@ -613,12 +624,14 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
    * @param sourceFile
    *          the source file resource corresponding to the source file being
    *          processed by the tool
+   * @param cwd
+   *          the current working directory of the compiler at its invocation
    * @param line
    *          the command line to process
    */
   private void processCommandLine(TimestampedLanguageSettingsStorage storage,
       ProjectLanguageSettingEntries projectEntries, IToolCommandlineParser cmdlineParser, IFile sourceFile,
-      String line) {
+      IPath cwd, String line) {
     line = ToolCommandlineParser.trimLeadingWS(line);
     final List<ICLanguageSettingEntry> entries = cmdlineParser.processArgs(line);
     // attach settings to sourceFile resource...
@@ -628,9 +641,16 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
        * per-project entries. For include dirs, add these entries to the project
        * resource to make them show up in the UI in the includes folder...
        */
-      for (Iterator<ICLanguageSettingEntry> iter = entries.iterator(); iter.hasNext();) {
-        ICLanguageSettingEntry entry = iter.next();
+      for (ICLanguageSettingEntry entry : entries) {
         if (entry.getKind() == ICSettingEntry.INCLUDE_PATH) {
+          final String ipathstr = entry.getName();
+          // workaround for relative path by cmake bug
+          // https://gitlab.kitware.com/cmake/cmake/issues/13894 : prepend cwd
+          IPath path = Path.fromOSString(ipathstr);
+          if (!path.isAbsolute()) {
+            // prepend CWD
+            entry = CDataUtil.createCIncludePathEntry(cwd.append(path).toOSString(), entry.getFlags());
+          }
           projectEntries.addSettingEntry(cmdlineParser.getLanguageId(), entry);
         }
       }
