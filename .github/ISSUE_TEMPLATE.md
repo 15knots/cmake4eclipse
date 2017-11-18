@@ -1,5 +1,4 @@
-If you have any question, please consult the **<a href="http://groups.google.com/d/forum/cmake4eclipse-users">mailing list</a> first**
-before you **do not raise issues** here 
+If you have any question, please **consult the <a href="http://groups.google.com/d/forum/cmake4eclipse-users">mailing list</a> first** before you raise issues here 
 
 **This is a...**  
 <!-- place an 'X' to check the box -->
