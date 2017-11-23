@@ -38,7 +38,6 @@ import org.eclipse.cdt.core.language.settings.providers.LanguageSettingsSerializ
 import org.eclipse.cdt.core.language.settings.providers.LanguageSettingsStorage;
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
 import org.eclipse.cdt.core.settings.model.ICLanguageSettingEntry;
-import org.eclipse.cdt.core.settings.model.ICOutputEntry;
 import org.eclipse.cdt.core.settings.model.ICProjectDescription;
 import org.eclipse.cdt.core.settings.model.ICSettingEntry;
 import org.eclipse.cdt.core.settings.model.util.CDataUtil;
@@ -272,12 +271,9 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
 
     // If getBuilderCWD() returns a workspace relative path, it is garbled.
     // It returns '${workspace_loc:/my-project-name}'. Additionally, it returns null on a project with makeNature.
-    // In contrast, getResolvedOutputDirectories() does it right, it returns '/my-project-name}'
-//     IPath builderCWD = currentCfgDescription.getBuildSetting().getBuilderCWD();
-    final ICOutputEntry[] resolvedOutputDirectories = currentCfgDescription.getBuildSetting()
-        .getResolvedOutputDirectories();
-    // cmake creates a single output dir only.
-    final IPath buildRoot = resolvedOutputDirectories[0].getFullPath();
+    // In contrast, getResolvedOutputDirectories() does it mostly right, it returns '/my-project-name', but also stale data
+    // when a user changed the buil-root
+    final  IPath buildRoot = currentCfgDescription.getBuildSetting().getBuilderCWD();
     final IPath jsonPath = buildRoot.append("compile_commands.json");
     final IFile jsonFileRc = ResourcesPlugin.getWorkspace().getRoot().getFile(jsonPath);
 
