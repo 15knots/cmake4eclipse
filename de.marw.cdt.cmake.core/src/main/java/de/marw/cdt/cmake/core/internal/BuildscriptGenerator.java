@@ -1,4 +1,4 @@
-/*******************************************************************************
+/* ******************************************************************************
  * Copyright (c) 2013-2017 Martin Weber.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -56,8 +56,6 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
-import org.eclipse.core.variables.IStringVariableManager;
-import org.eclipse.core.variables.VariablesPlugin;
 
 import de.marw.cdt.cmake.core.CdtPlugin;
 import de.marw.cdt.cmake.core.internal.settings.AbstractOsPreferences;
@@ -549,14 +547,15 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
    * @throws CoreException
    *         if unable to resolve the value of one or more variables
    */
-  private static void appendDefines(List<String> args, final List<CmakeDefine> defines) throws CoreException {
-    final IStringVariableManager varMgr = VariablesPlugin.getDefault().getStringVariableManager();
+  private void appendDefines(List<String> args, final List<CmakeDefine> defines) throws CoreException {
+    final ICdtVariableManager mngr = CCorePlugin.getDefault().getCdtVariableManager();
+    final ICConfigurationDescription cfgd = ManagedBuildManager.getDescriptionForConfiguration(config);
     for (CmakeDefine def : defines) {
       final StringBuilder sb = new StringBuilder("-D");
       sb.append(def.getName());
       sb.append(':').append(def.getType().getCmakeArg());
       sb.append('=');
-      String expanded = varMgr.performStringSubstitution(def.getValue(), false);
+      String expanded = mngr.resolveValue(def.getValue(), "", "", cfgd);
       sb.append(expanded);
       args.add(sb.toString());
     }

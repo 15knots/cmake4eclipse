@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 Martin Weber.
+ * Copyright (c) 2014-2017 Martin Weber.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,8 @@
  *******************************************************************************/
 package de.marw.cdt.cmake.core.ui;
 
-import org.eclipse.debug.ui.StringVariableSelectionDialog;
+import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
+import org.eclipse.cdt.ui.newui.AbstractCPropertyTab;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -46,6 +47,8 @@ public class AddCmakeDefineDialog extends Dialog {
    * created.
    */
   private CmakeDefine editedVar;
+  /** the configuration description to use for variable selection dialog or <code>null</code> */
+  private final ICConfigurationDescription cfgd;
 
   private Text variableName;
   private Combo typeSelector;
@@ -73,12 +76,16 @@ public class AddCmakeDefineDialog extends Dialog {
    *
    * @param parentShell
    * @param editedVar
-   *        the variable to edit or {@code null} if a new variable is going to
-   *        be created.
+   *          the variable to edit or {@code null} if a new variable is going to
+   *          be created.
+   * @param cfgd
+   *          the configuration description to use for variable selection dialog
+   *          or <code>null</code>
    */
-  public AddCmakeDefineDialog(Shell parentShell, CmakeDefine editedVar) {
+  public AddCmakeDefineDialog(Shell parentShell, ICConfigurationDescription cfgd, CmakeDefine editedVar) {
     super(parentShell);
     setShellStyle(SWT.SHELL_TRIM);
+    this.cfgd = cfgd;
     this.editedVar = editedVar;
   }
 
@@ -195,9 +202,9 @@ public class AddCmakeDefineDialog extends Dialog {
           settings.put("dir", dialog.getFilterPath());
         } else {
           FileDialog dialog = new FileDialog(getShell());
-          dialog.setFilterPath(settings.get("dir"));
+          dialog.setFilterPath(settings.get("file"));
           text = dialog.open();
-          settings.put("dir", dialog.getFilterPath());
+          settings.put("file", dialog.getFilterPath());
         }
 
         if (text != null)
@@ -209,17 +216,18 @@ public class AddCmakeDefineDialog extends Dialog {
     btnBrowseVars.setText("Variables...");
     btnBrowseVars.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false,
         false, 1, 1));
-    btnBrowseVars.addSelectionListener(new SelectionAdapter() {
-      @Override
-      public void widgetSelected(SelectionEvent e) {
-        StringVariableSelectionDialog dialog = new StringVariableSelectionDialog(
-            getShell());
-        dialog.open();
-        String text = dialog.getVariableExpression();
-        if (text != null)
-          variableValue.insert(text);
-      }
-    });
+    if (cfgd == null) {
+      btnBrowseVars.setEnabled(false);
+    } else {
+      btnBrowseVars.addSelectionListener(new SelectionAdapter() {
+        @Override
+        public void widgetSelected(SelectionEvent e) {
+          String text = AbstractCPropertyTab.getVariableDialog(getShell(), cfgd);
+          if (text != null)
+            variableValue.insert(text);
+        }
+      });
+    }
 
     // to control sensitivity of buttons...
     typeSelector.addModifyListener(new ModifyListener() {

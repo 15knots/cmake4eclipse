@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 Martin Weber.
+ * Copyright (c) 2014-2017 Martin Weber.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,7 @@ package de.marw.cdt.cmake.core.ui;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
 import org.eclipse.cdt.ui.newui.AbstractCPropertyTab;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -57,13 +58,20 @@ import de.marw.cdt.cmake.core.internal.settings.CmakeDefine;
   /** table column widths */
   private static final int[] tableColumnWidths = { 120, 80, 250 };
 
+  /** the configuration description to use for variable selection dialog or <code>null</code> */
+  private final ICConfigurationDescription cfgd;
+
   private TableViewer tableViewer;
   private MyViewerComparator comparator;
 
   /**
    * @param parent
+   * @param cfgd
+   *          the configuration description to use for variable selection dialog
+   *          or <code>null</code>
    */
-  public DefinesViewer(Composite parent) {
+  public DefinesViewer(Composite parent, ICConfigurationDescription cfgd) {
+    this.cfgd = cfgd;
     createEditor(parent);
     // Set the sorter for the table
     comparator = new MyViewerComparator();
@@ -237,7 +245,7 @@ import de.marw.cdt.cmake.core.internal.settings.CmakeDefine;
 
   private void handleDefineAddButton(TableViewer tableViewer) {
     final Shell shell = tableViewer.getControl().getShell();
-    AddCmakeDefineDialog dlg = new AddCmakeDefineDialog(shell, null);
+    AddCmakeDefineDialog dlg = new AddCmakeDefineDialog(shell, cfgd, null);
     if (dlg.open() == Dialog.OK) {
       CmakeDefine cmakeDefine = dlg.getCmakeDefine();
       @SuppressWarnings("unchecked")
@@ -256,7 +264,7 @@ import de.marw.cdt.cmake.core.internal.settings.CmakeDefine;
       // edit the selected variable in-place..
       final Shell shell = tableViewer.getControl().getShell();
       AddCmakeDefineDialog dlg = new AddCmakeDefineDialog(shell,
-          (CmakeDefine) cmakeDefine);
+          cfgd, (CmakeDefine) cmakeDefine);
       if (dlg.open() == Dialog.OK) {
         tableViewer.update(cmakeDefine, null); // updates the display
       }
