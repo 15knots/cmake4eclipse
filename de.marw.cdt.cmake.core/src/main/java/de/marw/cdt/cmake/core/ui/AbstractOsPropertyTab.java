@@ -212,7 +212,8 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
     } // makefile generator combo
 
     // cmake defines table...
-    definesViewer = new DefinesViewer(usercomp);
+    final ICResourceDescription resDesc = getResDesc();
+    definesViewer = new DefinesViewer(usercomp, resDesc == null ? null : resDesc.getConfiguration());
     // cmake undefines table...
     undefinesViewer = new UnDefinesViewer(usercomp);
   }

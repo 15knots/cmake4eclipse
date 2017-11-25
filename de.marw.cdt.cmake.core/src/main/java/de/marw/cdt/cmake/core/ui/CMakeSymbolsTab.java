@@ -60,7 +60,8 @@ public class CMakeSymbolsTab extends QuirklessAbstractCPropertyTab {
     super.createControls(parent);
     usercomp.setLayout(new GridLayout(1, false));
     // cmake defines table...
-    definesViewer = new DefinesViewer(usercomp);
+    final ICResourceDescription resDesc = getResDesc();
+    definesViewer = new DefinesViewer(usercomp, resDesc == null ? null : resDesc.getConfiguration());
     // cmake undefines table...
     undefinesViewer = new UnDefinesViewer(usercomp);
   }
