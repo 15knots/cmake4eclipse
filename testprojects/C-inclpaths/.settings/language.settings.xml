@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<project>
-	<configuration id="cdt.managedbuild.config.gnu.exe.debug.960404064" name="Debug">
-		<extension point="org.eclipse.cdt.core.LanguageSettingsProvider">
-			<provider-reference id="de.marw.cmake.cdt.language.settings.providers.CompileCommandsJsonParser" ref="shared-provider"/>
-		</extension>
-	</configuration>
-</project>
