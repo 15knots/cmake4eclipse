@@ -15,13 +15,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -41,7 +36,6 @@ import org.eclipse.cdt.core.settings.model.ICLanguageSettingEntry;
 import org.eclipse.cdt.core.settings.model.ICProjectDescription;
 import org.eclipse.cdt.core.settings.model.ICSettingEntry;
 import org.eclipse.cdt.core.settings.model.util.CDataUtil;
-import org.eclipse.cdt.ui.PreferenceConstants;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
@@ -56,14 +50,6 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jetty.util.ajax.JSON;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.IWorkbenchPartReference;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.PlatformUI;
 
 import de.marw.cmake.CMakePlugin;
 
@@ -238,14 +224,6 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
     }
   }
 
-  /**
-   * {@inheritDoc} <br>
-   * Note that this list is <b>unmodifiable</b>.<br>
-   * Note also that <b>you can compare these lists with simple equality operator
-   * ==</b>, as the lists themselves are backed by WeakHashSet<List
-   * <ICLanguageSettingEntry>> where identical copies (deep comparison is used)
-   * are replaced with the same one instance.
-   */
   @Override
   public List<ICLanguageSettingEntry> getSettingEntries(ICConfigurationDescription cfgDescription, IResource rc,
       String languageId) {
@@ -286,10 +264,11 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
 
         final IProject project = currentCfgDescription.getProjectDescription().getProject();
         final TimestampedLanguageSettingsStorage store = storage.getSettingsForConfig(currentCfgDescription);
-        final ProjectLanguageSettingEntries projectEntries = new ProjectLanguageSettingEntries();
 
         if (store.lastModified < tsJsonModified) {
           // must parse json file...
+          // store time-stamp
+          store.lastModified = tsJsonModified;
           if (!initializingWorkbench) {
             project.deleteMarkers(MARKER_ID, false, IResource.DEPTH_INFINITE);
           }
@@ -301,7 +280,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
             if (parsed instanceof Object[]) {
               for (Object o : (Object[]) parsed) {
                 if (o instanceof Map) {
-                  processJsonEntry(store, projectEntries, (Map<?, ?>) o, jsonFileRc);
+                  processJsonEntry(store, (Map<?, ?>) o, jsonFileRc);
                 } else {
                   // expected Map object, skipping entry.toString()
                   final String msg = "File format error: unexpected entry '" + o + "'. "
@@ -309,33 +288,10 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
                   createMarker(jsonFileRc, msg);
                 }
               }
-              /*
-               * compile_commands.json holds entries per-file only and does not
-               * contain per-project entries. For include dirs, add these
-               * entries to the project resource to make them show up in the UI
-               * in the includes folder...
-               */
-              store.addProjectLanguageSettingEntries(project, projectEntries);
-              // store time-stamp
-              store.lastModified = tsJsonModified;
               // System.out.println("stored cached compile_commands");
 
               // trigger UI update to show newly detected include paths
-              // must run in UI thread
-              Display.getDefault().asyncExec(new Runnable() {
-
-                public void run() {
-                  IWorkbenchWindow activeWorkbenchWindow = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-                  IWorkbenchPage activePage = activeWorkbenchWindow.getActivePage();
-                  IWorkbenchPartReference refs[] = activePage.getViewReferences();
-                  for (IWorkbenchPartReference ref : refs) {
-                    IWorkbenchPart part = ref.getPart(false);
-                    if (part instanceof IPropertyChangeListener)
-                      ((IPropertyChangeListener) part).propertyChange(
-                          new PropertyChangeEvent(project, PreferenceConstants.PREF_SHOW_CU_CHILDREN, null, null));
-                  }
-                }
-              });
+              serializeLanguageSettings(currentCfgDescription);
             } else {
               // file format error
               final String msg = "File does not seem to be in JSON format. " + WORKBENCH_WILL_NOT_KNOW_ALL_MSG;
@@ -362,8 +318,6 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
    *
    * @param storage
    *          where to store language settings
-   * @param projectEntries
-   *          where to store project wide setting entries
    * @param sourceFileInfo
    *          a Map of type Map<String,String>
    * @param jsonFile
@@ -372,7 +326,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
    *           if marker creation failed
    */
   private void processJsonEntry(TimestampedLanguageSettingsStorage storage,
-      ProjectLanguageSettingEntries projectEntries, Map<?, ?> sourceFileInfo, IFile jsonFile) throws CoreException {
+      Map<?, ?> sourceFileInfo, IFile jsonFile) throws CoreException {
 
     if (sourceFileInfo.containsKey("file") && sourceFileInfo.containsKey("command")
         && sourceFileInfo.containsKey("directory")) {
@@ -394,8 +348,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
               if (cwdStr != null) {
                 cwd = Path.fromOSString(cwdStr);
               }
-              processCommandLine(storage, projectEntries, pdr.detectorWMethod.detector.parser, files[0], cwd,
-                  pdr.getReducedCommandLine());
+              processCommandLine(storage, pdr.detectorWMethod.detector.parser, files[0], cwd, pdr.getReducedCommandLine());
             } else {
               // no matching parser found
               String message = "No parser for command '" + cmdLine + "'. " + WORKBENCH_WILL_NOT_KNOW_ALL_MSG;
@@ -613,8 +566,6 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
    *
    * @param storage
    *          where to store language settings
-   * @param projectEntries
-   *          where to store project wide setting entries
    * @param cmdlineParser
    *          the tool detector and its tool option parsers
    * @param sourceFile
@@ -626,17 +577,12 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
    *          the command line to process
    */
   private void processCommandLine(TimestampedLanguageSettingsStorage storage,
-      ProjectLanguageSettingEntries projectEntries, IToolCommandlineParser cmdlineParser, IFile sourceFile,
-      IPath cwd, String line) {
+      IToolCommandlineParser cmdlineParser, IFile sourceFile, IPath cwd,
+      String line) {
     line = ToolCommandlineParser.trimLeadingWS(line);
     final List<ICLanguageSettingEntry> entries = cmdlineParser.processArgs(line);
     // attach settings to sourceFile resource...
     if (entries != null && entries.size() > 0) {
-      /*
-       * compile_commands.json holds entries per-file only and does not contain
-       * per-project entries. For include dirs, add these entries to the project
-       * resource to make them show up in the UI in the includes folder...
-       */
       for (ICLanguageSettingEntry entry : entries) {
         if (entry.getKind() == ICSettingEntry.INCLUDE_PATH) {
           final String ipathstr = entry.getName();
@@ -647,7 +593,13 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
             // prepend CWD
             entry = CDataUtil.createCIncludePathEntry(cwd.append(path).toOSString(), entry.getFlags());
           }
-          projectEntries.addSettingEntry(cmdlineParser.getLanguageId(), entry);
+          /*
+           * compile_commands.json holds entries per-file only and does not
+           * contain per-project or per-folder entries. For include dirs, ALSO
+           * add these entries to the project resource to make them show up in
+           * the UI in the includes folder...
+           */
+          storage.setSettingEntries((String) null, cmdlineParser.getLanguageId(), entries);
         }
       }
       storage.setSettingEntries(sourceFile, cmdlineParser.getLanguageId(), entries);
@@ -697,6 +649,14 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
     return (CompileCommandsJsonParser) super.cloneShallow();
   }
 
+  @Override
+  public LanguageSettingsStorage copyStorage() {
+    if (currentCfgDescription == null)
+      return null;
+    TimestampedLanguageSettingsStorage st = storage.getSettingsForConfig(currentCfgDescription);
+    return st.clone();
+  }
+
   /**
    * Overridden to misuse this to populate the {@link #getSettingEntries setting
    * entries} on startup.<br>
@@ -704,6 +664,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
    */
   @Override
   public void registerListener(ICConfigurationDescription cfgDescription) {
+    System.out.println("CompileCommandsJsonParser.registerListener(): "+ this.getId()+ ": "+(cfgDescription==null?null:cfgDescription.getName()));
     IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
     IProject[] projects = workspaceRoot.getProjects();
     CCorePlugin ccp = CCorePlugin.getDefault();
@@ -753,36 +714,93 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
      * Sets language settings entries for this storages.
      *
      * @param rc
-     *          resource such as file or folder. If {@code null} the entries are
-     *          considered to be being defined as default entries for resources.
+     *          resource such as file or folder or project. If {@code null} the entries are
+     *          considered to be being defined as project-level entries for child resources.
      * @param languageId
      *          language id. Must not be {@code null}
      * @param entries
      *          language settings entries to set.
      */
     public void setSettingEntries(IResource rc, String languageId, List<ICLanguageSettingEntry> entries) {
-      final String rcPath = rc != null ? rc.toString() : null;
-      // System.out.println("#> setSettingEntries( " + rc + ", " + languageId +
-      // ")");
-      // System.out.println("\t" + entries);
+      /*
+       * compile_commands.json holds entries per-file only and does not contain
+       * per-project or per-folder entries. So we map the latter as project
+       * entries (=> null) to make the UI show the include directories we detected.
+       */
+      String rcPath = null;
+      if (rc != null && rc.getType() == IResource.FILE) {
+        rcPath = rc.getProjectRelativePath().toString();
+      }
       super.setSettingEntries(rcPath, languageId, entries);
     }
 
-    public void addProjectLanguageSettingEntries(IProject project, ProjectLanguageSettingEntries projectEntries) {
-      for (Entry<String, Set<ICLanguageSettingEntry>> entry : projectEntries.languages.entrySet()) {
-        List<ICLanguageSettingEntry> lses = Arrays.asList(entry.getValue().toArray(new ICLanguageSettingEntry[0]));
-        setSettingEntries(project, entry.getKey(), lses);
+    /**
+     * Sets language settings entries for this storages.
+     *
+     * @param rc
+     *          resource such as file or folder or project. If {@code null} the
+     *          entries are considered to be being defined as project-level
+     *          entries for child resources.
+     * @param languageId
+     *          language id. Must not be {@code null}
+     * @return the list of setting entries or {@code null} if no settings
+     *         defined.
+     */
+    public List<ICLanguageSettingEntry> getSettingEntries(IResource rc, String languageId) {
+      /*
+       * compile_commands.json holds entries per-file only and does not contain
+       * per-project or per-folder entries. So we map the latter as project
+       * entries (=> null) to make the UI show the include directories we detected.
+       */
+      String rcPath = null;
+      if (rc != null && rc.getType() == IResource.FILE) {
+        rcPath = rc.getProjectRelativePath().toString();
+      }
+      return super.getSettingEntries(rcPath, languageId);
+    }
+
+    public TimestampedLanguageSettingsStorage clone() {
+      TimestampedLanguageSettingsStorage cloned = new TimestampedLanguageSettingsStorage();
+      cloned.lastModified = this.lastModified;
+      cloned.fStorage.putAll( super.fStorage);
+      return cloned;
+    }
+
+    @Override
+    public void clear() {
+      synchronized (fStorage) {
+        super.clear();
+        lastModified = 0;
       }
     }
 
-    public TimestampedLanguageSettingsStorage clone() throws CloneNotSupportedException {
-      TimestampedLanguageSettingsStorage cloned = (TimestampedLanguageSettingsStorage) super.clone();
-      cloned.lastModified = this.lastModified;
-      return cloned;
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = super.hashCode();
+      result = prime * result + (int) (lastModified ^ (lastModified >>> 32));
+      return result;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj)
+        return true;
+      if (!super.equals(obj))
+        return false;
+      if (getClass() != obj.getClass())
+        return false;
+      TimestampedLanguageSettingsStorage other = (TimestampedLanguageSettingsStorage) obj;
+      if (lastModified != other.lastModified)
+        return false;
+      return true;
+    }
+
+
   } // TimestampedLanguageSettingsStorage
 
   private static class PerConfigLanguageSettingsStorage implements Cloneable {
+
     /**
      * Storage to keep settings entries. Key is
      * {@link ICConfigurationDescription#getId()}
@@ -791,17 +809,9 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
 
     public List<ICLanguageSettingEntry> getSettingEntries(ICConfigurationDescription cfgDescription, IResource rc,
         String languageId) {
-      // System.out.println("#< getSettingEntries( " + cfgDescription + ", " +
-      // rc + ", " + languageId + ")\t");
-      final LanguageSettingsStorage store = storages.get(cfgDescription.getId());
+      final TimestampedLanguageSettingsStorage store = storages.get(cfgDescription.getId());
       if (store != null) {
-        final String rcPath = rc.toString();
-        List<ICLanguageSettingEntry> entries = store.getSettingEntries(rcPath, languageId);
-        if (entries == null && languageId != null) {
-          entries = store.getSettingEntries(rcPath, null);
-        }
-        // System.out.println("\t" + entries);
-        return entries;
+        return store.getSettingEntries(rc, languageId);
       }
       return null;
     }
@@ -821,45 +831,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
       return store;
     }
 
-    public PerConfigLanguageSettingsStorage clone() throws CloneNotSupportedException {
-      PerConfigLanguageSettingsStorage cloned = new PerConfigLanguageSettingsStorage();
-      for (Entry<String, TimestampedLanguageSettingsStorage> entry : storages.entrySet()) {
-        cloned.storages.put(entry.getKey(), entry.getValue().clone());
-      }
-      return cloned;
-    }
   } // PerConfigLanguageSettingsStorage
-
-  /**
-   * Gathers {@code ICLanguageSettingEntry}s that are valid for a project.
-   *
-   * @author Martin Weber
-   */
-  private static class ProjectLanguageSettingEntries {
-    /**
-     * Storage to keep settings entries. Key is
-     * {@link ICConfigurationDescription#getId()}
-     */
-    private final Map<String, Set<ICLanguageSettingEntry>> languages = new HashMap<>(2, 1.0f);
-
-    /**
-     * Adds a language settings entry for the current project.
-     *
-     * @param languageId
-     *          language id. Must not be {@code null}
-     * @param entry
-     *          language setting entry to set.
-     */
-    public void addSettingEntry(String languageId, ICLanguageSettingEntry entry) {
-      Set<ICLanguageSettingEntry> langEntries = languages.get(languageId);
-      if (langEntries == null) {
-        langEntries = new HashSet<>(8);
-        languages.put(languageId, langEntries);
-      }
-      langEntries.add(entry);
-    }
-
-  }
 
   /** Responsible to match the first argument (the tool command) of a command-line.
    *
