@@ -42,8 +42,11 @@ Alternatively, **cmake4eclipse** can be installed into Eclipse using the "Instal
 This composite update site contains the latest release as well as selected older releases.
 https://raw.githubusercontent.com/15knots/cmake4eclipse/master/releng/comp-update/
 
-### Build
-Invoke `mvn -f ./parent/pom.xml verify` to build the plugin.
+### Debug and Build
+This project uses Apache maven as its build system.
+To build from a command-line, run `mvn -f ./parent/pom.xml verify` in the root directory of the project source files.
+
+There is a run configuration for eclipse to invoke maven `build cmake4eclipse` plus a launch configuration to debug the plugin: `cmake4eclipse`.
 
 ---
 # Release History
