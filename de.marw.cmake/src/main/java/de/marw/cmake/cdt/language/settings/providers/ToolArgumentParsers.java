@@ -135,7 +135,8 @@ class ToolArgumentParsers {
         if (matcher.lookingAt()) {
           final String name = matcher.group(oMatcher.nameGroup);
           final String value = matcher.group(oMatcher.valueGroup);
-          final ICLanguageSettingEntry entry = CDataUtil.createCMacroEntry(name, value, 0);
+          final ICLanguageSettingEntry entry = CDataUtil.createCMacroEntry(name, value,
+              ICSettingEntry.BUILTIN | ICSettingEntry.READONLY);
           returnedEntries.add(entry);
           final int end = matcher.end();
           return end;
@@ -160,7 +161,8 @@ class ToolArgumentParsers {
       oMatcher.reset(argsLine);
       if (oMatcher.lookingAt()) {
         final String name = oMatcher.group(1);
-        final ICLanguageSettingEntry entry = CDataUtil.createCMacroEntry(name, null, ICSettingEntry.UNDEFINED);
+        final ICLanguageSettingEntry entry = CDataUtil.createCMacroEntry(name, null,
+            ICSettingEntry.UNDEFINED | ICSettingEntry.BUILTIN | ICSettingEntry.READONLY);
         returnedEntries.add(entry);
         final int end = oMatcher.end();
         return end;
@@ -184,7 +186,8 @@ class ToolArgumentParsers {
         matcher.reset(argsLine);
         if (matcher.lookingAt()) {
           final String name = matcher.group(oMatcher.nameGroup);
-          final ICLanguageSettingEntry entry = CDataUtil.createCIncludePathEntry(name, ICSettingEntry.RESOLVED);
+          final ICLanguageSettingEntry entry = CDataUtil.createCIncludePathEntry(name,
+              ICSettingEntry.BUILTIN | ICSettingEntry.READONLY);
           returnedEntries.add(entry);
           final int end = matcher.end();
           return end;
@@ -291,7 +294,8 @@ class ToolArgumentParsers {
         matcher.reset(argsLine);
         if (matcher.lookingAt()) {
           final String name = matcher.group(oMatcher.nameGroup);
-          final ICLanguageSettingEntry entry = CDataUtil.createCIncludePathEntry(name, ICSettingEntry.RESOLVED);
+          final ICLanguageSettingEntry entry = CDataUtil.createCIncludePathEntry(name,
+              ICSettingEntry.BUILTIN | ICSettingEntry.READONLY);
           returnedEntries.add(entry);
           final int end = matcher.end();
           return end;
