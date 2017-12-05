@@ -31,6 +31,7 @@ import org.eclipse.cdt.core.language.settings.providers.ILanguageSettingsProvide
 import org.eclipse.cdt.core.language.settings.providers.IWorkingDirectoryTracker;
 import org.eclipse.cdt.core.language.settings.providers.LanguageSettingsSerializableProvider;
 import org.eclipse.cdt.core.language.settings.providers.LanguageSettingsStorage;
+import org.eclipse.cdt.core.model.CoreModel;
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
 import org.eclipse.cdt.core.settings.model.ICLanguageSettingEntry;
 import org.eclipse.cdt.core.settings.model.ICProjectDescription;
@@ -110,27 +111,27 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
         new ToolArgumentParsers.SystemIncludePath_C() };
     // POSIX compatible C compilers =================================
     final ToolCommandlineParser cc = new ToolCommandlineParser("org.eclipse.cdt.core.gcc", posix_cc_args);
-    parserDetectors.add( new ParserDetector("cc", cc));
-    parserDetectors.add( new ParserDetectorExt("cc","exe", cc));
-    parserDetectors.add( new ParserDetector("gcc", cc));
-    parserDetectors.add( new ParserDetectorExt("cc","exe", cc));
-    parserDetectors.add( new ParserDetector("clang", cc));
-    parserDetectors.add( new ParserDetectorExt("clang","exe", cc));
+    parserDetectors.add(new ParserDetector("cc", cc));
+    parserDetectors.add(new ParserDetectorExt("cc", "exe", cc));
+    parserDetectors.add(new ParserDetector("gcc", cc));
+    parserDetectors.add(new ParserDetectorExt("cc", "exe", cc));
+    parserDetectors.add(new ParserDetector("clang", cc));
+    parserDetectors.add(new ParserDetectorExt("clang", "exe", cc));
 
     // POSIX compatible C++ compilers ===============================
     final ToolCommandlineParser cxx = new ToolCommandlineParser("org.eclipse.cdt.core.g++", posix_cc_args);
-    parserDetectors.add( new ParserDetector("c\\+\\+", cxx));
-    parserDetectors.add( new ParserDetectorExt("c\\+\\+","exe", cxx));
-    parserDetectors.add( new ParserDetector("g\\+\\+", cxx));
-    parserDetectors.add( new ParserDetectorExt("g\\+\\+","exe", cxx));
-    parserDetectors.add( new ParserDetector("clang\\+\\+", cxx));
-    parserDetectors.add( new ParserDetectorExt("clang\\+\\+","exe", cxx));
+    parserDetectors.add(new ParserDetector("c\\+\\+", cxx));
+    parserDetectors.add(new ParserDetectorExt("c\\+\\+", "exe", cxx));
+    parserDetectors.add(new ParserDetector("g\\+\\+", cxx));
+    parserDetectors.add(new ParserDetectorExt("g\\+\\+", "exe", cxx));
+    parserDetectors.add(new ParserDetector("clang\\+\\+", cxx));
+    parserDetectors.add(new ParserDetectorExt("clang\\+\\+", "exe", cxx));
 
     // GNU C and C++ cross compilers, e.g. arm-none-eabi-gcc.exe ====
-    parserDetectors.add( new ParserDetector(".+-gcc", cc));
-    parserDetectors.add( new ParserDetectorExt(".+-gcc","exe", cc));
-    parserDetectors.add( new ParserDetector(".+-g\\+\\+", cxx));
-    parserDetectors.add( new ParserDetectorExt(".+-g\\+\\+","exe", cxx));
+    parserDetectors.add(new ParserDetector(".+-gcc", cc));
+    parserDetectors.add(new ParserDetectorExt(".+-gcc", "exe", cc));
+    parserDetectors.add(new ParserDetector(".+-g\\+\\+", cxx));
+    parserDetectors.add(new ParserDetectorExt(".+-g\\+\\+", "exe", cxx));
 
     // ms C + C++ compiler ==========================================
     final IToolArgumentParser[] cl_cc_args = { new ToolArgumentParsers.IncludePath_C_CL(),
@@ -143,14 +144,14 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
     final ToolCommandlineParser icpc = new ToolCommandlineParser("org.eclipse.cdt.core.g++", posix_cc_args);
 
     // Linux & OS X, EDG
-    parserDetectors.add( new ParserDetector("icc", icc));
+    parserDetectors.add(new ParserDetector("icc", icc));
     // OS X, clang
-    parserDetectors.add( new ParserDetector("icl", icc));
+    parserDetectors.add(new ParserDetector("icl", icc));
     // Intel C++ compiler
     // Linux & OS X, EDG
-    parserDetectors.add( new ParserDetector("icpc", icpc));
+    parserDetectors.add(new ParserDetector("icpc", icpc));
     // OS X, clang
-    parserDetectors.add( new ParserDetector("icl\\+\\+", icpc));
+    parserDetectors.add(new ParserDetector("icl\\+\\+", icpc));
     // Windows C + C++, EDG
     parserDetectors.add(new ParserDetectorExt("icl", "exe", cl));
 
@@ -248,10 +249,12 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
   private void tryParseJson(boolean initializingWorkbench) throws CoreException {
 
     // If getBuilderCWD() returns a workspace relative path, it is garbled.
-    // It returns '${workspace_loc:/my-project-name}'. Additionally, it returns null on a project with makeNature.
-    // In contrast, getResolvedOutputDirectories() does it mostly right, it returns '/my-project-name', but also stale data
+    // It returns '${workspace_loc:/my-project-name}'. Additionally, it returns
+    // null on a project with makeNature.
+    // In contrast, getResolvedOutputDirectories() does it mostly right, it
+    // returns '/my-project-name', but also stale data
     // when a user changed the buil-root
-    final  IPath buildRoot = currentCfgDescription.getBuildSetting().getBuilderCWD();
+    final IPath buildRoot = currentCfgDescription.getBuildSetting().getBuilderCWD();
     final IPath jsonPath = buildRoot.append("compile_commands.json");
     final IFile jsonFileRc = ResourcesPlugin.getWorkspace().getRoot().getFile(jsonPath);
 
@@ -269,6 +272,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
           // must parse json file...
           // store time-stamp
           store.lastModified = tsJsonModified;
+          store.clear();
           if (!initializingWorkbench) {
             project.deleteMarkers(MARKER_ID, false, IResource.DEPTH_INFINITE);
           }
@@ -290,8 +294,30 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
               }
               // System.out.println("stored cached compile_commands");
 
-              // trigger UI update to show newly detected include paths
-              serializeLanguageSettings(currentCfgDescription);
+              // re-index to reflect new paths and macros in editor views
+              // serializeLanguageSettings(currentCfgDescription);
+              CCorePlugin.getIndexManager().reindex(CoreModel.getDefault().create(project));
+
+              // trigger UI update to show newly detected include paths in
+              // Includes folder
+              // Useless. It looks like ICProject#getIncludeReferences() is only
+              // updated when the project is opened.
+              // Display.getDefault().asyncExec(new Runnable() {
+              // public void run() {
+              // ProjectExplorer projectExplorer = (ProjectExplorer)
+              // PlatformUI.getWorkbench()
+              // .getActiveWorkbenchWindow().getActivePage().findView(
+              //// "org.eclipse.cdt.ui.CView");
+              // ProjectExplorer.VIEW_ID);
+              // if (projectExplorer != null) {
+              // final CommonViewer v = projectExplorer.getCommonViewer();
+              // if (v != null) {
+              // v.refresh(project);
+              // }
+              // }
+              // }
+              // });
+
             } else {
               // file format error
               final String msg = "File does not seem to be in JSON format. " + WORKBENCH_WILL_NOT_KNOW_ALL_MSG;
@@ -325,8 +351,8 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
    * @throws CoreException
    *           if marker creation failed
    */
-  private void processJsonEntry(TimestampedLanguageSettingsStorage storage,
-      Map<?, ?> sourceFileInfo, IFile jsonFile) throws CoreException {
+  private void processJsonEntry(TimestampedLanguageSettingsStorage storage, Map<?, ?> sourceFileInfo, IFile jsonFile)
+      throws CoreException {
 
     if (sourceFileInfo.containsKey("file") && sourceFileInfo.containsKey("command")
         && sourceFileInfo.containsKey("directory")) {
@@ -337,7 +363,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
           final IFile[] files = ResourcesPlugin.getWorkspace().getRoot()
               .findFilesForLocationURI(new File(file).toURI());
           if (files.length > 0) {
-            ParserDetectionResult pdr= fastDetermineDetector(cmdLine);
+            ParserDetectionResult pdr = fastDetermineDetector(cmdLine);
             if (pdr != null) {
               // found a matching command-line parser
 
@@ -348,7 +374,8 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
               if (cwdStr != null) {
                 cwd = Path.fromOSString(cwdStr);
               }
-              processCommandLine(storage, pdr.detectorWMethod.detector.parser, files[0], cwd, pdr.getReducedCommandLine());
+              processCommandLine(storage, pdr.detectorWMethod.detector.parser, files[0], cwd,
+                  pdr.getReducedCommandLine());
             } else {
               // no matching parser found
               String message = "No parser for command '" + cmdLine + "'. " + WORKBENCH_WILL_NOT_KNOW_ALL_MSG;
@@ -439,8 +466,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
   }
 
   /**
-   * Determines the parser detector that can parse the specified
-   * command-line.
+   * Determines the parser detector that can parse the specified command-line.
    *
    * @param line
    *          the command line to process
@@ -576,9 +602,8 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
    * @param line
    *          the command line to process
    */
-  private void processCommandLine(TimestampedLanguageSettingsStorage storage,
-      IToolCommandlineParser cmdlineParser, IFile sourceFile, IPath cwd,
-      String line) {
+  private void processCommandLine(TimestampedLanguageSettingsStorage storage, IToolCommandlineParser cmdlineParser,
+      IFile sourceFile, IPath cwd, String line) {
     line = ToolCommandlineParser.trimLeadingWS(line);
     final List<ICLanguageSettingEntry> entries = cmdlineParser.processArgs(line);
     // attach settings to sourceFile resource...
@@ -664,32 +689,42 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
    */
   @Override
   public void registerListener(ICConfigurationDescription cfgDescription) {
-    System.out.println("CompileCommandsJsonParser.registerListener(): "+ this.getId()+ ": "+(cfgDescription==null?null:cfgDescription.getName()));
-    IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
-    IProject[] projects = workspaceRoot.getProjects();
-    CCorePlugin ccp = CCorePlugin.getDefault();
-    // parse JSOn file for any opened project that has a ScannerConfigNature...
-    for (IProject project : projects) {
+    if (cfgDescription != null) {
+      // per-project or if the user just added this provider on the provider tab
+      currentCfgDescription = cfgDescription;
       try {
-        if (project.isOpen() && project.hasNature(ScannerConfigNature.NATURE_ID)) {
-          ICProjectDescription projectDescription = ccp.getProjectDescription(project, false);
-          if (projectDescription != null) {
-            ICConfigurationDescription activeConfiguration = projectDescription.getActiveConfiguration();
-            if (activeConfiguration instanceof ILanguageSettingsProvidersKeeper) {
-              final List<ILanguageSettingsProvider> lsps = ((ILanguageSettingsProvidersKeeper) activeConfiguration)
-                  .getLanguageSettingProviders();
-              for (ILanguageSettingsProvider lsp : lsps) {
-                if ("de.marw.cmake.cdt.language.settings.providers.CompileCommandsJsonParser".equals(lsp.getId())) {
-                  currentCfgDescription = activeConfiguration;
-                  tryParseJson(true);
-                  break;
+        tryParseJson(true);
+      } catch (CoreException ex) {
+        log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, "registerListener()", ex));
+      }
+    } else {
+      // per workspace (to populate on startup)
+      IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
+      IProject[] projects = workspaceRoot.getProjects();
+      CCorePlugin ccp = CCorePlugin.getDefault();
+      // parse JSOn file for any opened project that has a ScannerConfigNature...
+      for (IProject project : projects) {
+        try {
+          if (project.isOpen() && project.hasNature(ScannerConfigNature.NATURE_ID)) {
+            ICProjectDescription projectDescription = ccp.getProjectDescription(project, false);
+            if (projectDescription != null) {
+              ICConfigurationDescription activeConfiguration = projectDescription.getActiveConfiguration();
+              if (activeConfiguration instanceof ILanguageSettingsProvidersKeeper) {
+                final List<ILanguageSettingsProvider> lsps = ((ILanguageSettingsProvidersKeeper) activeConfiguration)
+                    .getLanguageSettingProviders();
+                for (ILanguageSettingsProvider lsp : lsps) {
+                  if ("de.marw.cmake.cdt.language.settings.providers.CompileCommandsJsonParser".equals(lsp.getId())) {
+                    currentCfgDescription = activeConfiguration;
+                    tryParseJson(true);
+                    break;
+                  }
                 }
               }
             }
           }
+        } catch (CoreException ex) {
+          log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, "registerListener()", ex));
         }
-      } catch (CoreException ex) {
-        log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, "registerListener()", ex));
       }
     }
     // release resources for garbage collector
@@ -714,8 +749,9 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
      * Sets language settings entries for this storages.
      *
      * @param rc
-     *          resource such as file or folder or project. If {@code null} the entries are
-     *          considered to be being defined as project-level entries for child resources.
+     *          resource such as file or folder or project. If {@code null} the
+     *          entries are considered to be being defined as project-level
+     *          entries for child resources.
      * @param languageId
      *          language id. Must not be {@code null}
      * @param entries
@@ -725,7 +761,8 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
       /*
        * compile_commands.json holds entries per-file only and does not contain
        * per-project or per-folder entries. So we map the latter as project
-       * entries (=> null) to make the UI show the include directories we detected.
+       * entries (=> null) to make the UI show the include directories we
+       * detected.
        */
       String rcPath = null;
       if (rc != null && rc.getType() == IResource.FILE) {
@@ -750,7 +787,8 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
       /*
        * compile_commands.json holds entries per-file only and does not contain
        * per-project or per-folder entries. So we map the latter as project
-       * entries (=> null) to make the UI show the include directories we detected.
+       * entries (=> null) to make the UI show the include directories we
+       * detected.
        */
       String rcPath = null;
       if (rc != null && rc.getType() == IResource.FILE) {
@@ -762,7 +800,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
     public TimestampedLanguageSettingsStorage clone() {
       TimestampedLanguageSettingsStorage cloned = new TimestampedLanguageSettingsStorage();
       cloned.lastModified = this.lastModified;
-      cloned.fStorage.putAll( super.fStorage);
+      cloned.fStorage.putAll(super.fStorage);
       return cloned;
     }
 
@@ -795,7 +833,6 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
         return false;
       return true;
     }
-
 
   } // TimestampedLanguageSettingsStorage
 
@@ -833,7 +870,9 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
 
   } // PerConfigLanguageSettingsStorage
 
-  /** Responsible to match the first argument (the tool command) of a command-line.
+  /**
+   * Responsible to match the first argument (the tool command) of a
+   * command-line.
    *
    * @author weber
    */
@@ -845,8 +884,8 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
     protected static final String REGEX_CMD_TAIL = ")\\s";
 
     /**
-     * the Matcher that matches the name of the tool (including its path, BUT WITHOUT its filename extension)
-     * on a given command-line
+     * the Matcher that matches the name of the tool (including its path, BUT
+     * WITHOUT its filename extension) on a given command-line
      */
     private final Matcher toolNameMatcher;
     /**
@@ -854,23 +893,37 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
      */
     public final IToolCommandlineParser parser;
     protected final String basenameRegex;
-    /** whether to match a Linux path (which has a forward slash) or a Windows path with backSlashes */
+    /**
+     * whether to match a Linux path (which has a forward slash) or a Windows
+     * path with backSlashes
+     */
     protected final boolean matchBackslash;
 
-    /** Creates a {@code ParserDetector} that matches linux paths in the tool name.
+    /**
+     * Creates a {@code ParserDetector} that matches linux paths in the tool
+     * name.
      *
-     * @param basenameRegex a regular expression that matches the base name of the tool to detect
-     * @param parser the corresponding parser for the tool arguments
+     * @param basenameRegex
+     *          a regular expression that matches the base name of the tool to
+     *          detect
+     * @param parser
+     *          the corresponding parser for the tool arguments
      */
     public ParserDetector(String basenameRegex, IToolCommandlineParser parser) {
       this(basenameRegex, false, parser);
     }
 
-    /** Creates a {@code ParserDetector}.
+    /**
+     * Creates a {@code ParserDetector}.
      *
-     * @param basenameRegex a regular expression that matches the base name of the tool to detect
-     * @param matchBackslash whether to match a Linux path (which has a forward slash) or a Windows path with backSlashes.
-     * @param parser the corresponding parser for the tool arguments
+     * @param basenameRegex
+     *          a regular expression that matches the base name of the tool to
+     *          detect
+     * @param matchBackslash
+     *          whether to match a Linux path (which has a forward slash) or a
+     *          Windows path with backSlashes.
+     * @param parser
+     *          the corresponding parser for the tool arguments
      */
     public ParserDetector(String basenameRegex, boolean matchBackslash, IToolCommandlineParser parser) {
       this.toolNameMatcher = matchBackslash
@@ -878,7 +931,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
           : Pattern.compile(REGEX_CMD_HEAD + basenameRegex + REGEX_CMD_TAIL).matcher("");
       this.basenameRegex = basenameRegex;
       this.parser = parser;
-      this.matchBackslash= matchBackslash;
+      this.matchBackslash = matchBackslash;
     }
 
     /**
@@ -886,11 +939,13 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
      * specified command-line string. If so, the remaining arguments of the
      * command-line are returned.
      *
-     *@param commandLine the command line to match
+     * @param commandLine
+     *          the command line to match
      *
-     * @return {@code null} if the matcher does not matches the tool name in
-     *         the command-line string. Otherwise, if the tool name matches, the remaining
-     *         command-line string (without the portion that matched) is returned.
+     * @return {@code null} if the matcher does not matches the tool name in the
+     *         command-line string. Otherwise, if the tool name matches, the
+     *         remaining command-line string (without the portion that matched)
+     *         is returned.
      */
     public String basenameMatches(String commandLine) {
       return matcherMatches(toolNameMatcher, commandLine);
@@ -914,18 +969,18 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
      *         is returned.
      */
     public String basenameWithVersionMatches(String commandLine, String versionRegex) {
-      Matcher matcher = Pattern.compile(REGEX_CMD_HEAD + basenameRegex + versionRegex + REGEX_CMD_TAIL)
-          .matcher("");
+      Matcher matcher = Pattern.compile(REGEX_CMD_HEAD + basenameRegex + versionRegex + REGEX_CMD_TAIL).matcher("");
       return matcherMatches(matcher, commandLine);
     }
 
     /**
-     * Gets, whether the specified Matcher for the tool arguments can properly parse the
-     * specified command-line string. If so, the remaining arguments of the
-     * command-line are returned.
-     * @param matcher the matcher that performs the mathc
-     *          a regular expression that matches the version string in the name
-     *          of the tool to detect.
+     * Gets, whether the specified Matcher for the tool arguments can properly
+     * parse the specified command-line string. If so, the remaining arguments
+     * of the command-line are returned.
+     *
+     * @param matcher
+     *          the matcher that performs the mathc a regular expression that
+     *          matches the version string in the name of the tool to detect.
      * @param commandLine
      *          the command-line to match
      *
@@ -943,23 +998,32 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
     }
   } // ParserDetector
 
-  /** Same as {@link CompileCommandsJsonParser.ParserDetector}, but handles tool detection properly, if
-   * tool versions are allowed and the tool name contains a filename extension.
+  /**
+   * Same as {@link CompileCommandsJsonParser.ParserDetector}, but handles tool
+   * detection properly, if tool versions are allowed and the tool name contains
+   * a filename extension.
    *
    * @author weber
    */
   static class ParserDetectorExt extends ParserDetector {
     /**
-     * the Matcher that matches the name of the tool (including its path AND its filename extension)
-     * on a given command-line or <code>null</code>
+     * the Matcher that matches the name of the tool (including its path AND its
+     * filename extension) on a given command-line or <code>null</code>
      */
     private final Matcher toolNameMatcherExt;
     private final String extensionRegex;
 
-    /** a {@code ParserDetectorExt} that matches linux paths in the tool name.
-     * @param basenameRegex a regular expression that matches the base name of the tool to detect.
-     * @param extensionRegex  a regular expression that matches the filename extension of the tool to detect .
-     * @param parser the corresponding parser for the tool arguments
+    /**
+     * a {@code ParserDetectorExt} that matches linux paths in the tool name.
+     *
+     * @param basenameRegex
+     *          a regular expression that matches the base name of the tool to
+     *          detect.
+     * @param extensionRegex
+     *          a regular expression that matches the filename extension of the
+     *          tool to detect .
+     * @param parser
+     *          the corresponding parser for the tool arguments
      */
     public ParserDetectorExt(String basenameRegex, String extensionRegex, IToolCommandlineParser parser) {
       this(basenameRegex, false, extensionRegex, parser);
@@ -984,12 +1048,12 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
         IToolCommandlineParser parser) {
       super(basenameRegex, matchBackslash, parser);
       String head = matchBackslash ? REGEX_CMD_HEAD_WIN : REGEX_CMD_HEAD;
-      this.toolNameMatcherExt = Pattern.compile(head
-          + basenameRegex + Pattern.quote(".") + extensionRegex + REGEX_CMD_TAIL).matcher("");
+      this.toolNameMatcherExt = Pattern
+          .compile(head + basenameRegex + Pattern.quote(".") + extensionRegex + REGEX_CMD_TAIL).matcher("");
       this.extensionRegex = extensionRegex;
     }
 
-   /**
+    /**
      * Gets, whether the parser for the tool arguments can properly parse the
      * specified command-line string. If so, the remaining arguments of the
      * command-line are returned.
@@ -1033,16 +1097,14 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
   }
 
   // has package scope for unittest purposes
-  static class DetectorWithMethod  {
+  static class DetectorWithMethod {
     enum DetectionMethod {
-      BASENAME,
-      WITH_VERSION,
-      WITH_EXTENSION,
-      WITH_VERSION_EXTENSION;
+      BASENAME, WITH_VERSION, WITH_EXTENSION, WITH_VERSION_EXTENSION;
     }
 
     /**
-     * the ParserDetector that matched the name of the tool on a given command-line
+     * the ParserDetector that matched the name of the tool on a given
+     * command-line
      */
     final ParserDetector detector;
     /** describes the method that was used to match */
@@ -1059,11 +1121,12 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
       this.detector = detector;
       this.how = how;
     }
-}
-  // has package scope for unittest purposes
-  static class ParserDetectionResult{
+  }
 
-    /*package */ final DetectorWithMethod detectorWMethod;
+  // has package scope for unittest purposes
+  static class ParserDetectionResult {
+
+    /* package */ final DetectorWithMethod detectorWMethod;
     /**
      * the remaining arguments of the command-line, after the matcher has
      * matched the tool name
