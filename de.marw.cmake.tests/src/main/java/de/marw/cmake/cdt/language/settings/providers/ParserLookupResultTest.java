@@ -15,19 +15,17 @@ import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
 
-import de.marw.cmake.cdt.language.settings.providers.CompileCommandsJsonParser.ParserDetectionResult;
-
 /**
  * @author weber
  *
  */
 public class ParserLookupResultTest {
 
-  CompileCommandsJsonParser testee= new CompileCommandsJsonParser();
+  CompileCommandsJsonParser testee = new CompileCommandsJsonParser();
 
   /**
    * Test method for
-   * {@link de.marw.cmake.cdt.language.settings.providers.CompileCommandsJsonParser#determineDetector(String, boolean)}
+   * {@link de.marw.cmake.cdt.language.settings.providers.ParserDetection#determineDetector(String, String,boolean)}
    */
   @Test
   public void testCanParse() {
@@ -37,13 +35,13 @@ public class ParserLookupResultTest {
         + " -g -fPIC -std=gnu++11 -o CMakeFiles/foo.dir/foo_automoc.cpp.o"
         + " -c /home/self/shared/qt5-project/build/Debug/foo_automoc.cpp";
     String cmd = compiler + " " + args;
-    ParserDetectionResult result = testee.determineDetector(cmd, false);
+    ParserDetection.ParserDetectionResult result = ParserDetection.determineDetector(cmd, null, false);
     assertNotNull(result);
   }
 
   /**
    * Test method for
-   * {@link de.marw.cmake.cdt.language.settings.providers.CompileCommandsJsonParser.ParserDetectionResult#getReducedCommandLine()}.
+   * {@link de.marw.cmake.cdt.language.settings.providers.ParserDetection.ParserDetectionResult#getReducedCommandLine()}.
    */
   @Test
   public void testGetReducedCommandLine() {
@@ -53,19 +51,19 @@ public class ParserLookupResultTest {
         + " -g -fPIC -std=gnu++11 -o CMakeFiles/foo.dir/foo_automoc.cpp.o"
         + " -c /home/self/shared/qt5-project/build/Debug/foo_automoc.cpp";
     String cmd = compiler + " " + args;
-    ParserDetectionResult result = testee.determineDetector(cmd, false);
+    ParserDetection.ParserDetectionResult result = ParserDetection.determineDetector(cmd, null, false);
     assertNotNull(result);
     // verify that we got a C++ parser
-    assertEquals("C++", "org.eclipse.cdt.core.g++", result.detectorWMethod.detector.parser.getLanguageId());
+    assertEquals("C++", "org.eclipse.cdt.core.g++", result.getDetectorWithMethod().getDetector().getParser().getLanguageId());
     assertEquals("reducedCommandLine", args, result.getReducedCommandLine());
 
     // test without leading path
     compiler = "c++";
     cmd = compiler + " " + args;
-    result = testee.determineDetector(cmd, false);
+    result = ParserDetection.determineDetector(cmd, null, false);
     assertNotNull(result);
     // verify that we got a C++ parser
-    assertEquals("C++", "org.eclipse.cdt.core.g++", result.detectorWMethod.detector.parser.getLanguageId());
+    assertEquals("C++", "org.eclipse.cdt.core.g++", result.getDetectorWithMethod().getDetector().getParser().getLanguageId());
     assertEquals("reducedCommandLine", args, result.getReducedCommandLine());
   }
 
