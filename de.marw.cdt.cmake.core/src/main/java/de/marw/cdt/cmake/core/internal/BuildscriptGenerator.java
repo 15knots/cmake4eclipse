@@ -36,7 +36,6 @@ import org.eclipse.cdt.managedbuilder.core.IBuilder;
 import org.eclipse.cdt.managedbuilder.core.IConfiguration;
 import org.eclipse.cdt.managedbuilder.core.IManagedBuildInfo;
 import org.eclipse.cdt.managedbuilder.core.ManagedBuildManager;
-import org.eclipse.cdt.managedbuilder.makegen.IManagedBuilderMakefileGenerator;
 import org.eclipse.cdt.managedbuilder.makegen.IManagedBuilderMakefileGenerator2;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
@@ -192,18 +191,16 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     { // do a sanity check: only one source entry allowed for project
       if (srcEntries.length == 0) {
         // no source folders specified in project
-        // Make sure there is something to build
-        String msg = "No source directories in project " + project.getName();
-        MultiStatus status = new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.INFO, "", null);
-        status.add(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID, IManagedBuilderMakefileGenerator.NO_SOURCE_FOLDERS,
-            msg, null));
+        final String msg = "No source directories configured for project";
+        MultiStatus status = new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.ERROR, msg + " " + project.getName(), null);
+        createErrorMarker(project, msg);
         return status;
       } else if (srcEntries.length > 1) {
-        final String msg = "Only a single source location is supported";
+        final String msg = "Only a single source directory is supported";
         MultiStatus status = new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.ERROR, msg, null);
-        // if multiple projects are build, this information is lost when the a new console is opened.
+        // if multiple projects are build, this information is lost when a new console is opened.
         // So create a problem marker to show up in the problem view
-        createErrorMarker(project, status.getMessage());
+        createErrorMarker(project, msg);
         return status;
       } else {
         ICConfigurationDescription cfgDes = ManagedBuildManager.getDescriptionForConfiguration(config);
@@ -254,7 +251,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     // create makefile, assuming the first source directory contains a
     // CMakeLists.txt
     final ICSourceEntry srcEntry = srcEntries[0]; // project relative
-    updateMonitor("Invoking CMake for " + project.getName());
+    updateMonitor("Execute CMake for " + project.getName());
     try {
       final ConsoleOutputStream cis = console.getInfoStream();
       cis.write(SimpleDateFormat.getTimeInstance().format(new Date()).getBytes());
@@ -328,9 +325,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     Assert.isLegal(srcDir.isAbsolute(), "srcDir");
     Assert.isLegal(buildDir.isAbsolute(), "buildDir");
 
-    MultiStatus status; // Return value
-
-    String errMsg = null;
+    String errMsg;
     final List<String> argList = buildCommandline(srcDir);
     // extract cmake command
     final String cmd = argList.get(0);
@@ -366,19 +361,17 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       final int exitValue = proc.exitValue();
       if (exitValue == 0) {
         // success
-        status = new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.OK, null, null);
+        return new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.OK, null, null);
       } else {
         // cmake had errors...
-        errMsg = String.format("%1$s exited with status %2$d. See CMake console for details.", cmd, exitValue);
-        status = new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.ERROR, errMsg, null);
+        errMsg = String.format("%1$s exited with status %2$d. See CDT global build console for details.", cmd, exitValue);
+        return new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.ERROR, errMsg, null);
       }
     } else {
       // process start failed
       errMsg = launcher.getErrorMessage();
-      status = new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.ERROR, errMsg, null);
+      return new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.ERROR, errMsg, null);
     }
-
-    return status;
   }
 
   /**
