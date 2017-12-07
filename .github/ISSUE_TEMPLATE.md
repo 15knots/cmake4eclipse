@@ -25,6 +25,7 @@ If you have any question, please **consult the <a href="http://groups.google.com
 <!-- What you would like to see the enhancement add/accomplish or how you would like it to work. -->
 
 ## Useful Information
+cmake4eclipse verssion: 
 Which OS do you use: 
 Cmake version: 
 
