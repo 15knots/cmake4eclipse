@@ -291,10 +291,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
               // cwdStr is the absolute working directory of the compiler in
               // CMake-notation (fileSep are forward slashes)
               final String cwdStr = sourceFileInfo.get("directory").toString();
-              IPath cwd = null;
-              if (cwdStr != null) {
-                cwd = Path.fromOSString(cwdStr);
-              }
+              IPath cwd = cwdStr != null? Path.fromOSString(cwdStr): new Path("");;
               processCommandLine(storage, pdr.getDetectorWithMethod().getDetector().getParser(), files[0], cwd,
                   pdr.getReducedCommandLine());
             } else {
@@ -407,19 +404,11 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
   private void processCommandLine(TimestampedLanguageSettingsStorage storage, IToolCommandlineParser cmdlineParser,
       IFile sourceFile, IPath cwd, String line) {
     line = ToolCommandlineParser.trimLeadingWS(line);
-    final List<ICLanguageSettingEntry> entries = cmdlineParser.processArgs(line);
+    final List<ICLanguageSettingEntry> entries = cmdlineParser.processArgs(cwd, line);
     // attach settings to sourceFile resource...
     if (entries != null && entries.size() > 0) {
       for (ICLanguageSettingEntry entry : entries) {
         if (entry.getKind() == ICSettingEntry.INCLUDE_PATH) {
-          final String ipathstr = entry.getName();
-          // workaround for relative path by cmake bug
-          // https://gitlab.kitware.com/cmake/cmake/issues/13894 : prepend cwd
-          IPath path = Path.fromOSString(ipathstr);
-          if (!path.isAbsolute()) {
-            // prepend CWD
-            entry = CDataUtil.createCIncludePathEntry(cwd.append(path).toOSString(), entry.getFlags());
-          }
           /*
            * compile_commands.json holds entries per-file only and does not
            * contain per-project or per-folder entries. For include dirs, ALSO

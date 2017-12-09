@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.cdt.core.settings.model.ICLanguageSettingEntry;
+import org.eclipse.core.runtime.IPath;
 
 /**
  * Parses the build output produced by a specific tool invocation and detects
@@ -48,13 +49,13 @@ class ToolCommandlineParser implements IToolCommandlineParser {
   }
 
   @Override
-  public List<ICLanguageSettingEntry> processArgs(String buildOutput) {
-    List<ICLanguageSettingEntry> entries = new ArrayList<ICLanguageSettingEntry>();
+  public List<ICLanguageSettingEntry> processArgs(IPath cwd, String buildOutput) {
+    List<ICLanguageSettingEntry> entries = new ArrayList<>();
     while (!(buildOutput = ToolCommandlineParser.trimLeadingWS(buildOutput)).isEmpty()) {
       boolean argParsed = false;
       // try all argument parsers...
       for (IToolArgumentParser tap : argumentParsers) {
-        int consumed = tap.processArgument(entries, buildOutput);
+        int consumed = tap.processArgument(entries, cwd, buildOutput);
         if (consumed > 0) {
           buildOutput = buildOutput.substring(consumed);
           argParsed = true;
@@ -103,7 +104,7 @@ class ToolCommandlineParser implements IToolCommandlineParser {
     int len = string.length();
     int st = 0;
 
-    while ((st < len) && (string.charAt(st) <= ' ')) {
+    while ((st < len) && ( string.charAt(st) <= ' ')) {
       st++;
     }
     return st > 0 ? string.substring(st, len) : string;

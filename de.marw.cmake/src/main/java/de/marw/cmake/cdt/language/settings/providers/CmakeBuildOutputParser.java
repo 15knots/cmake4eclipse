@@ -25,6 +25,7 @@ import org.eclipse.cdt.core.language.settings.providers.IWorkingDirectoryTracker
 import org.eclipse.cdt.core.language.settings.providers.LanguageSettingsSerializableProvider;
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
 import org.eclipse.cdt.core.settings.model.ICLanguageSettingEntry;
+import org.eclipse.core.filesystem.URIUtil;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -76,11 +77,13 @@ public class CmakeBuildOutputParser extends LanguageSettingsSerializableProvider
    */
   private HashMap<Matcher, IToolCommandlineParser> currentBuildOutputToolParsers;
 
+  private IWorkingDirectoryTracker cwdTracker;
+
   private static final IToolCommandlineParser skipOutput = new IgnoringToolParser();
   /**
    * Names of known tools along with their command line argument parsers.
    */
-  private static Map<String, IToolCommandlineParser> knownCmdParsers = new HashMap<String, IToolCommandlineParser>(4,
+  private static Map<String, IToolCommandlineParser> knownCmdParsers = new HashMap<>(4,
       1.0f);
 
   static {
@@ -154,11 +157,11 @@ public class CmakeBuildOutputParser extends LanguageSettingsSerializableProvider
 //        + cwdTracker.getWorkingDirectoryURI());
     this.currentCfgDescription = cfgDescription;
     this.currentProject = cfgDescription.getProjectDescription().getProject();
-
+    this.cwdTracker = cwdTracker;
     SimpleCMakeCacheTxt parsedCMakeCache = getParsedCMakeCache(cfgDescription);
 
     // determine the parsers for the tool invocations of interest
-    currentBuildOutputToolParsers = new HashMap<Matcher, IToolCommandlineParser>(4, 1.0f);
+    currentBuildOutputToolParsers = new HashMap<>(4, 1.0f);
     // compilers and linkers...
     for (String toolPath : parsedCMakeCache.getTools()) {
       final String toolName = new File(toolPath).getName();
@@ -195,7 +198,8 @@ public class CmakeBuildOutputParser extends LanguageSettingsSerializableProvider
         String args = line.substring(cmdDetector.end());
         args = ToolCommandlineParser.trimLeadingWS(args);
         final IToolCommandlineParser botp = entry.getValue();
-        final List<ICLanguageSettingEntry> entries = botp.processArgs(args);
+        final IPath cwd= URIUtil.toPath(cwdTracker.getWorkingDirectoryURI());
+        final List<ICLanguageSettingEntry> entries = botp.processArgs(cwd, args);
         // attach settings to project...
         if (entries != null && entries.size() > 0) {
           super.setSettingEntries(currentCfgDescription, currentProject, botp.getLanguageId(), entries);
@@ -216,7 +220,7 @@ public class CmakeBuildOutputParser extends LanguageSettingsSerializableProvider
     currentCfgDescription = null;
     currentBuildOutputToolParsers = null;
     currentProject = null;
-    //    cwdTracker = null;
+    cwdTracker = null;
   }
 
   @Override
@@ -234,7 +238,7 @@ public class CmakeBuildOutputParser extends LanguageSettingsSerializableProvider
   ////////////////////////////////////////////////////////////////////
   private static class IgnoringToolParser implements IToolCommandlineParser {
     @Override
-    public List<ICLanguageSettingEntry> processArgs(String args) {
+    public List<ICLanguageSettingEntry> processArgs(IPath cwd, String args) {
       return null;
     }
 

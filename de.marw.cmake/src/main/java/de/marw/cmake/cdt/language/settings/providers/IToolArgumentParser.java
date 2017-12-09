@@ -13,6 +13,7 @@ package de.marw.cmake.cdt.language.settings.providers;
 import java.util.List;
 
 import org.eclipse.cdt.core.settings.model.ICLanguageSettingEntry;
+import org.eclipse.core.runtime.IPath;
 
 /**
  * Converts tool arguments into LanguageSettings objects.
@@ -27,6 +28,8 @@ public interface IToolArgumentParser {
    *
    * @param returnedEntries
    *        the buffer that receives the new {@code LanguageSettings}
+   * @param cwd
+   *          the current working directory of the compiler at its invocation
    * @param argsLine
    *        the arguments passed to the tool, as they appear in the build
    *        output. Implementers may safely assume that the specified value does
@@ -36,5 +39,5 @@ public interface IToolArgumentParser {
    *         processed. Return a value of {@code zero} or less, if this tool
    *         argument parser cannot process the first argument from the input.
    */
-  int processArgument(List<ICLanguageSettingEntry> returnedEntries, String argsLine);
+  int processArgument(List<ICLanguageSettingEntry> returnedEntries, IPath cwd, String argsLine);
 }

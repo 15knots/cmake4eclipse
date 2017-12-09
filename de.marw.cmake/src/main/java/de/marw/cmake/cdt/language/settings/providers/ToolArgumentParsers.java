@@ -17,6 +17,8 @@ import java.util.regex.Pattern;
 import org.eclipse.cdt.core.settings.model.ICLanguageSettingEntry;
 import org.eclipse.cdt.core.settings.model.ICSettingEntry;
 import org.eclipse.cdt.core.settings.model.util.CDataUtil;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 
 /**
  * Various tool argument parser implementations.
@@ -124,7 +126,7 @@ class ToolArgumentParsers {
    * A tool argument parser capable to parse a C-compiler macro definition
    * argument.
    */
-  private static class MacroDefineGeneric {
+  private static abstract class MacroDefineGeneric {
 
     protected final int processArgument(List<ICLanguageSettingEntry> returnedEntries, String args,
         NameValueOptionMatcher[] optionMatchers) {
@@ -174,18 +176,28 @@ class ToolArgumentParsers {
   /**
    * A tool argument parser capable to parse a C-compiler include path argument.
    */
-  private static class IncludePathGeneric {
-    /*-
-     * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgs(java.lang.String)
+  private static abstract class IncludePathGeneric {
+    /**
+     * @param cwd
+     *          the current working directory of the compiler at its invocation
+     * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgument(List, IPath, String)
      */
-    protected final int processArgument(List<ICLanguageSettingEntry> returnedEntries, String argsLine,
-        NameOptionMatcher[] optionMatchers) {
+    protected final int processArgument(List<ICLanguageSettingEntry> returnedEntries, IPath cwd,
+        String argsLine, NameOptionMatcher[] optionMatchers) {
       for (NameOptionMatcher oMatcher : optionMatchers) {
         final Matcher matcher = oMatcher.matcher;
 
         matcher.reset(argsLine);
         if (matcher.lookingAt()) {
-          final String name = matcher.group(oMatcher.nameGroup);
+          String name = matcher.group(oMatcher.nameGroup);
+          // workaround for relative path by cmake bug
+          // https://gitlab.kitware.com/cmake/cmake/issues/13894 : prepend cwd
+          IPath path = Path.fromOSString(name);
+          if (!path.isAbsolute()) {
+            // prepend CWD
+            name = cwd.append(path).toOSString();
+          }
+
           final ICLanguageSettingEntry entry = CDataUtil.createCIncludePathEntry(name,
               ICSettingEntry.BUILTIN | ICSettingEntry.READONLY);
           returnedEntries.add(entry);
@@ -220,7 +232,7 @@ class ToolArgumentParsers {
      * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgs(java.lang.String)
      */
     @Override
-    public int processArgument(List<ICLanguageSettingEntry> returnedEntries, String argsLine) {
+    public int processArgument(List<ICLanguageSettingEntry> returnedEntries, IPath cwd, String argsLine) {
       return processArgument(returnedEntries, argsLine, optionMatchers);
     }
 
@@ -240,7 +252,7 @@ class ToolArgumentParsers {
      * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgument(java.util.List, java.lang.String)
      */
     @Override
-    public int processArgument(List<ICLanguageSettingEntry> returnedEntries, String argsLine) {
+    public int processArgument(List<ICLanguageSettingEntry> returnedEntries, IPath cwd, String argsLine) {
       return processArgument(returnedEntries, argsLine, optionMatcher);
     }
   }
@@ -261,8 +273,8 @@ class ToolArgumentParsers {
      * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgs(java.lang.String)
      */
     @Override
-    public int processArgument(List<ICLanguageSettingEntry> returnedEntries, String argsLine) {
-      return processArgument(returnedEntries, argsLine, optionMatchers);
+    public int processArgument(List<ICLanguageSettingEntry> returnedEntries, IPath cwd, String argsLine) {
+      return processArgument(returnedEntries, cwd, argsLine, optionMatchers);
     }
   }
 
@@ -282,7 +294,7 @@ class ToolArgumentParsers {
      * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgs(java.lang.String)
      */
     @Override
-    public int processArgument(List<ICLanguageSettingEntry> returnedEntries, String argsLine) {
+    public int processArgument(List<ICLanguageSettingEntry> returnedEntries, IPath cwd, String argsLine) {
       return processArgument(returnedEntries, argsLine, optionMatchers);
     }
 
@@ -328,7 +340,7 @@ class ToolArgumentParsers {
      * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgs(java.lang.String)
      */
     @Override
-    public int processArgument(List<ICLanguageSettingEntry> returnedEntries, String argsLine) {
+    public int processArgument(List<ICLanguageSettingEntry> returnedEntries, IPath cwd, String argsLine) {
       return processArgument(returnedEntries, argsLine, optionMatchers);
     }
 
@@ -348,7 +360,7 @@ class ToolArgumentParsers {
      * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgument(java.util.List, java.lang.String)
      */
     @Override
-    public int processArgument(List<ICLanguageSettingEntry> returnedEntries, String argsLine) {
+    public int processArgument(List<ICLanguageSettingEntry> returnedEntries, IPath cwd, String argsLine) {
       return processArgument(returnedEntries, argsLine, optionMatcher);
     }
   }
@@ -369,8 +381,8 @@ class ToolArgumentParsers {
      * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgs(java.lang.String)
      */
     @Override
-    public int processArgument(List<ICLanguageSettingEntry> returnedEntries, String argsLine) {
-      return processArgument(returnedEntries, argsLine, optionMatchers);
+    public int processArgument(List<ICLanguageSettingEntry> returnedEntries, IPath cwd, String argsLine) {
+      return processArgument(returnedEntries, cwd, argsLine, optionMatchers);
     }
   }
 

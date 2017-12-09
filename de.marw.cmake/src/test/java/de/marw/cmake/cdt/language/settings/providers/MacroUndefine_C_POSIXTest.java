@@ -17,6 +17,8 @@ import java.util.List;
 
 import org.eclipse.cdt.core.settings.model.ICLanguageSettingEntry;
 import org.eclipse.cdt.core.settings.model.ICSettingEntry;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -39,21 +41,22 @@ public class MacroUndefine_C_POSIXTest {
 
   /**
    * Test method for
-   * {@link de.marw.cmake.cdt.language.settings.providers.ToolArgumentParsers.MacroUndefine_C_POSIX#processArgument(java.util.List, java.lang.String)}
+   * {@link de.marw.cmake.cdt.language.settings.providers.ToolArgumentParsers.MacroUndefine_C_POSIX#processArgument(java.util.List, IPath, java.lang.String)}
    * .
    */
   @Test
   public final void testProcessArgument() {
     final String more = " -g -MMD -MT CMakeFiles/execut1.dir/util1.c.o -MF \"CMakeFiles/execut1.dir/util1.c.o.d\""
         + " -o CMakeFiles/execut1.dir/util1.c.o -c /testprojects/C-subsrc/src/src-sub/main1.c";
-    List<ICLanguageSettingEntry> entries = new ArrayList<ICLanguageSettingEntry>();
+    List<ICLanguageSettingEntry> entries = new ArrayList<>();
     ICLanguageSettingEntry parsed;
+    final IPath cwd= new Path("");
 
     String name = "FOO";
     // -UFOO
     entries.clear();
     assertEquals(2 + name.length(),
-        testee.processArgument(entries, "-U" + name + more));
+        testee.processArgument(entries, cwd, "-U" + name + more));
     assertEquals("#entries", 1, entries.size());
     parsed = entries.get(0);
     assertEquals("kind", ICSettingEntry.MACRO, parsed.getKind());
@@ -63,7 +66,7 @@ public class MacroUndefine_C_POSIXTest {
     // -U  FOO
     entries.clear();
     assertEquals(2 +2+ name.length(),
-        testee.processArgument(entries, "-U  " + name + more));
+        testee.processArgument(entries, cwd, "-U  " + name + more));
     assertEquals("#entries", 1, entries.size());
     parsed = entries.get(0);
     assertEquals("kind", ICSettingEntry.MACRO, parsed.getKind());
