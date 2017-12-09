@@ -17,6 +17,8 @@ import java.util.List;
 
 import org.eclipse.cdt.core.settings.model.ICLanguageSettingEntry;
 import org.eclipse.cdt.core.settings.model.ICSettingEntry;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -41,15 +43,16 @@ public class SystemIncludePath_C_Test {
   public final void testProcessArgument() {
     final String more = " -g -MMD -MT CMakeFiles/execut1.dir/util1.c.o -MF \"CMakeFiles/execut1.dir/util1.c.o.d\""
         + " -o CMakeFiles/execut1.dir/util1.c.o -c /testprojects/C-subsrc/src/src-sub/main1.c";
-    List<ICLanguageSettingEntry> entries = new ArrayList<ICLanguageSettingEntry>();
+    List<ICLanguageSettingEntry> entries = new ArrayList<>();
     ICLanguageSettingEntry parsed;
+    final IPath cwd= new Path("");
 
     String name = "/an/Include/Path";
 
     // -isystem   /an/Include/Path
     entries.clear();
     assertEquals(8 + name.length() + 3,
-        testee.processArgument(entries, "-isystem   " + name + more));
+        testee.processArgument(entries, cwd, "-isystem   " + name + more));
     assertEquals("#entries", 1, entries.size());
     parsed = entries.get(0);
     assertEquals("kind", ICSettingEntry.INCLUDE_PATH, parsed.getKind());
@@ -57,7 +60,7 @@ public class SystemIncludePath_C_Test {
     // -isystem   '/an/Include/Path'
     entries.clear();
     assertEquals(8 + name.length() + 3 + 2,
-        testee.processArgument(entries, "-isystem   " + "'" + name + "'" + more));
+        testee.processArgument(entries, cwd, "-isystem   " + "'" + name + "'" + more));
     assertEquals("#entries", 1, entries.size());
     parsed = entries.get(0);
     assertEquals("kind", ICSettingEntry.INCLUDE_PATH, parsed.getKind());
@@ -65,7 +68,7 @@ public class SystemIncludePath_C_Test {
     // -isystem   "/an/Include/Path"
     entries.clear();
     assertEquals(8 + name.length() + 3 + 2,
-        testee.processArgument(entries, "-isystem   " + "\"" + name + "\"" + more));
+        testee.processArgument(entries, cwd, "-isystem   " + "\"" + name + "\"" + more));
     assertEquals("#entries", 1, entries.size());
     parsed = entries.get(0);
     assertEquals("kind", ICSettingEntry.INCLUDE_PATH, parsed.getKind());
@@ -75,7 +78,7 @@ public class SystemIncludePath_C_Test {
     // -isystemA:an\Include/Path
     entries.clear();
     assertEquals(8 + 1+ name.length(),
-        testee.processArgument(entries, "-isystem " + name + more));
+        testee.processArgument(entries, cwd, "-isystem " + name + more));
     assertEquals("#entries", 1, entries.size());
     parsed = entries.get(0);
     assertEquals("kind", ICSettingEntry.INCLUDE_PATH, parsed.getKind());
@@ -84,20 +87,21 @@ public class SystemIncludePath_C_Test {
 
   /**
    * Test method for
-   * {@link de.marw.cmake.cdt.language.settings.providers.ToolArgumentParsers.IncludePath_C_POSIX#processArgument(java.util.List, java.lang.String)}
+   * {@link de.marw.cmake.cdt.language.settings.providers.ToolArgumentParsers.IncludePath_C_POSIX#processArgument(java.util.List, IPath, java.lang.String)}
    */
   @Test
   public final void testProcessArgument_WS() {
     final String more = " -g -MMD -MT CMakeFiles/execut1.dir/util1.c.o -MF \"CMakeFiles/execut1.dir/util1.c.o.d\""
         + " -o CMakeFiles/execut1.dir/util1.c.o -c /testprojects/C-subsrc/src/src-sub/main1.c";
-    List<ICLanguageSettingEntry> entries = new ArrayList<ICLanguageSettingEntry>();
+    List<ICLanguageSettingEntry> entries = new ArrayList<>();
     ICLanguageSettingEntry parsed;
+    final IPath cwd= new Path("");
 
     String name = "/ye olde/In clu de/Pa the";
     // -isystem   '/ye olde/In clu de/Pa the'
     entries.clear();
     assertEquals(8 + name.length() + 3 + 2,
-        testee.processArgument(entries, "-isystem   " + "'" + name + "'" + more));
+        testee.processArgument(entries, cwd, "-isystem   " + "'" + name + "'" + more));
     assertEquals("#entries", 1, entries.size());
     parsed = entries.get(0);
     assertEquals("kind", ICSettingEntry.INCLUDE_PATH, parsed.getKind());
@@ -105,7 +109,7 @@ public class SystemIncludePath_C_Test {
     // -isystem   "/ye olde/In clu de/Pa the"
     entries.clear();
     assertEquals(8 + name.length() + 3 + 2,
-        testee.processArgument(entries, "-isystem   " + "\"" + name + "\"" + more));
+        testee.processArgument(entries, cwd, "-isystem   " + "\"" + name + "\"" + more));
     assertEquals("#entries", 1, entries.size());
     parsed = entries.get(0);
     assertEquals("kind", ICSettingEntry.INCLUDE_PATH, parsed.getKind());
@@ -115,7 +119,7 @@ public class SystemIncludePath_C_Test {
     // -isystem   'A:an\In CLU  de/Pat h'
     entries.clear();
     assertEquals(8 + name.length() +3 + 2,
-        testee.processArgument(entries, "-isystem   " + "\"" + name + "\"" + more));
+        testee.processArgument(entries, cwd, "-isystem   " + "\"" + name + "\"" + more));
     assertEquals("#entries", 1, entries.size());
     parsed = entries.get(0);
     assertEquals("kind", ICSettingEntry.INCLUDE_PATH, parsed.getKind());

@@ -58,6 +58,7 @@
   <properties>
     <tycho-version>0.24.0</tycho-version>
     <platform.version>1.0.1</platform.version>
+    <java.source>1.7</java.source>
   </properties>
 
   <dependencyManagement>
@@ -100,8 +101,8 @@
           <artifactId>tycho-compiler-plugin</artifactId>
           <version>${tycho-version}</version>
           <configuration>
-            <source>1.7</source>
-            <target>1.7</target>
+            <source>${java.source}</source>
+            <target>${java.source}</target>
             <encoding>UTF-8</encoding>
           </configuration>
         </plugin>
@@ -110,6 +111,8 @@
           <artifactId>maven-compiler-plugin</artifactId>
           <version>3.3</version>
           <configuration>
+            <source>${java.source}</source>
+            <target>${java.source}</target>
             <encoding>UTF-8</encoding>
           </configuration>
         </plugin>
