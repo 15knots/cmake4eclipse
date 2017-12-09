@@ -19,9 +19,7 @@ import org.junit.Test;
 /**
  * @author Martin Weber
  */
-public class CompileCommandsJsonParserTest {
-
-  CompileCommandsJsonParser testee = new CompileCommandsJsonParser();
+public class ParserDetectionTest {
 
   /**
    * Test method for
@@ -66,7 +64,6 @@ public class CompileCommandsJsonParserTest {
 
   @Test
   public void testDetermineParserForCommandline_withVersion() {
-    testee.setVersionPatternEnabled(true);
     ParserDetection.ParserDetectionResult result = ParserDetection.determineDetector("/usr/bin/cc-4.1 -C blah.c",
         "-?\\d+(\\.\\d+)*", false);
     assertNotNull(result);
