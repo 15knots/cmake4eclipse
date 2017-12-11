@@ -18,7 +18,10 @@
             ignoreErrCmd="-k"
             incrementalBuildTarget="all"
             isSystem="false"
-            name="CMake Make Builder">
+            name="CMake Builder (GNU Make)"
+            parallelBuildCmd="-j*"
+            parallelBuildOn="true"
+            parallelizationNumber="unlimited">
       </builder>
          <builder
                autoBuildTarget="all"

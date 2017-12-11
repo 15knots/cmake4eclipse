@@ -16,7 +16,7 @@
     and makes CMake generate the build scripts for the tool of your choice.
   </p>
 	<p>The builder retrieves the name of the actual build tool from the cache file written
-	by cmake during build-script-generation. It has some benefits compared to the CMake Make Builder:
+	by cmake during build-script-generation. It has some benefits compared to the <code>CMake Builder (GNU Make)</code>:
 	<ul>
   <li>It allows you to build with tools other than <code>make</code>, 
   for example <code>ninja</code>, <code>nmake</code> and others.</li>
@@ -29,17 +29,16 @@ under Linux, and build with <code>MSYS make</code> under windows; without the ne
 This is the recommended builder.
 </p>
 
-<h3 id="make">CMake Make Builder</h3>
+<h3 id="make">CMake Builder (GNU Make)</h3>
   <p>
     This builder is nearly identical to the built-in <i>Gnu Make Builder</i>,
     except that it uses the information found in the <code>CMakeLists.txt</code> file
     to generate the buildscripts.
-    It will always generate makefiles and then simply invoke the <code>make</code> tool
+    It will always generate makefiles and then invoke the <code>make</code> tool
     found in the system's executable search path ($PATH) to build the project.
   </p>
-	<p>Please note that this builder originates from the original states of this plugin
-	and is kept for compatibility reasons only.
-	</p>
+  <p>If you want to build in parallel and have GNU make installed you might want to choose this.
+  </p>
 
 </body>
 </html>
