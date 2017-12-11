@@ -50,6 +50,12 @@ There is a run configuration for eclipse to invoke maven `build cmake4eclipse` p
 
 ---
 # Release History
+## 1.9.0 (2017-12-??)
+### Changes
+- Enhancement: Improve diagnostic messages during build-script generation.
+- Enhancement #23: Handle CDT variables instead of just eclipse core variables.
+
+# Release History
 ## 1.8.0 (2017-11-18)
 ### Changes
 - Enhancement #54: Support variable expansion in build output location.
