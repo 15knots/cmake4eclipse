@@ -33,7 +33,6 @@ import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
 import org.eclipse.cdt.core.settings.model.ICLanguageSettingEntry;
 import org.eclipse.cdt.core.settings.model.ICProjectDescription;
 import org.eclipse.cdt.core.settings.model.ICSettingEntry;
-import org.eclipse.cdt.core.settings.model.util.CDataUtil;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
@@ -58,7 +57,7 @@ import de.marw.cmake.CMakePlugin;
  * NOTE: This class misuses interface ICBuildOutputParser to detect when a build
  * did finish.<br>
  * NOTE: This class misuses interface ICListenerAgent to populate the
- * {@link #getSettingEntries setting entries} on startup.
+ * {@link #getSettingEntries setting entries} on workbench startup.
  *
  * @author Martin Weber
  */
