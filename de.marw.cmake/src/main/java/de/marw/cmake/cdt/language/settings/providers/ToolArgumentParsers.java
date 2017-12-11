@@ -60,7 +60,7 @@ class ToolArgumentParsers {
    *
    * @author Martin Weber
    */
-  private static class NameOptionMatcher {
+  static class NameOptionMatcher {
     final Matcher matcher;
     final int nameGroup;
 

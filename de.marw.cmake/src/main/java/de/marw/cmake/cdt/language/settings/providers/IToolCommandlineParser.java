@@ -26,7 +26,8 @@ interface IToolCommandlineParser {
    * Parses all arguments given to the tool.
    *
    * @param cwd
-   *          the current working directory of the compiler at its invocation
+   *          the current working directory of the compiler at the time of its
+   *          invocation
    * @param args
    *          the command line arguments to process
    *

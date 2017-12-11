@@ -92,11 +92,11 @@ public class CmakeBuildOutputParser extends LanguageSettingsSerializableProvider
         // not defined by POSIX, but does not harm..
         new ToolArgumentParsers.SystemIncludePath_C(), };
     // POSIX compatible C compilers...
-    ToolCommandlineParser gcc = new ToolCommandlineParser("org.eclipse.cdt.core.gcc", posix_cc_args);
+    ToolCommandlineParser gcc = new ToolCommandlineParser("org.eclipse.cdt.core.gcc", null, posix_cc_args);
     knownCmdParsers.put("cc", gcc);
     knownCmdParsers.put("clang", gcc);
     // POSIX compatible C++ compilers...
-    ToolCommandlineParser gpp = new ToolCommandlineParser("org.eclipse.cdt.core.g++", posix_cc_args);
+    ToolCommandlineParser gpp = new ToolCommandlineParser("org.eclipse.cdt.core.g++", null, posix_cc_args);
     knownCmdParsers.put("c++", gpp);
     knownCmdParsers.put("clang++", gpp);
   }
