@@ -54,6 +54,7 @@ There is a run configuration for eclipse to invoke maven `build cmake4eclipse` p
 ### Changes
 - Enhancement: Improve diagnostic messages during build-script generation.
 - Enhancement #23: Handle CDT variables instead of just eclipse core variables.
+- Enhancement #58: CMAKE_EXPORT_COMPILE_COMMANDS Parser now evaluates compiler options passed in a "response file".
 
 # Release History
 ## 1.8.0 (2017-11-18)
