@@ -29,7 +29,6 @@
                buildfileGenerator="de.marw.cdt.cmake.core.internal.BuildscriptGenerator"
                cleanBuildTarget="clean"
                command="CMAKE_BUILD_TOOL"
-               errorParsers="org.eclipse.cdt.core.MakeErrorParser"
                id="de.marw.cdt.cmake.core.genscriptbuilder"
                ignoreErrCmd="CMAKE_BUILD_TOOL_IGN_ERR"
                incrementalBuildTarget="all"
