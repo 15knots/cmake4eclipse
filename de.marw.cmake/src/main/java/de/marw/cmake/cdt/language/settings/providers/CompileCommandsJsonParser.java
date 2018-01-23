@@ -190,9 +190,9 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
 
         if (store.lastModified < tsJsonModified) {
           // must parse json file...
+          store.clear();
           // store time-stamp
           store.lastModified = tsJsonModified;
-          store.clear();
           if (!initializingWorkbench) {
             project.deleteMarkers(MARKER_ID, false, IResource.DEPTH_INFINITE);
           }
