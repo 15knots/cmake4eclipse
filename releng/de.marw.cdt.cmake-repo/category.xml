@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature id="de.marw.cdt.cmake" version="1.9.1.qualifier">
+   <feature id="de.marw.cdt.cmake">
       <category name="cmake4eclipse"/>
    </feature>
    <category-def name="cmake4eclipse" label="CMake for Eclipse">
