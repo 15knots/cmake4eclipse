@@ -50,6 +50,10 @@ There is a run configuration for eclipse to invoke maven `build cmake4eclipse` p
 
 ---
 # Release History
+## 1.9.1 (2018-01-24)
+### Changes
+- Fixed #64: Project is fully reindexed after each build.
+
 ## 1.9.0 (2017-12-29)
 ### Changes
 - Enhancement: Improve diagnostic messages during build-script generation.
