@@ -328,8 +328,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     String errMsg;
     final List<String> argList = buildCommandline(srcDir);
     // extract cmake command
-    final String cmd = argList.get(0);
-    argList.remove(0);
+    final String cmd = argList.remove(0);
     // Set the environment
     IEnvironmentVariable[] variables = ManagedBuildManager.getEnvironmentVariableProvider().getVariables(config, true);
     String[] envp = null;
