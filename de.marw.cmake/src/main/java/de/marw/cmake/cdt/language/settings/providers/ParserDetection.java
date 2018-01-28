@@ -103,6 +103,12 @@ class ParserDetection {
     // Windows C + C++, EDG
     parserDetectors.add(new ParserDetectorExt("icl", "exe", cl));
 
+    // CUDA: nvcc compilers (POSIX compatible) =================================
+    final ToolCommandlineParser nvcc = new ToolCommandlineParser("com.nvidia.cuda.toolchain.language.cu",
+        new ResponseFileArgumentParsers.At(), posix_cc_args);
+    parserDetectors.add(new ParserDetector("nvcc", nvcc));
+    parserDetectors.add(new ParserDetectorExt("nvcc", "exe", nvcc));
+
     // add detectors for windows NTFS
     for (ParserDetector pd : parserDetectors) {
       if (pd instanceof ParserDetectorExt) {
