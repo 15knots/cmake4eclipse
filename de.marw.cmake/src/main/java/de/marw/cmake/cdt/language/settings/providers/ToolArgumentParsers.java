@@ -283,37 +283,19 @@ class ToolArgumentParsers {
    * A tool argument parser capable to parse a C-compiler system include path
    * argument: {@code -system path}.
    */
-  static class SystemIncludePath_C implements IToolArgumentParser {
+  static class SystemIncludePath_C extends IncludePathGeneric implements IToolArgumentParser {
     static final NameOptionMatcher[] optionMatchers = {
         /* quoted directory */
-        new NameOptionMatcher("-isystem" + "\\s+([\"'])(.+?)\\1", 2),
+        new NameOptionMatcher("-isystem" + REGEX_INCLUDEPATH_QUOTED_DIR, 2),
         /* unquoted directory */
-        new NameOptionMatcher("-isystem" + "\\s+([^\\s]+)", 1), };
+        new NameOptionMatcher("-isystem" + REGEX_INCLUDEPATH_UNQUOTED_DIR, 1), };
 
     /*-
      * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgs(java.lang.String)
      */
     @Override
     public int processArgument(List<ICLanguageSettingEntry> returnedEntries, IPath cwd, String argsLine) {
-      return processArgument(returnedEntries, argsLine, optionMatchers);
-    }
-
-    protected final int processArgument(List<ICLanguageSettingEntry> returnedEntries, String argsLine,
-        NameOptionMatcher[] optionMatchers) {
-      for (NameOptionMatcher oMatcher : optionMatchers) {
-        final Matcher matcher = oMatcher.matcher;
-
-        matcher.reset(argsLine);
-        if (matcher.lookingAt()) {
-          final String name = matcher.group(oMatcher.nameGroup);
-          final ICLanguageSettingEntry entry = CDataUtil.createCIncludePathEntry(name,
-              ICSettingEntry.BUILTIN | ICSettingEntry.READONLY);
-          returnedEntries.add(entry);
-          final int end = matcher.end();
-          return end;
-        }
-      }
-      return 0;// no input consumed
+      return processArgument(returnedEntries, cwd, argsLine, optionMatchers);
     }
   }
 
