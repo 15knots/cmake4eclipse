@@ -9,19 +9,11 @@
           id="de.marw.cmake.cdt.language.settings.providers.CompileCommandsJsonParser"
           name="CMAKE_EXPORT_COMPILE_COMMANDS Parser"
           prefer-non-shared="true">
-       <language-scope
-             id="org.eclipse.cdt.core.gcc">
-       </language-scope>
-       <language-scope
-             id="org.eclipse.cdt.core.g++">
-       </language-scope>
     </provider>
     <provider
           class="de.marw.cmake.cdt.language.settings.providers.CmakeBuildOutputParser"
           id="de.marw.cmake.cdt.language.settings.providers.CmakeBuildOutputParser"
           name="CMake Build Output Parser (deprecated)">
-         <language-scope id="org.eclipse.cdt.core.gcc"/>
-         <language-scope id="org.eclipse.cdt.core.g++"/>
     </provider>
  </extension>
  <extension
