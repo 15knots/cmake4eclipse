@@ -300,6 +300,31 @@ class ToolArgumentParsers {
   }
 
   ////////////////////////////////////////////////////////////////////
+  /**
+   * A tool argument parser capable to parse a nvcc-compiler system include path
+   * argument: {@code -system=dir}.<br>
+   * Note that nvcc seems to treat {@code -system=dir} differently from GCC
+   * which`s manpage says:
+   * <q>If dir begins with "=", then the "=" will be replaced by the sysroot
+   * prefix; see --sysroot and -isysroot.</q>
+   */
+  static class SystemIncludePath_nvcc extends IncludePathGeneric implements IToolArgumentParser {
+    static final NameOptionMatcher[] optionMatchers = {
+        /* quoted directory */
+        new NameOptionMatcher("-isystem=" + "([\"'])(.+?)\\1", 2),
+        /* unquoted directory */
+        new NameOptionMatcher("-isystem=" + "([^\\s]+)", 1), };
+
+    /*-
+     * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgs(java.lang.String)
+     */
+    @Override
+    public int processArgument(List<ICLanguageSettingEntry> returnedEntries, IPath cwd, String argsLine) {
+      return processArgument(returnedEntries, cwd, argsLine, optionMatchers);
+    }
+  }
+
+  ////////////////////////////////////////////////////////////////////
   // POSIX compatible option parsers
   ////////////////////////////////////////////////////////////////////
   /**
