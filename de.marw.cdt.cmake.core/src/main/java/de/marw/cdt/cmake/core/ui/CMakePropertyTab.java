@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013-2017 Martin Weber.
+ * Copyright (c) 2013-2018 Martin Weber.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -56,6 +56,8 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
   private static final ILog log = CdtPlugin.getDefault().getLog();
 
   // Widgets
+  /** Clear cmake-cache before build */
+  private Button b_clearCache;
   private Button b_warnNoDev;
   private Button b_debugTryCompile;
   private Button b_debug;
@@ -148,6 +150,14 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
         }
       });
     }
+    // Build behavior group...
+    {
+      Group gr = WidgetHelper.createGroup(usercomp, SWT.FILL, 2, "Build Behavior", 2);
+
+      b_clearCache = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2, "Cl&ear cmake cache before build");
+      b_clearCache.addListener(SWT.Selection, tsl);
+    }
+
     // cmake options group...
     {
       Group gr = WidgetHelper.createGroup(usercomp, SWT.FILL, 2, "CMake commandline options", 2);
@@ -278,6 +288,13 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
       BitSet bs = new BitSet(prefs.length);
       // b_warnNoDev...
       for (int i = 0; i < prefs.length; i++) {
+        bs.set(i, prefs[i].isClearCache());
+      }
+      enterTristateOrToggleMode(b_clearCache, bs, prefs.length);
+
+      // b_warnNoDev...
+      bs.clear();
+      for (int i = 0; i < prefs.length; i++) {
         bs.set(i, prefs[i].isWarnNoDev());
       }
       enterTristateOrToggleMode(b_warnNoDev, bs, prefs.length);
@@ -361,6 +378,7 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
       // we are editing a single configuration...
       // all buttons are in toggle mode
       CMakePreferences pref = prefs[0];
+      enterToggleMode(b_clearCache, pref.isClearCache());
       enterToggleMode(b_warnNoDev, pref.isWarnNoDev());
       enterToggleMode(b_debug, pref.isDebugOutput());
       enterToggleMode(b_trace, pref.isTrace());
@@ -384,6 +402,8 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
       for (int i = 0; i < prefs.length; i++) {
         CMakePreferences pref = prefs[i];
 
+        if (shouldSaveButtonSelection(b_clearCache))
+          pref.setClearCache(b_clearCache.getSelection());
         if (shouldSaveButtonSelection(b_warnNoDev))
           pref.setWarnNoDev(b_warnNoDev.getSelection());
         if (shouldSaveButtonSelection(b_debugTryCompile))
@@ -408,6 +428,7 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
     } else {
       // we are editing a single configuration...
       CMakePreferences pref = prefs[0];
+      pref.setClearCache(b_clearCache.getSelection());
       pref.setWarnNoDev(b_warnNoDev.getSelection());
       pref.setDebugTryCompile(b_debugTryCompile.getSelection());
       pref.setDebugOutput(b_debug.getSelection());
@@ -508,6 +529,7 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
       CMakePreferences srcPrefs = configMgr.getOrLoad(srcCfg);
       CMakePreferences dstPrefs = configMgr.getOrCreate(dstCfg);
       if (srcPrefs != dstPrefs) {
+        dstPrefs.setClearCache(srcPrefs.isClearCache());
         dstPrefs.setDebugTryCompile(srcPrefs.isDebugTryCompile());
         dstPrefs.setDebugOutput(srcPrefs.isDebugOutput());
         dstPrefs.setTrace(srcPrefs.isTrace());

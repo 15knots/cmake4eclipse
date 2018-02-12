@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013-2017 Martin Weber.
+ * Copyright (c) 2013-2018 Martin Weber.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -39,6 +39,7 @@ public class CMakePreferences {
   private static final String ATTR_TRACE = "trace";
   private static final String ATTR_WARN_UNITIALIZED = "warnUnitialized";
   private static final String ATTR_WARN_UNUSED = "warnUnused";
+  private static final String ATTR_CLEAR_CACHE = "clearCache";
   /**  */
   static final String ELEM_DEFINES = "defs";
   /**  */
@@ -58,6 +59,7 @@ public class CMakePreferences {
   private LinuxPreferences linuxPreferences = new LinuxPreferences();
 
   private WindowsPreferences windowsPreferences = new WindowsPreferences();
+  private boolean clearCache;
 
   /**
    * Creates a new object, initialized with all default values.
@@ -99,6 +101,7 @@ public class CMakePreferences {
     final ICStorageElement[] children = parent.getChildren();
     for (ICStorageElement child : children) {
       if (ELEM_OPTIONS.equals(child.getName())) {
+        clearCache= Boolean.parseBoolean(child.getAttribute(ATTR_CLEAR_CACHE));
         // options...
         warnNoDev = Boolean.parseBoolean(child.getAttribute(ATTR_WARN_NO_DEV));
         debugTryCompile = Boolean.parseBoolean(child
@@ -133,6 +136,12 @@ public class CMakePreferences {
       pOpts = options[0];
     } else {
       pOpts = parent.createChild(ELEM_OPTIONS);
+    }
+
+    if (clearCache) {
+      pOpts.setAttribute(ATTR_CLEAR_CACHE, String.valueOf(clearCache));
+    } else {
+      pOpts.removeAttribute(ATTR_CLEAR_CACHE);
     }
     if (warnNoDev) {
       pOpts.setAttribute(ATTR_WARN_NO_DEV, String.valueOf(warnNoDev));
@@ -341,4 +350,15 @@ public class CMakePreferences {
     this.buildDirectory = buildDirectory;
   }
 
+  /** Gets whether t clear the cmake-cache before build.
+   */
+  public boolean isClearCache() {
+    return clearCache;
+  }
+
+  /** Sets whether t clear the cmake-cache before build.
+   */
+  public void setClearCache(boolean clearCache) {
+    this.clearCache= clearCache;
+  }
 }

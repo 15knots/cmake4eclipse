@@ -1,5 +1,5 @@
 /* ******************************************************************************
- * Copyright (c) 2013-2017 Martin Weber.
+ * Copyright (c) 2013-2018 Martin Weber.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -187,6 +187,8 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
 
     project.deleteMarkers(MARKER_ID, false, IResource.DEPTH_ZERO);
 
+    final ICConfigurationDescription cfgDes = ManagedBuildManager.getDescriptionForConfiguration(config);
+
     ICSourceEntry[] srcEntries = config.getSourceEntries();
     { // do a sanity check: only one source entry allowed for project
       if (srcEntries.length == 0) {
@@ -203,10 +205,12 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
         createErrorMarker(project, msg);
         return status;
       } else {
-        ICConfigurationDescription cfgDes = ManagedBuildManager.getDescriptionForConfiguration(config);
         srcEntries = CDataUtil.resolveEntries(srcEntries, cfgDes);
       }
     }
+
+    // load project properties..
+    final CMakePreferences prefs = ConfigurationManager.getInstance().getOrLoad(cfgDes);
 
     // See if the user has cancelled the build
     checkCancel();
@@ -216,7 +220,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     final IFolder buildFolder = getBuildFolder();
     final File buildDir = buildFolder.getLocation().toFile();
     final File cacheFile = new File(buildDir, "CMakeCache.txt");
-    if (isGeneratorChanged() && cacheFile.exists()) {
+    if ((isGeneratorChanged(prefs) || prefs.isClearCache()) && cacheFile.exists()) {
       // The user changed the generator, remove cache file to avoid cmake's complaints..
       cacheFile.delete();
 //      System.out.println("DEL "+cacheFile);
@@ -469,18 +473,9 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
    * @return {@code true} if the user changed the generator setting in the
    *         preferences, otherwise {@code false}
    */
-  private boolean isGeneratorChanged() {
-    // load project properties..
-    final ICConfigurationDescription cfgd = ManagedBuildManager.getDescriptionForConfiguration(config);
-    CMakePreferences prefs;
-    try {
-      prefs = ConfigurationManager.getInstance().getOrLoad(cfgd);
-      AbstractOsPreferences osPrefs = AbstractOsPreferences.extractOsPreferences(prefs);
-      return osPrefs.getGenerator() != osPrefs.getGeneratedWith();
-    } catch (CoreException ex) {
-      log.log(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID, null, ex));
-      return false;
-    }
+  private boolean isGeneratorChanged(CMakePreferences prefs) {
+    AbstractOsPreferences osPrefs = AbstractOsPreferences.extractOsPreferences(prefs);
+    return osPrefs.getGenerator() != osPrefs.getGeneratedWith();
   }
 
   /**
