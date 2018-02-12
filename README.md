@@ -50,6 +50,11 @@ There is a run configuration for eclipse to invoke maven `build cmake4eclipse` p
 
 ---
 # Release History
+## 1.10.0 (2018-02-??) Upcoming
+### Changes
+- Fixed #65: Recognize nvcc as a CUDA compiler and integrate with the Nsight Eclipse Plugins.
+- more to come...
+
 ## 1.9.1 (2018-01-24)
 ### Changes
 - Fixed #64: Project is fully reindexed after each build.
