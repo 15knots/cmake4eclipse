@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Martin Weber.
+ * Copyright (c) 2015-2018 Martin Weber.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -75,10 +75,20 @@ public class SystemIncludePath_C_Test {
     assertEquals("name", name, parsed.getName());
 
     name = "A:an\\Include/Path";
-    // -isystemA:an\Include/Path
+    // -isystem A:an\Include/Path
     entries.clear();
     assertEquals(8 + 1+ name.length(),
         testee.processArgument(entries, cwd, "-isystem " + name + more));
+    assertEquals("#entries", 1, entries.size());
+    parsed = entries.get(0);
+    assertEquals("kind", ICSettingEntry.INCLUDE_PATH, parsed.getKind());
+    assertEquals("name", name, parsed.getName());
+
+    name = "A:an\\Include/Path";
+    // -isystemA:an\Include/Path
+    entries.clear();
+    assertEquals(8 + name.length(),
+        testee.processArgument(entries, cwd, "-isystem" + name + more));
     assertEquals("#entries", 1, entries.size());
     parsed = entries.get(0);
     assertEquals("kind", ICSettingEntry.INCLUDE_PATH, parsed.getKind());
@@ -116,14 +126,33 @@ public class SystemIncludePath_C_Test {
     assertEquals("name", name, parsed.getName());
 
     name = "A:an\\In CLU  de/Pat h";
-    // -isystem   'A:an\In CLU  de/Pat h'
+    // -isystem"A:an\In CLU  de/Pat h"
     entries.clear();
-    assertEquals(8 + name.length() +3 + 2,
-        testee.processArgument(entries, cwd, "-isystem   " + "\"" + name + "\"" + more));
+    assertEquals(8 + name.length() + 2,
+        testee.processArgument(entries, cwd, "-isystem" + "\"" + name + "\"" + more));
     assertEquals("#entries", 1, entries.size());
     parsed = entries.get(0);
     assertEquals("kind", ICSettingEntry.INCLUDE_PATH, parsed.getKind());
     assertEquals("name", name, parsed.getName());
-  }
+
+    // -isystem'A:an\In CLU  de/Pat h'
+    entries.clear();
+    assertEquals(8 + name.length() + 2,
+        testee.processArgument(entries, cwd, "-isystem" + "'" + name + "'" + more));
+    assertEquals("#entries", 1, entries.size());
+    parsed = entries.get(0);
+    assertEquals("kind", ICSettingEntry.INCLUDE_PATH, parsed.getKind());
+    assertEquals("name", name, parsed.getName());
+
+    name = "/Inc/CLUde/Path";
+    // -isystem/Inc/CLUde/Path
+    entries.clear();
+    assertEquals(8 + name.length(),
+        testee.processArgument(entries, cwd, "-isystem" + name + more));
+    assertEquals("#entries", 1, entries.size());
+    parsed = entries.get(0);
+    assertEquals("kind", ICSettingEntry.INCLUDE_PATH, parsed.getKind());
+    assertEquals("name", name, parsed.getName());
+ }
 
 }
