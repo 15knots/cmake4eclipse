@@ -157,7 +157,7 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
       b_debugTryCompile = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2,
           "Do not delete the t&ry_compile build tree (--debug-trycompile)");
       b_debugTryCompile.addListener(SWT.Selection, tsl);
-      b_debug = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2, "Put cmake in a &debug mode \t(--debug-output)");
+      b_debug = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2, "Put cmake in a &debug mode \t\t(--debug-output)");
       b_debug.addListener(SWT.Selection, tsl);
       b_trace = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2, "Put cmake in &trace mode \t\t(--trace)");
       b_trace.addListener(SWT.Selection, tsl);
