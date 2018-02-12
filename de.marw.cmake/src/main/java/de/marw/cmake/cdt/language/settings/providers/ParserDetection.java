@@ -104,8 +104,13 @@ class ParserDetection {
     parserDetectors.add(new ParserDetectorExt("icl", "exe", cl));
 
     // CUDA: nvcc compilers (POSIX compatible) =================================
+    final IToolArgumentParser[] nvcc_args = { new ToolArgumentParsers.IncludePath_C_POSIX(),
+        new ToolArgumentParsers.MacroDefine_C_POSIX(), new ToolArgumentParsers.MacroUndefine_C_POSIX(),
+        new ToolArgumentParsers.SystemIncludePath_nvcc(),
+        new ToolArgumentParsers.SystemIncludePath_C() };
+
     final ToolCommandlineParser nvcc = new ToolCommandlineParser("com.nvidia.cuda.toolchain.language.cuda.cu",
-        new ResponseFileArgumentParsers.At(), posix_cc_args);
+        new ResponseFileArgumentParsers.At(), nvcc_args);
     parserDetectors.add(new ParserDetector("nvcc", nvcc));
     parserDetectors.add(new ParserDetectorExt("nvcc", "exe", nvcc));
 
