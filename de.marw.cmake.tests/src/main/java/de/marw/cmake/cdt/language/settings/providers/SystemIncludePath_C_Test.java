@@ -74,7 +74,7 @@ public class SystemIncludePath_C_Test {
     assertEquals("kind", ICSettingEntry.INCLUDE_PATH, parsed.getKind());
     assertEquals("name", name, parsed.getName());
 
-    name = "A:an\\Include/Path";
+    name = (new Path("A:an\\Include/Path")).toOSString();
     // -isystem A:an\Include/Path
     entries.clear();
     assertEquals(8 + 1+ name.length(),
@@ -84,7 +84,6 @@ public class SystemIncludePath_C_Test {
     assertEquals("kind", ICSettingEntry.INCLUDE_PATH, parsed.getKind());
     assertEquals("name", name, parsed.getName());
 
-    name = "A:an\\Include/Path";
     // -isystemA:an\Include/Path
     entries.clear();
     assertEquals(8 + name.length(),
@@ -125,7 +124,7 @@ public class SystemIncludePath_C_Test {
     assertEquals("kind", ICSettingEntry.INCLUDE_PATH, parsed.getKind());
     assertEquals("name", name, parsed.getName());
 
-    name = "A:an\\In CLU  de/Pat h";
+    name = (new Path("A:an\\In CLU  de/Pat h")).toOSString();
     // -isystem"A:an\In CLU  de/Pat h"
     entries.clear();
     assertEquals(8 + name.length() + 2,
@@ -144,7 +143,7 @@ public class SystemIncludePath_C_Test {
     assertEquals("kind", ICSettingEntry.INCLUDE_PATH, parsed.getKind());
     assertEquals("name", name, parsed.getName());
 
-    name = "/Inc/CLUde/Path";
+    name = (new Path("/Inc/CLUde/Path")).toOSString();
     // -isystem/Inc/CLUde/Path
     entries.clear();
     assertEquals(8 + name.length(),

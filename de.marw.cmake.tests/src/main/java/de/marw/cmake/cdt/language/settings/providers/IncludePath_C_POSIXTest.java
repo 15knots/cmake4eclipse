@@ -103,7 +103,7 @@ public class IncludePath_C_POSIXTest {
     assertEquals("kind", ICSettingEntry.INCLUDE_PATH, parsed.getKind());
     assertEquals("name", name, parsed.getName());
 
-    name = "A:an\\Include/Path";
+    name = (new Path("A:an\\Include/Path")).toOSString();
     // -IA:an\Include/Path
     entries.clear();
     assertEquals(2 + name.length(),
@@ -161,7 +161,7 @@ public class IncludePath_C_POSIXTest {
     assertEquals("kind", ICSettingEntry.INCLUDE_PATH, parsed.getKind());
     assertEquals("name", name, parsed.getName());
 
-    name = "A:an\\In CLU  de/Pat h";
+    name = (new Path("A:an\\In CLU  de/Pat h")).toOSString();
     // -I'A:an\In CLU  de/Pat h'
     entries.clear();
     assertEquals(2 + name.length() + 2,
@@ -184,7 +184,7 @@ public class IncludePath_C_POSIXTest {
     List<ICLanguageSettingEntry> entries = new ArrayList<>();
     ICLanguageSettingEntry parsed;
 
-    String name = "a/relative/Include/Path";
+    String name = (new Path("a/relative/Include/Path")).toOSString();
     IPath cwd= new Path("/compiler/working/dir");
     entries.clear();
     assertEquals(2 + name.length(),
