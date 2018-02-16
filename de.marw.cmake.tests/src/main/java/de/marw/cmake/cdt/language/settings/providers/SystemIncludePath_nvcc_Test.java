@@ -74,7 +74,7 @@ public class SystemIncludePath_nvcc_Test {
     assertEquals("kind", ICSettingEntry.INCLUDE_PATH, parsed.getKind());
     assertEquals("name", name, parsed.getName());
 
-    name = "A:an\\In CLU  de/Pat h";
+    name = (new Path("A:an\\In CLU  de/Pat h")).toOSString();
     // -isystem="A:an\In CLU  de/Pat h"
     entries.clear();
     assertEquals(8 + name.length() + 1 + 2,
