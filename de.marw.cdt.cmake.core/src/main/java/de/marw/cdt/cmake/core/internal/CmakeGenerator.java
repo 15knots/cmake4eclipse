@@ -101,16 +101,6 @@ public enum CmakeGenerator {
   }
 
   /**
-   * Gets the extra argument to pass to the build-script processor.
-   *
-   * @return a non-empty string, or {@code null} if no extra argument should be
-   *         passed.
-   */
-  public String getBuildscriptProcessorExtraArg() {
-    return null;
-  }
-
-  /**
    * Gets the build-script processor´s command argument(s) to ignore build errors.
    *
    * @return the command option string or {@code null} if no argument is needed.
