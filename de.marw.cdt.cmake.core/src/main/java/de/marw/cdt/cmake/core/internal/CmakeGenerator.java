@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014 Martin Weber.
+ * Copyright (c) 2014-2018 Martin Weber.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,14 +18,14 @@ package de.marw.cdt.cmake.core.internal;
  */
 public enum CmakeGenerator {
   /*
-   * Implementation Note: Please not include generators for IDE project files,
+   * Implementation Note: Please do not include generators for IDE project files,
    * such as "Eclipse CDT4 - Unix Makefiles".
    */
 
   // linux generators
   UnixMakefiles("Unix Makefiles"),
   // Ninja
-  Ninja("Ninja", "ninja", "-k 0") {
+  Ninja("Ninja", "-k 0") {
     @Override
     public String getMakefileName(){
       return "build.ninja";
@@ -33,27 +33,21 @@ public enum CmakeGenerator {
   },
   // windows generators
   MinGWMakefiles("MinGW Makefiles", "mingw32-make"), MSYSMakefiles(
-      "MSYS Makefiles"), NMakeMakefiles("NMake Makefiles", "nmake.exe"), NMakeMakefilesJOM(
-      "NMake Makefiles JOM", "jom"), BorlandMakefiles("Borland Makefiles"), WatcomWMake(
-      "Watcom WMake", "wmake");
+      "MSYS Makefiles"), NMakeMakefiles("NMake Makefiles"), NMakeMakefilesJOM(
+      "NMake Makefiles JOM"), BorlandMakefiles("Borland Makefiles"), WatcomWMake(
+      "Watcom WMake");
 
   private final String name;
-  private final String buildscriptProcessorCommand;
   private String ignoreErrOption;
 
-  private CmakeGenerator(String name, String buildscriptProcessorCommand,
+  private CmakeGenerator(String name,
       String ignoreErrOption) {
     this.name = name;
-    this.buildscriptProcessorCommand = buildscriptProcessorCommand;
     this.ignoreErrOption = ignoreErrOption;
   }
 
-  private CmakeGenerator(String name, String buildscriptProcessorCommand) {
-    this(name, buildscriptProcessorCommand, "-k");
-  }
-
   private CmakeGenerator(String name) {
-    this(name, "make");
+    this(name, "-k");
   }
 
   /**
@@ -64,13 +58,6 @@ public enum CmakeGenerator {
    */
   public String getCmakeName() {
     return name;
-  }
-
-  /**
-   * Gets the name of the makefile (buildscript) processor.
-   */
-  public String getBuildscriptProcessorCommand() {
-    return buildscriptProcessorCommand;
   }
 
   /**

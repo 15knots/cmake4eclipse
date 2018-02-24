@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014-2017 Martin Weber.
+ * Copyright (c) 2014-2018 Martin Weber.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,6 +22,7 @@ import java.util.WeakHashMap;
 
 import org.eclipse.cdt.core.ICommandLauncher;
 import org.eclipse.cdt.core.IMarkerGenerator;
+import org.eclipse.cdt.core.ProblemMarkerInfo;
 import org.eclipse.cdt.core.resources.IConsole;
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
 import org.eclipse.cdt.core.settings.model.extension.CBuildData;
@@ -39,11 +40,11 @@ import org.eclipse.cdt.managedbuilder.macros.IFileContextBuildMacroValues;
 import org.eclipse.cdt.managedbuilder.macros.IReservedMacroNameSupplier;
 import org.eclipse.cdt.managedbuilder.makegen.IManagedBuilderMakefileGenerator;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -68,10 +69,11 @@ import de.marw.cdt.cmake.core.internal.settings.ConfigurationManager;
  * @author Martin Weber
  */
 public class CmakeBuildRunner extends ExternalBuildRunner {
-  private static final ILog log = CdtPlugin.getDefault().getLog();
+  /** build runner error marker ID */
+  private static final String MARKER_ID = CdtPlugin.PLUGIN_ID + ".BuildRunnerError";
 
   /** caches CMakeCacheFileInfo by ICConfigurationDescription.ID */
-  private WeakHashMap<String, CMakeCacheFileInfo> map = new WeakHashMap<String, CMakeCacheFileInfo>(
+  private WeakHashMap<String, CMakeCacheFileInfo> map = new WeakHashMap<>(
       2);
 
   /*-
@@ -88,13 +90,15 @@ public class CmakeBuildRunner extends ExternalBuildRunner {
      * Cmake-generator. First do a sanity check.
      */
     if (builder.getBaseId().equals("de.marw.cdt.cmake.core.genscriptbuilder")) {
+      project.deleteMarkers(MARKER_ID, false, IResource.DEPTH_INFINITE);
+
       final ICConfigurationDescription cfgd = ManagedBuildManager
           .getDescriptionForConfiguration(configuration);
+      final IPath builderCWD = cfgd.getBuildSetting().getBuilderCWD();
 
       if (kind == IncrementalProjectBuilder.CLEAN_BUILD) {
         // avoid calling 'rm -rf' if it is a clean build and the build dir was
         // deleted
-        final IPath builderCWD = cfgd.getBuildSetting().getBuilderCWD();
         final IPath location = ResourcesPlugin.getWorkspace().getRoot().getFile(builderCWD).getLocation();
         if (location == null || !location.toFile().exists()) {
           return true; // is clean
@@ -111,12 +115,15 @@ public class CmakeBuildRunner extends ExternalBuildRunner {
       String buildscriptProcessorCmd = getCommandFromCMakeCache(cfgd,
           generator != osPrefs.getGeneratedWith());
       if (buildscriptProcessorCmd == null) {
-        // fall back to values from OS preferences
-        buildscriptProcessorCmd = osPrefs.getBuildscriptProcessorCommand();
-        if (buildscriptProcessorCmd == null) {
-          // fall back to built-in defaults from CMake generator
-          buildscriptProcessorCmd = generator.getBuildscriptProcessorCommand();
-        }
+        // actually this should not happen, since cmake will abort if it cannot determine
+        // the build tool,.. but the variable name might change in future
+        final ProblemMarkerInfo pmi = new ProblemMarkerInfo(
+            ResourcesPlugin.getWorkspace().getRoot().getFolder(builderCWD), 0,
+            "No CMAKE_MAKE_PROGRAM entry in file CMakeCache.txt, unable to build project",
+            IMarkerGenerator.SEVERITY_ERROR_BUILD, null);
+        pmi.setType(MARKER_ID);
+        markerGenerator.addMarker(pmi);
+        return false;
       }
       builder = new CmakeBuildToolInjectorBuilder(builder,
           buildscriptProcessorCmd, generator);
@@ -132,15 +139,17 @@ public class CmakeBuildRunner extends ExternalBuildRunner {
    * parse the CMakeCache.txt file first and then caches the parsed content.
    *
    * @param cfgd
-   *        configuration
-    * @param forceParsing
-    *        {@code true} to force parsing of the cmake cache file without
-    *        checking its time-stamp, otherwise {@code false}.
-    * @return a value for the {@code "cmake_build_cmd"} macro or {@code null}, if
-    *         none could be determined
-    */
+   *          configuration
+   * @param forceParsing
+   *          {@code true} to force parsing of the cmake cache file without
+   *          checking its time-stamp, otherwise {@code false}.
+   * @return a value for the {@code "cmake_build_cmd"} macro or {@code null}, if
+   *         none could be determined
+   * @throws CoreException
+   *           if an IOExceptions occurs when reading the cmake cache file
+   */
    private String getCommandFromCMakeCache(ICConfigurationDescription cfgd,
-       boolean forceParsing) {
+       boolean forceParsing) throws CoreException {
      CMakeCacheFileInfo fi = map.get(cfgd.getId());
      if (fi == null) {
        fi = new CMakeCacheFileInfo();
@@ -153,15 +162,15 @@ public class CmakeBuildRunner extends ExternalBuildRunner {
     final IPath builderCWD = cfgd.getBuildSetting().getBuilderCWD();
 
     IPath location = ResourcesPlugin.getWorkspace().getRoot().getFolder(builderCWD).getLocation();
-    if (location == null) {
-      // fall back to built-in from generator
-      return null;
-    }
+// cannot be null, according to javadoc of Resource#getLocation()
+//    if (location == null) {
+//      return null;
+//    }
     final File file = location.append("CMakeCache.txt").toFile();
 
     if (file.isFile()) {
       final long lastModified = file.lastModified();
-      if (forceParsing || fi.cmCacheFileLastModified == 0
+      if (forceParsing || fi.cachedCmakeBuildTool == null || fi.cmCacheFileLastModified == 0
           || lastModified > fi.cmCacheFileLastModified) {
         // internally cached value is outdated, must parse CMakeCache.txt
         fi.cmCacheFileLastModified = lastModified;
@@ -185,9 +194,7 @@ public class CmakeBuildRunner extends ExternalBuildRunner {
             fi.cachedCmakeBuildTool = iter.next().getValue();
           }
         } catch (IOException ex) {
-          // ignore, the build command will run cmake anyway.
-          // So let cmake complain about its cache file
-          log.log(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID,
+          throw new CoreException(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID,
               "Failed to parse file " + file, ex));
         } finally {
           if (is != null) {
