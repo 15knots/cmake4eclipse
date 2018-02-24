@@ -17,7 +17,6 @@
             id="de.marw.cdt.cmake.core.genmakebuilder"
             ignoreErrCmd="-k"
             incrementalBuildTarget="all"
-            isSystem="false"
             name="CMake Builder (GNU Make)"
             parallelBuildCmd="-j*"
             parallelBuildOn="true"
@@ -79,6 +78,14 @@
    <extension
          id="BuildscriptGenerationError"
          name="Buildscript Generation Problem"
+         point="org.eclipse.core.resources.markers">
+      <super
+            type="org.eclipse.core.resources.problemmarker">
+      </super>
+   </extension>
+   <extension
+         id="BuildRunnerError"
+         name="CMakecache.txt Problem"
          point="org.eclipse.core.resources.markers">
       <super
             type="org.eclipse.core.resources.problemmarker">
