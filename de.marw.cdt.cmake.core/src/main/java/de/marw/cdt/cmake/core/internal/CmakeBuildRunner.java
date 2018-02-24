@@ -257,22 +257,25 @@ public class CmakeBuildRunner extends ExternalBuildRunner {
 
     @Override
     public String getBuildArguments() {
-      String args0 = delegate.getArguments();
-      // Handle ignore errors cmd...
-      final String ignoreErrOption = generator.getIgnoreErrOption();
-      if (ignoreErrOption != null) {
-        args0 = args0.replaceAll("CMAKE_BUILD_TOOL_IGN_ERR", ignoreErrOption);
+      String args = "";
+      // Handle ignore errors option...
+      if (!delegate.isStopOnError()) {
+        final String ignoreErrOption = generator.getIgnoreErrOption();
+        if (ignoreErrOption != null) {
+          args += ignoreErrOption;
+        }
       }
 
-      final String extraArg = generator.getBuildscriptProcessorExtraArg();
-      if (extraArg != null) {
-        if (args0.length() > 0) {
-          args0 += " ";
-        }
-        args0 += extraArg;
+      // Handle parallel build cmd
+      int num = delegate.getParallelizationNum();
+      String arg = generator.getParallelBuildArg(num);
+      if (arg != null) {
+        if (!args.isEmpty())
+          args += " ";
+        args += arg;
       }
-      // TODO Handle parallel build cmd
-      return args0;
+
+      return args;
     }
 
     @Override
