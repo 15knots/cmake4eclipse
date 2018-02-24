@@ -154,7 +154,8 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
     {
       Group gr = WidgetHelper.createGroup(usercomp, SWT.FILL, 2, "Build Behavior", 2);
 
-      b_clearCache = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2, "Cl&ear cmake cache before build");
+      b_clearCache = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2, "Force& cmake to run with each build");
+      b_clearCache.setToolTipText("Useful if you are configuring a new project");
       b_clearCache.addListener(SWT.Selection, tsl);
     }
 
@@ -165,7 +166,7 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
       b_warnNoDev = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2, "Suppress developer &warnings \t(-Wno-dev)");
       b_warnNoDev.addListener(SWT.Selection, tsl);
       b_debugTryCompile = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2,
-          "Do not delete the t&ry_compile build tree (--debug-trycompile)");
+          "Do n&ot delete the try_compile build tree (--debug-trycompile)");
       b_debugTryCompile.addListener(SWT.Selection, tsl);
       b_debug = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2, "Put cmake in a &debug mode \t\t(--debug-output)");
       b_debug.addListener(SWT.Selection, tsl);
