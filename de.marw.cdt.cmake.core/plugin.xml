@@ -29,9 +29,12 @@
                cleanBuildTarget="clean"
                command="CMAKE_BUILD_TOOL"
                id="de.marw.cdt.cmake.core.genscriptbuilder"
-               ignoreErrCmd="CMAKE_BUILD_TOOL_IGN_ERR"
+               ignoreErrCmd="-k"
                incrementalBuildTarget="all"
-               name="CMake Builder (portable)">
+               name="CMake Builder (portable)"
+               parallelBuildCmd="-j"
+               parallelBuildOn="true"
+               parallelizationNumber="unlimited">
          </builder>
          <!--
       <toolChain
