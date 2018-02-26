@@ -44,7 +44,7 @@ https://raw.githubusercontent.com/15knots/cmake4eclipse/master/releng/comp-updat
 
 ### Debug and Build
 This project uses Apache maven as its build system.
-To build from a command-line, run `mvn -f ./parent/pom.xml verify` in the root directory of the project source files.
+To build from a command-line, run `mvn -f ./parent/pom.xml package` in the root directory of the project source files.
 
 There is a run configuration for eclipse to invoke maven `build cmake4eclipse` plus a launch configuration to debug the plugin: `cmake4eclipse`.
 
