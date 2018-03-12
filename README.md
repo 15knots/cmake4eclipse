@@ -50,7 +50,7 @@ There is a run configuration for eclipse to invoke maven `build cmake4eclipse` p
 
 ---
 # Release History
-## 1.11.0 (2018-??-??)
+## 1.11.0 (2018-03-12)
 ### Changes
 - Fixed #52: Allow to run parallel builds.
 - Fail the build if build tool name cannot be determined from CMakeCache.txt.
