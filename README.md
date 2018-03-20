@@ -39,8 +39,10 @@ The easiest way is to drag this: <a href="http://marketplace.eclipse.org/marketp
 Alternatively, **cmake4eclipse** can be installed into Eclipse using the "Install New Software..." dialog and entering the update site URL listed below.
 
 ### Update Site
-This composite update site contains the latest release as well as selected older releases.
-https://raw.githubusercontent.com/15knots/cmake4eclipse/master/releng/comp-update/
+This composite update site is for use in a Eclipse workbench and contains the latest release as well as selected older releases:
+https://raw.githubusercontent.com/15knots/cmake4eclipse/master/releng/comp-update/.
+
+Tool integrators will find each release at [bintray](https://bintray.com/15knots/p2-zip/cmake4eclipse#files) (zipped p2 repositories for integration into a target platform).
 
 ### Debug and Build
 This project uses Apache maven as its build system.
