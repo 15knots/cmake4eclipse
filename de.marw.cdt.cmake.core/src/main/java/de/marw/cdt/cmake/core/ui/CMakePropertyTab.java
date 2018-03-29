@@ -94,7 +94,7 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
     {
       Group gr = WidgetHelper.createGroup(usercomp, SWT.FILL, 2, "Build output location (relative to project root)", 2);
 
-      setupLabel(gr, "F&older", 1, SWT.BEGINNING);
+      setupLabel(gr, "&Folder", 1, SWT.BEGINNING);
 
       t_outputFolder = setupText(gr, 1, GridData.FILL_HORIZONTAL);
 
@@ -107,7 +107,7 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
         layout.marginWidth = 0;
         buttonBar.setLayout(layout);
       }
-      b_browseOutputFolder = WidgetHelper.createButton(buttonBar, "B&rowse...", true);
+      b_browseOutputFolder = WidgetHelper.createButton(buttonBar, "&Browse...", true);
       b_browseOutputFolder.addSelectionListener(new SelectionAdapter() {
         @Override
         public void widgetSelected(SelectionEvent e) {
@@ -154,7 +154,7 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
     {
       Group gr = WidgetHelper.createGroup(usercomp, SWT.FILL, 2, "Build Behavior", 2);
 
-      b_clearCache = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2, "Force& cmake to run with each build");
+      b_clearCache = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2, "Forc&e cmake to run with each build");
       b_clearCache.setToolTipText("Useful if you are configuring a new project");
       b_clearCache.addListener(SWT.Selection, tsl);
     }
@@ -166,9 +166,9 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
       b_warnNoDev = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2, "Suppress developer &warnings \t(-Wno-dev)");
       b_warnNoDev.addListener(SWT.Selection, tsl);
       b_debugTryCompile = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2,
-          "Do n&ot delete the try_compile build tree (--debug-trycompile)");
+          "Do not delete the tr&y_compile build tree (--debug-trycompile)");
       b_debugTryCompile.addListener(SWT.Selection, tsl);
-      b_debug = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2, "Put cmake in a &debug mode \t\t(--debug-output)");
+      b_debug = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2, "Put cmake in &debug mode \t\t(--debug-output)");
       b_debug.addListener(SWT.Selection, tsl);
       b_trace = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2, "Put cmake in &trace mode \t\t(--trace)");
       b_trace.addListener(SWT.Selection, tsl);
@@ -183,11 +183,11 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
       {
         Group gr2 = WidgetHelper.createGroup(gr, SWT.FILL, 2, "Pre-populate CMake cache entries from file (-C)", 2);
 
-        setupLabel(gr2, "&File", 1, SWT.BEGINNING);
+        setupLabel(gr2, "Fi&le", 1, SWT.BEGINNING);
 
         t_cacheFile = setupText(gr2, 1, GridData.FILL_HORIZONTAL);
         // "Browse..." dialog launcher buttons...
-        b_browseCacheFile = WidgetHelper.createButton(gr2, "&Browse...", true);
+        b_browseCacheFile = WidgetHelper.createButton(gr2, "B&rowse...", true);
         b_browseCacheFile.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false, 2, 1));
 
         b_browseCacheFile.addSelectionListener(new SelectionAdapter() {
