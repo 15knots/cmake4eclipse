@@ -1,4 +1,4 @@
-[Release History](#release-history) | 
+[Release Notes](#release-notes) | 
 [Install...](#installation-instructions) | 
 [![Mailing-list](https://img.shields.io/badge/Mailing-list-blue.svg)](http://groups.google.com/d/forum/cmake4eclipse-users)
 [![Build Status](https://travis-ci.org/15knots/cmake4eclipse.svg?branch=master)](https://travis-ci.org/15knots/cmake4eclipse)
@@ -51,7 +51,11 @@ To build from a command-line, run `mvn -f ./parent/pom.xml package` in the root 
 There is a run configuration for eclipse to invoke maven `build cmake4eclipse` plus a launch configuration to debug the plugin: `cmake4eclipse`.
 
 ---
-# Release History
+# Release Notes
+## Upcoming (2018-??-??)
+### Changes
+- Eliminate duplicate mnemonics in UI.
+
 ## 1.11.0 (2018-03-12)
 ### Changes
 - Fixed #52: Allow to run parallel builds.
