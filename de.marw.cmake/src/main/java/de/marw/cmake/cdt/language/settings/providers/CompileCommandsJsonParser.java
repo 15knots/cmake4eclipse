@@ -173,7 +173,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
     // null on a project with makeNature.
     // In contrast, getResolvedOutputDirectories() does it mostly right, it
     // returns '/my-project-name', but also stale data
-    // when a user changed the buil-root
+    // when a user changed the build-root
     final IPath buildRoot = currentCfgDescription.getBuildSetting().getBuilderCWD();
     final IPath jsonPath = buildRoot.append("compile_commands.json");
     final IFile jsonFileRc = ResourcesPlugin.getWorkspace().getRoot().getFile(jsonPath);
@@ -404,7 +404,6 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
       IFile sourceFile, IPath cwd, String line) {
     line = ToolCommandlineParser.trimLeadingWS(line);
     final List<ICLanguageSettingEntry> entries = cmdlineParser.processArgs(cwd, line);
-    // attach settings to sourceFile resource...
     if (entries != null && entries.size() > 0) {
       for (ICLanguageSettingEntry entry : entries) {
         if (entry.getKind() == ICSettingEntry.INCLUDE_PATH) {
@@ -415,8 +414,10 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
            * the UI in the includes folder...
            */
           storage.setSettingEntries((String) null, cmdlineParser.getLanguageId(), entries);
+          break;
         }
       }
+      // attach settings to sourceFile resource...
       storage.setSettingEntries(sourceFile, cmdlineParser.getLanguageId(), entries);
     }
   }
