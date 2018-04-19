@@ -8,7 +8,7 @@
  * Contributors:
  *      Martin Weber - Initial implementation
  *******************************************************************************/
-package de.marw.cdt.cmake.core.internal.storage;
+package de.marw.cdt.cmake.core.storage;
 
 import java.util.Collection;
 

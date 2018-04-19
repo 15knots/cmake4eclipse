@@ -9,12 +9,14 @@
  *      Martin Weber - Initial implementation
  *******************************************************************************/
 
-package de.marw.cdt.cmake.core.internal;
+package de.marw.cdt.cmake.core;
 
 import static org.junit.Assert.*;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import de.marw.cdt.cmake.core.CmakeGenerator;
 
 /**
  * @author weber
@@ -31,7 +33,7 @@ public class CmakeGeneratorTest {
 
   /**
    * Test method for
-   * {@link de.marw.cdt.cmake.core.internal.CmakeGenerator#getParallelBuildArg(int)}.
+   * {@link de.marw.cdt.cmake.core.CmakeGenerator#getParallelBuildArg(int)}.
    */
   @Test
   public void testGetParallelBuildArg_Off() {
@@ -47,7 +49,7 @@ public class CmakeGeneratorTest {
 
   /**
    * Test method for
-   * {@link de.marw.cdt.cmake.core.internal.CmakeGenerator#getParallelBuildArg(int)}.
+   * {@link de.marw.cdt.cmake.core.CmakeGenerator#getParallelBuildArg(int)}.
    */
   @Test
   public void testGetParallelBuildArg_Unlimited() {
@@ -63,7 +65,7 @@ public class CmakeGeneratorTest {
 
   /**
    * Test method for
-   * {@link de.marw.cdt.cmake.core.internal.CmakeGenerator#getParallelBuildArg(int)}.
+   * {@link de.marw.cdt.cmake.core.CmakeGenerator#getParallelBuildArg(int)}.
    */
   @Test
   public void testGetParallelBuildArg_User() {

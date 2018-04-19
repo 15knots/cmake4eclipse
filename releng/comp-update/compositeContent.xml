@@ -9,7 +9,7 @@
   </properties>
   <children size='3'>
     <child
-      location='jar:https://dl.bintray.com/15knots/p2-zip/cmake4eclipse-1.11.0.zip!/' />
+      location='jar:https://dl.bintray.com/dnoliver/p2-repos/cmake4eclipse-1.11.0.zip!/' />
     <child
       location='jar:https://dl.bintray.com/15knots/p2-zip/cmake4eclipse-1.9.1.zip!/' />
     <child

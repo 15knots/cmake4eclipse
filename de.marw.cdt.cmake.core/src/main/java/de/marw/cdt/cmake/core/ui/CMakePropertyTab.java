@@ -41,8 +41,8 @@ import org.eclipse.ui.dialogs.FilteredResourcesSelectionDialog;
 import org.eclipse.ui.dialogs.NewFolderDialog;
 
 import de.marw.cdt.cmake.core.CdtPlugin;
-import de.marw.cdt.cmake.core.internal.settings.CMakePreferences;
-import de.marw.cdt.cmake.core.internal.settings.ConfigurationManager;
+import de.marw.cdt.cmake.core.settings.CMakePreferences;
+import de.marw.cdt.cmake.core.settings.ConfigurationManager;
 
 /**
  * UI to control general project properties for cmake. This tab is responsible
