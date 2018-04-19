@@ -24,10 +24,10 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 
 import de.marw.cdt.cmake.core.CdtPlugin;
-import de.marw.cdt.cmake.core.internal.settings.CMakePreferences;
-import de.marw.cdt.cmake.core.internal.settings.CmakeDefine;
-import de.marw.cdt.cmake.core.internal.settings.CmakeUnDefine;
-import de.marw.cdt.cmake.core.internal.settings.ConfigurationManager;
+import de.marw.cdt.cmake.core.settings.CMakePreferences;
+import de.marw.cdt.cmake.core.settings.CmakeDefine;
+import de.marw.cdt.cmake.core.settings.CmakeUnDefine;
+import de.marw.cdt.cmake.core.settings.ConfigurationManager;
 
 /**
  * UI to control general project properties for cmake. This tab is responsible

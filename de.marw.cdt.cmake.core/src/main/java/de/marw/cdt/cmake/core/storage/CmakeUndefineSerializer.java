@@ -8,11 +8,11 @@
  * Contributors:
  *      Martin Weber - Initial implementation
  *******************************************************************************/
-package de.marw.cdt.cmake.core.internal.storage;
+package de.marw.cdt.cmake.core.storage;
 
 import org.eclipse.cdt.core.settings.model.ICStorageElement;
 
-import de.marw.cdt.cmake.core.internal.settings.CmakeUnDefine;
+import de.marw.cdt.cmake.core.settings.CmakeUnDefine;
 
 /**
  * Responsible for serialization/de-serialization of CmakeUndefine objects.
@@ -32,7 +32,7 @@ public class CmakeUndefineSerializer implements
   }
 
   /*-
-   * @see de.marw.cdt.cmake.core.internal.storage.StorageSerializer#fromStorage(org.eclipse.cdt.core.settings.model.ICStorageElement)
+   * @see de.marw.cdt.cmake.core.storage.StorageSerializer#fromStorage(org.eclipse.cdt.core.settings.model.ICStorageElement)
    */
   @Override
   public CmakeUnDefine fromStorage(ICStorageElement item) {

@@ -26,7 +26,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 import de.marw.cdt.cmake.core.CdtPlugin;
-import de.marw.cdt.cmake.core.internal.settings.CmakeUnDefine;
+import de.marw.cdt.cmake.core.settings.CmakeUnDefine;
 
 /**
  * The dialog used to create or edit a cmake undefine.

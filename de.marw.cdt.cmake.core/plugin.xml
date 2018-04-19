@@ -10,7 +10,7 @@
       <builder
             autoBuildTarget="all"
             buildRunner="org.eclipse.cdt.managedbuilder.core.ExternalBuildRunner"
-            buildfileGenerator="de.marw.cdt.cmake.core.internal.BuildscriptGenerator"
+            buildfileGenerator="de.marw.cdt.cmake.core.BuildscriptGenerator"
             cleanBuildTarget="clean"
             command="make"
             errorParsers="org.eclipse.cdt.core.MakeErrorParser"
@@ -24,8 +24,8 @@
       </builder>
          <builder
                autoBuildTarget="all"
-               buildRunner="de.marw.cdt.cmake.core.internal.CmakeBuildRunner"
-               buildfileGenerator="de.marw.cdt.cmake.core.internal.BuildscriptGenerator"
+               buildRunner="de.marw.cdt.cmake.core.CmakeBuildRunner"
+               buildfileGenerator="de.marw.cdt.cmake.core.BuildscriptGenerator"
                cleanBuildTarget="clean"
                command="CMAKE_BUILD_TOOL"
                id="de.marw.cdt.cmake.core.genscriptbuilder"
@@ -39,7 +39,7 @@
          <!--
       <toolChain
             archList="all"
-            configurationMacroSupplier="de.marw.cdt.cmake.core.internal.CmakeOsMacroSupplier"
+            configurationMacroSupplier="de.marw.cdt.cmake.core.CmakeOsMacroSupplier"
             id="de.marw.cdt.cmake.core.toolChain"
             name="CMake portable"
             osList="all">
@@ -51,12 +51,12 @@
          </targetPlatform>
          <builder
                arguments="${cmake_build_cmd_earg}"
-               buildRunner="de.marw.cdt.cmake.core.internal.CmakeBuildRunner"
+               buildRunner="de.marw.cdt.cmake.core.CmakeBuildRunner"
                command="${cmake_build_cmd}"
                id="de.marw.cdt.cmake.core.genscriptbuilder"
                ignoreErrCmd="${cmake_ignore_err_option}"
                name="CMake Builder (portable)"
-               reservedMacroNameSupplier="de.marw.cdt.cmake.core.internal.CmakeOsMacroSupplier"
+               reservedMacroNameSupplier="de.marw.cdt.cmake.core.CmakeOsMacroSupplier"
                superClass="de.marw.cdt.cmake.core.genmakebuilder">
          </builder>
          <supportedProperties>
