@@ -119,7 +119,7 @@ public class CmakeBuildOutputParser extends LanguageSettingsSerializableProvider
     SimpleCMakeCacheTxt cmCache = null;
 
     // If getBuilderCWD() returns a workspace relative path, it is garbled.
-    // If garbled, make sure de.marw.cdt.cmake.core.internal.BuildscriptGenerator.getBuildWorkingDir()
+    // If garbled, make sure de.marw.cdt.cmake.core.BuildscriptGenerator.getBuildWorkingDir()
     // returns a full, absolute path relative to the workspace.
     final IPath builderCWD = cfgd.getBuildSetting().getBuilderCWD();
 

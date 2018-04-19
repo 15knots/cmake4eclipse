@@ -8,33 +8,28 @@
  * Contributors:
  *      Martin Weber - Initial implementation
  *******************************************************************************/
-package de.marw.cdt.cmake.core.internal.settings;
+package de.marw.cdt.cmake.core.settings;
 
+import de.marw.cdt.cmake.core.CmakeGenerator;
 
 /**
  * Preferences that override/augment the generic properties when running under
- * Linux.
+ * Windows.
  *
  * @author Martin Weber
  */
-public class LinuxPreferences extends AbstractOsPreferences {
+public class WindowsPreferences extends AbstractOsPreferences {
 
-  private static final String ELEM_OS = "linux";
+  private static final String ELEM_OS = "win32";
 
-  /**
-   * Creates a new object, initialized with all default values.
-   */
-  public LinuxPreferences() {
+  /** Overridden to set a sensible generator. */
+  public void reset() {
+    super.reset();
+    setGenerator(CmakeGenerator.MinGWMakefiles);
   }
 
-//  /** Overridden to set a sensible generator. */
-//  public void reset() {
-//    super.reset();
-//    setGenerator( CmakeGenerator.UnixMakefiles);
-//  }
-
   /**
-   * @return the String "linux".
+   * @return the String "win32".
    */
   protected String getStorageElementName() {
     return ELEM_OS;

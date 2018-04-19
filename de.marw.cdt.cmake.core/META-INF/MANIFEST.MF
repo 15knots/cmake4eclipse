@@ -42,5 +42,7 @@ Import-Package: org.eclipse.cdt.core,
  org.osgi.framework
 Bundle-Activator: de.marw.cdt.cmake.core.CdtPlugin
 Export-Package: de.marw.cdt.cmake.core,
- de.marw.cdt.cmake.core.cmakecache
+ de.marw.cdt.cmake.core.cmakecache,
+ de.marw.cdt.cmake.core.settings,
+ de.marw.cdt.cmake.core.storage
 Require-Bundle: org.eclipse.ui

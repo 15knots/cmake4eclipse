@@ -8,7 +8,7 @@
  * Contributors:
  *      Martin Weber - Initial implementation
  *******************************************************************************/
-package de.marw.cdt.cmake.core.internal.settings;
+package de.marw.cdt.cmake.core.settings;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,10 +16,10 @@ import java.util.List;
 import org.eclipse.cdt.core.settings.model.ICStorageElement;
 import org.eclipse.core.runtime.Platform;
 
-import de.marw.cdt.cmake.core.internal.CmakeGenerator;
-import de.marw.cdt.cmake.core.internal.storage.CmakeDefineSerializer;
-import de.marw.cdt.cmake.core.internal.storage.CmakeUndefineSerializer;
-import de.marw.cdt.cmake.core.internal.storage.Util;
+import de.marw.cdt.cmake.core.CmakeGenerator;
+import de.marw.cdt.cmake.core.storage.CmakeDefineSerializer;
+import de.marw.cdt.cmake.core.storage.CmakeUndefineSerializer;
+import de.marw.cdt.cmake.core.storage.Util;
 
 /**
  * Preferences that override/augment the generic properties when running under a

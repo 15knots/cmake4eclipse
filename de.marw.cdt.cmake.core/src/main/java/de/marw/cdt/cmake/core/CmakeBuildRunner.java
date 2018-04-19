@@ -8,7 +8,7 @@
  * Contributors:
  *      Martin Weber - Initial implementation
  *******************************************************************************/
-package de.marw.cdt.cmake.core.internal;
+package de.marw.cdt.cmake.core;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -52,13 +52,12 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.osgi.framework.Version;
 
-import de.marw.cdt.cmake.core.CdtPlugin;
 import de.marw.cdt.cmake.core.cmakecache.CMakeCacheFileParser;
 import de.marw.cdt.cmake.core.cmakecache.CMakeCacheFileParser.EntryFilter;
+import de.marw.cdt.cmake.core.settings.AbstractOsPreferences;
+import de.marw.cdt.cmake.core.settings.CMakePreferences;
+import de.marw.cdt.cmake.core.settings.ConfigurationManager;
 import de.marw.cdt.cmake.core.cmakecache.SimpleCMakeCacheEntry;
-import de.marw.cdt.cmake.core.internal.settings.AbstractOsPreferences;
-import de.marw.cdt.cmake.core.internal.settings.CMakePreferences;
-import de.marw.cdt.cmake.core.internal.settings.ConfigurationManager;
 
 /**
  * An ExternalBuildRunner that injects the build tool command to use and some of
@@ -157,7 +156,7 @@ public class CmakeBuildRunner extends ExternalBuildRunner {
      }
 
     // If getBuilderCWD() returns a workspace relative path, it gets garbled by CDT.
-    // If garbled, make sure de.marw.cdt.cmake.core.internal.BuildscriptGenerator.getBuildWorkingDir()
+    // If garbled, make sure de.marw.cdt.cmake.core.BuildscriptGenerator.getBuildWorkingDir()
     // returns a full, absolute path relative to the workspace.
     final IPath builderCWD = cfgd.getBuildSetting().getBuilderCWD();
 
