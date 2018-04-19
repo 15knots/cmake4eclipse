@@ -47,6 +47,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jetty.util.ajax.JSON;
+import org.w3c.dom.Element;
 
 import de.marw.cmake.CMakePlugin;
 
@@ -414,12 +415,23 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
            * the UI in the includes folder...
            */
           storage.setSettingEntries((String) null, cmdlineParser.getLanguageId(), entries);
+          // tell the CommandLauncherManager (since CDT 9.4) so it can translate paths from docker container
+          super.setSettingEntries(currentCfgDescription, null, cmdlineParser.getLanguageId(), entries);
           break;
         }
       }
       // attach settings to sourceFile resource...
       storage.setSettingEntries(sourceFile, cmdlineParser.getLanguageId(), entries);
     }
+  }
+
+
+  /* (non-Javadoc)
+   * @see org.eclipse.cdt.core.language.settings.providers.LanguageSettingsSerializableProvider#serializeEntries(org.w3c.dom.Element)
+   */
+  @Override
+  public void serializeEntries(Element elementProvider) {
+    // no language setting entries to serialize, since entries come from the compile_commands.json file
   }
 
   /*-
