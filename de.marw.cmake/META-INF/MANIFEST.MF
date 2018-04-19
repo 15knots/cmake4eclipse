@@ -4,7 +4,7 @@ Bundle-Name: %bundleName
 Bundle-Description: cmake4eclipse support for CDT Indexer (include path providers)
 Bundle-Copyright: 2013 Martin Weber
 Bundle-SymbolicName: de.marw.cmake;singleton:=true
-Bundle-Version: 1.6.0.qualifier
+Bundle-Version: 1.7.0.qualifier
 Bundle-Vendor: Martin Weber
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
@@ -17,6 +17,7 @@ Import-Package: de.marw.cdt.cmake.core.cmakecache,
  org.eclipse.cdt.core.model,
  org.eclipse.cdt.core.settings.model,
  org.eclipse.cdt.core.settings.model.util,
+ org.eclipse.cdt.managedbuilder.core,
  org.eclipse.cdt.ui,
  org.eclipse.cdt.ui.dialogs,
  org.eclipse.core.filesystem,
