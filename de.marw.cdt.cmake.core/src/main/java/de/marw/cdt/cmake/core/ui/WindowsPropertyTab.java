@@ -12,9 +12,9 @@ package de.marw.cdt.cmake.core.ui;
 
 import java.util.EnumSet;
 
-import de.marw.cdt.cmake.core.internal.CmakeGenerator;
-import de.marw.cdt.cmake.core.internal.settings.CMakePreferences;
-import de.marw.cdt.cmake.core.internal.settings.WindowsPreferences;
+import de.marw.cdt.cmake.core.CmakeGenerator;
+import de.marw.cdt.cmake.core.settings.CMakePreferences;
+import de.marw.cdt.cmake.core.settings.WindowsPreferences;
 
 /**
  * UI to control host Windows specific project properties and preferences for
@@ -32,7 +32,7 @@ public class WindowsPropertyTab extends
       CmakeGenerator.BorlandMakefiles, CmakeGenerator.WatcomWMake);
 
   /*-
-   * @see de.marw.cdt.cmake.core.ui.AbstractOsPropertyTab#getOsPreferences(de.marw.cdt.cmake.core.internal.CMakePreferences)
+   * @see de.marw.cdt.cmake.core.ui.AbstractOsPropertyTab#getOsPreferences(de.marw.cdt.cmake.core.settings.CMakePreferences)
    */
   @Override
   protected WindowsPreferences getOsPreferences(CMakePreferences prefs) {

@@ -33,8 +33,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 import de.marw.cdt.cmake.core.CdtPlugin;
-import de.marw.cdt.cmake.core.internal.settings.CmakeDefine;
-import de.marw.cdt.cmake.core.internal.settings.CmakeVariableType;
+import de.marw.cdt.cmake.core.settings.CmakeDefine;
+import de.marw.cdt.cmake.core.settings.CmakeVariableType;
 
 /**
  * The dialog used to create or edit a cmake define.
