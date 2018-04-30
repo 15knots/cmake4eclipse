@@ -345,6 +345,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     }
     // run cmake..
     final ICommandLauncher launcher = builder.getCommandLauncher();
+    launcher.setProject(project); // 9.4++ versions of CDT require this for docker
     launcher.showCommand(true);
     final Process proc =
         launcher.execute(new Path(cmd), argList.toArray(new String[argList.size()]), envp, buildDir, monitor);
