@@ -52,9 +52,11 @@ There is a run configuration for eclipse to invoke maven `build cmake4eclipse` p
 
 ---
 # Release Notes
-## Upcoming (2018-??-??)
+## 1.11.1 (2018-05-??)
 ### Changes
 - Eliminate duplicate mnemonics in UI.
+- Build in docker container: Fix NPE occurring in CDT 9.4+ with docker build launcher.
+- Build in docker container: let CDT copy header files back when building in a docker container.
 
 ## 1.11.0 (2018-03-12)
 ### Changes
