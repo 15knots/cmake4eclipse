@@ -113,16 +113,10 @@ public class CmakeBuildRunner extends ExternalBuildRunner {
       // try to get CMAKE_BUILD_TOOL entry from CMakeCache.txt...
       final CmakeGenerator generator = osPrefs.getGenerator();
       String buildscriptProcessorCmd = getCommandFromCMakeCache(cfgd,
-          generator != osPrefs.getGeneratedWith());
+          generator != osPrefs.getGeneratedWith(), project, markerGenerator);
       if (buildscriptProcessorCmd == null) {
         // actually this should not happen, since cmake will abort if it cannot determine
         // the build tool,.. but the variable name might change in future
-        final ProblemMarkerInfo pmi = new ProblemMarkerInfo(
-            ResourcesPlugin.getWorkspace().getRoot().getFolder(builderCWD), 0,
-            "No CMAKE_MAKE_PROGRAM entry in file CMakeCache.txt, unable to build project",
-            IMarkerGenerator.SEVERITY_ERROR_BUILD, null);
-        pmi.setType(MARKER_ID);
-        markerGenerator.addMarker(pmi);
         return false;
       }
       builder = new CmakeBuildToolInjectorBuilder(builder,
@@ -143,13 +137,17 @@ public class CmakeBuildRunner extends ExternalBuildRunner {
    * @param forceParsing
    *          {@code true} to force parsing of the cmake cache file without
    *          checking its time-stamp, otherwise {@code false}.
+   * @param markerGenerator
+   *          used to create error markers
+   * @param project
+   *          the current project, used to create error markers
    * @return a value for the {@code "cmake_build_cmd"} macro or {@code null}, if
    *         none could be determined
    * @throws CoreException
    *           if an IOExceptions occurs when reading the cmake cache file
    */
    private String getCommandFromCMakeCache(ICConfigurationDescription cfgd,
-       boolean forceParsing) throws CoreException {
+       boolean forceParsing, IProject project, IMarkerGenerator markerGenerator) throws CoreException {
      CMakeCacheFileInfo fi = map.get(cfgd.getId());
      if (fi == null) {
        fi = new CMakeCacheFileInfo();
@@ -162,13 +160,12 @@ public class CmakeBuildRunner extends ExternalBuildRunner {
     final IPath builderCWD = cfgd.getBuildSetting().getBuilderCWD();
 
     IPath location = ResourcesPlugin.getWorkspace().getRoot().getFolder(builderCWD).getLocation();
-// cannot be null, according to javadoc of Resource#getLocation()
-//    if (location == null) {
-//      return null;
-//    }
-    final File file = location.append("CMakeCache.txt").toFile();
+    File file= null;
+    if (location != null) {
+      file = location.append("CMakeCache.txt").toFile();
+    }
 
-    if (file.isFile()) {
+    if (file != null && file.isFile()) {
       final long lastModified = file.lastModified();
       if (forceParsing || fi.cachedCmakeBuildTool == null || fi.cmCacheFileLastModified == 0
           || lastModified > fi.cmCacheFileLastModified) {
@@ -192,6 +189,15 @@ public class CmakeBuildRunner extends ExternalBuildRunner {
           if (iter.hasNext()) {
             // got a CMAKE_BUILD_TOOL entry, update internally cached value
             fi.cachedCmakeBuildTool = iter.next().getValue();
+          } else {
+              // actually this should not happen, since cmake will abort if it cannot determine
+              // the build tool,.. but the variable name might change in future
+              final ProblemMarkerInfo pmi = new ProblemMarkerInfo(
+                  ResourcesPlugin.getWorkspace().getRoot().getFolder(builderCWD), 0,
+                  "No CMAKE_MAKE_PROGRAM entry in file CMakeCache.txt, unable to build project",
+                  IMarkerGenerator.SEVERITY_ERROR_BUILD, null);
+              pmi.setType(MARKER_ID);
+              markerGenerator.addMarker(pmi);
           }
         } catch (IOException ex) {
           throw new CoreException(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID,
@@ -205,6 +211,12 @@ public class CmakeBuildRunner extends ExternalBuildRunner {
           }
         }
       }
+    } else {
+      // CMakeCache.txt does not exist
+      final ProblemMarkerInfo pmi = new ProblemMarkerInfo(project, 0,
+          "File CMakeCache.txt does not exist, unable to build project", IMarkerGenerator.SEVERITY_ERROR_BUILD, null);
+      pmi.setType(MARKER_ID);
+      markerGenerator.addMarker(pmi);
     }
     return fi.cachedCmakeBuildTool;
   }
