@@ -264,12 +264,14 @@ public class CmakeBuildRunner extends ExternalBuildRunner {
     @Override
     public IPath getBuildCommand() {
       return new Path(this.delegate.getBuildCommand().toString()
-          .replaceAll("CMAKE_BUILD_TOOL", cmakeBuildTool));
+          .replace("CMAKE_BUILD_TOOL", cmakeBuildTool));
     }
 
     @Override
     public String getBuildArguments() {
-      String args = "";
+      String arg0 = delegate.getBuildArguments(); // macros are expanded
+      // remove placeholders required by CDT (specified in plugin.xml)
+      String args = arg0.replace("$<make4eclipse_dyn>", "");
       // Handle ignore errors option...
       if (!delegate.isStopOnError()) {
         final String ignoreErrOption = generator.getIgnoreErrOption();
