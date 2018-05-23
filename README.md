@@ -52,7 +52,7 @@ There is a run configuration for eclipse to invoke maven `build cmake4eclipse` p
 
 ---
 # Release Notes
-## 1.11.2 (2018-05-??)
+## 1.11.2 (2018-05-23)
 ### Changes
 - Fixed #78: NPE when running builder 'CDT Builder' on project.
 - Fixed #80: Custom build command is not used verbatim.
