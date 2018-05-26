@@ -27,17 +27,17 @@ import org.eclipse.core.runtime.Path;
  */
 class ToolArgumentParsers {
 
-  /** matches a macro name, with optional macro argument list */
-  private static final String REGEX_MACRO_NAME = "([\\w$]+)(?:\\(([\\w$, ]+)\\))?";
+  /** matches a macro name, with optional macro parameter list */
+  private static final String REGEX_MACRO_NAME = "([\\w$]+)(?:\\([\\w$, ]*?\\))?";
   /**
    * matches a macro name, skipping leading whitespace. Name in matcher group 1
    */
   private static final String REGEX_MACRO_NAME_SKIP_LEADING_WS = "\\s*" + REGEX_MACRO_NAME;
   /**
-   * matches a macro name with quotes, skipping leading whitespace. Name in
-   * matcher group 2
+   * matches a macro argument in quotes, skipping leading whitespace. Quote character in matcher group 1,
+   * Name in matcher group 2
    */
-  private static final String REGEX_MACRO_NAME_QUOTED__SKIP_LEADING_WS = "\\s*([\"'])" + REGEX_MACRO_NAME;
+  private static final String REGEX_MACRO_ARG_QUOTED__SKIP_LEADING_WS = "\\s*([\"'])" + REGEX_MACRO_NAME;
   /** matches an include path with quoted directory. Name in matcher group 2 */
   private static final String REGEX_INCLUDEPATH_QUOTED_DIR = "\\s*([\"'])(.+?)\\1";
   /**
@@ -90,6 +90,10 @@ class ToolArgumentParsers {
    * @author Martin Weber
    */
   static class NameValueOptionMatcher extends NameOptionMatcher {
+    /**
+     * the number of the value group, or {@code -1} for a pattern that does not
+     * recognize a macro value
+     */
     private final int valueGroup;
 
     /**
@@ -106,6 +110,8 @@ class ToolArgumentParsers {
      * @param pattern
      * @param nameGroup
      * @param valueGroup
+     *          the number of the value group, or {@code -1} for a pattern that
+     *          does not recognize a macro value
      */
     public NameValueOptionMatcher(String pattern, int nameGroup, int valueGroup) {
       super(pattern, nameGroup);
@@ -136,7 +142,7 @@ class ToolArgumentParsers {
         matcher.reset(args);
         if (matcher.lookingAt()) {
           final String name = matcher.group(oMatcher.nameGroup);
-          final String value = matcher.group(oMatcher.valueGroup);
+          final String value = oMatcher.valueGroup== -1? null: matcher.group(oMatcher.valueGroup);
           final ICLanguageSettingEntry entry = CDataUtil.createCMacroEntry(name, value,
               ICSettingEntry.BUILTIN | ICSettingEntry.READONLY);
           returnedEntries.add(entry);
@@ -219,14 +225,25 @@ class ToolArgumentParsers {
   static class MacroDefine_C_POSIX extends MacroDefineGeneric implements IToolArgumentParser {
 
     private static final NameValueOptionMatcher[] optionMatchers = {
-        /* quoted value, whitespace in value, w/ macro arglist */
-        new NameValueOptionMatcher("-D" + REGEX_MACRO_NAME_SKIP_LEADING_WS + "((?:=)([\"'])(.+?)\\4)", 1, 5),
-        /* w/ macro arglist */
-        new NameValueOptionMatcher("-D" + REGEX_MACRO_NAME_SKIP_LEADING_WS + "((?:=)(\\S+))?", 1, 4),
-        /* quoted name, whitespace in value, w/ macro arglist */
-        new NameValueOptionMatcher("-D" + REGEX_MACRO_NAME_QUOTED__SKIP_LEADING_WS + "((?:=)(.+?))?\\1", 2, 5),
-        /* w/ macro arglist, shell escapes \' and \" in value */
-        new NameValueOptionMatcher("-D" + REGEX_MACRO_NAME_SKIP_LEADING_WS + "(?:=)((\\\\([\"']))(.*?)\\2)", 1, 2) };
+        /* string or char literal value, with whitespace in value and escaped quotes */
+        new NameValueOptionMatcher("-D" + REGEX_MACRO_NAME_SKIP_LEADING_WS + "=("
+            + "([\"'])"  // the quote char in group 3
+            + "(?:" // non-capturing
+            + "\\\\\\\\" // the escaped escape char
+            + "|" // OR
+            + "\\\\\\3" // the escaped quote char
+            + "|" // OR
+            + "(?!\\3)."  // any character except the quote char
+            + ")*"  // zero or more times
+            + "\\3"  // the quote char
+            + ")", 1, 2),
+        /* macro name only, w/ optional macro arglist */
+        new NameValueOptionMatcher("-D" + REGEX_MACRO_NAME_SKIP_LEADING_WS + "=((\\S+))", 1, 3),
+        /* separated, quoted name-value arg, whitespace in value */
+        new NameValueOptionMatcher("-D" + REGEX_MACRO_ARG_QUOTED__SKIP_LEADING_WS + "=((.+?))\\1", 2, 4),
+        /* macro name only */
+        new NameValueOptionMatcher("-D" + REGEX_MACRO_NAME_SKIP_LEADING_WS, 1, -1),
+        };
 
     /*-
      * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgs(java.lang.String)
@@ -339,7 +356,7 @@ class ToolArgumentParsers {
         /* w/ macro arglist */
         new NameValueOptionMatcher("/D" + REGEX_MACRO_NAME_SKIP_LEADING_WS + "((?:=)(\\S+))?", 1, 4),
         /* quoted name, whitespace in value, w/ macro arglist */
-        new NameValueOptionMatcher("/D" + REGEX_MACRO_NAME_QUOTED__SKIP_LEADING_WS + "((?:=)(.+?))?\\1", 2, 5),
+        new NameValueOptionMatcher("/D" + REGEX_MACRO_NAME_SKIP_LEADING_WS + "((?:=)(.+?))?\\1", 2, 5),
         /* w/ macro arglist, shell escapes \' and \" in value */
         new NameValueOptionMatcher("/D" + REGEX_MACRO_NAME_SKIP_LEADING_WS + "(?:=)((\\\\([\"']))(.*?)\\2)", 1, 2), };
 
