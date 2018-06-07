@@ -50,6 +50,7 @@ import org.eclipse.jetty.util.ajax.JSON;
 import org.w3c.dom.Element;
 
 import de.marw.cmake.CMakePlugin;
+import de.marw.cmake.cdt.language.settings.providers.ParserDetection.MarchResult;
 
 /**
  * A ILanguageSettingsProvider that parses the file 'compile_commands.json'
@@ -337,38 +338,38 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
    * @param line
    *          the command line to process
    *
-   * @return {@code null} if none of the detectors matches the tool name in the
+   * @return {@code null} if none of the detectors matched the tool name in the
    *         specified command-line string. Otherwise, if the tool name matches,
-   *         a {@code ParserDetectionResult} holding the remaining command-line
-   *         string (without the portion that matched) is returned.
+   *         a {@code ParserDetectionResult} holding the de-composed command-line
+   *         is returned.
    */
   private ParserDetection.ParserDetectionResult fastDetermineDetector(String line) {
     // try last known matching detector first...
     if (lastDetector != null) {
-      String remaining = null;
+      MarchResult cmdline = null;
       final ParserDetection.ParserDetector detector = lastDetector.getDetector();
       switch (lastDetector.getHow()) {
       case BASENAME:
-        remaining = detector.basenameMatches(line);
+        cmdline = detector.basenameMatches(line);
         break;
       case WITH_EXTENSION:
-        remaining = ((ParserDetection.ParserDetectorExt) detector).basenameWithExtensionMatches(line);
+        cmdline = ((ParserDetection.ParserDetectorExt) detector).basenameWithExtensionMatches(line);
         break;
       case WITH_VERSION:
         if (isVersionPatternEnabled()) {
-          remaining = detector.basenameWithVersionMatches(line, getVersionPattern());
+          cmdline = detector.basenameWithVersionMatches(line, getVersionPattern());
         }
         break;
       case WITH_VERSION_EXTENSION:
         if (isVersionPatternEnabled()) {
-          remaining = ((ParserDetection.ParserDetectorExt) detector).basenameWithVersionAndExtensionMatches(line, getVersionPattern());
+          cmdline = ((ParserDetection.ParserDetectorExt) detector).basenameWithVersionAndExtensionMatches(line, getVersionPattern());
         }
         break;
       default:
         break;
       }
-      if (remaining != null) {
-        return new ParserDetection.ParserDetectionResult(lastDetector, remaining);
+      if (cmdline != null) {
+        return new ParserDetection.ParserDetectionResult(lastDetector, cmdline);
       } else {
         lastDetector = null; // invalidate last working detector
       }

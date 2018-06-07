@@ -181,17 +181,17 @@ class ParserDetection {
    *          version suffix
    * @return {@code null} if none of the detectors matches the tool name in the
    *         specified command-line string. Otherwise, if the tool name matches,
-   *         a {@code ParserDetectionResult} holding the remaining command-line
-   *         string (without the portion that matched) is returned.
+   *         a {@code ParserDetectionResult} holding the de-compose command-line
+   *         is returned.
    */
   private static ParserDetectionResult determineDetector(String commandLine, List<ParserDetector> detectors,
       String versionSuffixRegex) {
-    String remaining;
+    MarchResult cmdline;
     // try basenames
     for (ParserDetector pd : detectors) {
-      if ((remaining = pd.basenameMatches(commandLine)) != null) {
+      if ((cmdline = pd.basenameMatches(commandLine)) != null) {
         return new ParserDetectionResult(new DetectorWithMethod(pd, DetectorWithMethod.DetectionMethod.BASENAME),
-            remaining);
+            cmdline);
       }
     }
     if (versionSuffixRegex != null) {
@@ -199,27 +199,27 @@ class ParserDetection {
       // String versionPattern = getVersionPattern();
       // try with version pattern
       for (ParserDetector pd : detectors) {
-        if ((remaining = pd.basenameWithVersionMatches(commandLine, versionSuffixRegex)) != null) {
+        if ((cmdline = pd.basenameWithVersionMatches(commandLine, versionSuffixRegex)) != null) {
           return new ParserDetectionResult(new DetectorWithMethod(pd, DetectorWithMethod.DetectionMethod.WITH_VERSION),
-              remaining);
+              cmdline);
         }
       }
     }
     // try with extension
     for (ParserDetector pd : detectors) {
       if (pd instanceof ParserDetectorExt
-          && (remaining = ((ParserDetectorExt) pd).basenameWithExtensionMatches(commandLine)) != null) {
+          && (cmdline = ((ParserDetectorExt) pd).basenameWithExtensionMatches(commandLine)) != null) {
         return new ParserDetectionResult(new DetectorWithMethod(pd, DetectorWithMethod.DetectionMethod.WITH_EXTENSION),
-            remaining);
+            cmdline);
       }
     }
     if (versionSuffixRegex != null) {
       // try with extension and version
       for (ParserDetector pd : detectors) {
-        if (pd instanceof ParserDetectorExt && (remaining = ((ParserDetectorExt) pd)
+        if (pd instanceof ParserDetectorExt && (cmdline = ((ParserDetectorExt) pd)
             .basenameWithVersionAndExtensionMatches(commandLine, versionSuffixRegex)) != null) {
           return new ParserDetectionResult(
-              new DetectorWithMethod(pd, DetectorWithMethod.DetectionMethod.WITH_VERSION_EXTENSION), remaining);
+              new DetectorWithMethod(pd, DetectorWithMethod.DetectionMethod.WITH_VERSION_EXTENSION), cmdline);
         }
       }
     }
@@ -340,12 +340,11 @@ class ParserDetection {
      * @param commandLine
      *          the command line to match
      *
-     * @return {@code null} if the matcher does not matches the tool name in the
-     *         command-line string. Otherwise, if the tool name matches, the
-     *         remaining command-line string (without the portion that matched)
-     *         is returned.
+     * @return {@code null} if the matcher did not match the tool name in the
+     *         command-line string. Otherwise, if the tool name matches, a
+     *         MarchResult holding the de-composed command-line is returned.
      */
-    public String basenameMatches(String commandLine) {
+    public MarchResult basenameMatches(String commandLine) {
       return matcherMatches(toolNameMatcher, commandLine);
     }
 
@@ -361,12 +360,11 @@ class ParserDetection {
      *          a regular expression that matches the version string in the name
      *          of the tool to detect.
      *
-     * @return {@code null} if the matcher does not matches the tool name in the
-     *         command-line string. Otherwise, if the tool name matches, the
-     *         remaining command-line string (without the portion that matched)
-     *         is returned.
+     * @return {@code null} if the matcher did not match the tool name in the
+     *         command-line string. Otherwise, if the tool name matches, a
+     *         MarchResult holding the de-composed command-line is returned.
      */
-    public String basenameWithVersionMatches(String commandLine, String versionRegex) {
+    public MarchResult basenameWithVersionMatches(String commandLine, String versionRegex) {
       Matcher matcher = Pattern.compile(REGEX_CMD_HEAD + basenameRegex + versionRegex + REGEX_CMD_TAIL).matcher("");
       return matcherMatches(matcher, commandLine);
     }
@@ -377,20 +375,20 @@ class ParserDetection {
      * of the command-line are returned.
      *
      * @param matcher
-     *          the matcher that performs the mathc a regular expression that
+     *          the matcher that performs the match a regular expression that
      *          matches the version string in the name of the tool to detect.
      * @param commandLine
      *          the command-line to match
      *
-     * @return {@code null} if the matcher does not matches the tool name in the
-     *         command-line string. Otherwise, if the tool name matches, the
-     *         remaining command-line string (without the portion that matched)
-     *         is returned.
+     * @return {@code null} if the matcher did not match the tool name in the
+     *         command-line string. Otherwise, if the tool name matches, a
+     *         MarchResult holding the de-composed command-line is returned.
      */
-    protected final String matcherMatches(Matcher matcher, String commandLine) {
+    protected final MarchResult matcherMatches(Matcher matcher, String commandLine) {
       matcher.reset(commandLine);
       if (matcher.lookingAt()) {
-        return commandLine.substring(matcher.end());
+        return new MarchResult(commandLine.substring(matcher.start(), matcher.end()).trim(),
+            commandLine.substring(matcher.end()));
       }
       return null;
     }
@@ -458,12 +456,11 @@ class ParserDetection {
      *
      * @param commandLine
      *          the command-line to match
-     * @return {@code null} if the matcher does not matches the tool name in the
-     *         command-line string. Otherwise, if the tool name matches, the
-     *         remaining command-line string (without the portion that matched)
-     *         is returned.
+     * @return {@code null} if the matcher did not match the tool name in the
+     *         command-line string. Otherwise, if the tool name matches, a
+     *         MarchResult holding the de-composed command-line is returned.
      */
-    public String basenameWithExtensionMatches(String commandLine) {
+    public MarchResult basenameWithExtensionMatches(String commandLine) {
       return matcherMatches(toolNameMatcherExt, commandLine);
     }
 
@@ -479,12 +476,11 @@ class ParserDetection {
      *          a regular expression that matches the version string in the name
      *          of the tool to detect.
      *
-     * @return {@code null} if the matcher does not matches the tool name in the
-     *         command-line string. Otherwise, if the tool name matches, the
-     *         remaining command-line string (without the portion that matched)
-     *         is returned.
+     * @return {@code null} if the matcher did not match the tool name in the
+     *         command-line string. Otherwise, if the tool name matches, a
+     *         MarchResult holding the de-composed command-line is returned.
      */
-    public String basenameWithVersionAndExtensionMatches(String commandLine, String versionRegex) {
+    public MarchResult basenameWithVersionAndExtensionMatches(String commandLine, String versionRegex) {
       String head = matchBackslash ? REGEX_CMD_HEAD_WIN : REGEX_CMD_HEAD;
       Matcher matcher = Pattern
           .compile(head + basenameRegex + versionRegex + Pattern.quote(".") + extensionRegex + REGEX_CMD_TAIL)
@@ -545,35 +541,70 @@ class ParserDetection {
 
   }
 
+  /** The result of matching a commandline string.
+   */
+  static class MarchResult {
+    private final String command;
+    private final String arguments;
+
+    /**
+     * @param command
+     *          the command from the command-line, without the argument string
+     * @param arguments
+     *          the remaining arguments from the command-line, without the
+     *          command
+     */
+    public MarchResult(String command, String arguments) {
+      this.command = command;
+      this.arguments = arguments;
+    }
+
+    /**
+     * Gets the command from the command-line, without the argument string.
+     */
+    public String getCommand() {
+      return this.command;
+    }
+
+    /**
+     * Gets the remaining arguments from the command-line, without the command.
+     */
+    public String getArguments() {
+      return this.arguments;
+    }
+  }
+
   // has package scope for unittest purposes
   static class ParserDetectionResult {
 
     private final DetectorWithMethod detectorWMethod;
-    /**
-     * the remaining arguments of the command-line, after the matcher has
-     * matched the tool name
-     */
-    private final String reducedCommandLine;
+    private final MarchResult commandLine;
 
     /**
      * @param detectorWMethod
      *          the ParserDetector that matched the name of the tool on a given
      *          command-line
-     * @param reducedCommandLine
-     *          the remaining arguments of the command-line, after the matcher
-     *          has matched the tool name
+     * @param commandLine
+     *          the de-composed command-line, after the matcher has matched the
+     *          tool name
      */
-    public ParserDetectionResult(DetectorWithMethod detectorWMethod, String reducedCommandLine) {
+    public ParserDetectionResult(DetectorWithMethod detectorWMethod, MarchResult commandLine) {
       this.detectorWMethod = detectorWMethod;
-      this.reducedCommandLine = reducedCommandLine;
+      this.commandLine = commandLine;
+    }
+
+    /** Gets the de-composed command-line.
+     */
+    public MarchResult getCommandLine() {
+      return commandLine;
     }
 
     /**
      * Gets the remaining arguments of the command-line, after the matcher has
-     * matched the tool name (i.e. without the portion that matched).
+     * matched the tool name (i.e. without the command).
      */
     public String getReducedCommandLine() {
-      return this.reducedCommandLine;
+      return this.commandLine.getArguments();
     }
 
     /**
