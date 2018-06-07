@@ -195,8 +195,6 @@ class ParserDetection {
       }
     }
     if (versionSuffixRegex != null) {
-      // isVersionPatternEnabled()) {
-      // String versionPattern = getVersionPattern();
       // try with version pattern
       for (ParserDetector pd : detectors) {
         if ((cmdline = pd.basenameWithVersionMatches(commandLine, versionSuffixRegex)) != null) {
