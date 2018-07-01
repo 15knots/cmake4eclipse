@@ -170,7 +170,7 @@ public class BuiltinSpecsDetector {
     case GCC_MAYBE:
       return Arrays.asList("-E", "-P", "-dM", "-Wp,-v");
     case NVCC:
-      return Arrays.asList("-E", "-Xcompiler", "-P", "-Xcompiler", "-dD", "-Xcompiler", "-v");
+      return Arrays.asList("-E", "-Xcompiler", "-P", "-Xcompiler", "-dM", "-Xcompiler", "-v");
     case ICC:
       return Arrays.asList("-EP", "-dM", "-H");
     case CL:

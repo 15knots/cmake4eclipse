@@ -24,20 +24,20 @@ public enum BuiltinDetectionType {
    */
   GCC,
   /**
-   * 'cc{@link #clone()}, but may be a GNU C or C++ compatible compiler, (includes clang): -E -P -dM for macros, -Wp,-v
+   * 'cc, but may be a GNU C or C++ compatible compiler, (includes clang): -E -P -dM for macros, -Wp,-v
    * for include paths
    */
   GCC_MAYBE,
   /**
-   * NVidia CUDA compiler: -E -Xcompiler -P -Xcompiler -dD for macros, -Xcompiler -v for include paths
+   * NVidia CUDA compiler: -E -Xcompiler -P -Xcompiler -dM for macros, -Xcompiler -v for include paths
    */
   NVCC,
   /**
-   * Intel C or C++ compatible compiler: -EP -dM for macros, -H for include paths
+   * Intel C or C++ compatible compiler: -EP -dM for macros, -H for include FILES. NOTE: Windows: /QdM.
    */
   ICC,
   /**
-   * ms C or C++ compiler: /nologo /EP /dM for macros
+   * ms C or C++ compiler: /nologo /EP? /dM? for macros. (Reserved, if someone finds out the proper options)
    */
   CL,
   /**
