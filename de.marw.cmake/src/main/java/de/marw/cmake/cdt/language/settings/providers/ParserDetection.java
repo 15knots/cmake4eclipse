@@ -22,12 +22,13 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 import de.marw.cmake.CMakePlugin;
+import de.marw.cmake.cdt.language.settings.providers.builtins.BuiltinDetectionType;
 
 /**
  * Utility classes and methods to detect a parser for a compiler given on a
  * command-line string.
  *
- * @author weber
+ * @author Martin Weber
  *
  */
 class ParserDetection {
@@ -53,66 +54,82 @@ class ParserDetection {
         // not defined by POSIX, but does not harm..
         new ToolArgumentParsers.SystemIncludePath_C() };
     // POSIX compatible C compilers =================================
-    final ToolCommandlineParser cc = new ToolCommandlineParser("org.eclipse.cdt.core.gcc",
-        new ResponseFileArgumentParsers.At(), posix_cc_args);
-    parserDetectors.add(new ParserDetector("cc", cc));
-    parserDetectors.add(new ParserDetectorExt("cc", "exe", cc));
-    parserDetectors.add(new ParserDetector("gcc", cc));
-    parserDetectors.add(new ParserDetectorExt("cc", "exe", cc));
-    parserDetectors.add(new ParserDetector("clang", cc));
-    parserDetectors.add(new ParserDetectorExt("clang", "exe", cc));
-
+    {
+      final ToolCommandlineParser cc = new ToolCommandlineParser("org.eclipse.cdt.core.gcc",
+          new ResponseFileArgumentParsers.At(), BuiltinDetectionType.GCC_MAYBE, posix_cc_args);
+      parserDetectors.add(new ParserDetector("cc", cc));
+      parserDetectors.add(new ParserDetectorExt("cc", "exe", cc));
+    }
     // POSIX compatible C++ compilers ===============================
-    final ToolCommandlineParser cxx = new ToolCommandlineParser("org.eclipse.cdt.core.g++",
-        new ResponseFileArgumentParsers.At(), posix_cc_args);
-    parserDetectors.add(new ParserDetector("c\\+\\+", cxx));
-    parserDetectors.add(new ParserDetectorExt("c\\+\\+", "exe", cxx));
-    parserDetectors.add(new ParserDetector("g\\+\\+", cxx));
-    parserDetectors.add(new ParserDetectorExt("g\\+\\+", "exe", cxx));
-    parserDetectors.add(new ParserDetector("clang\\+\\+", cxx));
-    parserDetectors.add(new ParserDetectorExt("clang\\+\\+", "exe", cxx));
+    {
+      final ToolCommandlineParser cxx = new ToolCommandlineParser("org.eclipse.cdt.core.g++",
+          new ResponseFileArgumentParsers.At(), BuiltinDetectionType.GCC_MAYBE, posix_cc_args);
+      parserDetectors.add(new ParserDetector("c\\+\\+", cxx));
+      parserDetectors.add(new ParserDetectorExt("c\\+\\+", "exe", cxx));
+    }
 
-    // GNU C and C++ cross compilers, e.g. arm-none-eabi-gcc ====
-    parserDetectors.add(new ParserDetector(".+-gcc", cc));
-    parserDetectors.add(new ParserDetectorExt(".+-gcc", "exe", cc));
-    parserDetectors.add(new ParserDetector(".+-g\\+\\+", cxx));
-    parserDetectors.add(new ParserDetectorExt(".+-g\\+\\+", "exe", cxx));
-
+    // GNU C compatible compilers ====
+    {
+      final ToolCommandlineParser gcc = new ToolCommandlineParser("org.eclipse.cdt.core.gcc",
+          new ResponseFileArgumentParsers.At(), BuiltinDetectionType.GCC, posix_cc_args);
+      parserDetectors.add(new ParserDetector("gcc", gcc));
+      parserDetectors.add(new ParserDetectorExt("gcc", "exe", gcc));
+      parserDetectors.add(new ParserDetector("clang", gcc));
+      parserDetectors.add(new ParserDetectorExt("clang", "exe", gcc));
+      // cross compilers, e.g. arm-none-eabi-gcc ====
+      parserDetectors.add(new ParserDetector(".+-gcc", gcc));
+      parserDetectors.add(new ParserDetectorExt(".+-gcc", "exe", gcc));
+    }
+    // GNU C++ compatible compilers ====
+    {
+      final ToolCommandlineParser gxx = new ToolCommandlineParser("org.eclipse.cdt.core.g++",
+          new ResponseFileArgumentParsers.At(), BuiltinDetectionType.GCC, posix_cc_args);
+      parserDetectors.add(new ParserDetector("g\\+\\+", gxx));
+      parserDetectors.add(new ParserDetectorExt("g\\+\\+", "exe", gxx));
+      parserDetectors.add(new ParserDetector("clang\\+\\+", gxx));
+      parserDetectors.add(new ParserDetectorExt("clang\\+\\+", "exe", gxx));
+      // cross compilers, e.g. arm-none-eabi-gcc ====
+      parserDetectors.add(new ParserDetector(".+-g\\+\\+", gxx));
+      parserDetectors.add(new ParserDetectorExt(".+-g\\+\\+", "exe", gxx));
+    }
     // ms C + C++ compiler ==========================================
-    final IToolArgumentParser[] cl_cc_args = { new ToolArgumentParsers.IncludePath_C_CL(),
-        new ToolArgumentParsers.MacroDefine_C_CL(), new ToolArgumentParsers.MacroUndefine_C_CL() };
-    final ToolCommandlineParser cl = new ToolCommandlineParser("org.eclipse.cdt.core.gcc",
-        new ResponseFileArgumentParsers.At(), cl_cc_args);
-    parserDetectors.add(new ParserDetectorExt("cl", "exe", cl));
-
+    {
+      final IToolArgumentParser[] cl_cc_args = { new ToolArgumentParsers.IncludePath_C_CL(),
+          new ToolArgumentParsers.MacroDefine_C_CL(), new ToolArgumentParsers.MacroUndefine_C_CL() };
+      final ToolCommandlineParser cl = new ToolCommandlineParser("org.eclipse.cdt.core.gcc",
+          new ResponseFileArgumentParsers.At(), BuiltinDetectionType.CL, cl_cc_args);
+      parserDetectors.add(new ParserDetectorExt("cl", "exe", cl));
+    }
     // Intel C compilers ============================================
-    final ToolCommandlineParser icc = new ToolCommandlineParser("org.eclipse.cdt.core.gcc",
-        new ResponseFileArgumentParsers.At(), posix_cc_args);
-    final ToolCommandlineParser icpc = new ToolCommandlineParser("org.eclipse.cdt.core.g++",
-        new ResponseFileArgumentParsers.At(), posix_cc_args);
-
-    // Linux & OS X, EDG
-    parserDetectors.add(new ParserDetector("icc", icc));
-    // OS X, clang
-    parserDetectors.add(new ParserDetector("icl", icc));
-    // Intel C++ compiler
-    // Linux & OS X, EDG
-    parserDetectors.add(new ParserDetector("icpc", icpc));
-    // OS X, clang
-    parserDetectors.add(new ParserDetector("icl\\+\\+", icpc));
-    // Windows C + C++, EDG
-    parserDetectors.add(new ParserDetectorExt("icl", "exe", cl));
+    {
+      final ToolCommandlineParser icc = new ToolCommandlineParser("org.eclipse.cdt.core.gcc",
+          new ResponseFileArgumentParsers.At(), BuiltinDetectionType.ICC, posix_cc_args);
+      final ToolCommandlineParser icpc = new ToolCommandlineParser("org.eclipse.cdt.core.g++",
+          new ResponseFileArgumentParsers.At(), BuiltinDetectionType.ICC, posix_cc_args);
+      // Linux & OS X, EDG
+      parserDetectors.add(new ParserDetector("icc", icc));
+      // OS X, clang
+      parserDetectors.add(new ParserDetector("icl", icc));
+      // Intel C++ compiler
+      // Linux & OS X, EDG
+      parserDetectors.add(new ParserDetector("icpc", icpc));
+      // OS X, clang
+      parserDetectors.add(new ParserDetector("icl\\+\\+", icpc));
+      // Windows C + C++, EDG
+      parserDetectors.add(new ParserDetectorExt("icl", "exe", icc));
+    }
 
     // CUDA: nvcc compilers (POSIX compatible) =================================
-    final IToolArgumentParser[] nvcc_args = { new ToolArgumentParsers.IncludePath_C_POSIX(),
-        new ToolArgumentParsers.MacroDefine_C_POSIX(), new ToolArgumentParsers.MacroUndefine_C_POSIX(),
-        new ToolArgumentParsers.SystemIncludePath_nvcc(),
-        new ToolArgumentParsers.SystemIncludePath_C() };
+    {
+      final IToolArgumentParser[] nvcc_args = { new ToolArgumentParsers.IncludePath_C_POSIX(),
+          new ToolArgumentParsers.MacroDefine_C_POSIX(), new ToolArgumentParsers.MacroUndefine_C_POSIX(),
+          new ToolArgumentParsers.SystemIncludePath_nvcc(), new ToolArgumentParsers.SystemIncludePath_C() };
 
-    final ToolCommandlineParser nvcc = new ToolCommandlineParser("com.nvidia.cuda.toolchain.language.cuda.cu",
-        new ResponseFileArgumentParsers.At(), nvcc_args);
-    parserDetectors.add(new ParserDetector("nvcc", nvcc));
-    parserDetectors.add(new ParserDetectorExt("nvcc", "exe", nvcc));
+      final ToolCommandlineParser nvcc = new ToolCommandlineParser("com.nvidia.cuda.toolchain.language.cuda.cu",
+          new ResponseFileArgumentParsers.At(), BuiltinDetectionType.NVCC, nvcc_args);
+      parserDetectors.add(new ParserDetector("nvcc", nvcc));
+      parserDetectors.add(new ParserDetectorExt("nvcc", "exe", nvcc));
+    }
 
     // add detectors for windows NTFS
     for (ParserDetector pd : parserDetectors) {
@@ -259,7 +276,7 @@ class ParserDetection {
    * Responsible to match the first argument (the tool command) of a
    * command-line.
    *
-   * @author weber
+   * @author Martin Weber
    */
   static class ParserDetector {
     /** pattern part that matches linux filesystem paths */
@@ -397,7 +414,7 @@ class ParserDetection {
    * properly, if tool versions are allowed and the tool name contains a
    * filename extension.
    *
-   * @author weber
+   * @author Martin Weber
    */
   static class ParserDetectorExt extends ParserDetector {
     /**

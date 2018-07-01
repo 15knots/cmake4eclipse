@@ -23,6 +23,8 @@ import org.eclipse.cdt.core.settings.model.ICSettingEntry;
 import org.eclipse.core.runtime.Path;
 import org.junit.Test;
 
+import de.marw.cmake.cdt.language.settings.providers.builtins.BuiltinDetectionType;
+
 /**
  * @author Martin Weber
  */
@@ -32,7 +34,7 @@ public class ToolCommandlineParserTest {
   public final void testResponseFileArgumentParser_At() throws Exception {
 
     ToolCommandlineParser testee = new ToolCommandlineParser("egal", new ResponseFileArgumentParsers.At(),
-        new ToolArgumentParsers.IncludePath_C_POSIX(), new ToolArgumentParsers.MacroDefine_C_POSIX());
+        BuiltinDetectionType.NONE, new ToolArgumentParsers.IncludePath_C_POSIX(), new ToolArgumentParsers.MacroDefine_C_POSIX());
 
     List<ICLanguageSettingEntry> entries;
 

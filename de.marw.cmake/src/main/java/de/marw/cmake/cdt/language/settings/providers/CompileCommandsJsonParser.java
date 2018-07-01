@@ -14,8 +14,11 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.WeakHashMap;
 
 import org.eclipse.cdt.build.core.scannerconfig.ScannerConfigNature;
@@ -51,6 +54,8 @@ import org.w3c.dom.Element;
 
 import de.marw.cmake.CMakePlugin;
 import de.marw.cmake.cdt.language.settings.providers.ParserDetection.MarchResult;
+import de.marw.cmake.cdt.language.settings.providers.builtins.BuiltinDetectionType;
+import de.marw.cmake.cdt.language.settings.providers.builtins.BuiltinSpecsDetector;
 
 /**
  * A ILanguageSettingsProvider that parses the file 'compile_commands.json'
@@ -93,6 +98,12 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
    * {@code null}, if unknown (to speed up parsing)
    */
   private ParserDetection.DetectorWithMethod lastDetector;
+
+  /**
+   * tracks which compiler built-Ins where already detected: Map<LanguageID,
+   * Set<compilerCommand>>. {@code null} if no detection is required.
+   */
+  private Map<String, Set<String>> langMap;
 
   public CompileCommandsJsonParser() {
   }
@@ -145,6 +156,23 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
     } else {
       setProperty(ATTR_PATTERN, versionPattern);
     }
+  }
+
+  /**
+   * Gets whether the parser will not try to detect compiler-built-in macros and include paths.
+   *
+   * @return <code>false</code> version pattern matching in command names is
+   *         enabled, otherwise <code>true</code>
+   */
+  public boolean isDetectCompilerBuiltins() {
+    return false; //TODO getPropertyBool(ATTR_BUILINS_DISABLED);
+  }
+
+  /**
+   * Sets whether the parser will not try to detect compiler-built-in macros and include paths.
+   */
+  public void setDetectCompilerBuiltins(boolean disabled) {
+    // TODO setPropertyBool(ATTR_BUILINS_DISABLED, enabled);
   }
 
   @Override
@@ -288,13 +316,23 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
             ParserDetection.ParserDetectionResult pdr = fastDetermineDetector(cmdLine);
             if (pdr != null) {
               // found a matching command-line parser
-
+              final IToolCommandlineParser parser = pdr.getDetectorWithMethod().getDetector().getParser();
               // cwdStr is the absolute working directory of the compiler in
               // CMake-notation (fileSep are forward slashes)
               final String cwdStr = sourceFileInfo.get("directory").toString();
               IPath cwd = cwdStr != null? Path.fromOSString(cwdStr): new Path("");;
-              processCommandLine(storage, pdr.getDetectorWithMethod().getDetector().getParser(), files[0], cwd,
+              processCommandLine(storage, parser, files[0], cwd,
                   pdr.getReducedCommandLine());
+
+              if(shouldDetectBuiltins(parser.getLanguageId(), pdr.getCommandLine().getCommand())) {
+                // detect compiler-built-in settings
+                detectBuiltins(storage, parser.getLanguageId(), pdr.getCommandLine().getCommand(),
+                    parser.getBuiltinDetectionType());
+                try {
+                } finally {
+                  rememberDetectedBuiltins(parser.getLanguageId(), pdr.getCommandLine().getCommand());
+                }
+              }
             } else {
               // no matching parser found
               String message = "No parser for command '" + cmdLine + "'. " + WORKBENCH_WILL_NOT_KNOW_ALL_MSG;
@@ -309,6 +347,51 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
     final String msg = "File format error: " + ": 'file', 'command' or 'directory' missing in JSON object. "
         + WORKBENCH_WILL_NOT_KNOW_ALL_MSG;
     createMarker(jsonFile, msg);
+  }
+
+  /**
+   * Detects compiler built-ins and stores them.
+   *
+   * @param storage
+   *          where to store language settings
+   * @param languageId
+   *          language id
+   * @param command
+   *          the compiler command (arg 0)
+   * @param builtinDetectionType
+   *          the compiler classification
+   * @throws CoreException
+   */
+  private void detectBuiltins(TimestampedLanguageSettingsStorage storage, String languageId, String command,
+      BuiltinDetectionType builtinDetectionType) throws CoreException {
+    BuiltinSpecsDetector detector = new BuiltinSpecsDetector(currentCfgDescription, new NullProgressMonitor());
+    final List<ICLanguageSettingEntry> entries= detector.run(languageId, command, builtinDetectionType);
+    if (entries != null && entries.size() > 0) {
+      handleIncludePathEntries(storage, entries, languageId);
+      // attach settings to project resource...
+      storage.setSettingEntries(currentCfgDescription.getProjectDescription().getProject(), languageId, entries);
+    }
+  }
+
+  private boolean shouldDetectBuiltins(String languageID, String compilerCommand) {
+    if(!isDetectCompilerBuiltins()) {
+      return false;
+    }
+    Set<String> commands = langMap == null ? null : langMap.get(languageID);
+    if(commands == null)
+      return true;
+    return !commands.contains(compilerCommand);
+  }
+
+  private void rememberDetectedBuiltins(String languageID, String compilerCommand) {
+    if (langMap == null)
+      langMap = new HashMap<>(2, 1.0f);
+    Set<String> commands = langMap.get(languageID);
+    if(commands==null) {
+      commands= new HashSet<>();
+      langMap.put(languageID, commands);
+    }
+    commands.add(compilerCommand);
   }
 
   private static void createMarker(IFile file, String message) throws CoreException {
@@ -406,23 +489,39 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
       IFile sourceFile, IPath cwd, String line) {
     line = ToolCommandlineParser.trimLeadingWS(line);
     final List<ICLanguageSettingEntry> entries = cmdlineParser.processArgs(cwd, line);
+    final String languageId = cmdlineParser.getLanguageId();
     if (entries != null && entries.size() > 0) {
-      for (ICLanguageSettingEntry entry : entries) {
-        if (entry.getKind() == ICSettingEntry.INCLUDE_PATH) {
-          /*
-           * compile_commands.json holds entries per-file only and does not
-           * contain per-project or per-folder entries. For include dirs, ALSO
-           * add these entries to the project resource to make them show up in
-           * the UI in the includes folder...
-           */
-          storage.setSettingEntries((String) null, cmdlineParser.getLanguageId(), entries);
-          // tell the CommandLauncherManager (since CDT 9.4) so it can translate paths from docker container
-          super.setSettingEntries(currentCfgDescription, null, cmdlineParser.getLanguageId(), entries);
-          break;
-        }
-      }
+      handleIncludePathEntries(storage, entries, languageId);
       // attach settings to sourceFile resource...
-      storage.setSettingEntries(sourceFile, cmdlineParser.getLanguageId(), entries);
+      storage.setSettingEntries(sourceFile, languageId, entries);
+    }
+  }
+
+  /**
+   * Handles {@code ICSettingEntry.INCLUDE_PATH} entries. These are added to the
+   * project resource to make them show up in the UI in the includes folder and
+   * the CommandLauncherManager is told to respect them, when the build took
+   * place in a docker container.
+   *
+   * @param storage
+   * @param entries
+   * @param languageId
+   */
+  private void handleIncludePathEntries(TimestampedLanguageSettingsStorage storage,
+      final List<ICLanguageSettingEntry> entries, final String languageId) {
+    for (ICLanguageSettingEntry entry : entries) {
+      if (entry.getKind() == ICSettingEntry.INCLUDE_PATH) {
+        /*
+         * compile_commands.json holds entries per-file only and does not
+         * contain per-project or per-folder entries. For include dirs, ALSO
+         * add these entries to the project resource to make them show up in
+         * the UI in the includes folder...
+         */
+        storage.setSettingEntries((String) null, languageId, entries);
+        // tell the CommandLauncherManager (since CDT 9.4) so it can translate paths from docker container
+        super.setSettingEntries(currentCfgDescription, null, languageId, entries);
+        break;
+      }
     }
   }
 
@@ -466,6 +565,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
     }
     // release resources for garbage collector
     currentCfgDescription = null;
+    langMap = null;
   }
 
   @Override
@@ -533,6 +633,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
     }
     // release resources for garbage collector
     currentCfgDescription = null;
+    langMap = null;
   }
 
   /*-

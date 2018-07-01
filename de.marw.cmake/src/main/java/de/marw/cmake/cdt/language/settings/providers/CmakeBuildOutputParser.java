@@ -37,6 +37,7 @@ import org.eclipse.core.runtime.Status;
 
 import de.marw.cdt.cmake.core.cmakecache.SimpleCMakeCacheTxt;
 import de.marw.cmake.CMakePlugin;
+import de.marw.cmake.cdt.language.settings.providers.builtins.BuiltinDetectionType;
 
 /**
  * A build output parser capable to parse the output of the build tool for which
@@ -92,13 +93,13 @@ public class CmakeBuildOutputParser extends LanguageSettingsSerializableProvider
         // not defined by POSIX, but does not harm..
         new ToolArgumentParsers.SystemIncludePath_C(), };
     // POSIX compatible C compilers...
-    ToolCommandlineParser gcc = new ToolCommandlineParser("org.eclipse.cdt.core.gcc", null, posix_cc_args);
-    knownCmdParsers.put("cc", gcc);
-    knownCmdParsers.put("clang", gcc);
+    ToolCommandlineParser cc = new ToolCommandlineParser("org.eclipse.cdt.core.gcc", null, BuiltinDetectionType.NONE, posix_cc_args);
+    knownCmdParsers.put("cc", cc);
+    knownCmdParsers.put("clang", cc);
     // POSIX compatible C++ compilers...
-    ToolCommandlineParser gpp = new ToolCommandlineParser("org.eclipse.cdt.core.g++", null, posix_cc_args);
-    knownCmdParsers.put("c++", gpp);
-    knownCmdParsers.put("clang++", gpp);
+    ToolCommandlineParser cxx = new ToolCommandlineParser("org.eclipse.cdt.core.g++", null, BuiltinDetectionType.NONE, posix_cc_args);
+    knownCmdParsers.put("c++", cxx);
+    knownCmdParsers.put("clang++", cxx);
   }
 
   public CmakeBuildOutputParser() {
@@ -253,6 +254,14 @@ public class CmakeBuildOutputParser extends LanguageSettingsSerializableProvider
     @Override
     public String toString() {
       return "IgnoringToolParser";
+    }
+
+    /* (non-Javadoc)
+     * @see de.marw.cmake.cdt.language.settings.providers.IToolCommandlineParser#getBuiltinDetectionType()
+     */
+    @Override
+    public BuiltinDetectionType getBuiltinDetectionType() {
+      return BuiltinDetectionType.NONE;
     }
 
   }

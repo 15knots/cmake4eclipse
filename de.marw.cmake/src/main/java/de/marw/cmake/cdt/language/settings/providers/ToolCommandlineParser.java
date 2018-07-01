@@ -18,6 +18,8 @@ import java.util.Objects;
 import org.eclipse.cdt.core.settings.model.ICLanguageSettingEntry;
 import org.eclipse.core.runtime.IPath;
 
+import de.marw.cmake.cdt.language.settings.providers.builtins.BuiltinDetectionType;
+
 /**
  * Parses the build output produced by a specific tool invocation and detects
  * LanguageSettings.
@@ -29,6 +31,7 @@ class ToolCommandlineParser implements IToolCommandlineParser {
   private final IToolArgumentParser[] argumentParsers;
   private final String languageID;
   private final IResponseFileArgumentParser responseFileArgumentParser;
+  private final BuiltinDetectionType builtinDetectionType;
 
   /** gathers all entries */
   private List<ICLanguageSettingEntry> entries;
@@ -42,20 +45,21 @@ class ToolCommandlineParser implements IToolCommandlineParser {
    *          the parsers for the response-file command-line argument for the
    *          tool of <code>null</code> if the tool does not recognize a
    *          response-file argument
+   * @param builtinDetectionType
+   *          the classification of how to detect compiler-built-in macros and
+   *          include paths.
    * @param argumentParsers
    *          the parsers for the command line arguments of of interest for the
    *          tool
    * @throws NullPointerException
-   *           if {@code argumentParsers} is {@code null}
+   *           if any of the arguments is {@code null}
    */
   public ToolCommandlineParser(String languageID, IResponseFileArgumentParser responseFileArgumentParser,
-      IToolArgumentParser... argumentParsers) {
-    this.responseFileArgumentParser = responseFileArgumentParser;
+      BuiltinDetectionType builtinDetectionType, IToolArgumentParser... argumentParsers) {
     this.languageID = Objects.requireNonNull(languageID, "languageID");
-    if (argumentParsers == null) {
-      throw new NullPointerException("argumentParsers");
-    }
-    this.argumentParsers = argumentParsers;
+    this.builtinDetectionType = Objects.requireNonNull(builtinDetectionType, "builtinDetectionType");
+    this.argumentParsers = Objects.requireNonNull(argumentParsers, "argumentParsers");
+    this.responseFileArgumentParser = responseFileArgumentParser;
   }
 
   @Override
@@ -74,6 +78,13 @@ class ToolCommandlineParser implements IToolCommandlineParser {
   @Override
   public String getLanguageId() {
     return languageID;
+  }
+
+  /** Gets the {@code BuiltinDetectionType}.
+   */
+  @Override
+  public BuiltinDetectionType getBuiltinDetectionType() {
+    return builtinDetectionType;
   }
 
   @Override
