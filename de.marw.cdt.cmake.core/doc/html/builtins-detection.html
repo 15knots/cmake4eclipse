@@ -8,15 +8,15 @@
 	<h1>Compiler Built-ins Detection Support Overview</h1>
 	<p>Detection of compiler-built-in include paths and preprocessor macros.
 
-	<table id="overview_table" style="border: 1px solid black; border-collapse: separate;">
+	<table id="overview_table" style="border:1px solid black; border-collapse:separate; padding:2px">
 	<thead>
 	<tr>
 	<th>Compiler</th>
 	<th>Vendor</th>
 	<th>Macros</th>
-	<th>System include paths</th>
-	<th>Local include paths</th>
-	<th>MACOS Framework include paths</th>
+	<th>System<br/>include paths</th>
+	<th>Local<br/>include paths</th>
+	<th>MACOS Framework<br/>include paths</th>
 	</tr>
 	</thead>
 	<tbody>
@@ -42,12 +42,12 @@
 	<td>tested</td>
 	<td>tested</td>
 	<td>tested</td>
-	<td>NYI <a href="#fw-help-nvcc">[5]</a></td>
+	<td>NYI <a href="#fw-help-nvcc">[3]</a></td>
 	</tr>
 	<tr>
 	<td>icc</td>
 	<td>Intel</td>
-	<td>impl <a href="#help-test">[3]</a></td>
+	<td>NYI <a href="#help-icc">[4]</a> <a href="#help-test">[5]</a></td>
 	<td>NYI <a href="#help-icc">[4]</a></td>
 	<td>NYI <a href="#help-icc">[4]</a></td>
 	<td>NYI <a href="#fw-help-icc">[4]</a></td>
@@ -55,7 +55,7 @@
 	<tr>
 	<td>cl</td>
 	<td>Microsoft</td>
-	<td>impl <a href="#help-test">[3]</a></td>
+	<td>N/A</td>
 	<td>N/A</td>
 	<td>N/A</td>
 	<td>N/A</td>
@@ -80,13 +80,13 @@
 	running	on OSX is needed.</li>
 	<li id="fw-help-clang">[2] Help wanted! To implement this, the output of <code>clang -E -P -dM -Wp,-v emty.c</code>
 	running	on OSX is needed.</li>
-	<li id="help-test">[3] If you can test it, please do so and report your findings on the 
+	<li id="fw-help-nvcc">[3] Help wanted! To implement this, the output of <code>nvcc -E -Xcompiler -P -Xcompiler -dD -Xcompiler -v emty.cu</code>
+	running	on OSX is needed.</li>
+	<li id="fw-help-icc">[4] Help wanted! To implement this, the output of <code>icc -EP -dM emty.c</code> 
+	is needed.</li>
+	<li id="help-test">[5] If you can test it, please do so and report your findings on the 
 	<a href="http://groups.google.com/d/forum/cmake4eclipse-users">mailing-list</a> or on the
 	<a href="https://github.com/15knots/cmake4eclipse/issues">issue-tracker</a>.</li>
-	<li id="fw-help-icc">[4] Help wanted! To implement this, the output of <code>icc -EP -dM -H emty.c</code> 
-	is needed.</li>
-	<li id="fw-help-nvcc">[5] Help wanted! To implement this, the output of <code>nvcc -E -Xcompiler -P -Xcompiler -dD -Xcompiler -v emty.cu</code>
-	running	on OSX is needed.</li>
 	</ul>
 	</p>
 </body>

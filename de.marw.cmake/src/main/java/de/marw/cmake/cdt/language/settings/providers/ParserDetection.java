@@ -97,7 +97,7 @@ class ParserDetection {
       final IToolArgumentParser[] cl_cc_args = { new ToolArgumentParsers.IncludePath_C_CL(),
           new ToolArgumentParsers.MacroDefine_C_CL(), new ToolArgumentParsers.MacroUndefine_C_CL() };
       final ToolCommandlineParser cl = new ToolCommandlineParser("org.eclipse.cdt.core.gcc",
-          new ResponseFileArgumentParsers.At(), BuiltinDetectionType.CL, cl_cc_args);
+          new ResponseFileArgumentParsers.At(), BuiltinDetectionType.NONE, cl_cc_args);
       parserDetectors.add(new ParserDetectorExt("cl", "exe", cl));
     }
     // Intel C compilers ============================================
