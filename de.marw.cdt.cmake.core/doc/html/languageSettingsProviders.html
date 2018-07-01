@@ -1,14 +1,16 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8"/>
 <title>Available Language Settings Providers</title>
 </head>
 <body>
-	<h1>Preprocessor Include Paths, Macros, etc.</h1>
+	<h1>Preprocessor Include Paths, Macros</h1>
 	<P>Include paths and preprocessor macros for the C/C++ indexer are supplied by
 	<strong>Language Settings Providers</strong> using the
-	<a href="PLUGINS_ROOT/org.eclipse.cdt.doc.user/concepts/cdt_c_scanner_discovery.htm">Scanner Discovery</a> mechanism.
+	<a href="PLUGINS_ROOT/org.eclipse.cdt.doc.user/concepts/cdt_c_scanner_discovery.htm">Scanner Discovery</a>
+	mechanism. The C/C++/CUDA editors use the C/C++ indexer to improve syntax highlighting, to allow you to jump to
+	macro definitions and to browse through include files.
 	</P>
 	<p>The CMake for CDT plugin provides these <strong>Settings Providers</strong>:</p>
 
@@ -17,8 +19,12 @@
 	which will be executed when a project is build.<br/>
 	The plugin will parse that file and feed any preprocessor include path, macros definition or 
 	macros undefine that originates from your <em>CMakeLists.txt</em> files to the indexer.<br/>
-	Parsing is done rarely, since its internal cache is invalidated only when the
+	Parsing is done rarely, since the internal cache is invalidated only when the
 	file`s time-stamp is newer, so it should be reasonably fast.
+	</p>
+	<p>For popular compilers and those that support it, this settings provider also tries to detect 
+	include paths and preprocessor macros <strong>built-in to the compiler</strong>.
+	See <a href="builtins-detection.html">built-ins detection</a> for supported compilers.
 	</p>
 	
 	<h3>CMake Build Output Parser (deprecated)</h3>

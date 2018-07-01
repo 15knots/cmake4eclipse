@@ -7,7 +7,9 @@
    </topic>
    <topic href="doc/html/builders.html" label="Project Builders">
    </topic>
-   <topic href="doc/html/languageSettingsProviders.html" label="Preprocessor Include Paths, Macros, etc.">
+   <topic href="doc/html/languageSettingsProviders.html" label="Preprocessor Include Paths, Macros">
+      <topic href="doc/html/builtins-detection.html" label="Comipler Built-ins Detection">
+      </topic>
    </topic>
    <topic href="doc/html/notices.html" label="Legal">
    </topic>

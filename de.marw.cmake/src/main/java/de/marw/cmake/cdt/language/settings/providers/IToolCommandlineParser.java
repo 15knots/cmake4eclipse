@@ -15,6 +15,8 @@ import java.util.List;
 import org.eclipse.cdt.core.settings.model.ICLanguageSettingEntry;
 import org.eclipse.core.runtime.IPath;
 
+import de.marw.cmake.cdt.language.settings.providers.builtins.BuiltinDetectionType;
+
 /**
  * Parses the command-line produced by a specific tool invocation and detects
  * LanguageSettings.
@@ -46,4 +48,8 @@ interface IToolCommandlineParser {
    *         entries}
    */
   public String getLanguageId();
+
+  /** Gets the {@code BuiltinDetectionType}.
+   */
+  public BuiltinDetectionType getBuiltinDetectionType();
 }

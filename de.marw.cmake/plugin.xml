@@ -23,6 +23,12 @@
 	<super type="org.eclipse.core.resources.problemmarker"/>
  </extension>
  <extension
+       id="CompilerBuiltinsDetectorMarker"
+       name="Compiler Builtins Detector Problem"
+       point="org.eclipse.core.resources.markers">
+    <super type="de.marw.cmake.CompileCommandsJsonParserMarker"/>
+ </extension>
+ <extension
        point="org.eclipse.cdt.ui.LanguageSettingsProviderAssociation">
     <class-association
           class="de.marw.cmake.cdt.language.settings.providers.CompileCommandsJsonParser"
