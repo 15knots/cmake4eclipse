@@ -14,10 +14,12 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.WeakHashMap;
 
@@ -82,14 +84,20 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
   private static final String ATTR_PATTERN = "vPattern";
   /** storage key for version pattern enabled */
   private static final String ATTR_PATTERN_ENABLED = "vPatternEnabled";
+  /** whether the parser will not try to detect compiler-built-in macros and include paths. */
+  private static final String ATTR_BUILtINS_DISABLED = "builtinsDisabled";
 
   private static final String WORKBENCH_WILL_NOT_KNOW_ALL_MSG = "Your workbench will not know all include paths and preprocessor defines.";
 
   private static final String MARKER_ID = CMakePlugin.PLUGIN_ID + ".CompileCommandsJsonParserMarker";
+
   /**
    * Storage to keep settings entries
    */
   private PerConfigLanguageSettingsStorage storage = new PerConfigLanguageSettingsStorage();
+
+  /** {@code Map<LanguageID, List<ICLanguageSettingEntry>>} or {@code null} */
+  private Map<String, List<ICLanguageSettingEntry>> projectEntries;
 
   private ICConfigurationDescription currentCfgDescription;
 
@@ -100,8 +108,8 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
   private ParserDetection.DetectorWithMethod lastDetector;
 
   /**
-   * tracks which compiler built-Ins where already detected: Map<LanguageID,
-   * Set<compilerCommand>>. {@code null} if no detection is required.
+   * tracks which compiler built-Ins where already detected: {@code Map<LanguageID,
+   * Set<compilerCommand>>}. {@code null} if no detection is required.
    */
   private Map<String, Set<String>> langMap;
 
@@ -164,15 +172,15 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
    * @return <code>false</code> version pattern matching in command names is
    *         enabled, otherwise <code>true</code>
    */
-  public boolean isDetectCompilerBuiltins() {
-    return false; //TODO getPropertyBool(ATTR_BUILINS_DISABLED);
+  public boolean isDetectCompilerBuiltinsDisabled() {
+    return getPropertyBool(ATTR_BUILtINS_DISABLED);
   }
 
   /**
    * Sets whether the parser will not try to detect compiler-built-in macros and include paths.
    */
-  public void setDetectCompilerBuiltins(boolean disabled) {
-    // TODO setPropertyBool(ATTR_BUILINS_DISABLED, enabled);
+  public void setDetectCompilerBuiltinsDisabled(boolean disabled) {
+    setPropertyBool(ATTR_BUILtINS_DISABLED, disabled);
   }
 
   @Override
@@ -223,14 +231,15 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
           store.clear();
           // store time-stamp
           store.lastModified = tsJsonModified;
+
           if (!initializingWorkbench) {
             project.deleteMarkers(MARKER_ID, false, IResource.DEPTH_INFINITE);
           }
+          Reader in = null;
           try {
             // parse file...
-            JSON parser = new JSON();
-            Reader in = new FileReader(jsonFile);
-            Object parsed = parser.parse(new JSON.ReaderSource(in), false);
+            in = new FileReader(jsonFile);
+            Object parsed = new JSON().parse(new JSON.ReaderSource(in), false);
             if (parsed instanceof Object[]) {
               for (Object o : (Object[]) parsed) {
                 if (o instanceof Map) {
@@ -242,7 +251,13 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
                   createMarker(jsonFileRc, msg);
                 }
               }
-              // System.out.println("stored cached compile_commands");
+
+              // store project level entries
+              for (Entry<String, List<ICLanguageSettingEntry>> e : projectEntries.entrySet()) {
+                store.setSettingEntries((String) null, e.getKey(), e.getValue());
+                // tell the CommandLauncherManager (since CDT 9.4) so it can translate paths from docker container
+                super.setSettingEntries(currentCfgDescription, null, e.getKey(), e.getValue());
+              }
 
               // re-index to reflect new paths and macros in editor views
               // serializeLanguageSettings(currentCfgDescription);
@@ -276,6 +291,12 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
           } catch (IOException ex) {
             final String msg = "Failed to read file " + jsonFile + ". " + WORKBENCH_WILL_NOT_KNOW_ALL_MSG;
             createMarker(jsonFileRc, msg);
+          } finally {
+            if (in != null)
+              try {
+                in.close();
+              } catch (IOException ignore) {
+              }
           }
         }
         return;
@@ -366,15 +387,11 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
       BuiltinDetectionType builtinDetectionType) throws CoreException {
     BuiltinSpecsDetector detector = new BuiltinSpecsDetector(currentCfgDescription, new NullProgressMonitor());
     final List<ICLanguageSettingEntry> entries= detector.run(languageId, command, builtinDetectionType);
-    if (entries != null && entries.size() > 0) {
-      handleIncludePathEntries(storage, entries, languageId);
-      // attach settings to project resource...
-      storage.setSettingEntries(currentCfgDescription.getProjectDescription().getProject(), languageId, entries);
-    }
+    getProjectEntriesForLanguage(languageId).addAll(entries);
   }
 
   private boolean shouldDetectBuiltins(String languageID, String compilerCommand) {
-    if(!isDetectCompilerBuiltins()) {
+    if(isDetectCompilerBuiltinsDisabled()) {
       return false;
     }
     Set<String> commands = langMap == null ? null : langMap.get(languageID);
@@ -392,6 +409,17 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
       langMap.put(languageID, commands);
     }
     commands.add(compilerCommand);
+  }
+
+  private List<ICLanguageSettingEntry> getProjectEntriesForLanguage(String languageID) {
+    if (projectEntries == null)
+      projectEntries = new HashMap<>(2, 1.0f);
+    List<ICLanguageSettingEntry> langEntries = projectEntries.get(languageID);
+    if(langEntries==null) {
+      langEntries= new ArrayList<>();
+      projectEntries.put(languageID, langEntries);
+    }
+    return langEntries;
   }
 
   private static void createMarker(IFile file, String message) throws CoreException {
@@ -509,6 +537,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
    */
   private void handleIncludePathEntries(TimestampedLanguageSettingsStorage storage,
       final List<ICLanguageSettingEntry> entries, final String languageId) {
+    final List<ICLanguageSettingEntry> langEntries = getProjectEntriesForLanguage(languageId);
     for (ICLanguageSettingEntry entry : entries) {
       if (entry.getKind() == ICSettingEntry.INCLUDE_PATH) {
         /*
@@ -517,10 +546,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
          * add these entries to the project resource to make them show up in
          * the UI in the includes folder...
          */
-        storage.setSettingEntries((String) null, languageId, entries);
-        // tell the CommandLauncherManager (since CDT 9.4) so it can translate paths from docker container
-        super.setSettingEntries(currentCfgDescription, null, languageId, entries);
-        break;
+        langEntries.add(entry);
       }
     }
   }
@@ -566,6 +592,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
     // release resources for garbage collector
     currentCfgDescription = null;
     langMap = null;
+    projectEntries= null;
   }
 
   @Override
@@ -594,7 +621,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
   @Override
   public void registerListener(ICConfigurationDescription cfgDescription) {
     if (cfgDescription != null) {
-      // per-project or if the user just added this provider on the provider tab
+      // per-project or null if the user just added this provider on the provider tab
       currentCfgDescription = cfgDescription;
       try {
         tryParseJson(true);
@@ -634,6 +661,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
     // release resources for garbage collector
     currentCfgDescription = null;
     langMap = null;
+    projectEntries= null;
   }
 
   /*-
@@ -689,12 +717,6 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
      *         defined.
      */
     public List<ICLanguageSettingEntry> getSettingEntries(IResource rc, String languageId) {
-      /*
-       * compile_commands.json holds entries per-file only and does not contain
-       * per-project or per-folder entries. So we map the latter as project
-       * entries (=> null) to make the UI show the include directories we
-       * detected.
-       */
       String rcPath = null;
       if (rc != null && rc.getType() == IResource.FILE) {
         rcPath = rc.getProjectRelativePath().toString();
