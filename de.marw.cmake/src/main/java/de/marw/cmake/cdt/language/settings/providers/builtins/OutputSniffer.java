@@ -32,24 +32,30 @@ class OutputSniffer extends OutputStream {
   }
 
   @Override
-  public synchronized void write(int c) throws IOException {
-    buffer.append(new String(new byte[] { (byte) c }));
-    splitLines();
+  public void write(int c) throws IOException {
+    synchronized (this) {
+      buffer.append(new String(new byte[] { (byte) c }));
+      splitLines();
+    }
   }
 
   @Override
-  public synchronized void write(byte[] b, int off, int len) throws IOException {
-    buffer.append(new String(b, off, len));
-    splitLines();
+  public void write(byte[] b, int off, int len) throws IOException {
+    synchronized (this) {
+      buffer.append(new String(b, off, len));
+      splitLines();
+    }
   }
 
   @Override
-  public synchronized void flush() throws IOException {
-    splitLines();
-    // process remaining bytes
-    String line = buffer.toString();
-    buffer.setLength(0);
-    processLine(line);
+  public void flush() throws IOException {
+    synchronized (this) {
+      splitLines();
+      // process remaining bytes
+      String line = buffer.toString();
+      buffer.setLength(0);
+      processLine(line);
+    }
   }
 
   @Override
@@ -61,7 +67,7 @@ class OutputSniffer extends OutputStream {
    * Splits the buffer into separate lines and sends these to the parsers.
    *
    */
-  private synchronized void splitLines() {
+  private void splitLines() {
     int idx;
     while ((idx = buffer.indexOf(SEP)) != -1) {
       String line = buffer.substring(0, idx);

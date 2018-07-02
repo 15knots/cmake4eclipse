@@ -101,7 +101,6 @@ public class BuiltinSpecsDetector {
     }
 
     final List<String> argList = getCompilerArguments(languageId, builtinDetectionType);
-    final BuiltinsOutputProcessor bop = getCompilerOutputProcessor(entries, builtinDetectionType);
 
     IProject project = cfgDescription.getProjectDescription().getProject();
     ICommandLauncher launcher = new CommandLauncher();
@@ -114,7 +113,11 @@ public class BuiltinSpecsDetector {
         proc.getOutputStream().close();
       } catch (IOException e) {
       }
-      int state = launcher.waitAndRead(new OutputSniffer(bop), new OutputSniffer(bop), monitor);
+      // NOTE: we need 2 of this, since the output streams are not synchronized, causing loss of
+      // the internal processor state
+      final BuiltinsOutputProcessor bop1 = createCompilerOutputProcessor(entries, builtinDetectionType);
+      final BuiltinsOutputProcessor bop2 = createCompilerOutputProcessor(entries, builtinDetectionType);
+      int state = launcher.waitAndRead(new OutputSniffer(bop1), new OutputSniffer(bop2), monitor);
       if (state != ICommandLauncher.COMMAND_CANCELED) {
         // check exit status
         final int exitValue = proc.exitValue();
@@ -136,7 +139,7 @@ public class BuiltinSpecsDetector {
    *          where to place the {@code ICLanguageSettingEntry}s found during processing.
    * @param builtinDetectionType
    */
-  private BuiltinsOutputProcessor getCompilerOutputProcessor(List<ICLanguageSettingEntry> entries,
+  private BuiltinsOutputProcessor createCompilerOutputProcessor(List<ICLanguageSettingEntry> entries,
       BuiltinDetectionType builtinDetectionType) {
     switch (builtinDetectionType) {
     case GCC:
