@@ -26,7 +26,7 @@ import org.eclipse.cdt.core.settings.model.util.CDataUtil;
  */
 class CompilerOutputLineProcessor {
 
-  private final Matcher matcher;
+  private final Pattern pattern;
   private final int nameGroup;
   private final int valueGroup;
   private final int kind;
@@ -52,7 +52,7 @@ class CompilerOutputLineProcessor {
    */
   public CompilerOutputLineProcessor(String pattern, int nameGroup, int valueGroup, boolean isIncludePath,
       int extraFlag) {
-    this.matcher = Pattern.compile(pattern).matcher("");
+    this.pattern = Pattern.compile(pattern);
     this.nameGroup = nameGroup;
     this.valueGroup = valueGroup;
     this.kind = isIncludePath ? ICSettingEntry.INCLUDE_PATH : ICSettingEntry.MACRO;
@@ -68,7 +68,7 @@ class CompilerOutputLineProcessor {
    *         match any settings entry
    */
   protected ICLanguageSettingEntry process(String line) {
-    matcher.reset(line);
+    final Matcher matcher = pattern.matcher(line);
     if (matcher.matches()) {
       final String name = matcher.group(nameGroup);
       final String value = valueGroup == -1 ? null : matcher.group(valueGroup);
