@@ -2,7 +2,7 @@
 <feature
       id="de.marw.cdt.cmake"
       label="CDT CMake build integration"
-      version="1.11.2.qualifier"
+      version="1.12.0.qualifier"
       provider-name="Martin Weber">
 
    <description url="https://github.com/15knots/cmake4eclipse">
