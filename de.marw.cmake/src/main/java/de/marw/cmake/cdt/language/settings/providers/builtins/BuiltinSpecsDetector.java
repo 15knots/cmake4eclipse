@@ -91,6 +91,7 @@ public class BuiltinSpecsDetector {
     boolean silent = false;
     switch (builtinDetectionType) {
     case NONE:
+    case ICC: // TODO implement when someone demands it and comes with example output
       return entries;
     case GCC_MAYBE:
       // 'gcc' recognized as 'cc' by cmake: try detection, but do not report errors on failure
@@ -150,7 +151,6 @@ public class BuiltinSpecsDetector {
     // case CL:
     default:
     }
-    // TODO Auto-generated method stub
     return null;
   }
 
@@ -175,7 +175,7 @@ public class BuiltinSpecsDetector {
     case NVCC:
       return Arrays.asList("-E", "-Xcompiler", "-P", "-Xcompiler", "-dM", "-Xcompiler", "-v");
     case ICC:
-      return Arrays.asList("-EP", "-dM", "-H");
+      return Arrays.asList("-EP", "-dM");
     case CL:
       return Arrays.asList("/nologo", "/EP", "/dM");
     default:
