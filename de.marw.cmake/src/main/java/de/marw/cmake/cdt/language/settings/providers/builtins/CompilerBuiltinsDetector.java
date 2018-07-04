@@ -47,7 +47,7 @@ import de.marw.cmake.CMakePlugin;
  *
  * @author Martin Weber
  */
-public class BuiltinSpecsDetector {
+public class CompilerBuiltinsDetector {
 
   private static final String MARKER_ID = CMakePlugin.PLUGIN_ID + ".CompilerBuiltinsDetectorMarker";
 
@@ -62,7 +62,7 @@ public class BuiltinSpecsDetector {
    * @param monitor
    *          progress monitor or <code>null</code>
    */
-  public BuiltinSpecsDetector(ICConfigurationDescription cfgDescription, IProgressMonitor monitor) {
+  public CompilerBuiltinsDetector(ICConfigurationDescription cfgDescription, IProgressMonitor monitor) {
     this.cfgDescription = Objects.requireNonNull(cfgDescription);
     this.monitor = (monitor == null ? new NullProgressMonitor() : monitor);
   }

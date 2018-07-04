@@ -57,7 +57,7 @@ import org.w3c.dom.Element;
 import de.marw.cmake.CMakePlugin;
 import de.marw.cmake.cdt.language.settings.providers.ParserDetection.MarchResult;
 import de.marw.cmake.cdt.language.settings.providers.builtins.BuiltinDetectionType;
-import de.marw.cmake.cdt.language.settings.providers.builtins.BuiltinSpecsDetector;
+import de.marw.cmake.cdt.language.settings.providers.builtins.CompilerBuiltinsDetector;
 
 /**
  * A ILanguageSettingsProvider that parses the file 'compile_commands.json'
@@ -385,7 +385,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
    */
   private void detectBuiltins(TimestampedLanguageSettingsStorage storage, String languageId, String command,
       BuiltinDetectionType builtinDetectionType) throws CoreException {
-    BuiltinSpecsDetector detector = new BuiltinSpecsDetector(currentCfgDescription, new NullProgressMonitor());
+    CompilerBuiltinsDetector detector = new CompilerBuiltinsDetector(currentCfgDescription, new NullProgressMonitor());
     final List<ICLanguageSettingEntry> entries= detector.run(languageId, command, builtinDetectionType);
     getProjectEntriesForLanguage(languageId).addAll(entries);
   }
