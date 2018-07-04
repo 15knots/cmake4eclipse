@@ -86,7 +86,7 @@ public class BuiltinSpecsDetector {
     final SubMonitor monitor = SubMonitor.convert(this.monitor, "Built-in settings detection for compiler " + command,
         IProgressMonitor.UNKNOWN);
 
-    List<ICLanguageSettingEntry> entries = Collections.synchronizedList(new ArrayList<>());
+    List<ICLanguageSettingEntry> entries = Collections.synchronizedList(new ArrayList<ICLanguageSettingEntry>());
 
     boolean silent = false;
     switch (builtinDetectionType) {

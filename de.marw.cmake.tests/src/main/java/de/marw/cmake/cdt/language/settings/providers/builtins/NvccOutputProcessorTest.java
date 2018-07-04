@@ -39,28 +39,16 @@ public class NvccOutputProcessorTest {
    */
   @Before
   public void setUp() throws Exception {
-    entries = Collections.synchronizedList(new ArrayList<>());
+    entries = Collections.synchronizedList(new ArrayList<ICLanguageSettingEntry>());
     testee = new GccOutputProcessor(entries);
   }
 
-  /**
-   * Test method for
-   * {@link de.marw.cmake.cdt.language.settings.providers.GccOutputProcessor#processLine(java.lang.String)}.
-   */
   @Test
   @Ignore
   public void testProcessLine() {
-    entries = Collections.synchronizedList(new ArrayList<>());
-    testee = new GccOutputProcessor(entries);
     testee.processLine("#define AAA xyz");
   }
 
-  /**
-   * Test method for
-   * {@link de.marw.cmake.cdt.language.settings.providers.GccOutputProcessor#processLine(java.lang.String)}.
-   *
-   * @throws IOException
-   */
   @Test
   public void testProcessFile() throws IOException {
     // pass resource content line-wise to the testee...
