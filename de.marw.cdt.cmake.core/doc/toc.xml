@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<toc label="CMake for CDT User Guide" topic="doc/html/home.html">
+<toc label="Cmake4eclipse User Guide" topic="doc/html/home.html">
    <topic href="doc/html/getting_started.html" label="Getting Started">
    </topic>
    <topic label="Tasks">
