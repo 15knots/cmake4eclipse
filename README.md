@@ -52,7 +52,7 @@ There is a run configuration for eclipse to invoke maven `build cmake4eclipse` p
 
 ---
 # Release Notes
-## 1.12.0 (2018-07-??)
+## 1.12.0 (2018-07-04)
 ### Changes
 - Fixed #79: CMAKE_EXPORT_COMPILE_COMMANDS Parser does not detect compiler-built-in macros and include paths. (Forget CDT's GCC-builtin-specs-detector:-)
 
