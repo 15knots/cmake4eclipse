@@ -58,7 +58,7 @@
   <properties>
     <tycho-version>0.24.0</tycho-version>
     <platform.version>1.0.1</platform.version>
-    <java.source>1.7</java.source>
+    <java.source>1.8</java.source>
   </properties>
 
   <dependencyManagement>
