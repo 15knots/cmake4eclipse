@@ -107,7 +107,7 @@ public class CompilerBuiltinsDetector {
     ICommandLauncher launcher = new CommandLauncher();
     launcher.setProject(project);
     final Process proc = launcher.execute(new Path(command), argList.toArray(new String[argList.size()]), getEnvp(),
-        cfgDescription.getBuildSetting().getBuilderCWD(), monitor);
+        null, monitor);
     if (proc != null) {
       try {
         // Close the input of the process since we will never write to it
