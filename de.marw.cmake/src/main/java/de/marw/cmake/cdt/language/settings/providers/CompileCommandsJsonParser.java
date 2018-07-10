@@ -190,7 +190,12 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
       // speed up, we do not provide global (workspace) lang settings..
       return null;
     }
-    return storage.getSettingEntries(cfgDescription, rc, languageId);
+    TimestampedLanguageSettingsStorage store = storage.getSettingsStoreForConfig(cfgDescription);
+    String rcPath = null;
+    if (rc.getType() == IResource.FILE) {
+      rcPath = rc.getProjectRelativePath().toString();
+    }
+    return store.getSettingEntries(rcPath, languageId);
   }
 
   /**
@@ -224,7 +229,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
         final long tsJsonModified = jsonFile.lastModified();
 
         final IProject project = currentCfgDescription.getProjectDescription().getProject();
-        final TimestampedLanguageSettingsStorage store = storage.getSettingsForConfig(currentCfgDescription);
+        final TimestampedLanguageSettingsStorage store = storage.getSettingsStoreForConfig(currentCfgDescription);
 
         if (store.lastModified < tsJsonModified) {
           // must parse json file...
@@ -250,13 +255,6 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
                       + WORKBENCH_WILL_NOT_KNOW_ALL_MSG;
                   createMarker(jsonFileRc, msg);
                 }
-              }
-
-              // store project level entries
-              for (Entry<String, List<ICLanguageSettingEntry>> e : projectEntries.entrySet()) {
-                store.setSettingEntries((String) null, e.getKey(), e.getValue());
-                // tell the CommandLauncherManager (since CDT 9.4) so it can translate paths from docker container
-                super.setSettingEntries(currentCfgDescription, null, e.getKey(), e.getValue());
               }
 
               // re-index to reflect new paths and macros in editor views
@@ -387,7 +385,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
       BuiltinDetectionType builtinDetectionType) throws CoreException {
     CompilerBuiltinsDetector detector = new CompilerBuiltinsDetector(currentCfgDescription, new NullProgressMonitor());
     final List<ICLanguageSettingEntry> entries= detector.run(languageId, command, builtinDetectionType);
-    getProjectEntriesForLanguage(languageId).addAll(entries);
+    storage.addSettingEntries(null, languageId, entries);
   }
 
   private boolean shouldDetectBuiltins(String languageID, String compilerCommand) {
@@ -409,17 +407,6 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
       langMap.put(languageID, commands);
     }
     commands.add(compilerCommand);
-  }
-
-  private List<ICLanguageSettingEntry> getProjectEntriesForLanguage(String languageID) {
-    if (projectEntries == null)
-      projectEntries = new HashMap<>(2, 1.0f);
-    List<ICLanguageSettingEntry> langEntries = projectEntries.get(languageID);
-    if(langEntries==null) {
-      langEntries= new ArrayList<>();
-      projectEntries.put(languageID, langEntries);
-    }
-    return langEntries;
   }
 
   private static void createMarker(IFile file, String message) throws CoreException {
@@ -521,7 +508,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
     if (entries != null && entries.size() > 0) {
       handleIncludePathEntries(storage, entries, languageId);
       // attach settings to sourceFile resource...
-      storage.setSettingEntries(sourceFile, languageId, entries);
+      storage.addSettingEntries(sourceFile, languageId, entries);
     }
   }
 
@@ -537,18 +524,19 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
    */
   private void handleIncludePathEntries(TimestampedLanguageSettingsStorage storage,
       final List<ICLanguageSettingEntry> entries, final String languageId) {
-    final List<ICLanguageSettingEntry> langEntries = getProjectEntriesForLanguage(languageId);
+    final List<ICLanguageSettingEntry> addEntries = new ArrayList<>();
+    /*
+     * compile_commands.json holds entries per-file only and does not
+     * contain per-project or per-folder entries. For include dirs, ALSO
+     * add these entries to the project resource to make them show up in
+     * the UI in the includes folder...
+     */
     for (ICLanguageSettingEntry entry : entries) {
       if (entry.getKind() == ICSettingEntry.INCLUDE_PATH) {
-        /*
-         * compile_commands.json holds entries per-file only and does not
-         * contain per-project or per-folder entries. For include dirs, ALSO
-         * add these entries to the project resource to make them show up in
-         * the UI in the includes folder...
-         */
-        langEntries.add(entry);
+        addEntries.add(entry);
       }
     }
+    storage.addSettingEntries(null, languageId, addEntries);
   }
 
 
@@ -592,7 +580,6 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
     // release resources for garbage collector
     currentCfgDescription = null;
     langMap = null;
-    projectEntries= null;
   }
 
   @Override
@@ -609,7 +596,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
   public LanguageSettingsStorage copyStorage() {
     if (currentCfgDescription == null)
       return null;
-    TimestampedLanguageSettingsStorage st = storage.getSettingsForConfig(currentCfgDescription);
+    TimestampedLanguageSettingsStorage st = storage.getSettingsStoreForConfig(currentCfgDescription);
     return st.clone();
   }
 
@@ -661,7 +648,6 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
     // release resources for garbage collector
     currentCfgDescription = null;
     langMap = null;
-    projectEntries= null;
   }
 
   /*-
@@ -679,7 +665,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
     long lastModified = 0;
 
     /**
-     * Sets language settings entries for this storages.
+     * Adds the specified language settings entries for this storages.
      *
      * @param rc
      *          resource such as file or folder or project. If {@code null} the
@@ -690,7 +676,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
      * @param entries
      *          language settings entries to set.
      */
-    public void setSettingEntries(IResource rc, String languageId, List<ICLanguageSettingEntry> entries) {
+    private void addSettingEntries(IResource rc, String languageId, List<ICLanguageSettingEntry> entries) {
       /*
        * compile_commands.json holds entries per-file only and does not contain
        * per-project or per-folder entries. So we map the latter as project
@@ -701,27 +687,13 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
       if (rc != null && rc.getType() == IResource.FILE) {
         rcPath = rc.getProjectRelativePath().toString();
       }
-      super.setSettingEntries(rcPath, languageId, entries);
-    }
-
-    /**
-     * Sets language settings entries for this storages.
-     *
-     * @param rc
-     *          resource such as file or folder or project. If {@code null} the
-     *          entries are considered to be being defined as project-level
-     *          entries for child resources.
-     * @param languageId
-     *          language id. Must not be {@code null}
-     * @return the list of setting entries or {@code null} if no settings
-     *         defined.
-     */
-    public List<ICLanguageSettingEntry> getSettingEntries(IResource rc, String languageId) {
-      String rcPath = null;
-      if (rc != null && rc.getType() == IResource.FILE) {
-        rcPath = rc.getProjectRelativePath().toString();
+      List<ICLanguageSettingEntry> sentries = super.getSettingEntries(rcPath, languageId);
+      if(sentries!=null) {
+        entries= new ArrayList<>(entries);
+        entries.addAll(sentries);
       }
-      return super.getSettingEntries(rcPath, languageId);
+      // also tells the CommandLauncherManager (since CDT 9.4) so it can translate paths from docker container
+      super.setSettingEntries(rcPath, languageId, entries);
     }
 
     public TimestampedLanguageSettingsStorage clone() {
@@ -771,22 +743,13 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
      */
     private Map<String, TimestampedLanguageSettingsStorage> storages = new WeakHashMap<>();
 
-    public List<ICLanguageSettingEntry> getSettingEntries(ICConfigurationDescription cfgDescription, IResource rc,
-        String languageId) {
-      final TimestampedLanguageSettingsStorage store = storages.get(cfgDescription.getId());
-      if (store != null) {
-        return store.getSettingEntries(rc, languageId);
-      }
-      return null;
-    }
-
     /**
      * Gets the settings storage for the specified configuration. Creates a new
      * settings storage, if none exists.
      *
-     * @return the storages never {@code null}
+     * @return the storage, never {@code null}
      */
-    public TimestampedLanguageSettingsStorage getSettingsForConfig(ICConfigurationDescription cfgDescription) {
+    private TimestampedLanguageSettingsStorage getSettingsStoreForConfig(ICConfigurationDescription cfgDescription) {
       TimestampedLanguageSettingsStorage store = storages.get(cfgDescription.getId());
       if (store == null) {
         store = new TimestampedLanguageSettingsStorage();

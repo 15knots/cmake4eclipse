@@ -144,7 +144,7 @@ class ToolArgumentParsers {
           final String name = matcher.group(oMatcher.nameGroup);
           final String value = oMatcher.valueGroup== -1? null: matcher.group(oMatcher.valueGroup);
           final ICLanguageSettingEntry entry = CDataUtil.createCMacroEntry(name, value,
-              ICSettingEntry.BUILTIN | ICSettingEntry.READONLY);
+              ICSettingEntry.READONLY);
           returnedEntries.add(entry);
           final int end = matcher.end();
           return end;
@@ -170,7 +170,7 @@ class ToolArgumentParsers {
       if (oMatcher.lookingAt()) {
         final String name = oMatcher.group(1);
         final ICLanguageSettingEntry entry = CDataUtil.createCMacroEntry(name, null,
-            ICSettingEntry.UNDEFINED | ICSettingEntry.BUILTIN | ICSettingEntry.READONLY);
+            ICSettingEntry.UNDEFINED | ICSettingEntry.READONLY);
         returnedEntries.add(entry);
         final int end = oMatcher.end();
         return end;
@@ -205,7 +205,7 @@ class ToolArgumentParsers {
           }
 
           final ICLanguageSettingEntry entry = CDataUtil.createCIncludePathEntry(name,
-              ICSettingEntry.BUILTIN | ICSettingEntry.READONLY);
+              ICSettingEntry.READONLY);
           returnedEntries.add(entry);
           final int end = matcher.end();
           return end;
