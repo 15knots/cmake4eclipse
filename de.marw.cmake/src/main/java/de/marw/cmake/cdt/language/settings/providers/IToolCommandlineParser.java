@@ -36,7 +36,7 @@ interface IToolCommandlineParser {
    * @return the language setting entries produced or {@code null} or an empty
    *         list if no entries where produced
    * @throws NullPointerException
-   *           if any of the arguments is <code>null</code>
+   *           if any of the arguments is {@code null}
    */
   public List<ICLanguageSettingEntry> processArgs(IPath cwd, String args);
 

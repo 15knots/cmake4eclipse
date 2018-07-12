@@ -42,7 +42,7 @@ class ParserDetection {
   private static final List<ParserDetector> parserDetectors = new ArrayList<>(22);
   /**
    * same as {@link #parserDetectors}, but for windows where cmake places a
-   * backslash in the command path. Unused (<code>null</code>), when running
+   * backslash in the command path. Unused ({@code null}), when running
    * under *nix.
    */
   static final List<ParserDetector> parserDetectorsWin32 = new ArrayList<>(16);
@@ -153,7 +153,7 @@ class ParserDetection {
    *          the command line to process
    * @param versionSuffixRegex
    *          the regular expression to match a version suffix in the compiler
-   *          name or <code>null</code> to not try to detect the compiler with a
+   *          name or {@code null} to not try to detect the compiler with a
    *          version suffix
    * @param tryWindowsDectors
    *          whether to also try the detectors for ms windows OS
@@ -194,7 +194,7 @@ class ParserDetection {
    *          the detectors to try
    * @param versionSuffixRegex
    *          the regular expression to match a version suffix in the compiler
-   *          name or <code>null</code> to not try to detect the compiler with a
+   *          name or {@code null} to not try to detect the compiler with a
    *          version suffix
    * @return {@code null} if none of the detectors matches the tool name in the
    *         specified command-line string. Otherwise, if the tool name matches,
@@ -244,7 +244,7 @@ class ParserDetection {
 
   /**
    * Tries to convert windows short file names for the compiler executable (like
-   * <code>AVR-G_~1.EXE</code>) into their long representation. This is a
+   * {@code AVR-G_~1.EXE}) into their long representation. This is a
    * workaround for a
    * <a href="https://gitlab.kitware.com/cmake/cmake/issues/16138">bug in CMake
    * under windows</a>.<br>
@@ -311,7 +311,7 @@ class ParserDetection {
      * @param parser
      *          the corresponding parser for the tool arguments
      * @throws NullPointerException
-     *           if one of the arguments is <code>null</code>
+     *           if one of the arguments is {@code null}
      */
     public ParserDetector(String basenameRegex, IToolCommandlineParser parser) {
       this(basenameRegex, false, parser);
@@ -341,7 +341,7 @@ class ParserDetection {
     /**
      * Gets the IToolCommandlineParser.
      *
-     * @return the parser, never <code>null</code>
+     * @return the parser, never {@code null}
      */
     public IToolCommandlineParser getParser() {
       return parser;
@@ -419,7 +419,7 @@ class ParserDetection {
   static class ParserDetectorExt extends ParserDetector {
     /**
      * the Matcher that matches the name of the tool (including its path AND its
-     * filename extension) on a given command-line or <code>null</code>
+     * filename extension) on a given command-line or {@code null}
      */
     private final Matcher toolNameMatcherExt;
     private final String extensionRegex;
@@ -539,7 +539,7 @@ class ParserDetection {
      * Gets the ParserDetector that matched the name of the tool on a given
      * command-line.
      *
-     * @return the detector, never <code>null</code>
+     * @return the detector, never {@code null}
      */
     public ParserDetector getDetector() {
       return detector;
@@ -548,7 +548,7 @@ class ParserDetection {
     /**
      * Gets the method that was used to match.
      *
-     * @return the detection method, never <code>null</code>
+     * @return the detection method, never {@code null}
      */
     public DetectionMethod getHow() {
       return how;

@@ -58,7 +58,7 @@ import de.marw.cdt.cmake.core.internal.settings.CmakeDefine;
   /** table column widths */
   private static final int[] tableColumnWidths = { 120, 80, 250 };
 
-  /** the configuration description to use for variable selection dialog or <code>null</code> */
+  /** the configuration description to use for variable selection dialog or {@code null} */
   private final ICConfigurationDescription cfgd;
 
   private TableViewer tableViewer;
@@ -68,7 +68,7 @@ import de.marw.cdt.cmake.core.internal.settings.CmakeDefine;
    * @param parent
    * @param cfgd
    *          the configuration description to use for variable selection dialog
-   *          or <code>null</code>
+   *          or {@code null}
    */
   public DefinesViewer(Composite parent, ICConfigurationDescription cfgd) {
     this.cfgd = cfgd;

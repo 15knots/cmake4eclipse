@@ -47,7 +47,7 @@ public class AddCmakeDefineDialog extends Dialog {
    * created.
    */
   private CmakeDefine editedVar;
-  /** the configuration description to use for variable selection dialog or <code>null</code> */
+  /** the configuration description to use for variable selection dialog or {@code null} */
   private final ICConfigurationDescription cfgd;
 
   private Text variableName;
@@ -80,7 +80,7 @@ public class AddCmakeDefineDialog extends Dialog {
    *          be created.
    * @param cfgd
    *          the configuration description to use for variable selection dialog
-   *          or <code>null</code>
+   *          or {@code null}
    */
   public AddCmakeDefineDialog(Shell parentShell, ICConfigurationDescription cfgd, CmakeDefine editedVar) {
     super(parentShell);

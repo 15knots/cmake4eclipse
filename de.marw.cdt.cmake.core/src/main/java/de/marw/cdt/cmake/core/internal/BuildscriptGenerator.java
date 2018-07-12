@@ -602,7 +602,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
   /**
    * Checks whether the build has been cancelled. Cancellation requests are
    * propagated to the caller by throwing
-   * <code>OperationCanceledException</code>.
+   * {@code OperationCanceledException}.
    *
    * @see org.eclipse.core.runtime.OperationCanceledException#OperationCanceledException()
    */

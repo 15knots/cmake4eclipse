@@ -310,7 +310,7 @@ public class CMakePreferences {
    * Gets the name of the file that is used to pre-populate the cmake cache.
    * {@code -C}
    *
-   * @return the file name or <code>null</code> if the cmake cache shall not be
+   * @return the file name or {@code null} if the cmake cache shall not be
    *         pre-populated.
    */
   public String getCacheFile() {
@@ -322,7 +322,7 @@ public class CMakePreferences {
    * {@code -C}
    *
    * @param cacheFile
-   *          the file name or <code>null</code> if the cmake cache shall not be
+   *          the file name or {@code null} if the cmake cache shall not be
    *          pre-populated.
    */
   public void setCacheFile(String cacheFile) {
@@ -332,7 +332,7 @@ public class CMakePreferences {
   /**
    * Gets the name of the build directory.
    *
-   * @return the build directory name or <code>null</code> if the hard-coded default shall be
+   * @return the build directory name or {@code null} if the hard-coded default shall be
    *         used.
    */
   public String getBuildDirectory() {
@@ -343,7 +343,7 @@ public class CMakePreferences {
    * Sets the name of the build directory.
    *
    * @param buildDirectory
-   *          the build directory name or <code>null</code> if the hard-coded
+   *          the build directory name or {@code null} if the hard-coded
    *          default shall be used.
    */
   public void setBuildDirectory(String buildDirectory) {

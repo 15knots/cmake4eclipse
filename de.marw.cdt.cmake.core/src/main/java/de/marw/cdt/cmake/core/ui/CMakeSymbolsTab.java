@@ -170,7 +170,7 @@ public class CMakeSymbolsTab extends QuirklessAbstractCPropertyTab {
    * Updates displayed values according to the preferences edited by this tab.
    *
    * @param cMakePreferences
-   *          the CMakePreferences to display, never <code>null</code>
+   *          the CMakePreferences to display, never {@code null}
    */
   private void updateDisplay(CMakePreferences cMakePreferences) {
     definesViewer.setInput(cMakePreferences.getDefines());
