@@ -185,7 +185,7 @@ public class CMakeCacheFileParser {
      *
      * @param key
      *        The entry key to be tested. Never {@code null}
-     * @return <code>true</code> if and only if <code>key</code> should be
+     * @return {@code true} if and only if {@code key} should be
      *         included
      */
     boolean accept(String key);

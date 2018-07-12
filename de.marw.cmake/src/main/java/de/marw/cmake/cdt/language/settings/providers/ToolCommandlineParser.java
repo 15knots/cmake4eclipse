@@ -43,7 +43,7 @@ class ToolCommandlineParser implements IToolCommandlineParser {
    *          the language ID of the language that the tool compiles
    * @param responseFileArgumentParser
    *          the parsers for the response-file command-line argument for the
-   *          tool of <code>null</code> if the tool does not recognize a
+   *          tool of {@code null} if the tool does not recognize a
    *          response-file argument
    * @param builtinDetectionType
    *          the classification of how to detect compiler-built-in macros and

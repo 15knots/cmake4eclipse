@@ -43,8 +43,8 @@ class CompilerOutputLineProcessor {
    *          capturing group number defining the {@link ICSettingEntry#getValue() value} of an entry. Specify
    *          {@code -1} if no value is captured.
    * @param isIncludePath
-   *          kind of language settings entries to create. Specify <code>true</code> to create a
-   *          {@link ICSettingEntry#INCLUDE_PATH} entry, <code>false</code> to create a
+   *          kind of language settings entries to create. Specify {@code true} to create a
+   *          {@link ICSettingEntry#INCLUDE_PATH} entry, {@code false} to create a
    *          {@link ICLanguageSettingEntry#MACRO} entry
    * @param extraFlag
    *          extra-flags to add to the created language settings entry, e.g. {@link ICSettingEntry#LOCAL} or
@@ -64,7 +64,7 @@ class CompilerOutputLineProcessor {
    *
    * @param line
    *          the compiler output line to process
-   * @return the language settings entry constructed from the given output line or <code>null</code> if the line did not
+   * @return the language settings entry constructed from the given output line or {@code null} if the line did not
    *         match any settings entry
    */
   protected ICLanguageSettingEntry process(String line) {

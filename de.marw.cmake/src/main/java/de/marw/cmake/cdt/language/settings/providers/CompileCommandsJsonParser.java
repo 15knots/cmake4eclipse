@@ -122,8 +122,8 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
    * try to match for example {@code gcc-4.6} or {@code gcc-4.6.exe} if none of
    * the other patterns matched.
    *
-   * @return <code>true</code> version pattern matching in command names is
-   *         enabled, otherwise <code>false</code>
+   * @return {@code true} version pattern matching in command names is
+   *         enabled, otherwise {@code false}
    */
   public boolean isVersionPatternEnabled() {
     return getPropertyBool(ATTR_PATTERN_ENABLED);
@@ -169,8 +169,8 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
   /**
    * Gets whether the parser will not try to detect compiler-built-in macros and include paths.
    *
-   * @return <code>false</code> version pattern matching in command names is
-   *         enabled, otherwise <code>true</code>
+   * @return {@code false} version pattern matching in command names is
+   *         enabled, otherwise {@code true}
    */
   public boolean isDetectCompilerBuiltinsDisabled() {
     return getPropertyBool(ATTR_BUILtINS_DISABLED);

@@ -96,7 +96,7 @@ public abstract class QuirklessAbstractCPropertyTab extends AbstractCPropertyTab
    * configuration(s). Also invoked when the dialog opens.
    *
    * @param lastConfig
-   *          the last configuration being edited or <code>null</code> if the
+   *          the last configuration being edited or {@code null} if the
    *          dialog is opening.
    * @param newConfig
    *          the new configuration to edit. Note that

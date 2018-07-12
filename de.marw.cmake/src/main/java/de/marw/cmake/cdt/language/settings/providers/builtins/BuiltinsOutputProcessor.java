@@ -41,12 +41,12 @@ abstract class BuiltinsOutputProcessor {
 
   /**
    * Adds a ICLanguageSettingEntry to the result list. Implemented as a convenience method which reports whether the new
-   * entry was <code>null</code>.
+   * entry was {@code null}.
    *
    * @param entry
-   *          the entry to add to the result list or <code>null</code>.
+   *          the entry to add to the result list or {@code null}.
    *
-   * @return <code>false</code> if {@code entry} was <code>null</code>, otherwise <code>true</code>
+   * @return {@code false} if {@code entry} was {@code null}, otherwise {@code true}
    */
   protected boolean addEntry(ICLanguageSettingEntry entry) {
     if (entry != null) {

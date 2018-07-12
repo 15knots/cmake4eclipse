@@ -60,7 +60,7 @@ public class CompilerBuiltinsDetector {
   /**
    * @param cfgDescription
    * @param monitor
-   *          progress monitor or <code>null</code>
+   *          progress monitor or {@code null}
    */
   public CompilerBuiltinsDetector(ICConfigurationDescription cfgDescription, IProgressMonitor monitor) {
     this.cfgDescription = Objects.requireNonNull(cfgDescription);
