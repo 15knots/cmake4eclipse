@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016-2017 Martin Weber.
+ * Copyright (c) 2016-2018 Martin Weber.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -51,6 +51,60 @@ public class ParserDetectionTest {
     // verify that we got a C++ parser
     assertEquals("C++", "org.eclipse.cdt.core.g++", result.getDetectorWithMethod().getDetector().getParser().getLanguageId());
   }
+
+  /**
+   * Test method for
+   * {@link de.marw.cmake.cdt.language.settings.providers.ParserDetection#determineDetector(String, String,boolean)}
+   * .
+   * <a href="https://wiki.osdev.org/Target_Triplet"/>
+   */
+  @Test
+  public void testDetermineParserForCommandline_cross() {
+    ParserDetection.ParserDetectionResult result = ParserDetection.determineDetector("/usr/bin/arm-none-eabi-gcc -C blah.c", null,
+        true);
+    assertNotNull(result);
+    // verify that we got a C parser
+    assertEquals("C", "org.eclipse.cdt.core.gcc", result.getDetectorWithMethod().getDetector().getParser().getLanguageId());
+
+    result = ParserDetection.determineDetector("/usr/bin/arm-none-eabi-gcc.exe -C blah.c", null,
+        true);
+    assertNotNull(result);
+    // verify that we got a C parser
+    assertEquals("C", "org.eclipse.cdt.core.gcc", result.getDetectorWithMethod().getDetector().getParser().getLanguageId());
+  }
+
+  /**
+   * <a href="https://wiki.osdev.org/Target_Triplet"/>
+   */
+  @Test
+  public void testDetermineParserForCommandline_crossplusplus() {
+    ParserDetection.ParserDetectionResult result = ParserDetection.determineDetector("/usr/bin/arm-none-eabi-g++ -C blah.c", null,
+        true);
+    assertNotNull(result);
+    // verify that we got a C++ parser
+    assertEquals("C++", "org.eclipse.cdt.core.g++", result.getDetectorWithMethod().getDetector().getParser().getLanguageId());
+
+    result = ParserDetection.determineDetector("/usr/bin/arm-none-eabi-g++.exe -C blah.c", null,
+        true);
+    assertNotNull(result);
+    // verify that we got a C++ parser
+    assertEquals("C++", "org.eclipse.cdt.core.g++", result.getDetectorWithMethod().getDetector().getParser().getLanguageId());
+  }
+
+  /**
+   * <a href="https://wiki.osdev.org/Target_Triplet"/>
+   */
+  @Test
+  public void testDetermineParserForCommandline_crossplusplus_basename() {
+    ParserDetection.ParserDetectionResult result = ParserDetection.determineDetector("arm-none-eabi-g++ -C blah.c", null, false);
+    assertNotNull(result);
+    // verify that we got a C++ parser
+    assertEquals("C++", "org.eclipse.cdt.core.g++", result.getDetectorWithMethod().getDetector().getParser().getLanguageId());
+
+    result = ParserDetection.determineDetector("arm-none-eabi-g++.exe -C blah.c", null, false);
+    assertNotNull(result);
+    // verify that we got a C++ parser
+    assertEquals("C++", "org.eclipse.cdt.core.g++", result.getDetectorWithMethod().getDetector().getParser().getLanguageId());}
 
   @Test
   @Ignore("Requires NFTS to run")
