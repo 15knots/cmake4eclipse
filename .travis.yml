@@ -7,12 +7,25 @@ language: java
 jdk:
 - openjdk7
 
+cache:
+  directories:
+  - $HOME/.m2
+
 script:
-- mvn -Pretail -f ./parent/pom.xml verify
+  - mvn -Pretail -f ./parent/pom.xml verify
 
 after_success:
-- set -e
-# extract persion from repo pom
-- VERSION=$(basename releng/de.marw.cdt.cmake-repo/target/cmake4eclipse-*.zip| sed -r -n 's/.+-([0-9]+(\.[0-9]+)*).zip$/\1/p')
-# upload p2 repo zip to bintray as a new version
-- curl -f -T releng/de.marw.cdt.cmake-repo/target/cmake4eclipse*${VERSION}.zip -u${BINTRAY_USER}:${BINTRAY_API_KEY} https://api.bintray.com/content/${BINTRAY_USER}/p2-zip/cmake4eclipse/${VERSION}/
+  # Skip deployment on Pull Request
+  # extract persion from repo pom
+  - echo "TRAVIS_PULL_REQUEST=${TRAVIS_PULL_REQUEST}"
+  - VERSION=$(basename releng/de.marw.cdt.cmake-repo/target/cmake4eclipse-*.zip| sed -r -n 's/.+-([0-9]+(\.[0-9]+)*).zip$/\1/p')
+  - if [ "${TRAVIS_PULL_REQUEST}" != "false" ]; then exit 0; fi
+  # Skip deployment if branch is not master
+  - echo "TRAVIS_BRANCH=${TRAVIS_BRANCH}"
+  - if [ "${TRAVIS_BRANCH}" != "master" ]; then exit 0; fi
+  # Deployment steps
+  - set -e
+  # extract persion from repo pom
+  - VERSION=$(basename releng/de.marw.cdt.cmake-repo/target/cmake4eclipse-*.zip| sed -r -n 's/.+-([0-9]+(\.[0-9]+)*).zip$/\1/p')
+  # upload p2 repo zip to bintray as a new version
+  - curl -f -T releng/de.marw.cdt.cmake-repo/target/cmake4eclipse*${VERSION}.zip -u${BINTRAY_USER}:${BINTRAY_API_KEY} https://api.bintray.com/content/${BINTRAY_USER}/p2-zip/cmake4eclipse/${VERSION}/
