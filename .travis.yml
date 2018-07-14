@@ -5,7 +5,7 @@ env:
 
 language: java
 jdk:
-- openjdk7
+- openjdk8
 
 cache:
   directories:
