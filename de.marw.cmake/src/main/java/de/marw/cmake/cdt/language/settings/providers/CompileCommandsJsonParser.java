@@ -19,12 +19,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.WeakHashMap;
 
 import org.eclipse.cdt.build.core.scannerconfig.ScannerConfigNature;
 import org.eclipse.cdt.core.CCorePlugin;
+import org.eclipse.cdt.core.index.IIndexManager;
 import org.eclipse.cdt.core.language.settings.providers.ICBuildOutputParser;
 import org.eclipse.cdt.core.language.settings.providers.ICListenerAgent;
 import org.eclipse.cdt.core.language.settings.providers.ILanguageSettingsEditableProvider;
@@ -34,6 +34,7 @@ import org.eclipse.cdt.core.language.settings.providers.IWorkingDirectoryTracker
 import org.eclipse.cdt.core.language.settings.providers.LanguageSettingsSerializableProvider;
 import org.eclipse.cdt.core.language.settings.providers.LanguageSettingsStorage;
 import org.eclipse.cdt.core.model.CoreModel;
+import org.eclipse.cdt.core.model.ICElement;
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
 import org.eclipse.cdt.core.settings.model.ICLanguageSettingEntry;
 import org.eclipse.cdt.core.settings.model.ICProjectDescription;
@@ -95,9 +96,6 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
    * Storage to keep settings entries
    */
   private PerConfigLanguageSettingsStorage storage = new PerConfigLanguageSettingsStorage();
-
-  /** {@code Map<LanguageID, List<ICLanguageSettingEntry>>} or {@code null} */
-  private Map<String, List<ICLanguageSettingEntry>> projectEntries;
 
   private ICConfigurationDescription currentCfgDescription;
 
@@ -259,28 +257,14 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
 
               // re-index to reflect new paths and macros in editor views
               // serializeLanguageSettings(currentCfgDescription);
-              CCorePlugin.getIndexManager().reindex(CoreModel.getDefault().create(project));
-
-              // trigger UI update to show newly detected include paths in
-              // Includes folder
-              // Useless. It looks like ICProject#getIncludeReferences() is only
-              // updated when the project is opened.
-              // Display.getDefault().asyncExec(new Runnable() {
-              // public void run() {
-              // ProjectExplorer projectExplorer = (ProjectExplorer)
-              // PlatformUI.getWorkbench()
-              // .getActiveWorkbenchWindow().getActivePage().findView(
-              //// "org.eclipse.cdt.ui.CView");
-              // ProjectExplorer.VIEW_ID);
-              // if (projectExplorer != null) {
-              // final CommonViewer v = projectExplorer.getCommonViewer();
-              // if (v != null) {
-              // v.refresh(project);
-              // }
-              // }
-              // }
-              // });
-
+              if (!initializingWorkbench) {
+                final ICElement[] tuSelection = {CoreModel.getDefault().create(project)};
+                CCorePlugin.getIndexManager().update(tuSelection, IIndexManager.UPDATE_ALL);
+              }
+              // triggering UI update to show newly detected include paths in
+              // Includes folder is USELESS. It looks like ICProject#getIncludeReferences() is only
+              // updated when the project is opened or the user clicks 'Apply' in the
+              // Preprocessor Include Paths page.
             } else {
               // file format error
               final String msg = "File does not seem to be in JSON format. " + WORKBENCH_WILL_NOT_KNOW_ALL_MSG;
@@ -347,10 +331,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
                 // detect compiler-built-in settings
                 detectBuiltins(storage, parser.getLanguageId(), pdr.getCommandLine().getCommand(),
                     parser.getBuiltinDetectionType());
-                try {
-                } finally {
-                  rememberDetectedBuiltins(parser.getLanguageId(), pdr.getCommandLine().getCommand());
-                }
+                rememberDetectedBuiltins(parser.getLanguageId(), pdr.getCommandLine().getCommand());
               }
             } else {
               // no matching parser found
