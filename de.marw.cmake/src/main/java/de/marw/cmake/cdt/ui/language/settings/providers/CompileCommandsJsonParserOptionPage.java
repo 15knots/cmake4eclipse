@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Martin Weber.
+ * Copyright (c) 2017-2018 Martin Weber.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,7 +40,6 @@ public class CompileCommandsJsonParserOptionPage extends AbstractCOptionPage {
 
   private Text pattern;
   private Button b_versionsEnabled;
-  private Button b_builtinsDisabled;
 
   @Override
   public void performApply(IProgressMonitor monitor) throws CoreException {
@@ -112,18 +111,6 @@ public class CompileCommandsJsonParserOptionPage extends AbstractCOptionPage {
       gd.horizontalAlignment = SWT.FILL;
       pattern.setLayoutData(gd);
     }
-
-    b_builtinsDisabled = createCheckbox(composite, SWT.BEGINNING, 2, "&Disable Compiler-built-ins dectection");
-    b_builtinsDisabled.setToolTipText("Disable if detection causes any problems (see log)");
-    b_builtinsDisabled.setEnabled(enabled);
-    b_builtinsDisabled.setSelection(provider.isDetectCompilerBuiltinsDisabled());
-    b_builtinsDisabled.addSelectionListener(new SelectionAdapter() {
-      @Override
-      public void widgetSelected(SelectionEvent event) {
-        boolean selected = ((Button) event.widget).getSelection();
-        provider.setDetectCompilerBuiltinsDisabled(selected);
-      }
-    });
 
     // to adjust sensitivity...
     b_versionsEnabled.addSelectionListener(new SelectionAdapter() {
