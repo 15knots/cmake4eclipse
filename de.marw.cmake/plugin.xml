@@ -7,8 +7,12 @@
     <provider
           class="de.marw.cmake.cdt.language.settings.providers.CompileCommandsJsonParser"
           id="de.marw.cmake.cdt.language.settings.providers.CompileCommandsJsonParser"
-          name="CMAKE_EXPORT_COMPILE_COMMANDS Parser"
-          prefer-non-shared="true">
+          name="CMAKE_EXPORT_COMPILE_COMMANDS Parser">
+    </provider>
+    <provider
+          class="de.marw.cmake.cdt.language.settings.providers.BuiltinsCompileCommandsJsonParser"
+          id="de.marw.cmake.cdt.language.settings.providers.BuiltinsCompileCommandsJsonParser"
+          name="CMAKE_EXPORT_COMPILE_COMMANDS Compiler Built-ins">
     </provider>
     <provider
           class="de.marw.cmake.cdt.language.settings.providers.CmakeBuildOutputParser"
@@ -32,7 +36,12 @@
        point="org.eclipse.cdt.ui.LanguageSettingsProviderAssociation">
     <class-association
           class="de.marw.cmake.cdt.language.settings.providers.CompileCommandsJsonParser"
+          icon="icons/CMakeLogo.gif"
           page="de.marw.cmake.cdt.ui.language.settings.providers.CompileCommandsJsonParserOptionPage">
+    </class-association>
+    <class-association
+          class="de.marw.cmake.cdt.language.settings.providers.BuiltinsCompileCommandsJsonParser"
+          icon="icons/CMakeLogo.gif">
     </class-association>
  </extension>
 </plugin>

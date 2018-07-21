@@ -35,7 +35,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
@@ -52,38 +51,49 @@ public class CompilerBuiltinsDetector {
   private static final String MARKER_ID = CMakePlugin.PLUGIN_ID + ".CompilerBuiltinsDetectorMarker";
 
   private ICConfigurationDescription cfgDescription;
-  private IProgressMonitor monitor;
 
   /** environment variables, lazily instantiated */
   private String[] envp;
 
+  private String languageId;
+
+  private String command;
+
+  private BuiltinDetectionType builtinDetectionType;
+
   /**
    * @param cfgDescription
-   * @param monitor
-   *          progress monitor or {@code null}
+   *          configuration description.
+   * @param languageId
+   *          language id
+   * @param builtinDetectionType
+   *          the compiler classification
+   * @param command
+   *          the compiler command (arg 0)
    */
-  public CompilerBuiltinsDetector(ICConfigurationDescription cfgDescription, IProgressMonitor monitor) {
+  public CompilerBuiltinsDetector(ICConfigurationDescription cfgDescription, String languageId,
+      BuiltinDetectionType builtinDetectionType, String command) {
+    this.languageId = Objects.requireNonNull(languageId, "languageId");
+    this.command = Objects.requireNonNull(command, "command");
+    this.builtinDetectionType = Objects.requireNonNull(builtinDetectionType, "builtinDetectionType");
     this.cfgDescription = Objects.requireNonNull(cfgDescription);
-    this.monitor = (monitor == null ? new NullProgressMonitor() : monitor);
+  }
+
+  /** Gets the language ID of this detector.
+   */
+  public String getLanguageId() {
+    return languageId;
   }
 
   /**
    * Run built-in detection command.
    *
-   * @param languageId
-   *          language id
-   * @param command
-   *          the compiler command (arg 0)
-   * @param builtinDetectionType
-   *          the compiler classification
+   * @param monitor
+   *          progress monitor or {@code null}
    * @throws CoreException
    */
-  public List<ICLanguageSettingEntry> run(String languageId, String command, BuiltinDetectionType builtinDetectionType)
-      throws CoreException {
-    Objects.requireNonNull(languageId, "languageId");
-    Objects.requireNonNull(command, "command");
-    Objects.requireNonNull(builtinDetectionType, "builtinDetectionType");
-    final SubMonitor monitor = SubMonitor.convert(this.monitor, "Built-in settings detection for compiler " + command,
+  public List<ICLanguageSettingEntry> run(IProgressMonitor monitor) throws CoreException {
+    final SubMonitor subMonitor = SubMonitor.convert(monitor, "Built-in settings detection for compiler " + command,
         IProgressMonitor.UNKNOWN);
 
     List<ICLanguageSettingEntry> entries = Collections.synchronizedList(new ArrayList<ICLanguageSettingEntry>());
@@ -107,7 +117,7 @@ public class CompilerBuiltinsDetector {
     ICommandLauncher launcher = new CommandLauncher();
     launcher.setProject(project);
     final Process proc = launcher.execute(new Path(command), argList.toArray(new String[argList.size()]), getEnvp(),
-        null, monitor);
+        null, subMonitor);
     if (proc != null) {
       try {
         // Close the input of the process since we will never write to it
@@ -219,7 +229,7 @@ public class CompilerBuiltinsDetector {
    * Runtime.exec(String[] cmdarray, String[] envp, File dir)
    *
    * @param cfgDescription
-   *          - configuration description.
+   *          configuration description.
    * @return String array of environment variables in format "var=value". Does not return {@code null}.
    */
   private static String[] getEnvp(ICConfigurationDescription cfgDescription) {
@@ -299,6 +309,57 @@ public class CompilerBuiltinsDetector {
     IMarker marker = cfgDescription.getProjectDescription().getProject().createMarker(MARKER_ID);
     marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_INFO);
     marker.setAttribute(IMarker.MESSAGE, message);
+  }
+
+  /*
+   * (non-Javadoc)
+   *
+   * @see java.lang.Object#hashCode()
+   */
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + builtinDetectionType.hashCode();
+    result = prime * result + cfgDescription.getId().hashCode();
+    result = prime * result + command.hashCode();
+    result = prime * result + languageId.hashCode();
+    return result;
+  }
+
+  /*
+   * (non-Javadoc)
+   *
+   * @see java.lang.Object#equals(java.lang.Object)
+   */
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    CompilerBuiltinsDetector other = (CompilerBuiltinsDetector) obj;
+    if (builtinDetectionType != other.builtinDetectionType) {
+      return false;
+    }
+    if (other.cfgDescription == null) {
+      return false;
+    }
+    if (!cfgDescription.getId().equals(other.cfgDescription.getId())) {
+      return false;
+    }
+    if (!command.equals(other.command)) {
+      return false;
+    }
+    if (!languageId.equals(other.languageId)) {
+      return false;
+    }
+    return true;
   }
 
 }
