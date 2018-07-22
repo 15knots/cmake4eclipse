@@ -15,15 +15,19 @@
 	<p>The CMake for CDT plugin provides these <strong>Settings Providers</strong>:</p>
 
 	<h3>CMAKE_EXPORT_COMPILE_COMMANDS Parser</h3>
-	<p>This provider instructs CMake to generate a file that contains all the compiler commands-lines
+	<p>This provider instructs CMake to generate a file that contains all the compiler command-lines
 	which will be executed when a project is build.<br/>
-	The plugin will parse that file and feed any preprocessor include path, macros definition or 
-	macros undefine that originates from your <em>CMakeLists.txt</em> files to the indexer.<br/>
+	The plugin will parse that file and feed any preprocessor include path, macro definition or 
+	macro undefine that originates from your <em>CMakeLists.txt</em> files to the indexer.<br/>
 	Parsing is done rarely, since the internal cache is invalidated only when the
 	file`s time-stamp is newer, so it should be reasonably fast.
 	</p>
-	<p>For popular compilers and those that support it, this settings provider also tries to detect 
-	include paths and preprocessor macros <strong>built-in to the compiler</strong>.
+	
+	<h3>CMAKE_EXPORT_COMPILE_COMMANDS Compiler Built-ins</h3>
+	<p>This provider works similar to <quote>CMAKE_EXPORT_COMPILE_COMMANDS Parser</quote>, but invokes 
+	the compiler with arguments to get the include paths and preprocessor macros 
+	<strong>built-in to the compiler</strong>.<br/>
+	Note thtat this works only for compilers that support this.
 	See <a href="builtins-detection.html">built-ins detection</a> for supported compilers.
 	</p>
 	
