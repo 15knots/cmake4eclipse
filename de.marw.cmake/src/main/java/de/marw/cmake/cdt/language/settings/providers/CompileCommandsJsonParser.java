@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.WeakHashMap;
+import java.util.stream.Collectors;
 
 import org.eclipse.cdt.build.core.scannerconfig.ScannerConfigNature;
 import org.eclipse.cdt.core.CCorePlugin;
@@ -478,18 +479,27 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
    */
   private void handleIncludePathEntries(TimestampedLanguageSettingsStorage storage,
       final List<ICLanguageSettingEntry> entries, final String languageId) {
-    final List<ICLanguageSettingEntry> addEntries = new ArrayList<>();
     /*
      * compile_commands.json holds entries per-file only and does not contain per-project or per-folder entries. For
      * include dirs, ALSO add these entries to the project resource to make them show up in the UI in the includes
      * folder...
      */
-    for (ICLanguageSettingEntry entry : entries) {
-      if (entry.getKind() == ICSettingEntry.INCLUDE_PATH) {
-        addEntries.add(entry);
+    List<ICLanguageSettingEntry> allEntries = entries.stream().filter(e -> e.getKind() == ICSettingEntry.INCLUDE_PATH)
+        .collect(Collectors.toList());
+    // avoid duplicate entries by using a Set...
+    List<ICLanguageSettingEntry> oldEntries = storage.getSettingEntries(null, languageId);
+    // add new items only, maintain list order
+    if (oldEntries != null) {
+      HashSet<ICLanguageSettingEntry> oldSet = new HashSet<>(oldEntries);
+      oldEntries = new ArrayList<>(oldEntries); // as modifiable list
+      for (ICLanguageSettingEntry e : allEntries) {
+        if (!oldSet.contains(e))
+          oldEntries.add(e);
       }
+    } else {
+      oldEntries = entries;
     }
-    storage.addSettingEntries(null, languageId, addEntries);
+    storage.addSettingEntries(null, languageId, oldEntries);
   }
 
   /*
