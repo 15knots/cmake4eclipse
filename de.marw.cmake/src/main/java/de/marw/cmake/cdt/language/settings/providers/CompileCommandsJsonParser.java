@@ -203,71 +203,72 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
     final IPath location = jsonFileRc.getLocation();
     if (location != null) {
       final File jsonFile = location.toFile();
-      if (jsonFile.exists()) {
-        // file exists on disk...
-        final long tsJsonModified = jsonFile.lastModified();
+      if (!jsonFile.exists()) {
+        // no json file was produced in the build
+        final String msg = "File '" + jsonPath + "' was not created in the build. " + WORKBENCH_WILL_NOT_KNOW_ALL_MSG;
+        createMarker(jsonFileRc, msg);
+        return false;
+      }
+      // file exists on disk...
+      final long tsJsonModified = jsonFile.lastModified();
 
-        final IProject project = currentCfgDescription.getProjectDescription().getProject();
-        final TimestampedLanguageSettingsStorage store = storage.getSettingsStoreForConfig(currentCfgDescription);
+      final IProject project = currentCfgDescription.getProjectDescription().getProject();
+      final TimestampedLanguageSettingsStorage store = storage.getSettingsStoreForConfig(currentCfgDescription);
 
-        if (store.lastModified < tsJsonModified) {
-          // must parse json file...
-          store.clear();
-          // store time-stamp
-          store.lastModified = tsJsonModified;
+      if (store.lastModified < tsJsonModified) {
+        // must parse json file...
+        store.clear();
+        // store time-stamp
+        store.lastModified = tsJsonModified;
 
-          if (!initializingWorkbench) {
-            project.deleteMarkers(MARKER_ID, false, IResource.DEPTH_INFINITE);
-          }
-          Reader in = null;
-          try {
-            // parse file...
-            in = new FileReader(jsonFile);
-            Object parsed = new JSON().parse(new JSON.ReaderSource(in), false);
-            if (parsed instanceof Object[]) {
-              for (Object o : (Object[]) parsed) {
-                if (o instanceof Map) {
-                  processJsonEntry(store, enabled, (Map<?, ?>) o, jsonFileRc);
-                } else {
-                  // expected Map object, skipping entry.toString()
-                  final String msg = "File format error: unexpected entry '" + o + "'. "
-                      + WORKBENCH_WILL_NOT_KNOW_ALL_MSG;
-                  createMarker(jsonFileRc, msg);
-                }
-              }
-
-              // re-index to reflect new paths and macros in editor views
-              // serializeLanguageSettings(currentCfgDescription);
-              if (!initializingWorkbench) {
-                final ICElement[] tuSelection = { CoreModel.getDefault().create(project) };
-                CCorePlugin.getIndexManager().update(tuSelection, IIndexManager.UPDATE_ALL);
-              }
-              // triggering UI update to show newly detected include paths in
-              // Includes folder is USELESS. It looks like ICProject#getIncludeReferences() is only
-              // updated when the project is opened or the user clicks 'Apply' in the
-              // Preprocessor Include Paths page.
-            } else {
-              // file format error
-              final String msg = "File does not seem to be in JSON format. " + WORKBENCH_WILL_NOT_KNOW_ALL_MSG;
-              createMarker(jsonFileRc, msg);
-            }
-          } catch (IOException ex) {
-            final String msg = "Failed to read file " + jsonFile + ". " + WORKBENCH_WILL_NOT_KNOW_ALL_MSG;
-            createMarker(jsonFileRc, msg);
-          } finally {
-            if (in != null)
-              try {
-                in.close();
-              } catch (IOException ignore) {
-              }
-          }
-          return true;
+        if (!initializingWorkbench) {
+          project.deleteMarkers(MARKER_ID, false, IResource.DEPTH_INFINITE);
         }
+        Reader in = null;
+        try {
+          // parse file...
+          in = new FileReader(jsonFile);
+          Object parsed = new JSON().parse(new JSON.ReaderSource(in), false);
+          if (parsed instanceof Object[]) {
+            for (Object o : (Object[]) parsed) {
+              if (o instanceof Map) {
+                processJsonEntry(store, enabled, (Map<?, ?>) o, jsonFileRc);
+              } else {
+                // expected Map object, skipping entry.toString()
+                final String msg = "File format error: unexpected entry '" + o + "'. "
+                    + WORKBENCH_WILL_NOT_KNOW_ALL_MSG;
+                createMarker(jsonFileRc, msg);
+              }
+            }
+
+            // re-index to reflect new paths and macros in editor views
+            // serializeLanguageSettings(currentCfgDescription);
+            if (!initializingWorkbench) {
+              final ICElement[] tuSelection = { CoreModel.getDefault().create(project) };
+              CCorePlugin.getIndexManager().update(tuSelection, IIndexManager.UPDATE_ALL);
+            }
+            // triggering UI update to show newly detected include paths in
+            // Includes folder is USELESS. It looks like ICProject#getIncludeReferences() is only
+            // updated when the project is opened or the user clicks 'Apply' in the
+            // Preprocessor Include Paths page.
+          } else {
+            // file format error
+            final String msg = "File does not seem to be in JSON format. " + WORKBENCH_WILL_NOT_KNOW_ALL_MSG;
+            createMarker(jsonFileRc, msg);
+          }
+        } catch (IOException ex) {
+          final String msg = "Failed to read file " + jsonFile + ". " + WORKBENCH_WILL_NOT_KNOW_ALL_MSG;
+          createMarker(jsonFileRc, msg);
+        } finally {
+          if (in != null)
+            try {
+              in.close();
+            } catch (IOException ignore) {
+            }
+        }
+        return true;
       }
     }
-    // no json file was produced in the build
-    final String msg = "File '" + jsonPath + "' was not created in the build. " + WORKBENCH_WILL_NOT_KNOW_ALL_MSG;
-    createMarker(jsonFileRc, msg);
     return false;
   }
 
