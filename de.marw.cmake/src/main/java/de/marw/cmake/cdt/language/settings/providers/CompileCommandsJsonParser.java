@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.WeakHashMap;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.eclipse.cdt.build.core.scannerconfig.ScannerConfigNature;
@@ -485,22 +486,17 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
      * include dirs, ALSO add these entries to the project resource to make them show up in the UI in the includes
      * folder...
      */
-    List<ICLanguageSettingEntry> allEntries = entries.stream().filter(e -> e.getKind() == ICSettingEntry.INCLUDE_PATH)
-        .collect(Collectors.toList());
-    // avoid duplicate entries by using a Set...
+    Predicate<ICLanguageSettingEntry> isInclDir = e -> e.getKind() == ICSettingEntry.INCLUDE_PATH;
+    List<ICLanguageSettingEntry> newEntries = entries.stream().filter(isInclDir).collect(Collectors.toList());
+
     List<ICLanguageSettingEntry> oldEntries = storage.getSettingEntries(null, languageId);
     // add new items only, maintain list order
     if (oldEntries != null) {
-      HashSet<ICLanguageSettingEntry> oldSet = new HashSet<>(oldEntries);
-      oldEntries = new ArrayList<>(oldEntries); // as modifiable list
-      for (ICLanguageSettingEntry e : allEntries) {
-        if (!oldSet.contains(e))
-          oldEntries.add(e);
-      }
-    } else {
-      oldEntries = entries;
+      // filter duplicates by using a Set...
+      Set<ICLanguageSettingEntry> oldSet = new HashSet<>(oldEntries);
+      newEntries = newEntries.stream().filter(e -> !oldSet.contains(e)).collect(Collectors.toList());
     }
-    storage.addSettingEntries(null, languageId, oldEntries);
+    storage.addSettingEntries(null, languageId, newEntries);
   }
 
   /*
@@ -642,6 +638,8 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
      *          language settings entries to set.
      */
     private void addSettingEntries(IResource rc, String languageId, List<ICLanguageSettingEntry> entries) {
+      if (entries.size() == 0)
+        return;
       /*
        * compile_commands.json holds entries per-file only and does not contain per-project or per-folder entries. So we
        * map the latter as project entries (=> null) to make the UI show the include directories we detected.
@@ -652,8 +650,10 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
       }
       List<ICLanguageSettingEntry> sentries = super.getSettingEntries(rcPath, languageId);
       if (sentries != null) {
-        entries = new ArrayList<>(entries);
-        entries.addAll(sentries);
+        // make list mutable
+        List<ICLanguageSettingEntry> tmp = new ArrayList<>(sentries);
+        tmp.addAll(entries);
+        entries = tmp;
       }
       // also tells the CommandLauncherManager (since CDT 9.4) so it can translate paths from docker container
       super.setSettingEntries(rcPath, languageId, entries);
