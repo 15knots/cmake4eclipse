@@ -29,8 +29,14 @@ Screenshots can be found at the <a href="https://marketplace.eclipse.org/content
  1. If you do not have any existing code, check out the [Sample Projects](https://github.com/15knots/cmake4eclipse-sample-projects), chose one and fill in your code.
  1. If you have an existing C/C++ project code, inside Eclipse, goto `Help:Help Contents`, then read the `CMake for CDT User Guide:Getting Started` node to adjust your project settings.
  
+---
 ## License
 The plugin is licensed under the <a href="http://www.eclipse.org/legal/epl-v10.html">Eclipse Public License Version 1.0 ("EPL")</a>.
+
+# System Requirements
+CDT v 8.7 or newer and Eclipse v 4.5 (Mars) or newer
+
+Java 8 or newer
 
 # Installation Instructions
 The easiest way is to drag this: <a href="http://marketplace.eclipse.org/marketplace-client-intro?mpc_install=2318334" class="drag" title="Drag to your running Eclipse workbench to install cmake4eclipse">
@@ -52,6 +58,16 @@ There is a run configuration for eclipse to invoke maven `build cmake4eclipse` p
 
 ---
 # Release Notes
+## 1.12.1 (upcoming)
+### Changes
+- Fixed #86: Parsing compile_commands.json creates duplicate entries.
+- Fixed #85: Poor workbench startup performance due to doing a IIndexManger.reindex().
+- Fixed #84: CMAKE_EXPORT_COMPILE_COMMANDS Parser no longer detects macros specified on a command-line.
+- Fixed #79: CMAKE_EXPORT_COMPILE_COMMANDS Parser does not detect compiler-built-in macros and include paths.
+- Builtins-Dtector get no longer started in non-existing CWD.
+- Plugin now requires Java 8, Eclipse 4.5 (mars) and CDT 8.7 to run.
+- Reworked Documentation.
+
 ## 1.12.0 (2018-07-04)
 ### Changes
 - Fixed #79: CMAKE_EXPORT_COMPILE_COMMANDS Parser does not detect compiler-built-in macros and include paths. (Forget CDT's GCC-builtin-specs-detector:-)
@@ -131,9 +147,9 @@ There is a run configuration for eclipse to invoke maven `build cmake4eclipse` p
 ### Repository URL
 `jar:https://bintray.com/artifact/download/15knots/p2-zip/cmake4eclipse-1.4.8.zip!/`
 ### System Requirements
-CDT v 8.1.0 or higher and Eclipse v 3.8.0 (Juno) or higher
+CDT v 8.7 or newer and Eclipse v 4.5 (Mars) or newer
 
-Java 7 or newer
+Java 8 or newer
 
 ## 1.4.7 (2017-04-11)
 ### Changes
