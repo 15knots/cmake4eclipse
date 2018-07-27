@@ -48,7 +48,12 @@ Alternatively, **cmake4eclipse** can be installed into Eclipse using the "Instal
 This composite update site is for use in a Eclipse workbench and contains the latest release as well as selected older releases:
 https://raw.githubusercontent.com/15knots/cmake4eclipse/master/releng/comp-update/.
 
-Tool integrators will find each release at [bintray](https://bintray.com/15knots/p2-zip/cmake4eclipse#files) (zipped p2 repositories for integration into a target platform).
+Tool integrators will find each release at [bintray](https://bintray.com/15knots/p2-zip/cmake4eclipse#files).
+Each release is provided as a standalone zipped p2 repository and can be consumed in a PDE target platform. To add one
+of these repositories to your target platform, add a **Software Site** and enter a URL for the location as
+`**jar:**https://dl.bintray.com/15knots/p2-zip/cmake4eclipse-1.12.1.zip**!/**` (note the leading `jar:` and the trailing
+`!/`).
+
 
 ### Debug and Build
 This project uses Apache maven as its build system.
