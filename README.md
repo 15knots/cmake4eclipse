@@ -64,9 +64,9 @@ There is a run configuration for eclipse to invoke maven `build cmake4eclipse` p
 - Fixed #85: Poor workbench startup performance due to doing a IIndexManger.reindex().
 - Fixed #84: CMAKE_EXPORT_COMPILE_COMMANDS Parser no longer detects macros specified on a command-line.
 - Fixed #79: CMAKE_EXPORT_COMPILE_COMMANDS Parser does not detect compiler-built-in macros and include paths.
-- Builtins-Dtector get no longer started in non-existing CWD.
+- Builtins-detector get no longer started in non-existing CWD.
 - Plugin now requires Java 8, Eclipse 4.5 (mars) and CDT 8.7 to run.
-- Reworked Documentation.
+- Reworked documentation (a little).
 
 ## 1.12.0 (2018-07-04)
 ### Changes
