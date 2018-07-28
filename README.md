@@ -63,7 +63,7 @@ There is a run configuration for eclipse to invoke maven `build cmake4eclipse` p
 
 ---
 # Release Notes
-## 1.12.1 (upcoming)
+## 1.12.1 (2018-07-28)
 ### Changes
 - Fixed #86: Parsing compile_commands.json creates duplicate entries.
 - Fixed #85: Poor workbench startup performance due to doing a IIndexManger.reindex().
