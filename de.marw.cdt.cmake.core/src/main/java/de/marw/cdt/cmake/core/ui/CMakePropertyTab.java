@@ -92,7 +92,7 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
 
     // output folder group
     {
-      Group gr = WidgetHelper.createGroup(usercomp, SWT.FILL, 2, "Build output location (relative to project root)", 2);
+      Group gr = WidgetHelper.createGroup(usercomp, SWT.FILL, 2, "Build output location (relative to project or absolute)", 2);
 
       setupLabel(gr, "&Folder", 1, SWT.BEGINNING);
 

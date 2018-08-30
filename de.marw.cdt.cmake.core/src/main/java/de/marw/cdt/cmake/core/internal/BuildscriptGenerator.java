@@ -40,10 +40,12 @@ import org.eclipse.cdt.managedbuilder.makegen.IManagedBuilderMakefileGenerator2;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IPathVariableManager;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceStatus;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ILog;
@@ -147,13 +149,65 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       String buildPathString = buildP.toString();
       buildPathString = mngr.resolveValue(buildPathString, "", "",
           ManagedBuildManager.getDescriptionForConfiguration(config));
-      buildP= new Path(buildPathString);
+      buildP = new Path(buildPathString);
     } catch (CdtVariableException e) {
       log.log(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID,
           "variable expansion for build directory failed", e));
     }
 
-    buildFolder = project.getFolder(buildP);
+    // if the path is absolute, it is necessary to link the external directory
+    // into the project to use it
+    if (buildP.isAbsolute()) {
+      buildFolder = project.getFolder("build_output");
+
+      if (buildFolder.exists()) {
+        return buildFolder;
+      }
+
+      try {
+        // create the folder if it does not exist
+        if (!buildP.toFile().isDirectory()) {
+          buildP.toFile().mkdirs();
+        }
+
+        final IWorkspace workspace = project.getWorkspace();
+        final IPathVariableManager pathMan = workspace.getPathVariableManager();
+        final String symLinkName = "CMAKE_BUILD_DIR";
+
+        if (!pathMan.validateName(symLinkName).isOK() || !pathMan.validateValue(buildP).isOK()) {
+          throw new Exception("invalid build path destination directory");
+        }
+
+        try {
+          pathMan.setURIValue(symLinkName, buildP.toFile().toURI());
+        } catch (CoreException e) {
+          throw new Exception("Error registering CMake destination path as variable: "
+              + buildP.toFile().toURI().toString());
+        }
+
+        final IPath location = new Path("CMAKE_BUILD_DIR");
+        final IStatus linkStatus = workspace.validateLinkLocation(buildFolder, location);
+        if (!linkStatus.isOK()) {
+          throw new Exception("validateLinkLocation failed: " + linkStatus.getMessage());
+        }
+
+        try {
+          buildFolder.createLink(location, IResource.NONE, null);
+        } catch (CoreException e) {
+          throw new Exception("failed to link build driectory: createLink failed");
+        }
+
+        log.log(new Status(IStatus.INFO, CdtPlugin.PLUGIN_ID,
+            "External build directory created successfully: " + buildP.toFile().toURI().toString()));
+      } catch (Exception e) {
+        log.log(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID,
+            "Failed to link external build directory", e));
+      }
+
+    } else {
+      buildFolder = project.getFolder(buildP);
+    }
+    
     return buildFolder;
   }
 
