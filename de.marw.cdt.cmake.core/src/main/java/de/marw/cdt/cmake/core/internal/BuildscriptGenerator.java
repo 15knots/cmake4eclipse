@@ -11,7 +11,11 @@
 package de.marw.cdt.cmake.core.internal;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
+import java.net.URI;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -29,6 +33,13 @@ import org.eclipse.cdt.core.resources.IConsole;
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
 import org.eclipse.cdt.core.settings.model.ICSourceEntry;
 import org.eclipse.cdt.core.settings.model.util.CDataUtil;
+import org.eclipse.cdt.make.core.IMakeTarget;
+import org.eclipse.cdt.make.core.IMakeTargetManager;
+import org.eclipse.cdt.make.core.MakeCorePlugin;
+import org.eclipse.cdt.make.core.makefile.IMakefileReaderProvider;
+import org.eclipse.cdt.make.core.makefile.ITargetRule;
+import org.eclipse.cdt.make.internal.core.makefile.MakefileReader;
+import org.eclipse.cdt.make.internal.core.makefile.gnu.GNUMakefile;
 import org.eclipse.cdt.managedbuilder.buildproperties.IBuildProperty;
 import org.eclipse.cdt.managedbuilder.buildproperties.IBuildPropertyValue;
 import org.eclipse.cdt.managedbuilder.core.IBuildObjectProperties;
@@ -37,6 +48,7 @@ import org.eclipse.cdt.managedbuilder.core.IConfiguration;
 import org.eclipse.cdt.managedbuilder.core.IManagedBuildInfo;
 import org.eclipse.cdt.managedbuilder.core.ManagedBuildManager;
 import org.eclipse.cdt.managedbuilder.makegen.IManagedBuilderMakefileGenerator2;
+import org.eclipse.cdt.newmake.core.IMakeCommonBuildInfo;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IMarker;
@@ -418,6 +430,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       // check cmake exit status
       final int exitValue = proc.exitValue();
       if (exitValue == 0) {
+        setupMakeTargets();
         // success
         return new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.OK, null, null);
       } else {
@@ -429,6 +442,46 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       // process start failed
       errMsg = launcher.getErrorMessage();
       return new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.ERROR, errMsg, null);
+    }
+  }
+  
+  
+  private void setupMakeTargets() {
+    IPath makefilePath = buildFolder.getLocation().append(getMakefileName());
+    log.log(new Status(IStatus.INFO, CdtPlugin.PLUGIN_ID,
+        "setting up make targets..." + makefilePath.toOSString()));
+    
+    final GNUMakefile makefile = new GNUMakefile();
+    try {
+      makefile.parse(makefilePath.toOSString(), new FileReader(makefilePath.toFile()));
+    } catch(IOException e) {
+      log.log(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID,
+          "failed to parse generated makefile", e));
+      return;
+    }
+    
+    IMakeTargetManager manager = MakeCorePlugin.getDefault().getTargetManager();
+    
+    String[] ids = manager.getTargetBuilders(project);
+    try {
+      for(ITargetRule rule : makefile.getTargetRules()) {
+        System.out.println("adding makefile target: " + rule.getTarget().toString());
+        IMakeTarget target = manager.createTarget(project, rule.getTarget().toString(), ids[0]);
+        target.setStopOnError(false);
+        target.setRunAllBuilders(false);
+        target.setUseDefaultBuildCmd(true);
+        target.setBuildAttribute(IMakeCommonBuildInfo.BUILD_COMMAND, "make");
+        target.setBuildAttribute(IMakeTarget.BUILD_LOCATION, buildFolder.getLocation().toOSString());
+        target.setBuildAttribute(IMakeTarget.BUILD_ARGUMENTS, "");
+        target.setBuildAttribute(IMakeTarget.BUILD_TARGET, rule.getTarget().toString());
+        manager.addTarget(project, target);
+      }
+      for(IMakeTarget t : manager.getTargets(project)) {
+        System.out.println("target_exists: " + t.getName() + "; build_target=" + t.getBuildTarget());
+      }
+    } catch (CoreException e) {
+      log.log(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID,
+          "failed to setup make targets", e));
     }
   }
 
