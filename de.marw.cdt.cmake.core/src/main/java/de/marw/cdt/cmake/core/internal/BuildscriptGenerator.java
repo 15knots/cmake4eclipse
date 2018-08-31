@@ -184,10 +184,11 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
 
         final IWorkspace workspace = project.getWorkspace();
         final IPathVariableManager pathMan = workspace.getPathVariableManager();
-        final String symLinkName = "CMAKE_BUILD_DIR";
+        // use a pseudo unique hashcode for each project to avoid errors when creating linked directories
+        final String symLinkName = "CMAKE_BUILD_DIR_" + Math.abs(project.getName().hashCode());
 
         if (!pathMan.validateName(symLinkName).isOK() || !pathMan.validateValue(buildP).isOK()) {
-          throw new Exception("invalid build path destination directory");
+          throw new Exception("invalid build path destination directory, " + symLinkName + ", " + pathMan.validateName(symLinkName).getMessage() + ", " + pathMan.validateValue(buildP).getMessage());
         }
 
         try {
@@ -197,7 +198,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
               + buildP.toFile().toURI().toString());
         }
 
-        final IPath location = new Path("CMAKE_BUILD_DIR");
+        final IPath location = new Path(symLinkName);
         final IStatus linkStatus = workspace.validateLinkLocation(buildFolder, location);
         if (!linkStatus.isOK()) {
           throw new Exception("validateLinkLocation failed: " + linkStatus.getMessage());
@@ -446,8 +447,9 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
   }
   
   
+  @SuppressWarnings("restriction")
   private void setupMakeTargets() {
-    IPath makefilePath = buildFolder.getLocation().append(getMakefileName());
+    final IPath makefilePath = buildFolder.getLocation().append(getMakefileName());
     log.log(new Status(IStatus.INFO, CdtPlugin.PLUGIN_ID,
         "setting up make targets..." + makefilePath.toOSString()));
     
@@ -460,13 +462,16 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       return;
     }
     
-    IMakeTargetManager manager = MakeCorePlugin.getDefault().getTargetManager();
-    
-    String[] ids = manager.getTargetBuilders(project);
+    final IMakeTargetManager manager = MakeCorePlugin.getDefault().getTargetManager();
+    final String[] ids = manager.getTargetBuilders(project);
+
     try {
+      for(final IMakeTarget t : manager.getTargets(project)) {
+        manager.removeTarget(t);
+      }
       for(ITargetRule rule : makefile.getTargetRules()) {
         System.out.println("adding makefile target: " + rule.getTarget().toString());
-        IMakeTarget target = manager.createTarget(project, rule.getTarget().toString(), ids[0]);
+        final IMakeTarget target = manager.createTarget(project, rule.getTarget().toString(), ids[0]);
         target.setStopOnError(false);
         target.setRunAllBuilders(false);
         target.setUseDefaultBuildCmd(true);
@@ -475,9 +480,6 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
         target.setBuildAttribute(IMakeTarget.BUILD_ARGUMENTS, "");
         target.setBuildAttribute(IMakeTarget.BUILD_TARGET, rule.getTarget().toString());
         manager.addTarget(project, target);
-      }
-      for(IMakeTarget t : manager.getTargets(project)) {
-        System.out.println("target_exists: " + t.getName() + "; build_target=" + t.getBuildTarget());
       }
     } catch (CoreException e) {
       log.log(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID,
