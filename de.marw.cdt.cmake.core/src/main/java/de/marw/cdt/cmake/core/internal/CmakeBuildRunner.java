@@ -85,6 +85,10 @@ public class CmakeBuildRunner extends ExternalBuildRunner {
       IMarkerGenerator markerGenerator,
       IncrementalProjectBuilder projectBuilder, IProgressMonitor monitor)
       throws CoreException {
+    final ICConfigurationDescription cfgd = ManagedBuildManager
+        .getDescriptionForConfiguration(configuration);
+    final CMakePreferences prefs = ConfigurationManager.getInstance()
+        .getOrLoad(cfgd);
     /*
      * wrap the passed-in builder into one that gets its build command from the
      * Cmake-generator. First do a sanity check.
@@ -92,8 +96,6 @@ public class CmakeBuildRunner extends ExternalBuildRunner {
     if (builder.getBaseId().equals("de.marw.cdt.cmake.core.genscriptbuilder")) {
       project.deleteMarkers(MARKER_ID, false, IResource.DEPTH_INFINITE);
 
-      final ICConfigurationDescription cfgd = ManagedBuildManager
-          .getDescriptionForConfiguration(configuration);
       final IPath builderCWD = cfgd.getBuildSetting().getBuilderCWD();
 
       if (kind == IncrementalProjectBuilder.CLEAN_BUILD) {
@@ -105,8 +107,6 @@ public class CmakeBuildRunner extends ExternalBuildRunner {
         }
       }
 
-      final CMakePreferences prefs = ConfigurationManager.getInstance()
-          .getOrLoad(cfgd);
       final AbstractOsPreferences osPrefs = AbstractOsPreferences
           .extractOsPreferences(prefs);
 
@@ -122,6 +122,11 @@ public class CmakeBuildRunner extends ExternalBuildRunner {
       builder = new CmakeBuildToolInjectorBuilder(builder,
           buildscriptProcessorCmd, generator);
     }
+    
+    if(prefs.isMakeDisabled() && prefs.shouldSkipNextBuild()) {
+      return true;
+    }
+
     return super.invokeBuild(kind, project, configuration, builder, console,
         markerGenerator, projectBuilder, monitor);
   }

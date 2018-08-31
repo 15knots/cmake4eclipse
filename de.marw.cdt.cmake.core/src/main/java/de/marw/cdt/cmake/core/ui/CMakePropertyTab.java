@@ -58,6 +58,8 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
   // Widgets
   /** Clear cmake-cache before build */
   private Button b_clearCache;
+  private Button b_disableMake;
+  private Button b_disableVerbose;
   private Button b_warnNoDev;
   private Button b_debugTryCompile;
   private Button b_debug;
@@ -157,6 +159,14 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
       b_clearCache = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2, "Forc&e cmake to run with each build");
       b_clearCache.setToolTipText("Useful if you are configuring a new project");
       b_clearCache.addListener(SWT.Selection, tsl);
+      
+      b_disableMake = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2, "Disa&ble execution of make after cmake");
+      b_disableMake.setToolTipText("Useful for configuring large projects with many small targets");
+      b_disableMake.addListener(SWT.Selection, tsl);
+      
+      b_disableVerbose = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2, "Disa&ble generation of verbose makefiles (!Warning! build output parsers may not work)");
+      b_disableVerbose.setToolTipText("Useful for getting a better overview of the log output");
+      b_disableVerbose.addListener(SWT.Selection, tsl);
     }
 
     // cmake options group...
@@ -292,6 +302,18 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
         bs.set(i, prefs[i].isClearCache());
       }
       enterTristateOrToggleMode(b_clearCache, bs, prefs.length);
+      
+      // b_disableMake...
+      for (int i = 0; i < prefs.length; i++) {
+        bs.set(i, prefs[i].isMakeDisabled());
+      }
+      enterTristateOrToggleMode(b_disableMake, bs, prefs.length);
+      
+      // b_disableVerbose...
+      for (int i = 0; i < prefs.length; i++) {
+        bs.set(i, prefs[i].isVerboseDisabled());
+      }
+      enterTristateOrToggleMode(b_disableVerbose, bs, prefs.length);
 
       // b_warnNoDev...
       bs.clear();
@@ -380,6 +402,8 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
       // all buttons are in toggle mode
       CMakePreferences pref = prefs[0];
       enterToggleMode(b_clearCache, pref.isClearCache());
+      enterToggleMode(b_disableMake, pref.isMakeDisabled());
+      enterToggleMode(b_disableVerbose, pref.isVerboseDisabled());
       enterToggleMode(b_warnNoDev, pref.isWarnNoDev());
       enterToggleMode(b_debug, pref.isDebugOutput());
       enterToggleMode(b_trace, pref.isTrace());
@@ -405,6 +429,10 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
 
         if (shouldSaveButtonSelection(b_clearCache))
           pref.setClearCache(b_clearCache.getSelection());
+        if (shouldSaveButtonSelection(b_disableMake))
+          pref.setMakeDisabled(b_disableMake.getSelection());
+        if (shouldSaveButtonSelection(b_disableVerbose))
+          pref.setVerboseDisabled(b_disableVerbose.getSelection());
         if (shouldSaveButtonSelection(b_warnNoDev))
           pref.setWarnNoDev(b_warnNoDev.getSelection());
         if (shouldSaveButtonSelection(b_debugTryCompile))
@@ -430,6 +458,8 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
       // we are editing a single configuration...
       CMakePreferences pref = prefs[0];
       pref.setClearCache(b_clearCache.getSelection());
+      pref.setMakeDisabled(b_disableMake.getSelection());
+      pref.setVerboseDisabled(b_disableVerbose.getSelection());
       pref.setWarnNoDev(b_warnNoDev.getSelection());
       pref.setDebugTryCompile(b_debugTryCompile.getSelection());
       pref.setDebugOutput(b_debug.getSelection());
