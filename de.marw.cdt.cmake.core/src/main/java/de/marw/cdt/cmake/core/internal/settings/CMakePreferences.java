@@ -43,6 +43,7 @@ public class CMakePreferences {
   private static final String ATTR_MAKE_DISABLED = "makeDisabled";
   private static final String ATTR_VERBOSE_DISABLED = "verboseDisabled";
   private static final String ATTR_GENERATE_MAKE_TARGETS = "generateMakeTargets";
+  private static final String ATTR_IGNORE_SINGLE_FILE_TARGETS = "ignoreSingleFileTargets";
   /**  */
   static final String ELEM_DEFINES = "defs";
   /**  */
@@ -66,6 +67,7 @@ public class CMakePreferences {
   private boolean makeDisabled;
   private boolean verboseDisabled;
   private boolean generateMakeTargets;
+  private boolean ignoreSingleFileTargets;
   
   // temporary volatile variable to skip the next build after a cmake run
   private boolean skipNextBuild = false;
@@ -114,6 +116,7 @@ public class CMakePreferences {
         makeDisabled = Boolean.parseBoolean(child.getAttribute(ATTR_MAKE_DISABLED));
         verboseDisabled = Boolean.parseBoolean(child.getAttribute(ATTR_VERBOSE_DISABLED));
         generateMakeTargets = Boolean.parseBoolean(child.getAttribute(ATTR_GENERATE_MAKE_TARGETS));
+        ignoreSingleFileTargets = Boolean.parseBoolean(child.getAttribute(ATTR_IGNORE_SINGLE_FILE_TARGETS));
         // options...
         warnNoDev = Boolean.parseBoolean(child.getAttribute(ATTR_WARN_NO_DEV));
         debugTryCompile = Boolean.parseBoolean(child
@@ -169,6 +172,11 @@ public class CMakePreferences {
       pOpts.setAttribute(ATTR_GENERATE_MAKE_TARGETS, String.valueOf(generateMakeTargets));
     } else {
       pOpts.removeAttribute(ATTR_GENERATE_MAKE_TARGETS);
+    }
+    if (ignoreSingleFileTargets) {
+      pOpts.setAttribute(ATTR_IGNORE_SINGLE_FILE_TARGETS, String.valueOf(ignoreSingleFileTargets));
+    } else {
+      pOpts.removeAttribute(ATTR_IGNORE_SINGLE_FILE_TARGETS);
     }
     if (warnNoDev) {
       pOpts.setAttribute(ATTR_WARN_NO_DEV, String.valueOf(warnNoDev));
@@ -439,5 +447,17 @@ public class CMakePreferences {
    */
   public void setGenerateMakeTargets(boolean generateMakeTargets) {
     this.generateMakeTargets = generateMakeTargets;
+  }
+
+  /** Gets whether Make targets that compile only one file will be generated after cmake
+   */
+  public boolean shouldIgnoreSingleFileTargets() {
+    return ignoreSingleFileTargets;
+  }
+  
+  /** Sets whether Make targets that compile only one file will be generated after cmake
+   */
+  public void setIgnoreSingleFileTargets(boolean ignoreSingleFileTargets) {
+    this.ignoreSingleFileTargets = ignoreSingleFileTargets;
   }
 }

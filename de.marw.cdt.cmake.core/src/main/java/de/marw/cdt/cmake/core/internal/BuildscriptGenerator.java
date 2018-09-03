@@ -436,7 +436,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
         final CMakePreferences prefs = ConfigurationManager.getInstance().getOrLoad(cfgd);
         
         if(prefs.shouldGenerateMakeTargets()) {
-          setupMakeTargets();
+          setupMakeTargets(prefs);
         }
         
         // success
@@ -455,7 +455,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
   
   
   @SuppressWarnings("restriction")
-  private void setupMakeTargets() {
+  private void setupMakeTargets(CMakePreferences prefs) {
     final IPath makefilePath = buildFolder.getLocation().append(getMakefileName());
     log.log(new Status(IStatus.INFO, CdtPlugin.PLUGIN_ID,
         "setting up make targets..." + makefilePath.toOSString()));
@@ -477,7 +477,12 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
         manager.removeTarget(t);
       }
       for(ITargetRule rule : makefile.getTargetRules()) {
-        System.out.println("adding makefile target: " + rule.getTarget().toString());
+        String targetName = rule.getTarget().toString();
+        if(prefs.shouldIgnoreSingleFileTargets()) {
+          if(targetName.endsWith(".i") || targetName.endsWith(".o") || targetName.endsWith(".s")) {
+            continue;
+          }
+        }
         final IMakeTarget target = manager.createTarget(project, rule.getTarget().toString(), ids[0]);
         target.setStopOnError(false);
         target.setRunAllBuilders(false);
