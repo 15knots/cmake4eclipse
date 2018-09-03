@@ -42,6 +42,7 @@ public class CMakePreferences {
   private static final String ATTR_CLEAR_CACHE = "clearCache";
   private static final String ATTR_MAKE_DISABLED = "makeDisabled";
   private static final String ATTR_VERBOSE_DISABLED = "verboseDisabled";
+  private static final String ATTR_GENERATE_MAKE_TARGETS = "generateMakeTargets";
   /**  */
   static final String ELEM_DEFINES = "defs";
   /**  */
@@ -64,6 +65,7 @@ public class CMakePreferences {
   private boolean clearCache;
   private boolean makeDisabled;
   private boolean verboseDisabled;
+  private boolean generateMakeTargets;
   
   // temporary volatile variable to skip the next build after a cmake run
   private boolean skipNextBuild = false;
@@ -111,6 +113,7 @@ public class CMakePreferences {
         clearCache= Boolean.parseBoolean(child.getAttribute(ATTR_CLEAR_CACHE));
         makeDisabled = Boolean.parseBoolean(child.getAttribute(ATTR_MAKE_DISABLED));
         verboseDisabled = Boolean.parseBoolean(child.getAttribute(ATTR_VERBOSE_DISABLED));
+        generateMakeTargets = Boolean.parseBoolean(child.getAttribute(ATTR_GENERATE_MAKE_TARGETS));
         // options...
         warnNoDev = Boolean.parseBoolean(child.getAttribute(ATTR_WARN_NO_DEV));
         debugTryCompile = Boolean.parseBoolean(child
@@ -161,6 +164,11 @@ public class CMakePreferences {
       pOpts.setAttribute(ATTR_VERBOSE_DISABLED, String.valueOf(verboseDisabled));
     } else {
       pOpts.removeAttribute(ATTR_VERBOSE_DISABLED);
+    }
+    if (generateMakeTargets) {
+      pOpts.setAttribute(ATTR_GENERATE_MAKE_TARGETS, String.valueOf(generateMakeTargets));
+    } else {
+      pOpts.removeAttribute(ATTR_GENERATE_MAKE_TARGETS);
     }
     if (warnNoDev) {
       pOpts.setAttribute(ATTR_WARN_NO_DEV, String.valueOf(warnNoDev));
@@ -415,7 +423,21 @@ public class CMakePreferences {
     return false;
   }
   
+  /** Sets whether the next build shall be skipped
+   */
   public void setSkipNextBuild(boolean skipNextBuild) {
     this.skipNextBuild = skipNextBuild;
+  }
+
+  /** Gets whether Make targets will be generated after cmake
+   */
+  public boolean shouldGenerateMakeTargets() {
+    return generateMakeTargets;
+  }
+  
+  /** Sets whether Make targets will be generated after cmake
+   */
+  public void setGenerateMakeTargets(boolean generateMakeTargets) {
+    this.generateMakeTargets = generateMakeTargets;
   }
 }

@@ -432,7 +432,13 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       // check cmake exit status
       final int exitValue = proc.exitValue();
       if (exitValue == 0) {
-        setupMakeTargets();
+        final ICConfigurationDescription cfgd = ManagedBuildManager.getDescriptionForConfiguration(config);
+        final CMakePreferences prefs = ConfigurationManager.getInstance().getOrLoad(cfgd);
+        
+        if(prefs.shouldGenerateMakeTargets()) {
+          setupMakeTargets();
+        }
+        
         // success
         return new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.OK, null, null);
       } else {

@@ -60,6 +60,7 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
   private Button b_clearCache;
   private Button b_disableMake;
   private Button b_disableVerbose;
+  private Button b_enableGenMakeTargets;
   private Button b_warnNoDev;
   private Button b_debugTryCompile;
   private Button b_debug;
@@ -163,6 +164,10 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
       b_disableMake = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2, "Disa&ble execution of make after cmake");
       b_disableMake.setToolTipText("Useful for configuring large projects with many small targets");
       b_disableMake.addListener(SWT.Selection, tsl);
+      
+      b_enableGenMakeTargets = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2, "Gene&rate Make targets from cmake file");
+      b_enableGenMakeTargets.setToolTipText("Generates targets to be dipslayed in the 'Build Target' UI");
+      b_enableGenMakeTargets.addListener(SWT.Selection, tsl);
     }
 
     // cmake options group...
@@ -314,6 +319,12 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
         bs.set(i, prefs[i].isVerboseDisabled());
       }
       enterTristateOrToggleMode(b_disableVerbose, bs, prefs.length);
+      
+      // b_enableGenMakeTargets...
+      for (int i = 0; i < prefs.length; i++) {
+        bs.set(i, prefs[i].shouldGenerateMakeTargets());
+      }
+      enterTristateOrToggleMode(b_enableGenMakeTargets, bs, prefs.length);
 
       // b_warnNoDev...
       bs.clear();
@@ -404,6 +415,7 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
       enterToggleMode(b_clearCache, pref.isClearCache());
       enterToggleMode(b_disableMake, pref.isMakeDisabled());
       enterToggleMode(b_disableVerbose, pref.isVerboseDisabled());
+      enterToggleMode(b_enableGenMakeTargets, pref.shouldGenerateMakeTargets());
       enterToggleMode(b_warnNoDev, pref.isWarnNoDev());
       enterToggleMode(b_debug, pref.isDebugOutput());
       enterToggleMode(b_trace, pref.isTrace());
@@ -433,6 +445,8 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
           pref.setMakeDisabled(b_disableMake.getSelection());
         if (shouldSaveButtonSelection(b_disableVerbose))
           pref.setVerboseDisabled(b_disableVerbose.getSelection());
+        if (shouldSaveButtonSelection(b_enableGenMakeTargets))
+          pref.setGenerateMakeTargets(b_enableGenMakeTargets.getSelection());
         if (shouldSaveButtonSelection(b_warnNoDev))
           pref.setWarnNoDev(b_warnNoDev.getSelection());
         if (shouldSaveButtonSelection(b_debugTryCompile))
@@ -460,6 +474,7 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
       pref.setClearCache(b_clearCache.getSelection());
       pref.setMakeDisabled(b_disableMake.getSelection());
       pref.setVerboseDisabled(b_disableVerbose.getSelection());
+      pref.setGenerateMakeTargets(b_enableGenMakeTargets.getSelection());
       pref.setWarnNoDev(b_warnNoDev.getSelection());
       pref.setDebugTryCompile(b_debugTryCompile.getSelection());
       pref.setDebugOutput(b_debug.getSelection());
