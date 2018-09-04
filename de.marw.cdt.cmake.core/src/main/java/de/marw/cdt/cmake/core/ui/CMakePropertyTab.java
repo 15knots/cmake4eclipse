@@ -58,8 +58,6 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
   // Widgets
   /** Clear cmake-cache before build */
   private Button b_clearCache;
-  private Button b_disableMake;
-  private Button b_disableVerbose;
   private Button b_enableGenMakeTargets;
   private Button b_ignoreSingleFileTargets;
   private Button b_warnNoDev;
@@ -161,14 +159,6 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
       b_clearCache = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2, "Forc&e cmake to run with each build");
       b_clearCache.setToolTipText("Useful if you are configuring a new project");
       b_clearCache.addListener(SWT.Selection, tsl);
-      
-      b_disableMake = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2, "Disa&ble execution of make after cmake");
-      b_disableMake.setToolTipText("Useful for configuring large projects with many small targets");
-      b_disableMake.addListener(SWT.Selection, tsl);
-
-      b_disableVerbose = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2, "Disa&ble generation of verbose makefiles (!Warning! build output parsers may not work)");
-      b_disableVerbose.setToolTipText("Useful for getting a better overview of the log output");
-      b_disableVerbose.addListener(SWT.Selection, tsl);
       
       b_enableGenMakeTargets = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2, "Gene&rate Make targets from cmake file");
       b_enableGenMakeTargets.setToolTipText("Generates targets to be dipslayed in the 'Build Target' UI");
@@ -329,18 +319,6 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
       }
       enterTristateOrToggleMode(b_clearCache, bs, prefs.length);
       
-      // b_disableMake...
-      for (int i = 0; i < prefs.length; i++) {
-        bs.set(i, prefs[i].isMakeDisabled());
-      }
-      enterTristateOrToggleMode(b_disableMake, bs, prefs.length);
-      
-      // b_disableVerbose...
-      for (int i = 0; i < prefs.length; i++) {
-        bs.set(i, prefs[i].isVerboseDisabled());
-      }
-      enterTristateOrToggleMode(b_disableVerbose, bs, prefs.length);
-      
       // b_enableGenMakeTargets...
       for (int i = 0; i < prefs.length; i++) {
         bs.set(i, prefs[i].shouldGenerateMakeTargets());
@@ -440,8 +418,6 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
       // all buttons are in toggle mode
       CMakePreferences pref = prefs[0];
       enterToggleMode(b_clearCache, pref.isClearCache());
-      enterToggleMode(b_disableMake, pref.isMakeDisabled());
-      enterToggleMode(b_disableVerbose, pref.isVerboseDisabled());
       enterToggleMode(b_enableGenMakeTargets, pref.shouldGenerateMakeTargets());
       b_ignoreSingleFileTargets.setEnabled(pref.shouldGenerateMakeTargets());
       enterToggleMode(b_ignoreSingleFileTargets, pref.shouldIgnoreSingleFileTargets());
@@ -470,10 +446,6 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
 
         if (shouldSaveButtonSelection(b_clearCache))
           pref.setClearCache(b_clearCache.getSelection());
-        if (shouldSaveButtonSelection(b_disableMake))
-          pref.setMakeDisabled(b_disableMake.getSelection());
-        if (shouldSaveButtonSelection(b_disableVerbose))
-          pref.setVerboseDisabled(b_disableVerbose.getSelection());
         if (shouldSaveButtonSelection(b_enableGenMakeTargets))
           pref.setGenerateMakeTargets(b_enableGenMakeTargets.getSelection());
         if (shouldSaveButtonSelection(b_ignoreSingleFileTargets))
@@ -503,8 +475,6 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
       // we are editing a single configuration...
       CMakePreferences pref = prefs[0];
       pref.setClearCache(b_clearCache.getSelection());
-      pref.setMakeDisabled(b_disableMake.getSelection());
-      pref.setVerboseDisabled(b_disableVerbose.getSelection());
       pref.setGenerateMakeTargets(b_enableGenMakeTargets.getSelection());
       pref.setIgnoreSingleFileTargets(b_ignoreSingleFileTargets.getSelection());
       pref.setWarnNoDev(b_warnNoDev.getSelection());

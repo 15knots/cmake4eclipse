@@ -343,7 +343,6 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       return status;
     }
 
-    prefs.setSkipNextBuild(true);
     return new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.OK, "", null);
   }
 
@@ -505,11 +504,9 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     // load project properties..
     final ICConfigurationDescription cfgd = ManagedBuildManager.getDescriptionForConfiguration(config);
 
-    final CMakePreferences prefs = ConfigurationManager.getInstance().getOrLoad(cfgd);
-    
     boolean needExportComileCommands = true;
     boolean needVerboseBuild = false;
-    if(!prefs.isVerboseDisabled()){
+    {
       final List<ILanguageSettingsProvider> lsps =
           ((ILanguageSettingsProvidersKeeper) cfgd).getLanguageSettingProviders();
       for (ILanguageSettingsProvider lsp : lsps) {
@@ -520,6 +517,8 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
         }
       }
     }
+
+    final CMakePreferences prefs = ConfigurationManager.getInstance().getOrLoad(cfgd);
 
     List<String> args = new ArrayList<>();
 

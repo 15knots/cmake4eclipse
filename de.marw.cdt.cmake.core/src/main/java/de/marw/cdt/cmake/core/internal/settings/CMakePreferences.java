@@ -40,8 +40,6 @@ public class CMakePreferences {
   private static final String ATTR_WARN_UNITIALIZED = "warnUnitialized";
   private static final String ATTR_WARN_UNUSED = "warnUnused";
   private static final String ATTR_CLEAR_CACHE = "clearCache";
-  private static final String ATTR_MAKE_DISABLED = "makeDisabled";
-  private static final String ATTR_VERBOSE_DISABLED = "verboseDisabled";
   private static final String ATTR_GENERATE_MAKE_TARGETS = "generateMakeTargets";
   private static final String ATTR_IGNORE_SINGLE_FILE_TARGETS = "ignoreSingleFileTargets";
   /**  */
@@ -64,13 +62,8 @@ public class CMakePreferences {
 
   private WindowsPreferences windowsPreferences = new WindowsPreferences();
   private boolean clearCache;
-  private boolean makeDisabled;
-  private boolean verboseDisabled;
   private boolean generateMakeTargets;
   private boolean ignoreSingleFileTargets;
-  
-  // temporary volatile variable to skip the next build after a cmake run
-  private boolean skipNextBuild = false;
 
   /**
    * Creates a new object, initialized with all default values.
@@ -113,12 +106,10 @@ public class CMakePreferences {
     for (ICStorageElement child : children) {
       if (ELEM_OPTIONS.equals(child.getName())) {
         clearCache= Boolean.parseBoolean(child.getAttribute(ATTR_CLEAR_CACHE));
-        makeDisabled = Boolean.parseBoolean(child.getAttribute(ATTR_MAKE_DISABLED));
-        verboseDisabled = Boolean.parseBoolean(child.getAttribute(ATTR_VERBOSE_DISABLED));
-        generateMakeTargets = Boolean.parseBoolean(child.getAttribute(ATTR_GENERATE_MAKE_TARGETS));
-        ignoreSingleFileTargets = Boolean.parseBoolean(child.getAttribute(ATTR_IGNORE_SINGLE_FILE_TARGETS));
         // options...
         warnNoDev = Boolean.parseBoolean(child.getAttribute(ATTR_WARN_NO_DEV));
+        generateMakeTargets = Boolean.parseBoolean(child.getAttribute(ATTR_GENERATE_MAKE_TARGETS));
+        ignoreSingleFileTargets = Boolean.parseBoolean(child.getAttribute(ATTR_IGNORE_SINGLE_FILE_TARGETS));
         debugTryCompile = Boolean.parseBoolean(child
             .getAttribute(ATTR_DEBUG_TRYCOMPILE));
         debugOutput = Boolean.parseBoolean(child.getAttribute(ATTR_DEBUG));
@@ -157,16 +148,6 @@ public class CMakePreferences {
       pOpts.setAttribute(ATTR_CLEAR_CACHE, String.valueOf(clearCache));
     } else {
       pOpts.removeAttribute(ATTR_CLEAR_CACHE);
-    }
-    if (makeDisabled) {
-      pOpts.setAttribute(ATTR_MAKE_DISABLED, String.valueOf(makeDisabled));
-    } else {
-      pOpts.removeAttribute(ATTR_MAKE_DISABLED);
-    }
-    if (verboseDisabled) {
-      pOpts.setAttribute(ATTR_VERBOSE_DISABLED, String.valueOf(verboseDisabled));
-    } else {
-      pOpts.removeAttribute(ATTR_VERBOSE_DISABLED);
     }
     if (generateMakeTargets) {
       pOpts.setAttribute(ATTR_GENERATE_MAKE_TARGETS, String.valueOf(generateMakeTargets));
@@ -395,46 +376,6 @@ public class CMakePreferences {
    */
   public void setClearCache(boolean clearCache) {
     this.clearCache= clearCache;
-  }
-
-  /** Gets whether to disable running make after the cmake configuration.
-   */
-  public boolean isMakeDisabled() {
-    return makeDisabled;
-  }
-
-  /** Sets whether to disable running make after the cmake configuration.
-   */
-  public void setMakeDisabled(boolean makeDisabled) {
-    this.makeDisabled = makeDisabled;
-  }
-  
-  /** Gets whether to disable the verbose output for makefiles.
-   */
-  public boolean isVerboseDisabled() {
-    return verboseDisabled;
-  }
-
-  /** Sets whether to disable the verbose output for makefiles.
-   */
-  public void setVerboseDisabled(boolean verboseDisabled) {
-    this.verboseDisabled = verboseDisabled;
-  }
-  
-  /** Gets whether the next build shall be skipped, retrieves the value and sets it to false
-   */
-  public boolean shouldSkipNextBuild() {
-    if(skipNextBuild) {
-      skipNextBuild = false;
-      return true;
-    }
-    return false;
-  }
-  
-  /** Sets whether the next build shall be skipped
-   */
-  public void setSkipNextBuild(boolean skipNextBuild) {
-    this.skipNextBuild = skipNextBuild;
   }
 
   /** Gets whether Make targets will be generated after cmake
