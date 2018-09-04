@@ -165,6 +165,10 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
       b_disableMake = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2, "Disa&ble execution of make after cmake");
       b_disableMake.setToolTipText("Useful for configuring large projects with many small targets");
       b_disableMake.addListener(SWT.Selection, tsl);
+
+      b_disableVerbose = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2, "Disa&ble generation of verbose makefiles (!Warning! build output parsers may not work)");
+      b_disableVerbose.setToolTipText("Useful for getting a better overview of the log output");
+      b_disableVerbose.addListener(SWT.Selection, tsl);
       
       b_enableGenMakeTargets = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2, "Gene&rate Make targets from cmake file");
       b_enableGenMakeTargets.setToolTipText("Generates targets to be dipslayed in the 'Build Target' UI");
@@ -210,10 +214,6 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
       b_warnUnused = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2,
           "Warn about un&used variables \t(--warn-unused-vars)");
       b_warnUnused.addListener(SWT.Selection, tsl);
-      
-      b_disableVerbose = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2, "Disable gener&ation of verbose makefiles (!Warning! build output parsers may not work)");
-      b_disableVerbose.setToolTipText("Useful for getting a better overview of the log output");
-      b_disableVerbose.addListener(SWT.Selection, tsl);
 
       // cmake prepopulate cache group...
       {
