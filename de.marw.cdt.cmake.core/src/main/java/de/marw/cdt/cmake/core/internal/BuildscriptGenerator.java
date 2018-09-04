@@ -11,15 +11,13 @@
 package de.marw.cdt.cmake.core.internal;
 
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.Reader;
-import java.net.URI;
-import java.net.URL;
+import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.eclipse.cdt.core.CCorePlugin;
 import org.eclipse.cdt.core.ConsoleOutputStream;
@@ -36,10 +34,6 @@ import org.eclipse.cdt.core.settings.model.util.CDataUtil;
 import org.eclipse.cdt.make.core.IMakeTarget;
 import org.eclipse.cdt.make.core.IMakeTargetManager;
 import org.eclipse.cdt.make.core.MakeCorePlugin;
-import org.eclipse.cdt.make.core.makefile.IMakefileReaderProvider;
-import org.eclipse.cdt.make.core.makefile.ITargetRule;
-import org.eclipse.cdt.make.internal.core.makefile.MakefileReader;
-import org.eclipse.cdt.make.internal.core.makefile.gnu.GNUMakefile;
 import org.eclipse.cdt.managedbuilder.buildproperties.IBuildProperty;
 import org.eclipse.cdt.managedbuilder.buildproperties.IBuildPropertyValue;
 import org.eclipse.cdt.managedbuilder.core.IBuildObjectProperties;
@@ -453,47 +447,49 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     }
   }
   
+  private void tryAddMakeTarget(
+      IMakeTargetManager tm,
+      String buildLocation,
+      String targetBuilder,
+      String targetName) {
+    try {
+      final IMakeTarget target = tm.createTarget(project, targetName, targetBuilder);
+      target.setStopOnError(false);
+      target.setRunAllBuilders(false);
+      target.setUseDefaultBuildCmd(true);
+      target.setBuildAttribute(IMakeCommonBuildInfo.BUILD_COMMAND, "make");
+      target.setBuildAttribute(IMakeTarget.BUILD_LOCATION, buildLocation);
+      target.setBuildAttribute(IMakeTarget.BUILD_ARGUMENTS, "");
+      target.setBuildAttribute(IMakeTarget.BUILD_TARGET, targetName);
+      tm.addTarget(project, target);
+    } catch (CoreException e) {
+      log.log(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID,
+          "failed to setup make target \"" + targetName + "\"", e));
+    }
+  }
   
-  @SuppressWarnings("restriction")
   private void setupMakeTargets(CMakePreferences prefs) {
     final IPath makefilePath = buildFolder.getLocation().append(getMakefileName());
     log.log(new Status(IStatus.INFO, CdtPlugin.PLUGIN_ID,
         "setting up make targets..." + makefilePath.toOSString()));
     
-    final GNUMakefile makefile = new GNUMakefile();
-    try {
-      makefile.parse(makefilePath.toOSString(), new FileReader(makefilePath.toFile()));
-    } catch(IOException e) {
-      log.log(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID,
-          "failed to parse generated makefile", e));
-      return;
-    }
-    
     final IMakeTargetManager manager = MakeCorePlugin.getDefault().getTargetManager();
     final String[] ids = manager.getTargetBuilders(project);
-
-    try {
+    final String buildLocation = buildFolder.getLocation().toOSString();
+    
+    try (Stream<String> stream = Files.lines(makefilePath.toFile().toPath())) {
       for(final IMakeTarget t : manager.getTargets(project)) {
         manager.removeTarget(t);
       }
-      for(ITargetRule rule : makefile.getTargetRules()) {
-        String targetName = rule.getTarget().toString();
-        if(prefs.shouldIgnoreSingleFileTargets()) {
-          if(targetName.endsWith(".i") || targetName.endsWith(".o") || targetName.endsWith(".s")) {
-            continue;
-          }
-        }
-        final IMakeTarget target = manager.createTarget(project, rule.getTarget().toString(), ids[0]);
-        target.setStopOnError(false);
-        target.setRunAllBuilders(false);
-        target.setUseDefaultBuildCmd(true);
-        target.setBuildAttribute(IMakeCommonBuildInfo.BUILD_COMMAND, "make");
-        target.setBuildAttribute(IMakeTarget.BUILD_LOCATION, buildFolder.getLocation().toOSString());
-        target.setBuildAttribute(IMakeTarget.BUILD_ARGUMENTS, "");
-        target.setBuildAttribute(IMakeTarget.BUILD_TARGET, rule.getTarget().toString());
-        manager.addTarget(project, target);
-      }
-    } catch (CoreException e) {
+      
+      // add all make targets of the generated makefile to the IDE
+      stream
+        .filter(s -> s.length() > 1 && Character.isAlphabetic(s.charAt(0)) && s.contains(":"))
+        .map(s -> s.substring(0, s.indexOf(":")))
+        .filter(s -> !prefs.shouldIgnoreSingleFileTargets() || (!s.endsWith(".i") && !s.endsWith(".o") && !s.endsWith(".s")))
+        .forEach(s -> tryAddMakeTarget(manager, buildLocation, ids[0], s));
+      
+    } catch (Exception e) {
       log.log(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID,
           "failed to setup make targets", e));
     }
