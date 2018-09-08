@@ -1,13 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?pde version="3.8"?><target name="cdt/8.7-eclipse/4.5.target" sequenceNumber="24">
+<?pde version="3.8"?><target name="cdt/8.7-eclipse/4.5.2" sequenceNumber="25">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.equinox.p2.sdk.feature.group" version="0.0.0"/>
-<unit id="org.eclipse.pde.api.tools.ee.feature.feature.group" version="0.0.0"/>
-<unit id="org.eclipse.platform.feature.group" version="0.0.0"/>
-<unit id="org.eclipse.platform.source.feature.group" version="0.0.0"/>
-<unit id="org.eclipse.rcp.source.feature.group" version="0.0.0"/>
-<unit id="org.eclipse.pde.feature.group" version="0.0.0"/>
+<unit id="org.eclipse.pde.api.tools.ee.feature.feature.group" version="1.0.1.v20140424-1723"/>
+<unit id="org.eclipse.sdk.ide" version="4.5.2.M20160212-1500"/>
 <repository location="http://download.eclipse.org/eclipse/updates/4.5/"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
@@ -15,12 +11,22 @@
 <unit id="org.eclipse.cdt.build.crossgcc.feature.group" version="0.0.0"/>
 <repository location="http://download.eclipse.org/tools/cdt/releases/8.7/"/>
 </location>
-<!--
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.pde.feature.group" version="0.0.0"/>
-<repository location="jar:http://ftp.gnome.org/mirror/eclipse.org/eclipse/downloads/drops4/R-4.7.3-201803010715/org.eclipse.pde-4.7.3.zip!/"/>
+<unit id="org.hamcrest" version="1.1.0.v20090501071000"/>
+<unit id="org.hamcrest.core" version="1.1.0.v20090501071000"/>
+<unit id="org.hamcrest.core.source" version="1.1.0.v20090501071000"/>
+<unit id="org.hamcrest.generator" version="1.1.0.v20090501071000"/>
+<unit id="org.hamcrest.generator.source" version="1.1.0.v20090501071000"/>
+<unit id="org.hamcrest.integration" version="1.1.0.v20090501071000"/>
+<unit id="org.hamcrest.integration.source" version="1.1.0.v20090501071000"/>
+<unit id="org.hamcrest.library" version="1.1.0.v20090501071000"/>
+<unit id="org.hamcrest.library.source" version="1.1.0.v20090501071000"/>
+<unit id="org.hamcrest.text" version="1.1.0.v20090501071000"/>
+<unit id="org.hamcrest.text.source" version="1.1.0.v20090501071000"/>
+<unit id="org.junit" version="4.10.0.v4_10_0_v20120426-0900"/>
+<unit id="org.junit.source" version="4.10.0.v4_10_0_v20120426-0900"/>
+<repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20130118183705/repository/"/>
 </location>
--->
 </locations>
 <targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 <launcherArgs>
