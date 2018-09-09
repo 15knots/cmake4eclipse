@@ -12,10 +12,12 @@ package de.marw.cdt.cmake.core.internal;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.eclipse.cdt.core.CCorePlugin;
 import org.eclipse.cdt.core.ConsoleOutputStream;
@@ -29,6 +31,9 @@ import org.eclipse.cdt.core.resources.IConsole;
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
 import org.eclipse.cdt.core.settings.model.ICSourceEntry;
 import org.eclipse.cdt.core.settings.model.util.CDataUtil;
+import org.eclipse.cdt.make.core.IMakeTarget;
+import org.eclipse.cdt.make.core.IMakeTargetManager;
+import org.eclipse.cdt.make.core.MakeCorePlugin;
 import org.eclipse.cdt.managedbuilder.buildproperties.IBuildProperty;
 import org.eclipse.cdt.managedbuilder.buildproperties.IBuildPropertyValue;
 import org.eclipse.cdt.managedbuilder.core.IBuildObjectProperties;
@@ -37,13 +42,16 @@ import org.eclipse.cdt.managedbuilder.core.IConfiguration;
 import org.eclipse.cdt.managedbuilder.core.IManagedBuildInfo;
 import org.eclipse.cdt.managedbuilder.core.ManagedBuildManager;
 import org.eclipse.cdt.managedbuilder.makegen.IManagedBuilderMakefileGenerator2;
+import org.eclipse.cdt.newmake.core.IMakeCommonBuildInfo;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IPathVariableManager;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceStatus;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ILog;
@@ -147,13 +155,66 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       String buildPathString = buildP.toString();
       buildPathString = mngr.resolveValue(buildPathString, "", "",
           ManagedBuildManager.getDescriptionForConfiguration(config));
-      buildP= new Path(buildPathString);
+      buildP = new Path(buildPathString);
     } catch (CdtVariableException e) {
       log.log(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID,
           "variable expansion for build directory failed", e));
     }
 
-    buildFolder = project.getFolder(buildP);
+    // if the path is absolute, it is necessary to link the external directory
+    // into the project to use it
+    if (buildP.isAbsolute()) {
+      buildFolder = project.getFolder("build_output");
+
+      if (buildFolder.exists()) {
+        return buildFolder;
+      }
+
+      try {
+        // create the folder if it does not exist
+        if (!buildP.toFile().isDirectory()) {
+          buildP.toFile().mkdirs();
+        }
+
+        final IWorkspace workspace = project.getWorkspace();
+        final IPathVariableManager pathMan = workspace.getPathVariableManager();
+        // use a pseudo unique hashcode for each project to avoid errors when creating linked directories
+        final String symLinkName = "CMAKE_BUILD_DIR_" + Math.abs(project.getName().hashCode());
+
+        if (!pathMan.validateName(symLinkName).isOK() || !pathMan.validateValue(buildP).isOK()) {
+          throw new Exception("invalid build path destination directory, " + symLinkName + ", " + pathMan.validateName(symLinkName).getMessage() + ", " + pathMan.validateValue(buildP).getMessage());
+        }
+
+        try {
+          pathMan.setURIValue(symLinkName, buildP.toFile().toURI());
+        } catch (CoreException e) {
+          throw new Exception("Error registering CMake destination path as variable: "
+              + buildP.toFile().toURI().toString());
+        }
+
+        final IPath location = new Path(symLinkName);
+        final IStatus linkStatus = workspace.validateLinkLocation(buildFolder, location);
+        if (!linkStatus.isOK()) {
+          throw new Exception("validateLinkLocation failed: " + linkStatus.getMessage());
+        }
+
+        try {
+          buildFolder.createLink(location, IResource.NONE, null);
+        } catch (CoreException e) {
+          throw new Exception("failed to link build driectory: createLink failed");
+        }
+
+        log.log(new Status(IStatus.INFO, CdtPlugin.PLUGIN_ID,
+            "External build directory created successfully: " + buildP.toFile().toURI().toString()));
+      } catch (Exception e) {
+        log.log(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID,
+            "Failed to link external build directory", e));
+      }
+
+    } else {
+      buildFolder = project.getFolder(buildP);
+    }
+    
     return buildFolder;
   }
 
@@ -364,6 +425,13 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       // check cmake exit status
       final int exitValue = proc.exitValue();
       if (exitValue == 0) {
+        final ICConfigurationDescription cfgd = ManagedBuildManager.getDescriptionForConfiguration(config);
+        final CMakePreferences prefs = ConfigurationManager.getInstance().getOrLoad(cfgd);
+        
+        if(prefs.shouldGenerateMakeTargets()) {
+          setupMakeTargets(prefs);
+        }
+        
         // success
         return new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.OK, null, null);
       } else {
@@ -375,6 +443,54 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       // process start failed
       errMsg = launcher.getErrorMessage();
       return new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.ERROR, errMsg, null);
+    }
+  }
+  
+  private void tryAddMakeTarget(
+      IMakeTargetManager tm,
+      String buildLocation,
+      String targetBuilder,
+      String targetName) {
+    try {
+      final IMakeTarget target = tm.createTarget(project, targetName, targetBuilder);
+      target.setStopOnError(false);
+      target.setRunAllBuilders(false);
+      target.setUseDefaultBuildCmd(true);
+      target.setBuildAttribute(IMakeCommonBuildInfo.BUILD_COMMAND, "make");
+      target.setBuildAttribute(IMakeTarget.BUILD_LOCATION, buildLocation);
+      target.setBuildAttribute(IMakeTarget.BUILD_ARGUMENTS, "");
+      target.setBuildAttribute(IMakeTarget.BUILD_TARGET, targetName);
+      tm.addTarget(project, target);
+    } catch (CoreException e) {
+      log.log(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID,
+          "failed to setup make target \"" + targetName + "\"", e));
+    }
+  }
+  
+  private void setupMakeTargets(CMakePreferences prefs) {
+    final IPath makefilePath = buildFolder.getLocation().append(getMakefileName());
+    log.log(new Status(IStatus.INFO, CdtPlugin.PLUGIN_ID,
+        "setting up make targets..." + makefilePath.toOSString()));
+    
+    final IMakeTargetManager manager = MakeCorePlugin.getDefault().getTargetManager();
+    final String[] ids = manager.getTargetBuilders(project);
+    final String buildLocation = buildFolder.getLocation().toOSString();
+    
+    try (Stream<String> stream = Files.lines(makefilePath.toFile().toPath())) {
+      for(final IMakeTarget t : manager.getTargets(project)) {
+        manager.removeTarget(t);
+      }
+      
+      // add all make targets of the generated makefile to the IDE
+      stream
+        .filter(s -> s.length() > 1 && Character.isAlphabetic(s.charAt(0)) && s.contains(":"))
+        .map(s -> s.substring(0, s.indexOf(":")))
+        .filter(s -> !prefs.shouldIgnoreSingleFileTargets() || (!s.endsWith(".i") && !s.endsWith(".o") && !s.endsWith(".s")))
+        .forEach(s -> tryAddMakeTarget(manager, buildLocation, ids[0], s));
+      
+    } catch (Exception e) {
+      log.log(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID,
+          "failed to setup make targets", e));
     }
   }
 

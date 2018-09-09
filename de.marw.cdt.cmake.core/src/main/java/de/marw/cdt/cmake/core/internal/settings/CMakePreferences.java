@@ -40,6 +40,8 @@ public class CMakePreferences {
   private static final String ATTR_WARN_UNITIALIZED = "warnUnitialized";
   private static final String ATTR_WARN_UNUSED = "warnUnused";
   private static final String ATTR_CLEAR_CACHE = "clearCache";
+  private static final String ATTR_GENERATE_MAKE_TARGETS = "generateMakeTargets";
+  private static final String ATTR_IGNORE_SINGLE_FILE_TARGETS = "ignoreSingleFileTargets";
   /**  */
   static final String ELEM_DEFINES = "defs";
   /**  */
@@ -60,6 +62,8 @@ public class CMakePreferences {
 
   private WindowsPreferences windowsPreferences = new WindowsPreferences();
   private boolean clearCache;
+  private boolean generateMakeTargets;
+  private boolean ignoreSingleFileTargets;
 
   /**
    * Creates a new object, initialized with all default values.
@@ -104,6 +108,8 @@ public class CMakePreferences {
         clearCache= Boolean.parseBoolean(child.getAttribute(ATTR_CLEAR_CACHE));
         // options...
         warnNoDev = Boolean.parseBoolean(child.getAttribute(ATTR_WARN_NO_DEV));
+        generateMakeTargets = Boolean.parseBoolean(child.getAttribute(ATTR_GENERATE_MAKE_TARGETS));
+        ignoreSingleFileTargets = Boolean.parseBoolean(child.getAttribute(ATTR_IGNORE_SINGLE_FILE_TARGETS));
         debugTryCompile = Boolean.parseBoolean(child
             .getAttribute(ATTR_DEBUG_TRYCOMPILE));
         debugOutput = Boolean.parseBoolean(child.getAttribute(ATTR_DEBUG));
@@ -142,6 +148,16 @@ public class CMakePreferences {
       pOpts.setAttribute(ATTR_CLEAR_CACHE, String.valueOf(clearCache));
     } else {
       pOpts.removeAttribute(ATTR_CLEAR_CACHE);
+    }
+    if (generateMakeTargets) {
+      pOpts.setAttribute(ATTR_GENERATE_MAKE_TARGETS, String.valueOf(generateMakeTargets));
+    } else {
+      pOpts.removeAttribute(ATTR_GENERATE_MAKE_TARGETS);
+    }
+    if (ignoreSingleFileTargets) {
+      pOpts.setAttribute(ATTR_IGNORE_SINGLE_FILE_TARGETS, String.valueOf(ignoreSingleFileTargets));
+    } else {
+      pOpts.removeAttribute(ATTR_IGNORE_SINGLE_FILE_TARGETS);
     }
     if (warnNoDev) {
       pOpts.setAttribute(ATTR_WARN_NO_DEV, String.valueOf(warnNoDev));
@@ -360,5 +376,29 @@ public class CMakePreferences {
    */
   public void setClearCache(boolean clearCache) {
     this.clearCache= clearCache;
+  }
+
+  /** Gets whether Make targets will be generated after cmake
+   */
+  public boolean shouldGenerateMakeTargets() {
+    return generateMakeTargets;
+  }
+  
+  /** Sets whether Make targets will be generated after cmake
+   */
+  public void setGenerateMakeTargets(boolean generateMakeTargets) {
+    this.generateMakeTargets = generateMakeTargets;
+  }
+
+  /** Gets whether Make targets that compile only one file will be generated after cmake
+   */
+  public boolean shouldIgnoreSingleFileTargets() {
+    return ignoreSingleFileTargets;
+  }
+  
+  /** Sets whether Make targets that compile only one file will be generated after cmake
+   */
+  public void setIgnoreSingleFileTargets(boolean ignoreSingleFileTargets) {
+    this.ignoreSingleFileTargets = ignoreSingleFileTargets;
   }
 }

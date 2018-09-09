@@ -58,6 +58,8 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
   // Widgets
   /** Clear cmake-cache before build */
   private Button b_clearCache;
+  private Button b_enableGenMakeTargets;
+  private Button b_ignoreSingleFileTargets;
   private Button b_warnNoDev;
   private Button b_debugTryCompile;
   private Button b_debug;
@@ -92,7 +94,7 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
 
     // output folder group
     {
-      Group gr = WidgetHelper.createGroup(usercomp, SWT.FILL, 2, "Build output location (relative to project root)", 2);
+      Group gr = WidgetHelper.createGroup(usercomp, SWT.FILL, 2, "Build output location (relative to project or absolute)", 2);
 
       setupLabel(gr, "&Folder", 1, SWT.BEGINNING);
 
@@ -157,6 +159,30 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
       b_clearCache = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2, "Forc&e cmake to run with each build");
       b_clearCache.setToolTipText("Useful if you are configuring a new project");
       b_clearCache.addListener(SWT.Selection, tsl);
+      
+      b_enableGenMakeTargets = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2, "Gene&rate Make targets from cmake file");
+      b_enableGenMakeTargets.setToolTipText("Generates targets to be dipslayed in the 'Build Target' UI");
+      b_enableGenMakeTargets.addListener(SWT.Selection, tsl);
+      
+      // probably wrong, just copy pasted from WidgetHelper.createGroup
+      Composite gr2 = new Composite(parent, SWT.NONE);
+      GridLayout gl2 = new GridLayout(1, false);
+      gl2.marginLeft = 20;
+      gl2.marginTop = 0;
+      gl2.marginBottom = 0;
+      gr2.setLayout(gl2);
+      GridData gd2 = new GridData(SWT.FILL, SWT.CENTER, true, false);
+      gd2.horizontalSpan = 1;
+      gr2.setLayoutData(gd2);
+      gr2.setParent(gr);
+
+      b_ignoreSingleFileTargets = WidgetHelper.createCheckbox(gr2, SWT.BEGINNING, 2, "Igno&re single file targets");
+      b_ignoreSingleFileTargets.setToolTipText("Don't create targets that compile a single file");
+      b_ignoreSingleFileTargets.addListener(SWT.Selection, tsl);
+      
+      b_enableGenMakeTargets.addListener(SWT.Selection, e -> {
+        b_ignoreSingleFileTargets.setEnabled(b_enableGenMakeTargets.getSelection());
+      });
     }
 
     // cmake options group...
@@ -292,7 +318,19 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
         bs.set(i, prefs[i].isClearCache());
       }
       enterTristateOrToggleMode(b_clearCache, bs, prefs.length);
+      
+      // b_enableGenMakeTargets...
+      for (int i = 0; i < prefs.length; i++) {
+        bs.set(i, prefs[i].shouldGenerateMakeTargets());
+      }
+      enterTristateOrToggleMode(b_enableGenMakeTargets, bs, prefs.length);
 
+      // b_ignoreSingleFileTargets...
+      for (int i = 0; i < prefs.length; i++) {
+        bs.set(i, prefs[i].shouldIgnoreSingleFileTargets());
+      }
+      enterTristateOrToggleMode(b_ignoreSingleFileTargets, bs, prefs.length);
+      
       // b_warnNoDev...
       bs.clear();
       for (int i = 0; i < prefs.length; i++) {
@@ -380,6 +418,9 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
       // all buttons are in toggle mode
       CMakePreferences pref = prefs[0];
       enterToggleMode(b_clearCache, pref.isClearCache());
+      enterToggleMode(b_enableGenMakeTargets, pref.shouldGenerateMakeTargets());
+      b_ignoreSingleFileTargets.setEnabled(pref.shouldGenerateMakeTargets());
+      enterToggleMode(b_ignoreSingleFileTargets, pref.shouldIgnoreSingleFileTargets());
       enterToggleMode(b_warnNoDev, pref.isWarnNoDev());
       enterToggleMode(b_debug, pref.isDebugOutput());
       enterToggleMode(b_trace, pref.isTrace());
@@ -405,6 +446,10 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
 
         if (shouldSaveButtonSelection(b_clearCache))
           pref.setClearCache(b_clearCache.getSelection());
+        if (shouldSaveButtonSelection(b_enableGenMakeTargets))
+          pref.setGenerateMakeTargets(b_enableGenMakeTargets.getSelection());
+        if (shouldSaveButtonSelection(b_ignoreSingleFileTargets))
+          pref.setIgnoreSingleFileTargets(b_ignoreSingleFileTargets.getSelection());
         if (shouldSaveButtonSelection(b_warnNoDev))
           pref.setWarnNoDev(b_warnNoDev.getSelection());
         if (shouldSaveButtonSelection(b_debugTryCompile))
@@ -430,6 +475,8 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
       // we are editing a single configuration...
       CMakePreferences pref = prefs[0];
       pref.setClearCache(b_clearCache.getSelection());
+      pref.setGenerateMakeTargets(b_enableGenMakeTargets.getSelection());
+      pref.setIgnoreSingleFileTargets(b_ignoreSingleFileTargets.getSelection());
       pref.setWarnNoDev(b_warnNoDev.getSelection());
       pref.setDebugTryCompile(b_debugTryCompile.getSelection());
       pref.setDebugOutput(b_debug.getSelection());
