@@ -44,7 +44,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceStatus;
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IPath;
@@ -54,7 +53,6 @@ import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
 import de.marw.cdt.cmake.core.CdtPlugin;
 import de.marw.cdt.cmake.core.internal.settings.AbstractOsPreferences;
@@ -269,10 +267,10 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     } catch (IOException ignore) {
     }
     final IPath srcPath = srcEntry.getFullPath();
-    IResource srcDir = srcPath.isEmpty() ? project : project.getFolder(srcPath);
+    IContainer srcDir = srcPath.isEmpty() ? project : project.getFolder(srcPath);
 
     checkCancel();
-    MultiStatus status = invokeCMake(srcDir.getLocation(), buildFolder.getLocation(), console);
+    MultiStatus status = invokeCMake(srcDir, buildFolder, console);
     // NOTE: Commonbuilder reads getCode() to detect errors, not getSeverity()
     if (status.getCode() == IStatus.ERROR) {
       // failed to generate
@@ -319,18 +317,16 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
    *
    * @param console
    *        the build console to send messages to
-   * @param buildDir
+   * @param buildFolder
    *        abs. path
-   * @param srcDir
+   * @param srcFolder
    * @return a MultiStatus object, where .getCode() return the severity
    * @throws CoreException
    */
-  private MultiStatus invokeCMake(IPath srcDir, IPath buildDir, IConsole console) throws CoreException {
-    Assert.isLegal(srcDir.isAbsolute(), "srcDir");
-    Assert.isLegal(buildDir.isAbsolute(), "buildDir");
+  private MultiStatus invokeCMake(IContainer srcFolder, IFolder buildFolder, IConsole console) throws CoreException {
 
     String errMsg;
-    final List<String> argList = buildCommandline(srcDir);
+    final List<String> argList = buildCommandline(srcFolder.getLocation());
     // extract cmake command
     final String cmd = argList.remove(0);
     // Set the environment
@@ -348,15 +344,19 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     launcher.setProject(project); // 9.4++ versions of CDT require this for docker
     launcher.showCommand(true);
     final Process proc =
-        launcher.execute(new Path(cmd), argList.toArray(new String[argList.size()]), envp, buildDir, monitor);
+        launcher.execute(new Path(cmd), argList.toArray(new String[argList.size()]), envp, buildFolder.getLocation(), monitor);
     if (proc != null) {
       try {
         // Close the input of the process since we will never write to it
         proc.getOutputStream().close();
       } catch (IOException e) {
       }
-      int state = launcher.waitAndRead(console.getOutputStream(), console.getErrorStream(),
-          new SubProgressMonitor(monitor, IProgressMonitor.UNKNOWN));
+      CMakeErrorParser.deleteErrorMarkers(project);
+      // NOTE: we need 2 of this, since the output streams are not synchronized, causing loss of
+      // the internal processor state
+      CMakeErrorParser epo = new CMakeErrorParser(srcFolder, console.getOutputStream());
+      CMakeErrorParser epe = new CMakeErrorParser(srcFolder, console.getErrorStream());
+      int state = launcher.waitAndRead(epo, epe, monitor);
       if (state == ICommandLauncher.COMMAND_CANCELED) {
         throw new OperationCanceledException(launcher.getErrorMessage());
       }

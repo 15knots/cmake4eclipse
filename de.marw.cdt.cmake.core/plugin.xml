@@ -173,13 +173,6 @@
       </CBuildConsole>
    </extension>
    <extension
-         id="CMakeErrorParser"
-         name="CMake Error Parser"
-         point="org.eclipse.cdt.core.ErrorParser">
-      <errorparser
-            class="de.marw.cdt.cmake.core.CMakeErrorParser"></errorparser>
-   </extension>
-   <extension
          id="problem"
          name="CMake Problem"
          point="org.eclipse.core.resources.markers">
@@ -219,5 +212,28 @@
           id="de.marw.cdt.cmake.core.keyword.cmake"
           label="cmake">
     </keyword>
+ </extension>
+ <extension
+       point="org.eclipse.cdt.managedbuilder.ui.newWizardPages">
+    <wizardPage
+          ID="de.marw.cdt.cmake.core.wizardPage1"
+          pageClass="de.marw.cdt.cmake.core.WizardPage1">
+       <projectType
+             projectTypeID="de.marw.cdt.cmake.core.projectType1">
+       </projectType>
+       <toolchain
+             toolchainID="de.marw.cdt.cmake.core.toolchain1">
+       </toolchain>
+    </wizardPage>
+ </extension>
+ <extension
+       point="org.eclipse.cdt.core.templates">
+    <template
+          id="de.marw.cdt.cmake.core.template1"
+          location="de.marw.cdt.cmake.core.template1">
+    </template>
+ </extension>
+ <extension
+       point="org.eclipse.cdt.managedbuilder.core.buildDefinitions">
  </extension>
 </plugin>
