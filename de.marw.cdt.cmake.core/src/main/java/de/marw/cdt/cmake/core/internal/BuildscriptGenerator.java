@@ -12,10 +12,12 @@ package de.marw.cdt.cmake.core.internal;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.eclipse.cdt.core.CCorePlugin;
 import org.eclipse.cdt.core.ConsoleOutputStream;
@@ -40,10 +42,12 @@ import org.eclipse.cdt.managedbuilder.makegen.IManagedBuilderMakefileGenerator2;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IPathVariableManager;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceStatus;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IPath;
@@ -74,6 +78,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
   private static final String CMAKE_CONSOLE_ID = "de.marw.cdt.cmake.core.cmakeConsole";
   /** buildscript generation error marker ID */
   private static final String MARKER_ID = CdtPlugin.PLUGIN_ID + ".BuildscriptGenerationError";
+  private static final String CONFIG_MARKER_ID = CdtPlugin.PLUGIN_ID + ".ConfigurationError";
 
   private IProject project;
   private IProgressMonitor monitor;
@@ -114,13 +119,150 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     config = info.getDefaultConfiguration();
     builder = config.getEditableBuilder();
   }
+  
+  public static void createBuildFolderIfNeeded(final IProject project, CMakePreferences prefs, IConfiguration config) {
+    if(prefs == null) {
+      // fallback to the default values
+      prefs = new CMakePreferences();
+    }
+    
+    // resolve variables in the path
+    final IPath buildDestination;
+    try {
+      ICdtVariableManager mngr = CCorePlugin.getDefault().getCdtVariableManager();
+      String buildPathString = mngr.resolveValue(prefs.getBuildDirectory(), "", "",
+          ManagedBuildManager.getDescriptionForConfiguration(config));
+      buildDestination = new Path(buildPathString);
+    } catch (CdtVariableException e) {
+      createConfigMarker(project, IMarker.SEVERITY_ERROR, "Unable to resolve build path: ", e);
+      return;
+    }
+    
+    // clear existing markers
+    try {
+      project.deleteMarkers(MARKER_ID, true, IResource.DEPTH_ZERO);
+    } catch (CoreException e) {
+      // no marker needs to be deleted
+    }
+    
+    // abort if the destination path is not absolute
+    if (!buildDestination.isAbsolute()) {
+      return;
+    }
+    
+    final IWorkspace workspace = project.getWorkspace();
+    final IPathVariableManager pathMan = workspace.getPathVariableManager();
+    // use a pseudo unique hashcode for each project to avoid errors when creating
+    // linked directories and to remove old build directories
+    final String symLinkName = "CMAKE_BUILD_DIR_" + Math.abs(project.getName().hashCode());
+    final URI oldBuildLocation = pathMan.getURIValue(symLinkName);
+    
+    // try to remove the links to old build folders (but don't delete real files)
+    if(oldBuildLocation != null) {
+      try {
+        Stream.of(project.members())
+          .filter(el -> el.getType() == IResource.FOLDER && el.isLinked() && el.getLocation().toString().equals(oldBuildLocation.getPath()))
+          .findAny()
+          .ifPresent(el -> {
+            try {
+              el.delete(false, null);
+            } catch (CoreException e) {
+              
+            }
+          });
+      } catch(Exception e) {
+        // not a bad exception
+      }
+    }
+    
+    final String linkedFolderName = prefs.getLinkedFolderName();
+    final IFolder linkedFolder = project.getFolder(linkedFolderName);
+    
+    // check if the folder does not override any existing folder
+    if(!isBuildFolderStateValid(project, linkedFolder, buildDestination)) {
+      return;
+    }
+    
+    try {
+      // create the folder if it does not exist
+      if (!buildDestination.toFile().isDirectory()) {
+        buildDestination.toFile().mkdirs();
+      }
+
+      if (!pathMan.validateName(symLinkName).isOK() || !pathMan.validateValue(buildDestination).isOK()) {
+        throw new Exception("invalid build path destination directory, " + symLinkName + ", "
+            + pathMan.validateName(symLinkName).getMessage() + ", " + pathMan.validateValue(buildDestination).getMessage());
+      }
+      try {
+        pathMan.setURIValue(symLinkName, buildDestination.toFile().toURI());
+      } catch (CoreException e) {
+        throw new Exception("Error registering CMake destination path as variable: "
+            + buildDestination.toFile().toURI().toString());
+      }
+      final IPath location = new Path(symLinkName);
+      final IStatus linkStatus = workspace.validateLinkLocation(linkedFolder, location);
+      if (!linkStatus.isOK()) {
+        throw new Exception("validateLinkLocation failed: " + linkStatus.getMessage());
+      }
+      try {
+        linkedFolder.createLink(location, IResource.NONE, null);
+      } catch (CoreException e) {
+        throw new Exception(e.getLocalizedMessage(), e);
+      }
+      log.log(new Status(IStatus.INFO, CdtPlugin.PLUGIN_ID,
+          "External build directory created successfully: " + buildDestination.toFile().toURI().toString()));
+    } catch (Exception e) {
+      createConfigMarker(project, IMarker.SEVERITY_ERROR, "Failed to link external build directory", e);
+    }
+  }
+  
+  private static boolean isBuildFolderStateValid(IProject project, IFolder linkedFolder, IPath buildDestination) {
+    if (linkedFolder.exists()) {
+      if (linkedFolder.isLinked()) {
+        if(linkedFolder.getLocation().equals(buildDestination)) {
+          // folder already is linked to the correct destination
+          return false;
+        } else {
+          try {
+            linkedFolder.delete(false, null);
+          } catch (CoreException e) {
+            // this will generate a validateLinkLocation error later
+          }
+        }
+      } else {
+        // do not touch a non-linked project folder, warn the user that the linked
+        // location could not be created
+        createConfigMarker(project, IMarker.SEVERITY_WARNING, "Build output directory not linked, folder already exists. Did you mean to use a relative path?",
+            null);
+        return false;
+      }
+    }
+    return true;
+  }
+  
+  private static void createConfigMarker(IProject project, int severity, String message, Exception e) {
+    try {
+      IMarker marker = project.createMarker(CONFIG_MARKER_ID);
+      marker.setAttribute(IMarker.SEVERITY, severity);
+      if(e == null) {
+        marker.setAttribute(IMarker.MESSAGE, message);
+      } else {        
+        marker.setAttribute(IMarker.MESSAGE, message + ": " + e.getLocalizedMessage());
+      }
+    } catch (CoreException e1) {
+      // unable to create markers? Report to Eclipse error log
+      log.log(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID,
+          "Failed to create ConfigurationError Marker", e));
+    }
+  }
 
   private IFolder getBuildFolder() {
     // set the top build dir path for the current configuration
     String buildDirStr = null;
+    CMakePreferences prefs = null;
     final ICConfigurationDescription cfgd = ManagedBuildManager.getDescriptionForConfiguration(config);
     try {
-      CMakePreferences prefs = ConfigurationManager.getInstance().getOrLoad(cfgd);
+      prefs = ConfigurationManager.getInstance().getOrLoad(cfgd);
       buildDirStr = prefs.getBuildDirectory();
     } catch (CoreException e) {
       // storage base is null; treat as bug in CDT..
@@ -150,8 +292,19 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       log.log(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID,
           "variable expansion for build directory failed", e));
     }
-
-    buildFolder = project.getFolder(buildP);
+    
+    if(buildP.isAbsolute()) {
+      // this is necessary to ensure that the linked folder exists prior to the build,
+      // even if it was deleted after the first configuration. In the most cases the folder does 
+      // exist because it was created in the configuration UI
+      buildFolder = project.getFolder(prefs.getLinkedFolderName());
+      if(!buildFolder.exists()) {
+        createBuildFolderIfNeeded(project, prefs, config);
+      }
+    } else {
+      buildFolder = project.getFolder(buildP);
+    }
+    
     return buildFolder;
   }
 

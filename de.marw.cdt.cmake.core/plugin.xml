@@ -87,6 +87,14 @@
       </super>
    </extension>
    <extension
+         id="ConfigurationError"
+         name="CMake Configuration Problem"
+         point="org.eclipse.core.resources.markers">
+      <super
+            type="org.eclipse.core.resources.problemmarker">
+      </super>
+   </extension>
+   <extension
          id="BuildRunnerError"
          name="CMakecache.txt Problem"
          point="org.eclipse.core.resources.markers">

@@ -11,11 +11,11 @@
 package de.marw.cdt.cmake.core.ui;
 
 import java.util.BitSet;
-
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
 import org.eclipse.cdt.core.settings.model.ICMultiConfigDescription;
 import org.eclipse.cdt.core.settings.model.ICResourceDescription;
 import org.eclipse.cdt.core.settings.model.ICStorageElement;
+import org.eclipse.cdt.managedbuilder.core.ManagedBuildManager;
 import org.eclipse.cdt.ui.newui.AbstractCPropertyTab;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -41,6 +41,7 @@ import org.eclipse.ui.dialogs.FilteredResourcesSelectionDialog;
 import org.eclipse.ui.dialogs.NewFolderDialog;
 
 import de.marw.cdt.cmake.core.CdtPlugin;
+import de.marw.cdt.cmake.core.internal.BuildscriptGenerator;
 import de.marw.cdt.cmake.core.internal.settings.CMakePreferences;
 import de.marw.cdt.cmake.core.internal.settings.ConfigurationManager;
 
@@ -72,6 +73,7 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
   private Text t_outputFolder;
   private Button b_browseOutputFolder;
   private Button b_createOutputFolder;
+  private Text t_linkedFolderName;
   /** variables in output folder text field */
   private Button b_cmdVariables;
 
@@ -92,7 +94,7 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
 
     // output folder group
     {
-      Group gr = WidgetHelper.createGroup(usercomp, SWT.FILL, 2, "Build output location (relative to project root)", 2);
+      Group gr = WidgetHelper.createGroup(usercomp, SWT.FILL, 2, "Build output location (relative to project root or absolute to automatically create linked folders)", 2);
 
       setupLabel(gr, "&Folder", 1, SWT.BEGINNING);
 
@@ -149,6 +151,9 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
           }
         }
       });
+      
+      setupLabel(gr, "&Linked Folder Name", 1, SWT.BEGINNING);
+      t_linkedFolderName = setupText(gr, 1, GridData.FILL_HORIZONTAL);
     }
     // Build behavior group...
     {
@@ -390,6 +395,9 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
     setCacheFileEditable(cacheFileEditable, prefs[0].getCacheFile());
     String text = prefs[0].getBuildDirectory();
     setBuildFolderEditable(buildFolderEditable, text == null ? "build/${ConfigName}" : text);
+    
+    String name = prefs[0].getLinkedFolderName();
+    t_linkedFolderName.setText(name == null ? "build_output" : name);
   }
 
   /**
@@ -425,6 +433,16 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
           final String dir = t_outputFolder.getText();
           pref.setBuildDirectory(dir.trim().isEmpty() ? null : dir);
         }
+        if (t_linkedFolderName.getEditable()) {
+          final String name = t_linkedFolderName.getText();
+          pref.setLinkedFolderName(name.trim().isEmpty() ? null : name);
+        }
+        
+        BuildscriptGenerator.createBuildFolderIfNeeded(
+            page.getProject(),
+            pref,
+            ManagedBuildManager.getConfigurationForDescription(page.getResDesc().getConfiguration())
+        );
       }
     } else {
       // we are editing a single configuration...
@@ -440,6 +458,14 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
       pref.setCacheFile(cacheFileName.isEmpty() ? null : cacheFileName);
       final String dir = t_outputFolder.getText().trim();
       pref.setBuildDirectory(dir.isEmpty() ? null : dir);
+      final String name = t_linkedFolderName.getText().trim();
+      pref.setLinkedFolderName(name.isEmpty() ? null : name);
+      
+      BuildscriptGenerator.createBuildFolderIfNeeded(
+          page.getProject(),
+          pref,
+          ManagedBuildManager.getConfigurationForDescription(page.getResDesc().getConfiguration())
+      );
     }
   }
 

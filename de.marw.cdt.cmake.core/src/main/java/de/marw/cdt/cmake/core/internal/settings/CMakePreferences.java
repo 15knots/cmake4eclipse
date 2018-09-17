@@ -47,6 +47,7 @@ public class CMakePreferences {
   private static final String ELEM_OPTIONS = "options";
   private static final String ATTR_CACHE_FILE = "cacheEntriesFile";
   private static final String ATTR_BUILD_DIR = "buildDir";
+  private static final String ATTR_LINKED_FOLDER_NAME = "linkedFolderName";
 
   private boolean warnNoDev, debugTryCompile, debugOutput, trace,
       warnUnitialized, warnUnused;
@@ -55,6 +56,8 @@ public class CMakePreferences {
   private List<CmakeUnDefine> undefines = new ArrayList<>(0);
   private String buildDirectory;
   private String cacheFile;
+  
+  private String linkedFolderName;
 
   private LinuxPreferences linuxPreferences = new LinuxPreferences();
 
@@ -113,6 +116,7 @@ public class CMakePreferences {
         warnUnused = Boolean.parseBoolean(child.getAttribute(ATTR_WARN_UNUSED));
         cacheFile = child.getAttribute(ATTR_CACHE_FILE);
         buildDirectory= parent.getAttribute(ATTR_BUILD_DIR);
+        linkedFolderName = parent.getAttribute(ATTR_LINKED_FOLDER_NAME);
       } else if (ELEM_DEFINES.equals(child.getName())) {
         // defines...
         Util.deserializeCollection(defines, new CmakeDefineSerializer(), child);
@@ -184,6 +188,12 @@ public class CMakePreferences {
       parent.setAttribute(ATTR_BUILD_DIR, buildDirectory);
     } else {
       parent.removeAttribute(ATTR_CACHE_FILE);
+    }
+    
+    if (linkedFolderName!= null) {
+      parent.setAttribute(ATTR_LINKED_FOLDER_NAME, linkedFolderName);
+    } else {
+      parent.removeAttribute(ATTR_LINKED_FOLDER_NAME);
     }
 
     // defines...
@@ -360,5 +370,13 @@ public class CMakePreferences {
    */
   public void setClearCache(boolean clearCache) {
     this.clearCache= clearCache;
+  }
+
+  public void setLinkedFolderName(String linkedFolderName) {
+    this.linkedFolderName = linkedFolderName;
+  }
+
+  public String getLinkedFolderName() {
+    return linkedFolderName;
   }
 }
