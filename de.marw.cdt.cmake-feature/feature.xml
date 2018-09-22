@@ -8,11 +8,11 @@
    <description url="https://github.com/15knots/cmake4eclipse">
       Integrates the CMake cross-platform buildscript generator into
 the C/C++ Development Toolkit (CDT).
-Requires CDT 8.1.0 or newer.
+Requires CDT 8.7 or newer.
    </description>
 
    <copyright>
-      Copyright (c) 2013-2017 Martin Weber
+      Copyright (c) 2013-2018 Martin Weber
    </copyright>
 
    <license url="http://opensource.org/licenses/EPL-1.0">
@@ -107,6 +107,7 @@ This Agreement is governed by the laws of the State of New York and the intellec
 
    <url>
       <discovery label="Mailing List" url="https://groups.google.com/forum/#!forum/cmake4eclipse-users"/>
+      <discovery label="Sample Projects" url="https://github.com/15knots/cmake4eclipse-sample-projects"/>
    </url>
 
    <plugin
