@@ -80,17 +80,11 @@ public class CMakeErrorParser extends OutputStream {
   /** Name of the named-capturing group that holds a line number. */
   private static final String GP_LINE = "LinenO";
 
-  /** patterns used to extract file-name and line number information */
-  private static final Pattern[] PTN_LOCATION;
-
   static {
     String ptn = "^" + String.join("|", START_DERROR, START_DWARNING, Pattern.quote(START_ERROR_DEV), START_ERROR,
         Pattern.quote(START_IERROR), START_LOG, Pattern.quote(START_WARNING_DEV), START_WARNING, START_STATUS,
         START_MSG_SIMPLE);
     PTN_MSG_START = Pattern.compile(ptn);
-    PTN_LOCATION = new Pattern[] { Pattern.compile("(?m)^ at (?<" + GP_FILE + ">.+):(?<" + GP_LINE + ">\\d+).*$"),
-        Pattern.compile("(?m)^ in (?<" + GP_FILE + ">.+):(?<" + GP_LINE + ">\\d+).*$"),
-        Pattern.compile("(?m)^:\\s.+$"), };
   }
 
   ////////////////////////////////////////////////////////////////////
@@ -171,25 +165,25 @@ public class CMakeErrorParser extends OutputStream {
     MarkerCreator creator;
     switch (classification) {
     case START_DERROR:
-      creator = new MC_DError();
+      creator = new MC_DError(srcPath);
       break;
     case START_DWARNING:
-      creator = new MC_DWarning();
+      creator = new MC_DWarning(srcPath);
       break;
     case START_ERROR:
-      creator = new MC_Error();
+      creator = new MC_Error(srcPath);
       break;
     case START_ERROR_DEV:
-      creator = new MC_ErrorDev();
+      creator = new MC_ErrorDev(srcPath);
       break;
     case START_IERROR:
-      creator = new MC_IError();
+      creator = new MC_IError(srcPath);
       break;
     case START_WARNING:
-      creator = new MC_Warning();
+      creator = new MC_Warning(srcPath);
       break;
     case START_WARNING_DEV:
-      creator = new MC_WarningDev();
+      creator = new MC_WarningDev(srcPath);
       break;
     default:
       return; // ignore message
@@ -241,7 +235,27 @@ public class CMakeErrorParser extends OutputStream {
    *
    * @author Martin Weber
    */
-  private abstract class MarkerCreator {
+  private static abstract class MarkerCreator {
+
+    /** patterns used to extract file-name and line number information */
+    private static final Pattern[] PTN_LOCATION;
+
+    static {
+      PTN_LOCATION = new Pattern[] { Pattern.compile("(?m)^ at (?<" + GP_FILE + ">.+):(?<" + GP_LINE + ">\\d+).*$"),
+          Pattern.compile("(?m)^ in (?<" + GP_FILE + ">.+):(?<" + GP_LINE + ">\\d+).*$"),
+          Pattern.compile("(?m)^:\\s.+$"), };
+    }
+
+    // the source root of the project being built
+    protected final IContainer srcPath;
+
+    /**
+     * @param srcPath
+     *          the source root of the project being built
+     */
+    public MarkerCreator(IContainer srcPath) {
+      this.srcPath = srcPath;
+    }
 
     /**
      * Gets the message classification that this object handles.
@@ -307,7 +321,11 @@ public class CMakeErrorParser extends OutputStream {
     }
   } // MarkerCreator
 
-  private class MC_DError extends MarkerCreator {
+  private static class MC_DError extends MarkerCreator {
+    public MC_DError(IContainer srcPath) {
+      super(srcPath);
+    }
+
     @Override
     String getClassification() {
       return START_DERROR;
@@ -319,7 +337,11 @@ public class CMakeErrorParser extends OutputStream {
     };
   }
 
-  private class MC_DWarning extends MarkerCreator {
+  private static class MC_DWarning extends MarkerCreator {
+    public MC_DWarning(IContainer srcPath) {
+      super(srcPath);
+    }
+
     @Override
     String getClassification() {
       return START_DWARNING;
@@ -331,7 +353,10 @@ public class CMakeErrorParser extends OutputStream {
     };
   }
 
-  private class MC_Error extends MarkerCreator {
+  private static class MC_Error extends MarkerCreator {
+    public MC_Error(IContainer srcPath) {
+      super(srcPath);
+    }
 
     @Override
     String getClassification() {
@@ -344,7 +369,11 @@ public class CMakeErrorParser extends OutputStream {
     };
   }
 
-  private class MC_ErrorDev extends MarkerCreator {
+  private static class MC_ErrorDev extends MarkerCreator {
+    public MC_ErrorDev(IContainer srcPath) {
+      super(srcPath);
+    }
+
     @Override
     String getClassification() {
       return START_ERROR_DEV;
@@ -356,7 +385,11 @@ public class CMakeErrorParser extends OutputStream {
     };
   }
 
-  private class MC_IError extends MarkerCreator {
+  private static class MC_IError extends MarkerCreator {
+    public MC_IError(IContainer srcPath) {
+      super(srcPath);
+    }
+
     @Override
     String getClassification() {
       return START_IERROR;
@@ -368,7 +401,11 @@ public class CMakeErrorParser extends OutputStream {
     };
   }
 
-  private class MC_Warning extends MarkerCreator {
+  private static class MC_Warning extends MarkerCreator {
+    public MC_Warning(IContainer srcPath) {
+      super(srcPath);
+    }
+
     @Override
     String getClassification() {
       return START_WARNING;
@@ -380,7 +417,11 @@ public class CMakeErrorParser extends OutputStream {
     };
   }
 
-  private class MC_WarningDev extends MarkerCreator {
+  private static class MC_WarningDev extends MarkerCreator {
+    public MC_WarningDev(IContainer srcPath) {
+      super(srcPath);
+    }
+
     @Override
     String getClassification() {
       return START_WARNING_DEV;
