@@ -72,9 +72,6 @@ class ToolCommandlineParser implements IToolCommandlineParser {
     return entries;
   }
 
-  /*-
-   * @see de.marw.cmake.cdt.language.settings.providers.CmakeBuildOutputParser.IBuildOutputToolParser#getLanguageId()
-   */
   @Override
   public String getLanguageId() {
     return languageID;

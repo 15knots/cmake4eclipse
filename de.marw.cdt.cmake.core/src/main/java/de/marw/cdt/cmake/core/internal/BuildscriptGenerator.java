@@ -393,8 +393,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       final List<ILanguageSettingsProvider> lsps =
           ((ILanguageSettingsProvidersKeeper) cfgd).getLanguageSettingProviders();
       for (ILanguageSettingsProvider lsp : lsps) {
-        if (!needVerboseBuild && ("org.eclipse.cdt.managedbuilder.core.GCCBuildCommandParser".equals(lsp.getId())
-            || "de.marw.cmake.cdt.language.settings.providers.CmakeBuildOutputParser".equals(lsp.getId()))) {
+        if (!needVerboseBuild && "org.eclipse.cdt.managedbuilder.core.GCCBuildCommandParser".equals(lsp.getId())) {
           needVerboseBuild = true;
           continue;
         }
