@@ -25,7 +25,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import de.marw.cdt.cmake.core.Activator;
+import de.marw.cdt.cmake.core.internal.Activator;
 import de.marw.cdt.cmake.core.internal.settings.CmakeUnDefine;
 
 /**
