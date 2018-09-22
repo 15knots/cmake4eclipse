@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
    <feature id="de.marw.cdt.cmake">
-      <category name="cmake4eclipse"/>
+      <category name="cmake"/>
    </feature>
-   <category-def name="cmake4eclipse" label="CMake for Eclipse">
-      <description>
-         Integrates the CMake cross-platform buildscript generator into Eclipse C/C++ Development Toolkit (CDT).
-      </description>
+
+   <category-def name="cmake" label="CMake">
+      <description>CMake</description>
    </category-def>
 </site>
