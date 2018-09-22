@@ -52,7 +52,6 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.osgi.framework.Version;
 
-import de.marw.cdt.cmake.core.Activator;
 import de.marw.cdt.cmake.core.cmakecache.CMakeCacheFileParser;
 import de.marw.cdt.cmake.core.cmakecache.CMakeCacheFileParser.EntryFilter;
 import de.marw.cdt.cmake.core.cmakecache.SimpleCMakeCacheEntry;

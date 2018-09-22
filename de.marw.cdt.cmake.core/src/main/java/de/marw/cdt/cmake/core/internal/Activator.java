@@ -8,7 +8,7 @@
  * Contributors:
  *      Martin Weber - initial implementation
  *******************************************************************************/
-package de.marw.cdt.cmake.core;
+package de.marw.cdt.cmake.core.internal;
 
 import java.text.MessageFormat;
 

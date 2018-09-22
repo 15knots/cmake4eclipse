@@ -15,7 +15,7 @@ import java.util.List;
 
 import org.eclipse.cdt.core.settings.model.ICStorageElement;
 
-import de.marw.cdt.cmake.core.Activator;
+import de.marw.cdt.cmake.core.internal.Activator;
 import de.marw.cdt.cmake.core.internal.storage.CmakeDefineSerializer;
 import de.marw.cdt.cmake.core.internal.storage.CmakeUndefineSerializer;
 import de.marw.cdt.cmake.core.internal.storage.Util;

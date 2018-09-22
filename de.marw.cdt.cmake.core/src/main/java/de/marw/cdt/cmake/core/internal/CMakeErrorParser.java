@@ -26,8 +26,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 
-import de.marw.cdt.cmake.core.Activator;
-
 /**
  * @author Martin Weber
  */

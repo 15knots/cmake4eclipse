@@ -40,7 +40,7 @@ import org.eclipse.ui.dialogs.FilteredItemsSelectionDialog;
 import org.eclipse.ui.dialogs.FilteredResourcesSelectionDialog;
 import org.eclipse.ui.dialogs.NewFolderDialog;
 
-import de.marw.cdt.cmake.core.Activator;
+import de.marw.cdt.cmake.core.internal.Activator;
 import de.marw.cdt.cmake.core.internal.settings.CMakePreferences;
 import de.marw.cdt.cmake.core.internal.settings.ConfigurationManager;
 

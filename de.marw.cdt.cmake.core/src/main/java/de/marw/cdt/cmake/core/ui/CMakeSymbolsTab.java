@@ -23,7 +23,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 
-import de.marw.cdt.cmake.core.Activator;
+import de.marw.cdt.cmake.core.internal.Activator;
 import de.marw.cdt.cmake.core.internal.settings.CMakePreferences;
 import de.marw.cdt.cmake.core.internal.settings.CmakeDefine;
 import de.marw.cdt.cmake.core.internal.settings.CmakeUnDefine;
