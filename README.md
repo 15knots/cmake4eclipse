@@ -63,6 +63,11 @@ There is a run configuration for eclipse to invoke maven `build cmake4eclipse` p
 
 ---
 # Release Notes
+## 1.12.2 (2018-09-??) upcoming
+### Changes
+- Change related to #73 (CMake Error Parser): Deleted the old parser (which was based on CDT output handling and gave poor results) and re-wrote it from scratch.
+Note that the new parser does not claim to detect *any* cmake message; more input from the community is required to detect more messages. 
+
 ## 1.12.1 (2018-07-28)
 ### Changes
 - Fixed #86: Parsing compile_commands.json creates duplicate entries.
