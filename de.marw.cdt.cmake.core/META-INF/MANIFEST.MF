@@ -41,6 +41,5 @@ Import-Package: org.eclipse.cdt.core,
  org.eclipse.ui.plugin,
  org.osgi.framework
 Bundle-Activator: de.marw.cdt.cmake.core.internal.Activator
-Export-Package: de.marw.cdt.cmake.core,
- de.marw.cdt.cmake.core.cmakecache
+Export-Package: de.marw.cdt.cmake.core.cmakecache
 Require-Bundle: org.eclipse.ui
