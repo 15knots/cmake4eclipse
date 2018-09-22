@@ -18,20 +18,20 @@ import org.osgi.framework.BundleContext;
 /**
  * @author Martin Weber
  */
-public class CdtPlugin extends AbstractUIPlugin {
+public class Activator extends AbstractUIPlugin {
 
   public static final String PLUGIN_ID = "de.marw.cdt.cmake.core"; //$NON-NLS-1$
   /** extension id of the cmake-generated makefile builder */
-  public static final String BUILDER_ID = CdtPlugin.PLUGIN_ID
+  public static final String BUILDER_ID = Activator.PLUGIN_ID
       + "." + "genmakebuilder"; //$NON-NLS-1$
 
   //The shared instance.
-  private static CdtPlugin plugin;
+  private static Activator plugin;
 
   /**
    * The constructor.
    */
-  public CdtPlugin() {
+  public Activator() {
   }
 
   /**
@@ -56,7 +56,7 @@ public class CdtPlugin extends AbstractUIPlugin {
   /**
    * Returns the shared instance.
    */
-  public static CdtPlugin getDefault() {
+  public static Activator getDefault() {
     return plugin;
   }
 

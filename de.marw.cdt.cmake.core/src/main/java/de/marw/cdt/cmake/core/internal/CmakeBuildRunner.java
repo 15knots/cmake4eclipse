@@ -52,7 +52,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.osgi.framework.Version;
 
-import de.marw.cdt.cmake.core.CdtPlugin;
+import de.marw.cdt.cmake.core.Activator;
 import de.marw.cdt.cmake.core.cmakecache.CMakeCacheFileParser;
 import de.marw.cdt.cmake.core.cmakecache.CMakeCacheFileParser.EntryFilter;
 import de.marw.cdt.cmake.core.cmakecache.SimpleCMakeCacheEntry;
@@ -70,7 +70,7 @@ import de.marw.cdt.cmake.core.internal.settings.ConfigurationManager;
  */
 public class CmakeBuildRunner extends ExternalBuildRunner {
   /** build runner error marker ID */
-  private static final String MARKER_ID = CdtPlugin.PLUGIN_ID + ".BuildRunnerError";
+  private static final String MARKER_ID = Activator.PLUGIN_ID + ".BuildRunnerError";
 
   /** caches CMakeCacheFileInfo by ICConfigurationDescription.ID */
   private WeakHashMap<String, CMakeCacheFileInfo> map = new WeakHashMap<>(
@@ -200,7 +200,7 @@ public class CmakeBuildRunner extends ExternalBuildRunner {
               markerGenerator.addMarker(pmi);
           }
         } catch (IOException ex) {
-          throw new CoreException(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID,
+          throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID,
               "Failed to parse file " + file, ex));
         } finally {
           if (is != null) {

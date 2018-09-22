@@ -25,7 +25,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import de.marw.cdt.cmake.core.CdtPlugin;
+import de.marw.cdt.cmake.core.Activator;
 import de.marw.cdt.cmake.core.internal.settings.CmakeUnDefine;
 
 /**
@@ -150,7 +150,7 @@ public class AddCmakeUndefineDialog extends Dialog {
    */
   @Override
   protected IDialogSettings getDialogBoundsSettings() {
-    IDialogSettings settings = CdtPlugin.getDefault().getDialogSettings();
+    IDialogSettings settings = Activator.getDefault().getDialogSettings();
     IDialogSettings section = settings.getSection(DIALOG_SETTINGS_SECT);
     if (section == null) {
       section = settings.addNewSection(DIALOG_SETTINGS_SECT);
