@@ -21,6 +21,7 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
@@ -138,7 +139,7 @@ public class CMakeErrorParser extends OutputStream {
         if (matcher.find() || isEOF) {
           int end = isEOF ? buffer.length() : matcher.start();
           String fullMessage = buffer.substring(0, end);
-          System.err.println("-###" + fullMessage.trim() + "\n###-");
+          // System.err.println("-###" + fullMessage.trim() + "\n###-");
           String content = buffer.substring(start, end);
           // buffer contains a complete message
           processMessage(classification, content, fullMessage);
@@ -242,6 +243,7 @@ public class CMakeErrorParser extends OutputStream {
 
     static {
       PTN_LOCATION = new Pattern[] { Pattern.compile("(?m)^ at (?<" + GP_FILE + ">.+):(?<" + GP_LINE + ">\\d+).*$"),
+          Pattern.compile("(?s)^: Error in cmake code at.(?<" + GP_FILE + ">.+):(?<" + GP_LINE + ">\\d+).*$"),
           Pattern.compile("(?m)^ in (?<" + GP_FILE + ">.+):(?<" + GP_LINE + ">\\d+).*$"),
           Pattern.compile("(?m)^:\\s.+$"), };
     }
@@ -280,6 +282,7 @@ public class CMakeErrorParser extends OutputStream {
       for (Pattern ptn : PTN_LOCATION) {
         final Matcher matcher = ptn.matcher(content);
         if (matcher.find()) {
+          // normally project source root relative but may be absolute FS path
           String filename = null;
           try {
             filename = matcher.group(GP_FILE);
@@ -311,9 +314,37 @@ public class CMakeErrorParser extends OutputStream {
      * @throws CoreException
      */
     protected final IMarker createBasicMarker(String fileName, int severity, String fullMessage) throws CoreException {
-      // cmake reports the file relative to source entry
-      IResource owner = fileName == null ? srcPath : srcPath.getFile(new Path(fileName));
-      IMarker marker = owner.createMarker(CMAKE_PROBLEM_MARKER_ID);
+      IMarker marker;
+      if (fileName == null) {
+        marker = srcPath.createMarker(CMAKE_PROBLEM_MARKER_ID);
+      } else {
+        // NOTE normally, cmake reports the file name relative to source root.
+        // BUT some messages give an absolute file-system path which is problematic when the build
+        // runs in a docker container
+        // So we do some heuristics here...
+        IPath path = new Path(fileName);
+        try {
+          // normal case: file is rel. to source root
+          marker = srcPath.getFile(path).createMarker(CMAKE_PROBLEM_MARKER_ID);
+        } catch (CoreException ign) {
+          // try abs. path
+          IPath srcLocation = srcPath.getLocation();
+          if (srcLocation.isPrefixOf(path)) {
+            // can resolve the cmake file
+            int segmentsToRemove = srcLocation.segmentCount();
+            path = path.removeFirstSegments(segmentsToRemove);
+            marker = srcPath.getFile(path).createMarker(CMAKE_PROBLEM_MARKER_ID);
+          } else {
+            // possibly a build in docker container. we would reach this if the source-dir path inside
+            // the container is NOT the same as the one in the host/IDE.
+            // for now, just add the markers to the source dir and lets users file issues:-)
+            marker = srcPath.createMarker(CMAKE_PROBLEM_MARKER_ID);
+            CdtPlugin.getDefault().getLog().log(new Status(IStatus.INFO, CdtPlugin.PLUGIN_ID,
+                "Could not map " + fileName + " to a workspace resource. Did the build run in a container?"));
+            // Extra case: IDE runs on Linux, build runs on Windows, or vice versa...
+          }
+        }
+      }
       marker.setAttribute(IMarker.MESSAGE, fullMessage);
       marker.setAttribute(IMarker.SEVERITY, severity);
       marker.setAttribute(IMarker.LOCATION, CMakeErrorParser.class.getName());
@@ -321,6 +352,7 @@ public class CMakeErrorParser extends OutputStream {
     }
   } // MarkerCreator
 
+  ////////////////////////////////////////////////////////////////////
   private static class MC_DError extends MarkerCreator {
     public MC_DError(IContainer srcPath) {
       super(srcPath);
