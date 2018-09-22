@@ -23,7 +23,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 
-import de.marw.cdt.cmake.core.CdtPlugin;
+import de.marw.cdt.cmake.core.Activator;
 import de.marw.cdt.cmake.core.internal.settings.CMakePreferences;
 import de.marw.cdt.cmake.core.internal.settings.CmakeDefine;
 import de.marw.cdt.cmake.core.internal.settings.CmakeUnDefine;
@@ -38,7 +38,7 @@ import de.marw.cdt.cmake.core.internal.settings.ConfigurationManager;
 public class CMakeSymbolsTab extends QuirklessAbstractCPropertyTab {
 
   /**  */
-  private static final ILog log = CdtPlugin.getDefault().getLog();
+  private static final ILog log = Activator.getDefault().getLog();
 
   /** the table showing the cmake defines */
   private DefinesViewer definesViewer;
@@ -87,7 +87,7 @@ public class CMakeSymbolsTab extends QuirklessAbstractCPropertyTab {
         CMakePreferences prefs = configMgr.getOrLoad(cfgd);
         updateDisplay(prefs);
       } catch (CoreException ex) {
-        log.log(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID, null, ex));
+        log.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, null, ex));
       }
     }
   }
@@ -124,7 +124,7 @@ public class CMakeSymbolsTab extends QuirklessAbstractCPropertyTab {
         }
       }
     } catch (CoreException ex) {
-      log.log(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID, null, ex));
+      log.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, null, ex));
     }
   }
 
@@ -148,7 +148,7 @@ public class CMakeSymbolsTab extends QuirklessAbstractCPropertyTab {
       prefs.saveToStorage(storage);
 
     } catch (CoreException ex) {
-      log.log(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID, null, ex));
+      log.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, null, ex));
     }
   }
 

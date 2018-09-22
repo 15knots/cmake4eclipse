@@ -40,7 +40,7 @@ import org.eclipse.ui.dialogs.FilteredItemsSelectionDialog;
 import org.eclipse.ui.dialogs.FilteredResourcesSelectionDialog;
 import org.eclipse.ui.dialogs.NewFolderDialog;
 
-import de.marw.cdt.cmake.core.CdtPlugin;
+import de.marw.cdt.cmake.core.Activator;
 import de.marw.cdt.cmake.core.internal.settings.CMakePreferences;
 import de.marw.cdt.cmake.core.internal.settings.ConfigurationManager;
 
@@ -53,7 +53,7 @@ import de.marw.cdt.cmake.core.internal.settings.ConfigurationManager;
 public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
 
   /**  */
-  private static final ILog log = CdtPlugin.getDefault().getLog();
+  private static final ILog log = Activator.getDefault().getLog();
 
   // Widgets
   /** Clear cmake-cache before build */
@@ -236,7 +236,7 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
         prefs[0] = configMgr.getOrLoad(cfgd);
       }
     } catch (CoreException ex) {
-      log.log(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID, null, ex));
+      log.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, null, ex));
     }
     updateDisplay();
   }
@@ -540,7 +540,7 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
         dstPrefs.setCacheFile(srcPrefs.getCacheFile());
       }
     } catch (CoreException ex) {
-      log.log(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID, null, ex));
+      log.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, null, ex));
     }
   }
 
@@ -567,7 +567,7 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
         prefs[0].saveToStorage(storage);
       }
     } catch (CoreException ex) {
-      log.log(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID, null, ex));
+      log.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, null, ex));
     }
   }
 

@@ -54,7 +54,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 
-import de.marw.cdt.cmake.core.CdtPlugin;
+import de.marw.cdt.cmake.core.Activator;
 import de.marw.cdt.cmake.core.internal.settings.AbstractOsPreferences;
 import de.marw.cdt.cmake.core.internal.settings.CMakePreferences;
 import de.marw.cdt.cmake.core.internal.settings.CmakeDefine;
@@ -68,12 +68,12 @@ import de.marw.cdt.cmake.core.internal.settings.ConfigurationManager;
  * @author Martin Weber
  */
 public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
-  private static final ILog log = CdtPlugin.getDefault().getLog();
+  private static final ILog log = Activator.getDefault().getLog();
 
   /** CBuildConsole element id */
   private static final String CMAKE_CONSOLE_ID = "de.marw.cdt.cmake.core.cmakeConsole";
   /** buildscript generation error marker ID */
-  private static final String MARKER_ID = CdtPlugin.PLUGIN_ID + ".BuildscriptGenerationError";
+  private static final String MARKER_ID = Activator.PLUGIN_ID + ".BuildscriptGenerationError";
 
   private IProject project;
   private IProgressMonitor monitor;
@@ -124,7 +124,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       buildDirStr = prefs.getBuildDirectory();
     } catch (CoreException e) {
       // storage base is null; treat as bug in CDT..
-      log.log(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID,
+      log.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID,
           "falling back to hard coded build directory", e));
     }
     IPath buildP;
@@ -147,7 +147,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
           ManagedBuildManager.getDescriptionForConfiguration(config));
       buildP= new Path(buildPathString);
     } catch (CdtVariableException e) {
-      log.log(new Status(IStatus.ERROR, CdtPlugin.PLUGIN_ID,
+      log.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID,
           "variable expansion for build directory failed", e));
     }
 
@@ -192,12 +192,12 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       if (srcEntries.length == 0) {
         // no source folders specified in project
         final String msg = "No source directories configured for project";
-        MultiStatus status = new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.ERROR, msg + " " + project.getName(), null);
+        MultiStatus status = new MultiStatus(Activator.PLUGIN_ID, IStatus.ERROR, msg + " " + project.getName(), null);
         createErrorMarker(project, msg);
         return status;
       } else if (srcEntries.length > 1) {
         final String msg = "Only a single source directory is supported";
-        MultiStatus status = new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.ERROR, msg, null);
+        MultiStatus status = new MultiStatus(Activator.PLUGIN_ID, IStatus.ERROR, msg, null);
         // if multiple projects are build, this information is lost when a new console is opened.
         // So create a problem marker to show up in the problem view
         createErrorMarker(project, msg);
@@ -231,7 +231,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     }
 
     if( !mustGenerate){
-      return new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.OK, "", null);
+      return new MultiStatus(Activator.PLUGIN_ID, IStatus.OK, "", null);
     }
 
     // Create the top-level directory for the build output
@@ -280,7 +280,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       return status;
     }
 
-    return new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.OK, "", null);
+    return new MultiStatus(Activator.PLUGIN_ID, IStatus.OK, "", null);
   }
 
   /**
@@ -365,16 +365,16 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       final int exitValue = proc.exitValue();
       if (exitValue == 0) {
         // success
-        return new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.OK, null, null);
+        return new MultiStatus(Activator.PLUGIN_ID, IStatus.OK, null, null);
       } else {
         // cmake had errors...
         errMsg = String.format("%1$s exited with status %2$d. See CDT global build console for details.", cmd, exitValue);
-        return new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.ERROR, errMsg, null);
+        return new MultiStatus(Activator.PLUGIN_ID, IStatus.ERROR, errMsg, null);
       }
     } else {
       // process start failed
       errMsg = launcher.getErrorMessage();
-      return new MultiStatus(CdtPlugin.PLUGIN_ID, IStatus.ERROR, errMsg, null);
+      return new MultiStatus(Activator.PLUGIN_ID, IStatus.ERROR, errMsg, null);
     }
   }
 

@@ -26,14 +26,14 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 
-import de.marw.cdt.cmake.core.CdtPlugin;
+import de.marw.cdt.cmake.core.Activator;
 
 /**
  * @author Martin Weber
  */
 public class CMakeErrorParser extends OutputStream {
 
-  public static final String CMAKE_PROBLEM_MARKER_ID = CdtPlugin.PLUGIN_ID + ".problem"; //$NON-NLS-1$
+  public static final String CMAKE_PROBLEM_MARKER_ID = Activator.PLUGIN_ID + ".problem"; //$NON-NLS-1$
 
   /**
    * Taken from cmMessenger.cxx#printMessagePreamble: <code>
@@ -193,8 +193,8 @@ public class CMakeErrorParser extends OutputStream {
     try {
       creator.createMarker(fullMessage, content);
     } catch (CoreException e) {
-      CdtPlugin.getDefault().getLog()
-          .log(new Status(IStatus.WARNING, CdtPlugin.PLUGIN_ID, "CMake output error parsing failed", e));
+      Activator.getDefault().getLog()
+          .log(new Status(IStatus.WARNING, Activator.PLUGIN_ID, "CMake output error parsing failed", e));
     }
   }
 
@@ -339,7 +339,7 @@ public class CMakeErrorParser extends OutputStream {
             // the container is NOT the same as the one in the host/IDE.
             // for now, just add the markers to the source dir and lets users file issues:-)
             marker = srcPath.createMarker(CMAKE_PROBLEM_MARKER_ID);
-            CdtPlugin.getDefault().getLog().log(new Status(IStatus.INFO, CdtPlugin.PLUGIN_ID,
+            Activator.getDefault().getLog().log(new Status(IStatus.INFO, Activator.PLUGIN_ID,
                 "Could not map " + fileName + " to a workspace resource. Did the build run in a container?"));
             // Extra case: IDE runs on Linux, build runs on Windows, or vice versa...
           }
