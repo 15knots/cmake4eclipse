@@ -385,6 +385,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
     }
     marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_INFO);
     marker.setAttribute(IMarker.MESSAGE, message);
+    marker.setAttribute(IMarker.LOCATION, CompileCommandsJsonParser.class.getName());
   }
 
   /**
