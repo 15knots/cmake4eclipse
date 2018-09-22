@@ -624,6 +624,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       IMarker marker = project.createMarker(MARKER_ID);
       marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
       marker.setAttribute(IMarker.MESSAGE, message);
+      marker.setAttribute(IMarker.LOCATION, BuildscriptGenerator.class.getName());
     } catch (CoreException ex) {
       // resource is not (yet) known by the workbench
       // ignore
