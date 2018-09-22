@@ -14,11 +14,6 @@
           id="de.marw.cmake.cdt.language.settings.providers.BuiltinsCompileCommandsJsonParser"
           name="CMAKE_EXPORT_COMPILE_COMMANDS Compiler Built-ins">
     </provider>
-    <provider
-          class="de.marw.cmake.cdt.language.settings.providers.CmakeBuildOutputParser"
-          id="de.marw.cmake.cdt.language.settings.providers.CmakeBuildOutputParser"
-          name="CMake Build Output Parser (deprecated)">
-    </provider>
  </extension>
  <extension
        id="CompileCommandsJsonParserMarker"
