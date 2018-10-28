@@ -375,8 +375,8 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
       marker = file.createMarker(MARKER_ID);
     } catch (CoreException ex) {
       // resource is not (yet) known by the workbench
-      file.refreshLocal(IResource.DEPTH_ZERO, new NullProgressMonitor());
       try {
+        file.refreshLocal(IResource.DEPTH_ZERO, new NullProgressMonitor());
         marker = file.createMarker(MARKER_ID);
       } catch (CoreException ex2) {
         // resource is not known by the workbench, use project instead of file
