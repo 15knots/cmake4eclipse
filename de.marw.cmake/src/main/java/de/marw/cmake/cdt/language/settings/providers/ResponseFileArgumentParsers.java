@@ -63,6 +63,14 @@ class ResponseFileArgumentParsers {
         matcher.reset(argsLine);
         if (matcher.lookingAt()) {
           String fname = matcher.group(oMatcher.nameGroup);
+          final int consumed = matcher.end();
+          if("<<".equals(fname)) {
+            // see https://github.com/15knots/cmake4eclipse/issues/94
+            // Handle '@<< compiler-args <<' syntax: The file '<<' does not exist, arguments come from argsline.
+            // so we just do not open the non-existing file
+            return consumed;
+          }
+
           IPath path = Path.fromOSString(fname);
           if (!path.isAbsolute()) {
             // relative path, prepend CWD
@@ -78,7 +86,7 @@ class ResponseFileArgumentParsers {
             // swallow exception for now
             e.printStackTrace();
           }
-          return matcher.end();
+          return consumed;
         }
       }
       return 0;// no input consumed

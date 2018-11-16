@@ -16,13 +16,16 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.cdt.core.settings.model.ICLanguageSettingEntry;
 import org.eclipse.cdt.core.settings.model.ICSettingEntry;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.junit.Test;
 
+import de.marw.cmake.cdt.language.settings.providers.ToolArgumentParsers.IncludePath_C_POSIX;
 import de.marw.cmake.cdt.language.settings.providers.builtins.BuiltinDetectionType;
 
 /**
@@ -94,4 +97,28 @@ public class ToolCommandlineParserTest {
     Files.delete(absRspP);
   }
 
+  /**
+   * Test for HERE documents on cmdline:@<< ... <<
+   */
+  @Test
+  public final void testResponseFileArgumentParser_At_heredoc() throws Exception {
+    ToolCommandlineParser testee = new ToolCommandlineParser("egal", new ResponseFileArgumentParsers.At(),
+        BuiltinDetectionType.NONE, new ToolArgumentParsers.IncludePath_C_POSIX(),
+        new ToolArgumentParsers.MacroDefine_C_POSIX());
+
+    final String more = " -g -MMD  -o CMakeFiles/execut1.dir/util1.c.o"
+        + " -c /testprojects/C-subsrc/src/src-sub/main.c";
+    List<ICLanguageSettingEntry> entries = new ArrayList<>();
+    ICLanguageSettingEntry parsed;
+
+    String name = "/ye/olde/Include/Pathe";
+    IPath cwd = new Path("");
+    entries.clear();
+    // @<< ... <<
+    entries = testee.processArgs(cwd, "@<<" + " -I" + name + " <<" + more);
+    assertEquals("#entries", 1, entries.size());
+    parsed = entries.get(0);
+    assertEquals("kind", ICSettingEntry.INCLUDE_PATH, parsed.getKind());
+    assertEquals("name", name, parsed.getName());
+  }
 }
