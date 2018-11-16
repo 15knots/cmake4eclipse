@@ -21,11 +21,15 @@ If you have any question, please **consult the <a href="http://groups.google.com
 <!--- Provide the steps for reproduce -->
 1. 
 1. 
+## Useful Information
+- cmake4eclipse version: 
+- Which OS do you use: 
+- Cmake version: 
+#### What is in Eclipse's Error Log?
+<!-- If possible, attach stack traces from the error log that mention de.marw.
+Please keep the traces small; try to obfuscate any sensitive information (account names, passwords, ...) 
+-->
+Sanitized stack traces:
+
 ## (If Enhancement Request) Describe it. 
 <!-- What you would like to see the enhancement add/accomplish or how you would like it to work. -->
-
-## Useful Information
-cmake4eclipse verssion: 
-Which OS do you use: 
-Cmake version: 
-
