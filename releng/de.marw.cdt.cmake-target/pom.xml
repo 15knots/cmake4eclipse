@@ -12,6 +12,4 @@
   <artifactId>de.marw.cdt.cmake-target</artifactId>
   <version>1.0.1</version>
   <packaging>eclipse-target-definition</packaging>
-
-  <name>Target definition CDT/8.1.0 Eclipse/3.8.0 (Juno)</name>
 </project>
