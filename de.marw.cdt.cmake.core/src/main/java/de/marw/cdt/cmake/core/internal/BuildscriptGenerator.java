@@ -14,8 +14,10 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.cdt.core.CCorePlugin;
 import org.eclipse.cdt.core.ConsoleOutputStream;
@@ -325,7 +327,15 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
   private MultiStatus invokeCMake(IContainer srcFolder, IFolder buildFolder, IConsole console) throws CoreException {
 
     String errMsg;
-    final List<String> argList = buildCommandline(srcFolder.getLocation());
+    List<String> argList = buildCommandline(srcFolder.getLocation());
+    argList = wrapArgsForEnvScript(argList);
+    try {
+      console.getErrorStream().write(("#### Arrays.toString(String[] args)="
+          + Arrays.toString(argList.toArray())).getBytes());
+      console.getErrorStream().write('\n');
+    } catch (IOException e1) {
+    }
+
     // extract cmake command
     final String cmd = argList.remove(0);
     // Set the environment
@@ -375,6 +385,47 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       errMsg = launcher.getErrorMessage();
       return new MultiStatus(Activator.PLUGIN_ID, IStatus.ERROR, errMsg, null);
     }
+  }
+
+  /**
+   * Wraps the specified command line into a command line that runs cmake in a sub-shell with an environment-setter
+   * script. If no environment-setter script is configured, the passed-in commandline is returned unchanged..
+   *
+   * @param cmakeCommandline
+   *          the command-line to run cmake
+   * @throws CoreException
+   */
+  private List<String> wrapArgsForEnvScript(List<String> cmakeCommandline) throws CoreException {
+    final ICConfigurationDescription cfgd = ManagedBuildManager.getDescriptionForConfiguration(config);
+    final CMakePreferences prefs = ConfigurationManager.getInstance().getOrLoad(cfgd);
+    AbstractOsPreferences osPreferences = AbstractOsPreferences.extractOsPreferences(prefs);
+    String envSetterScript = osPreferences.getEnvSetterScript();
+//    envSetterScript = "path to/envs.bat";
+    if (envSetterScript == null) {
+      return cmakeCommandline; // nothing to do
+    }
+
+    final ICdtVariableManager mngr = CCorePlugin.getDefault().getCdtVariableManager();
+    envSetterScript = mngr.resolveValue(envSetterScript, "", "", cfgd);
+    if (/*true|| */System.getProperty("os.name").toLowerCase().startsWith("windows")) {
+      // host OS is windows
+
+      // TODO detect whether the build runs in a container and which OS runs the build
+      // ContainerCommandLauncher.CONTAINER_BUILD_ENABLED property
+      // assume windows runs the build for now
+      List<String> result = new ArrayList<>(Arrays.asList("cmd.exe", "/c"));
+      List<String> script = new ArrayList<>(Arrays.asList(envSetterScript, "&"));
+      script.addAll(cmakeCommandline);
+      // quote args that have spaces..
+      script = script.stream().map(a -> a.contains(" ") ? "\"" + a + "\"" : a).collect(Collectors.toList());
+      // combine to a single argument and quote the combined arg
+      String scriptArg = String.join(" ", script) ;
+      result.add(scriptArg);
+      return result;
+    }
+
+    // currently not implemented for Linux..
+    return cmakeCommandline;
   }
 
   /**

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014-2017 Martin Weber.
+ * Copyright (c) 2014-2018 Martin Weber.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -124,6 +124,7 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
     // cmake executable group...
     {
       GridLayout layout;
+      final int horizontalSpan = 3;
       Group gr = WidgetHelper.createGroup(usercomp, SWT.FILL, 2,
           "CMake Executable", 2);
 
@@ -138,7 +139,7 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
       Composite buttonBar = new Composite(gr, SWT.NONE);
       {
         buttonBar.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false,
-            3, 1));
+            horizontalSpan, 1));
         layout = new GridLayout(2, false);
         layout.marginHeight = 0;
         layout.marginWidth = 0;
@@ -184,6 +185,7 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
         }
       });
 
+      createEnvironmentScriptControls(gr, horizontalSpan);
     } // cmake executable group
 
     // makefile generator combo...
@@ -218,10 +220,23 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
     undefinesViewer = new UnDefinesViewer(usercomp);
   }
 
+  /**
+   * Creates the controls to specify an extra script to run in the same shell prior to cmake. The default implementation
+   * does nothing.
+   *
+   * @param parent
+   *          the parent control
+   * @param horizontalSpan
+   *          the max. number of column cells that the control may take up
+   */
+  protected void createEnvironmentScriptControls(Group parent, int horizontalSpan) {
+
+  }
+
   @Override
   protected void configSelectionChanged(ICResourceDescription lastConfig, ICResourceDescription newConfig) {
     if (lastConfig != null) {
-      saveToModel();
+      saveToModel(prefs);
     }
     if (newConfig == null)
       return;
@@ -242,14 +257,18 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
         log.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, null, ex));
       }
 
-      updateDisplay();
+      updateDisplay(prefs);
     }
   }
 
   /**
    * Updates displayed values according to the preferences edited by this tab.
+   *
+   * @param prefs
+   *          the preferences associated with our configuration to manage.
+   *
    */
-  private void updateDisplay() {
+  protected void updateDisplay(P prefs) {
     t_cmd.setText(prefs.getCommand());
     b_cmdFromPath.setSelection(prefs.getUseDefaultCommand());
     // adjust sensitivity...
@@ -265,9 +284,12 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
   /**
    * Stores displayed values to the preferences edited by this tab.
    *
-   * @see #updateDisplay()
+   * @param prefs
+   *          the preferences associated with our configuration to manage or <code>null</code>.
+   *
+   * @see #updateDisplay
    */
-  private void saveToModel() {
+  protected void saveToModel(P prefs) {
     if (prefs == null)
       return;
     prefs.setUseDefaultCommand(b_cmdFromPath.getSelection());
@@ -304,7 +326,7 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
   protected void performApply(ICResourceDescription src,
       ICResourceDescription dst) {
     // make sure the displayed values get applied
-    saveToModel();
+    saveToModel(prefs);
 
     ICConfigurationDescription srcCfg = src.getConfiguration();
     ICConfigurationDescription dstCfg = dst.getConfiguration();
@@ -346,7 +368,7 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
       // this tab does not support editing of multiple configurations
       return;
     }
-    saveToModel();
+    saveToModel(prefs);
     try {
       // save as project settings..
       ICStorageElement storage = cfgd.getStorage(
@@ -360,7 +382,7 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
   @Override
   protected void performDefaults() {
     prefs.reset();
-    updateDisplay();
+    updateDisplay(prefs);
   }
 
   @Override

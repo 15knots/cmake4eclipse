@@ -32,14 +32,16 @@ public abstract class AbstractOsPreferences {
   private static final String ATTR_USE_DEFAULT_COMMAND = "use-default";
   private static final String ATTR_GENERATOR = "generator";
   private static final String ATTR_BUILD_COMMAND = "build_command";
+  private static final String ATTR_ENV_SETTER_COMMAND = "envCommand";
 
   private String command;
   private CmakeGenerator generator;
   private String buildscriptProcessorCmd;
   private boolean useDefaultCommand;
-  private List<CmakeDefine> defines = new ArrayList<CmakeDefine>(0);
-  private List<CmakeUnDefine> undefines = new ArrayList<CmakeUnDefine>(0);
+  private List<CmakeDefine> defines = new ArrayList<>(0);
+  private List<CmakeUnDefine> undefines = new ArrayList<>(0);
   private CmakeGenerator generatedWith;
+  private String envSetterScript;
 
   /**
    * Creates a new object, initialized with all default values.
@@ -140,6 +142,7 @@ public abstract class AbstractOsPreferences {
    *
    * @return the buildscript processor or {@code null} if the build command
    *         matching the chosen generator should be used.
+   * @todo do we really need this?
    */
   public String getBuildscriptProcessorCommand() {
     return buildscriptProcessorCmd;
@@ -156,6 +159,27 @@ public abstract class AbstractOsPreferences {
     if ("".equals(buildscriptProcessorCommand))
       buildscriptProcessorCommand = null;
     this.buildscriptProcessorCmd = buildscriptProcessorCommand;
+  }
+
+  /**
+   * Gets the name of the script to run prior to cmake.
+   *
+   * @return the script name or {@code null} if none.
+   */
+  public String getEnvSetterScript() {
+    return this.envSetterScript;
+  }
+
+  /**
+   * Sets the name of the script to run prior to cmake (runs in the same sub-shell).
+   *
+   * @param command
+   *          the script name or {@code null} or an empty string if none.
+   */
+  public void setEnvSetterScript(String command) {
+    if ("".equals(command))
+      command = null;
+    this.envSetterScript = command;
   }
 
   /**
@@ -217,6 +241,9 @@ public abstract class AbstractOsPreferences {
 //    if (val != null)
     setBuildscriptProcessorCommand(val);
 
+    val = parent.getAttribute(ATTR_ENV_SETTER_COMMAND);
+    setEnvSetterScript(val);
+
     ICStorageElement[] children = parent.getChildren();
     for (ICStorageElement child : children) {
       if (CMakePreferences.ELEM_DEFINES.equals(child.getName())) {
@@ -246,26 +273,29 @@ public abstract class AbstractOsPreferences {
     }
 
     // use default command
-    if (useDefaultCommand) {
-      parent.setAttribute(ATTR_USE_DEFAULT_COMMAND,
-          String.valueOf(useDefaultCommand));
-    } else {
-      parent.removeAttribute(ATTR_USE_DEFAULT_COMMAND);
-    }
+    saveNullableAttribute(parent, ATTR_USE_DEFAULT_COMMAND, String.valueOf(useDefaultCommand));
     parent.setAttribute(ATTR_COMMAND, command);
     // generator
     parent.setAttribute(ATTR_GENERATOR, generator.name());
-    if (buildscriptProcessorCmd != null) {
-      parent.setAttribute(ATTR_BUILD_COMMAND, buildscriptProcessorCmd);
-    } else {
-      parent.removeAttribute(ATTR_BUILD_COMMAND);
-    }
+    saveNullableAttribute(parent, ATTR_BUILD_COMMAND, buildscriptProcessorCmd);
+    saveNullableAttribute(parent, ATTR_ENV_SETTER_COMMAND, envSetterScript);
     // defines...
     Util.serializeCollection(CMakePreferences.ELEM_DEFINES, parent,
         new CmakeDefineSerializer(), defines);
     // undefines...
     Util.serializeCollection(CMakePreferences.ELEM_UNDEFINES, parent,
         new CmakeUndefineSerializer(), undefines);
+  }
+
+  /**
+   * Adds the specified attribute to the parent tag or removes it, if value is <code>null</code>.
+   */
+  private void saveNullableAttribute(ICStorageElement parent, String attrName, String attrValue) {
+    if (attrValue != null) {
+      parent.setAttribute(attrName, attrValue);
+    } else {
+      parent.removeAttribute(attrName);
+    }
   }
 
   /**
