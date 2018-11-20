@@ -23,12 +23,12 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.eclipse.cdt.core.CCorePlugin;
-import org.eclipse.cdt.core.CommandLauncher;
 import org.eclipse.cdt.core.ICommandLauncher;
 import org.eclipse.cdt.core.envvar.IEnvironmentVariable;
 import org.eclipse.cdt.core.envvar.IEnvironmentVariableManager;
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
 import org.eclipse.cdt.core.settings.model.ICLanguageSettingEntry;
+import org.eclipse.cdt.managedbuilder.core.ManagedBuildManager;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
@@ -114,7 +114,10 @@ public class CompilerBuiltinsDetector {
     final List<String> argList = getCompilerArguments(languageId, builtinDetectionType);
 
     IProject project = cfgDescription.getProjectDescription().getProject();
-    ICommandLauncher launcher = new CommandLauncher();
+    // get the launcher that runs in docker container, if any
+    ICommandLauncher launcher = ManagedBuildManager.getConfigurationForDescription(cfgDescription).getEditableBuilder()
+        .getCommandLauncher();
+
     launcher.setProject(project);
     final Process proc = launcher.execute(new Path(command), argList.toArray(new String[argList.size()]), getEnvp(),
         null, subMonitor);
