@@ -192,8 +192,6 @@ public class CMakePreferences {
     // undefines...
     Util.serializeCollection(ELEM_UNDEFINES, parent,
         new CmakeUndefineSerializer(), undefines);
-//    linuxPreferences.saveToStorage(parent);
-//    windowsPreferences.saveToStorage(parent);
   }
 
   /**

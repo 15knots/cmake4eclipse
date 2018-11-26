@@ -27,7 +27,7 @@ public final class ConfigurationManager {
   private static ConfigurationManager instance;
 
   /** caches CMakePreferences by ICConfigurationDescription.ID */
-  private WeakHashMap<String, CMakePreferences> map = new WeakHashMap<String, CMakePreferences>(
+  private WeakHashMap<String, CMakePreferences> map = new WeakHashMap<>(
       2);
 
   /**
@@ -44,23 +44,6 @@ public final class ConfigurationManager {
       instance = new ConfigurationManager();
     return instance;
   }
-
-//  /**
-//   * Associates the specified {@code ICConfigurationDescription} from the CDT
-//   * data model with the specified CMakePreferences object and stores it for
-//   * later retrieval. The association will be automatically removed as soon as
-//   * there is no longer a hard reference to the ICConfigurationDescription.
-//   *
-//   * @throws NullPointerException
-//   *         if prefs is {@code null}
-//   */
-//  public void put(ICConfigurationDescription cfgd, CMakePreferences prefs) {
-//    if (prefs == null) {
-//      throw new NullPointerException("prefs");
-//    }
-//
-//    map.put(cfgd, prefs);
-//  }
 
   /**
    * Gets the {@code CMakePreferences} object associated with the specified
