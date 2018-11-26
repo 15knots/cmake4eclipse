@@ -27,12 +27,6 @@ public class LinuxPreferences extends AbstractOsPreferences {
   public LinuxPreferences() {
   }
 
-//  /** Overridden to set a sensible generator. */
-//  public void reset() {
-//    super.reset();
-//    setGenerator( CmakeGenerator.UnixMakefiles);
-//  }
-
   /**
    * @return the String "linux".
    */
