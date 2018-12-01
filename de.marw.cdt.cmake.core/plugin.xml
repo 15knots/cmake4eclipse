@@ -102,7 +102,7 @@
               category="org.eclipse.cdt.managedbuilder.ui.properties.Page_head_build"
               class="de.marw.cdt.cmake.core.ui.CMakePropertyPage"
               id="de.marw.cdt.cmake.core.ui.CMakePropertyPage"
-              name="CMake">
+              name="Cmake4eclipse">
          <enabledWhen>
               <adapt type="org.eclipse.core.resources.IProject">
                  <test
