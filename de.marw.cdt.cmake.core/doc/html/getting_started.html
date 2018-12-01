@@ -10,39 +10,42 @@
 <body>
   <h1>Getting Started</h1>
   <p>
-    Cmake4eclipse requires an existing C/C++ project to work with.<br/>It allows
-    to use <code>cmake</code> as the generator for the makefiles instead of the
-    generator built-in to CDT.
-    See <a href="t_enable_generator.html">Enabling CMake buildscript generation</a>
-    for details.
+    Cmake4eclipse requires an existing CDT C-project or C++-project to work with.<br/>It allows
+    to use <code>cmake</code> as the generator for the buildscripts instead of the
+    makefile generator built-in to CDT.
   </p>
   
   <p>As a first start, you may want to try out one of the 
-  <a href="https://github.com/15knots/cmake4eclipse/tree/master/testprojects">example projects</a>.
+  <a href="https://github.com/15knots/cmake4eclipse-sample-projects">example projects</a>.
   </p>
   
   <p>
   To set up your own project with existing source code, please follow these steps:
   <ol>
 <li>Check out your source code.</li>
-<li>Open the <kbd>New C/C++ project</kbd> wizard (<kbd>File&#10146; New&#10146; C Project</kbd>
-or <kbd>File&#10146; New&#10146; C++ Project</kbd>).</li>
+<li>Open menu <kbd>File&#10146; New&#10146; Project...&#10146; C/C++</kbd> and select one of the
+<kbd>New C project</kbd> or <kbd>New C++ project</kbd> wizards. Do <strong>not</strong> choose the
+<kbd>New C/C++ project</kbd> wizard, as that will take you down the road of CDT`s new project type (which has poor cmake support).</li>
 <li>Make sure the project location points to root directory of your checked out files</li>
-<li>For the project type, select <kbd>Executable</kbd>. 
-You may also select <kbd>Shared Library</kbd> or <kbd>Static Library</kbd>,
-it does not matter. Your <em>CMakeLists.txt</em> is the source of truth.
-<strong>So do not select <kbd>Makefile project</kbd> here!</strong>
+<li>For the project type, select anything below <kbd>Executable</kbd>, <kbd>Shared Library</kbd> or 
+<kbd>Static Library</kbd>, it does not matter since the settings actually come from your <em>CMakeLists.txt</em> files.<br/>
+<strong>Do not select <kbd>Makefile project</kbd> here!</strong>
 </li>
 <li>Finish project creation.</li>
 <li>Open the <a class="command-link" href='javascript:executeCommand("org.eclipse.ui.project.properties")'>
    <img src="PLUGINS_ROOT/org.eclipse.help/command_link.png"/><b>Project Properties</b></a>
    dialog.
 </li>
-<li>Select the <kbd>C/C++ Build</kbd> node and the <kbd>Builder Settings</kbd> tab 
-   and make sure <kbd>Generate Makefiles automatically</kbd> is checked.
+<li>Select the <kbd>C/C++ Build</kbd> node and the <kbd>Builder Settings</kbd> tab. 
+   Make sure that
+   <ol>
+   <li><kbd>External Builder</kbd> is set as the builder type.</li>
+   <li><kbd>Use default build command</kbd> is checked. (Although you may use different settings here at your own risk.)</li>
+   <li><kbd>Generate Makefiles automatically</kbd> is checked.</li>
+   </ol>
 </li>
 <li>Select the <kbd>Tool Chain Editor</kbd> node and set 
-<kbd>CMake Builder (portable)</kbd> as the current builder.</li>
+<kbd>CMake Builder (portable)</kbd> as the current builder. See <a href="builders.html">Builders</a> for details on the available builders.</li>
 <li>If your top level <em>CMakeLists.txt</em> does not reside in the root directory
 of your checked out files, select the <kbd>C/C++ General&#10146; Path and Symbols</kbd> node
  and the <kbd>Source Location</kbd> tab.
