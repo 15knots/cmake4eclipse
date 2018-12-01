@@ -29,10 +29,10 @@
                cleanBuildTarget="clean"
                command="CMAKE_BUILD_TOOL"
                id="de.marw.cdt.cmake.core.genscriptbuilder"
-               ignoreErrCmd="$&lt;make4eclipse_dyn&gt;"
+               ignoreErrCmd="$&lt;cmake4eclipse_dyn&gt;"
                incrementalBuildTarget="all"
                name="CMake Builder (portable)"
-               parallelBuildCmd="$&lt;make4eclipse_dyn&gt;"
+               parallelBuildCmd="$&lt;cmake4eclipse_dyn&gt;"
                parallelBuildOn="true"
                parallelizationNumber="unlimited">
          </builder>

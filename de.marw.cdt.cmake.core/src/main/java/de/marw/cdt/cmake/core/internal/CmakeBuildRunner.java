@@ -176,7 +176,7 @@ public class CmakeBuildRunner extends ExternalBuildRunner {
         InputStream is = null;
         try {
           is = new FileInputStream(file);
-          final Set<SimpleCMakeCacheEntry> entries = new HashSet<SimpleCMakeCacheEntry>();
+          final Set<SimpleCMakeCacheEntry> entries = new HashSet<>();
           final EntryFilter filter = new EntryFilter() {
             @Override
             public boolean accept(String key) {
@@ -270,7 +270,7 @@ public class CmakeBuildRunner extends ExternalBuildRunner {
     public String getBuildArguments() {
       String arg0 = delegate.getBuildArguments(); // macros are expanded
       // remove placeholders required by CDT (specified in plugin.xml)
-      String args = arg0.replace("$<make4eclipse_dyn>", "");
+      String args = arg0.replace("$<cmake4eclipse_dyn>", "");
       // Handle ignore errors option...
       if (!delegate.isStopOnError()) {
         final String ignoreErrOption = generator.getIgnoreErrOption();
