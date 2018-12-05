@@ -53,7 +53,7 @@ public class NvccOutputProcessorTest {
   public void testProcessFile() throws IOException {
     // pass resource content line-wise to the testee...
     try (InputStream is = getClass().getResourceAsStream("cbd-nvcc.output.txt");
-        OutputSniffer os = new OutputSniffer(testee)) {
+        OutputSniffer os = new OutputSniffer(testee, null)) {
       byte[] buffer = new byte[1024];
       int length;
       while ((length = is.read(buffer)) > 0) {

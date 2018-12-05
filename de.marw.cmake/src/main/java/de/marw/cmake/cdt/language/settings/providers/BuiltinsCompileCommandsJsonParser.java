@@ -22,6 +22,7 @@ import org.eclipse.cdt.build.core.scannerconfig.ScannerConfigNature;
 import org.eclipse.cdt.core.CCorePlugin;
 import org.eclipse.cdt.core.language.settings.providers.ICBuildOutputParser;
 import org.eclipse.cdt.core.language.settings.providers.ICListenerAgent;
+import org.eclipse.cdt.core.language.settings.providers.ILanguageSettingsEditableProvider;
 import org.eclipse.cdt.core.language.settings.providers.ILanguageSettingsProvider;
 import org.eclipse.cdt.core.language.settings.providers.ILanguageSettingsProvidersKeeper;
 import org.eclipse.cdt.core.language.settings.providers.IWorkingDirectoryTracker;
@@ -38,7 +39,6 @@ import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
-import org.w3c.dom.Element;
 
 import de.marw.cmake.CMakePlugin;
 import de.marw.cmake.cdt.language.settings.providers.builtins.CompilerBuiltinsDetector;
@@ -53,8 +53,13 @@ import de.marw.cmake.cdt.language.settings.providers.builtins.CompilerBuiltinsDe
  * @author Martin Weber
  */
 public class BuiltinsCompileCommandsJsonParser extends LanguageSettingsSerializableProvider
-    implements ICListenerAgent, ICBuildOutputParser, Cloneable {
+    implements ILanguageSettingsEditableProvider, ICListenerAgent, ICBuildOutputParser, Cloneable {
+
+  public static final String PROVIDER_ID = "de.marw.cmake.cdt.language.settings.providers.BuiltinsCompileCommandsJsonParser";
   private static final ILog log = CMakePlugin.getDefault().getLog();
+
+  /** storage key for with console */
+  private static final String ATTR_WITH_CONSOLE = "console";
 
   private ICConfigurationDescription currentCfgDescription;
 
@@ -98,7 +103,7 @@ public class BuiltinsCompileCommandsJsonParser extends LanguageSettingsSerializa
         for (CompilerBuiltinsDetector detector : detectors) {
           final String languageId = detector.getLanguageId();
           // entries per language
-          List<ICLanguageSettingEntry> entries = detector.run(new NullProgressMonitor());
+          List<ICLanguageSettingEntry> entries = detector.run(new NullProgressMonitor(), isWithConsole());
           // use a Set here to avoid duplicates by name and kind ..
           Set<ICLanguageSettingEntry> allEntries = langMap.get(languageId);
           if (allEntries == null) {
@@ -114,18 +119,6 @@ public class BuiltinsCompileCommandsJsonParser extends LanguageSettingsSerializa
         }
       }
     }
-  }
-
-  /*
-   * (non-Javadoc)
-   *
-   * @see
-   * org.eclipse.cdt.core.language.settings.providers.LanguageSettingsSerializableProvider#serializeEntries(org.w3c.dom.
-   * Element)
-   */
-  @Override
-  public void serializeEntries(Element elementProvider) {
-    // no language setting entries to serialize, since entries come from the compile_commands.json file
   }
 
   /*-
@@ -201,8 +194,7 @@ public class BuiltinsCompileCommandsJsonParser extends LanguageSettingsSerializa
                 final List<ILanguageSettingsProvider> lsps = ((ILanguageSettingsProvidersKeeper) activeConfiguration)
                     .getLanguageSettingProviders();
                 for (ILanguageSettingsProvider lsp : lsps) {
-                  if ("de.marw.cmake.cdt.language.settings.providers.BuiltinsCompileCommandsJsonParser"
-                      .equals(lsp.getId())) {
+                  if (PROVIDER_ID.equals(lsp.getId())) {
                     currentCfgDescription = activeConfiguration;
                     detectBuiltins(true);
                     break;
@@ -225,6 +217,23 @@ public class BuiltinsCompileCommandsJsonParser extends LanguageSettingsSerializa
    */
   @Override
   public void unregisterListener() {
+  }
+
+  /**
+   * Gets whether a console in the console view should be allocated during detection.
+   */
+  public boolean isWithConsole() {
+    return getPropertyBool(ATTR_WITH_CONSOLE);
+  }
+
+  /** Sets whether a console in the console view should be allocated during detection.
+   */
+  public void setWithConsole(boolean enabled) {
+    if(enabled) {
+      setPropertyBool(ATTR_WITH_CONSOLE, enabled);
+    } else {
+      properties.remove(ATTR_WITH_CONSOLE);
+    }
   }
 
 }

@@ -25,14 +25,22 @@ class OutputSniffer extends OutputStream {
   private static final String SEP = System.lineSeparator();
   private final StringBuilder buffer;
   private final BuiltinsOutputProcessor processor;
+  private final OutputStream os;
 
-  public OutputSniffer(BuiltinsOutputProcessor processor) {
+  /**
+   * @param outputStream
+   *          the OutputStream to write to or {@code null}
+   */
+  public OutputSniffer(BuiltinsOutputProcessor processor, OutputStream outputStream) {
     this.processor = Objects.requireNonNull(processor);
+    this.os= outputStream;
     buffer = new StringBuilder(512);
   }
 
   @Override
   public void write(int c) throws IOException {
+    if (os != null)
+      os.write(c);
     synchronized (this) {
       buffer.append(new String(new byte[] { (byte) c }));
       splitLines();
@@ -41,6 +49,8 @@ class OutputSniffer extends OutputStream {
 
   @Override
   public void write(byte[] b, int off, int len) throws IOException {
+    if (os != null)
+      os.write(b, off, len);
     synchronized (this) {
       buffer.append(new String(b, off, len));
       splitLines();
@@ -49,6 +59,8 @@ class OutputSniffer extends OutputStream {
 
   @Override
   public void flush() throws IOException {
+    if (os != null)
+      os.flush();
     synchronized (this) {
       splitLines();
       // process remaining bytes
@@ -60,6 +72,8 @@ class OutputSniffer extends OutputStream {
 
   @Override
   public void close() throws IOException {
+    if (os != null)
+      os.close();
     flush();
   }
 
