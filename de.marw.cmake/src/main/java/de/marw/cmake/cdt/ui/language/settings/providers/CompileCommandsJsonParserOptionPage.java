@@ -139,7 +139,7 @@ public class CompileCommandsJsonParserOptionPage extends AbstractCOptionPage {
    * @param text
    *          text to display on the checkbox
    */
-  private static Button createCheckbox(Composite parent, int horizontalAlignment, int horizontalSpan, String text) {
+  static Button createCheckbox(Composite parent, int horizontalAlignment, int horizontalSpan, String text) {
     Button b = new Button(parent, SWT.CHECK);
     b.setText(text);
     GridData gd = new GridData(horizontalAlignment, SWT.CENTER, false, false);

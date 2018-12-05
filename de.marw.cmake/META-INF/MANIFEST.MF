@@ -10,6 +10,7 @@ Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
 Import-Package: de.marw.cdt.cmake.core.cmakecache,
+ de.marw.cdt.cmake.core.ui,
  org.eclipse.cdt.build.core.scannerconfig,
  org.eclipse.cdt.core,
  org.eclipse.cdt.core.envvar,
@@ -22,6 +23,7 @@ Import-Package: de.marw.cdt.cmake.core.cmakecache,
  org.eclipse.cdt.managedbuilder.core,
  org.eclipse.cdt.ui,
  org.eclipse.cdt.ui.dialogs,
+ org.eclipse.cdt.ui.language.settings.providers,
  org.eclipse.core.filesystem,
  org.eclipse.core.resources,
  org.eclipse.core.runtime,

@@ -13,9 +13,11 @@ package de.marw.cmake.cdt.language.settings.providers.builtins;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -23,9 +25,13 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.eclipse.cdt.core.CCorePlugin;
+import org.eclipse.cdt.core.ConsoleOutputStream;
 import org.eclipse.cdt.core.ICommandLauncher;
 import org.eclipse.cdt.core.envvar.IEnvironmentVariable;
 import org.eclipse.cdt.core.envvar.IEnvironmentVariableManager;
+import org.eclipse.cdt.core.model.ILanguage;
+import org.eclipse.cdt.core.model.LanguageManager;
+import org.eclipse.cdt.core.resources.IConsole;
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
 import org.eclipse.cdt.core.settings.model.ICLanguageSettingEntry;
 import org.eclipse.cdt.managedbuilder.core.ManagedBuildManager;
@@ -47,7 +53,9 @@ import de.marw.cmake.CMakePlugin;
  * @author Martin Weber
  */
 public class CompilerBuiltinsDetector {
-
+  /** console ID for extension point org.eclipse.cdt.core.CBuildConsole (see plugin.xml) */
+  private static final String CONSOLE_ID = CMakePlugin.PLUGIN_ID + ".detectorConsole";
+  /** error marker ID */
   private static final String MARKER_ID = CMakePlugin.PLUGIN_ID + ".CompilerBuiltinsDetectorMarker";
 
   private ICConfigurationDescription cfgDescription;
@@ -90,9 +98,10 @@ public class CompilerBuiltinsDetector {
    *
    * @param monitor
    *          progress monitor or {@code null}
+   * @param withConsole whether to show a console for the command output
    * @throws CoreException
    */
-  public List<ICLanguageSettingEntry> run(IProgressMonitor monitor) throws CoreException {
+  public List<ICLanguageSettingEntry> run(IProgressMonitor monitor, boolean withConsole) throws CoreException {
     final SubMonitor subMonitor = SubMonitor.convert(monitor, "Built-in settings detection for compiler " + command,
         IProgressMonitor.UNKNOWN);
 
@@ -113,12 +122,17 @@ public class CompilerBuiltinsDetector {
 
     final List<String> argList = getCompilerArguments(languageId, builtinDetectionType);
 
+    IConsole console= null;
+    if (withConsole) {
+      console = startOutputConsole();
+    }
+
     IProject project = cfgDescription.getProjectDescription().getProject();
     // get the launcher that runs in docker container, if any
     ICommandLauncher launcher = ManagedBuildManager.getConfigurationForDescription(cfgDescription).getEditableBuilder()
         .getCommandLauncher();
-
     launcher.setProject(project);
+    launcher.showCommand(console != null);
     final Process proc = launcher.execute(new Path(command), argList.toArray(new String[argList.size()]), getEnvp(),
         null, subMonitor);
     if (proc != null) {
@@ -127,11 +141,12 @@ public class CompilerBuiltinsDetector {
         proc.getOutputStream().close();
       } catch (IOException e) {
       }
-      // NOTE: we need 2 of this, since the output streams are not synchronized, causing loss of
+      // NOTE: we need 2 of these, since the output streams are not synchronized, causing loss of
       // the internal processor state
-      final BuiltinsOutputProcessor bop1 = createCompilerOutputProcessor(entries, builtinDetectionType);
-      final BuiltinsOutputProcessor bop2 = createCompilerOutputProcessor(entries, builtinDetectionType);
-      int state = launcher.waitAndRead(new OutputSniffer(bop1), new OutputSniffer(bop2), monitor);
+      final BuiltinsOutputProcessor bopOut = createCompilerOutputProcessor(entries, builtinDetectionType);
+      final BuiltinsOutputProcessor bopErr = createCompilerOutputProcessor(entries, builtinDetectionType);
+      int state = launcher.waitAndRead(new OutputSniffer(bopOut, console == null ? null : console.getOutputStream()),
+          new OutputSniffer(bopErr, console == null ? null : console.getErrorStream()), monitor);
       if (state != ICommandLauncher.COMMAND_CANCELED) {
         // check exit status
         final int exitValue = proc.exitValue();
@@ -312,6 +327,39 @@ public class CompilerBuiltinsDetector {
     IMarker marker = cfgDescription.getProjectDescription().getProject().createMarker(MARKER_ID);
     marker.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_INFO);
     marker.setAttribute(IMarker.MESSAGE, message);
+  }
+
+  /**
+   * Creates and starts the provider console.
+   *
+   * @return CDT console or <code>null</code>
+   *
+   * @throws CoreException
+   */
+  private IConsole startOutputConsole() throws CoreException {
+    IConsole console = null;
+
+    ILanguage ld = LanguageManager.getInstance().getLanguage(languageId);
+    if (ld != null) {
+      String consoleId = CONSOLE_ID + '.' + languageId;
+      console = CCorePlugin.getDefault().getConsole(CONSOLE_ID,consoleId,null, null);
+      final IProject project = cfgDescription.getProjectDescription().getProject();
+      console.start(project);
+      try {
+        final ConsoleOutputStream cis = console.getInfoStream();
+        cis.write(SimpleDateFormat.getTimeInstance().format(new Date()).getBytes());
+        cis.write(" Detecting compiler built-ins: ".getBytes());
+        cis.write(project.getName().getBytes());
+        cis.write("::".getBytes());
+        cis.write(cfgDescription.getConfiguration().getName().getBytes());
+        cis.write(" for ".getBytes());
+        cis.write(ld.getName().getBytes());
+        cis.write("\n".getBytes());
+      } catch (IOException ignore) {
+      }
+    }
+
+    return console;
   }
 
   /*
