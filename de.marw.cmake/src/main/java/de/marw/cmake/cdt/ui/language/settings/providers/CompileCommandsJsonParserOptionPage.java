@@ -13,12 +13,14 @@ package de.marw.cmake.cdt.ui.language.settings.providers;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import org.eclipse.cdt.core.language.settings.providers.ILanguageSettingsProvider;
-import org.eclipse.cdt.core.language.settings.providers.LanguageSettingsManager;
-import org.eclipse.cdt.ui.dialogs.AbstractCOptionPage;
+import org.eclipse.cdt.ui.language.settings.providers.AbstractLanguageSettingProviderOptionPage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.FocusAdapter;
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -36,7 +38,7 @@ import de.marw.cmake.cdt.language.settings.providers.CompileCommandsJsonParser;
  *
  * @author Martin Weber
  */
-public class CompileCommandsJsonParserOptionPage extends AbstractCOptionPage {
+public class CompileCommandsJsonParserOptionPage extends AbstractLanguageSettingProviderOptionPage {
 
   private Text pattern;
   private Button b_versionsEnabled;
@@ -47,17 +49,15 @@ public class CompileCommandsJsonParserOptionPage extends AbstractCOptionPage {
     final String text = pattern.getText();
     try {
       Pattern.compile(text);
-      CompileCommandsJsonParser provider = (CompileCommandsJsonParser) getProvider();
-      provider.setVersionPattern(text);
     } catch (PatternSyntaxException ex) {
-      // BUG in CDT: core exceptions are not visible to users here
+      // BUG in CDT: core exceptions thrown here are not visible to users. CDT-WTF
       // IStatus status = new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID,
       // IStatus.OK,
       // "invalid suffix pattern in CMAKE_EXPORT_COMPILE_COMMANDS Parser", ex);
       // throw new CoreException(status);
 
       throw new PatternSyntaxException(
-          "invalid suffix pattern in CMAKE_EXPORT_COMPILE_COMMANDS Parser: " + ex.getDescription(), ex.getPattern(),
+          "Invalid suffix pattern in CMAKE_EXPORT_COMPILE_COMMANDS Parser:\n" + ex.getDescription(), ex.getPattern(),
           ex.getIndex());
     }
   }
@@ -65,6 +65,7 @@ public class CompileCommandsJsonParserOptionPage extends AbstractCOptionPage {
   @Override
   public void performDefaults() {
     // normally should be handled by LanguageSettingsProviderTab
+    b_versionsEnabled.setSelection(false);
   }
 
   @Override
@@ -111,6 +112,24 @@ public class CompileCommandsJsonParserOptionPage extends AbstractCOptionPage {
       gd.horizontalAlignment = SWT.FILL;
       pattern.setLayoutData(gd);
     }
+    pattern.addModifyListener(new ModifyListener() {
+      public void modifyText(ModifyEvent e) {
+        final String text = ((Text) e.widget).getText();
+        provider.setVersionPattern(text);
+      }
+    });
+    pattern.addFocusListener(new FocusAdapter() {
+      public void focusLost(FocusEvent e) {
+        final String text = pattern.getText();
+        try {
+          Pattern.compile(text);
+//          provider.setVersionPattern(text); has no effect here
+        } catch (PatternSyntaxException ex) {
+          // swallow exception here, but re-check with error dialog in performApply(), since
+          // provider.setVersionPattern(() has no effect when called in performApply()- CDT-WTF
+        }
+      }
+    });
 
     // to adjust sensitivity...
     b_versionsEnabled.addSelectionListener(new SelectionAdapter() {
@@ -173,16 +192,5 @@ public class CompileCommandsJsonParserOptionPage extends AbstractCOptionPage {
     gd.horizontalSpan = horizontalSpan;
     gr.setLayoutData(gd);
     return gr;
-  }
-
-  /**
-   * Get provider being displayed on this Options Page.
-   *
-   * @return provider.
-   */
-  private static ILanguageSettingsProvider getProvider() {
-    ILanguageSettingsProvider provider = LanguageSettingsManager
-        .getWorkspaceProvider("de.marw.cmake.cdt.language.settings.providers.CompileCommandsJsonParser");
-    return LanguageSettingsManager.getRawProvider(provider);
   }
 }

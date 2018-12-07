@@ -39,6 +39,7 @@ import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
+import org.w3c.dom.Element;
 
 import de.marw.cmake.CMakePlugin;
 import de.marw.cmake.cdt.language.settings.providers.builtins.CompilerBuiltinsDetector;
@@ -234,6 +235,11 @@ public class BuiltinsCompileCommandsJsonParser extends LanguageSettingsSerializa
     } else {
       properties.remove(ATTR_WITH_CONSOLE);
     }
+  }
+
+  @Override
+  public void serializeEntries(Element elementProvider) {
+    // no language setting entries to serialize, since entries come from the compile_commands.json file
   }
 
 }
