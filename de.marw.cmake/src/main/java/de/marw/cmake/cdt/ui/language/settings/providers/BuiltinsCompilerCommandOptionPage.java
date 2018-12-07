@@ -13,6 +13,7 @@ package de.marw.cmake.cdt.ui.language.settings.providers;
 import org.eclipse.cdt.core.language.settings.providers.ILanguageSettingsProvider;
 import org.eclipse.cdt.core.language.settings.providers.LanguageSettingsManager;
 import org.eclipse.cdt.ui.dialogs.AbstractCOptionPage;
+import org.eclipse.cdt.ui.language.settings.providers.AbstractLanguageSettingProviderOptionPage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.SWT;
@@ -25,7 +26,7 @@ import org.eclipse.swt.widgets.Composite;
 
 import de.marw.cmake.cdt.language.settings.providers.BuiltinsCompileCommandsJsonParser;
 
-public class BuiltinsCompilerCommandOptionPage extends AbstractCOptionPage {
+public class BuiltinsCompilerCommandOptionPage extends AbstractLanguageSettingProviderOptionPage {
   private Button b_withConsole;
 
   @Override
@@ -64,16 +65,5 @@ public class BuiltinsCompilerCommandOptionPage extends AbstractCOptionPage {
   @Override
   public void performDefaults() {
     b_withConsole.setSelection(false);
-  }
-
-  /**
-   * Gets the provider being displayed on this Options Page.
-   *
-   * @return provider.
-   */
-  private static ILanguageSettingsProvider getProvider() {
-    ILanguageSettingsProvider provider = LanguageSettingsManager
-        .getWorkspaceProvider(BuiltinsCompileCommandsJsonParser.PROVIDER_ID);
-    return LanguageSettingsManager.getRawProvider(provider);
   }
 }
