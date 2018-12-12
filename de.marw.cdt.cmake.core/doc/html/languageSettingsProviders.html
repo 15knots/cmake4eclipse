@@ -30,17 +30,5 @@
 	Note thtat this works only for compilers that support this.
 	See <a href="builtins-detection.html">built-ins detection</a> for supported compilers.
 	</p>
-	
-	<h3>CMake Build Output Parser (deprecated)</h3>
-	<p>
-	<strong>Do not use, it will be removed in future versions.</strong> 
-	It is just my first implementation of a <code>LanguageSettingsProvider</code>.<br/>
-	This provider parses each line of the build output and tries to find compiler command-lines.
-	To do so, it instructs CMake to generate build scripts that produce verbose build output.	
-	As a cause, it will not work with the <code>ninja</code> build tool, because ninja builds do not print any
-	compiler command lines by default.<br/>
-	Build output parsing also degrades build performance, so this provider tries to cache its 
-	findings -- unfortunately its caching is somehow unreliable.
-	</p>
 </body>
 </html>
