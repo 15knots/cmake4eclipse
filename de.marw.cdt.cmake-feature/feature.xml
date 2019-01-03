@@ -2,7 +2,7 @@
 <feature
       id="de.marw.cdt.cmake"
       label="cmake4eclipse"
-      version="1.12.2.qualifier"
+      version="1.13.0.qualifier"
       provider-name="Martin Weber">
 
    <description url="https://github.com/15knots/cmake4eclipse">
@@ -12,7 +12,7 @@ Requires CDT 8.7 or newer.
    </description>
 
    <copyright>
-      Copyright (c) 2013-2018 Martin Weber
+      Copyright (c) 2013-2019 Martin Weber
    </copyright>
 
    <license url="http://opensource.org/licenses/EPL-1.0">
