@@ -142,13 +142,7 @@ class ToolArgumentParsers {
         matcher.reset(args);
         if (matcher.lookingAt()) {
           final String name = matcher.group(oMatcher.nameGroup);
-          String optVal = null;
-          try {
-        	  optVal = matcher.group(oMatcher.valueGroup);          
-          } catch (IndexOutOfBoundsException e) {
-        	  optVal = null;        	  
-          }
-          final String value = oMatcher.valueGroup== -1? null: optVal;
+          final String value = oMatcher.valueGroup== -1? null: matcher.group(oMatcher.valueGroup);
           final ICLanguageSettingEntry entry = CDataUtil.createCMacroEntry(name, value,
               ICSettingEntry.READONLY);
           returnedEntries.add(entry);
