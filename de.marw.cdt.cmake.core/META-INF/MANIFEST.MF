@@ -4,7 +4,7 @@ Bundle-Name: %bundleName
 Bundle-Description: CDT CMake build integration
 Bundle-Copyright: 2013 Martin Weber
 Bundle-SymbolicName: de.marw.cdt.cmake.core;singleton:=true
-Bundle-Version: 1.10.3.qualifier
+Bundle-Version: 1.11.0.qualifier
 Bundle-Vendor: Martin Weber
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
