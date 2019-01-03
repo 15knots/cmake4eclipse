@@ -352,13 +352,13 @@ class ToolArgumentParsers {
 
     private static final NameValueOptionMatcher[] optionMatchers = {
         /* quoted value, whitespace in value, w/ macro arglist */
-        new NameValueOptionMatcher("/D" + REGEX_MACRO_NAME_SKIP_LEADING_WS + "((?:=)([\"'])(.+?)\\4)", 1, 5),
+        new NameValueOptionMatcher("[-/]D" + REGEX_MACRO_NAME_SKIP_LEADING_WS + "((?:=)([\"'])(.+?)\\4)", 1, 5),
         /* w/ macro arglist */
-        new NameValueOptionMatcher("/D" + REGEX_MACRO_NAME_SKIP_LEADING_WS + "((?:=)(\\S+))?", 1, 4),
+        new NameValueOptionMatcher("[-/]D" + REGEX_MACRO_NAME_SKIP_LEADING_WS + "((?:=)(\\S+))?", 1, 3),
         /* quoted name, whitespace in value, w/ macro arglist */
-        new NameValueOptionMatcher("/D" + REGEX_MACRO_NAME_SKIP_LEADING_WS + "((?:=)(.+?))?\\1", 2, 5),
+        new NameValueOptionMatcher("[-/]D" + REGEX_MACRO_NAME_SKIP_LEADING_WS + "((?:=)(.+?))?\\1", 2, 5),
         /* w/ macro arglist, shell escapes \' and \" in value */
-        new NameValueOptionMatcher("/D" + REGEX_MACRO_NAME_SKIP_LEADING_WS + "(?:=)((\\\\([\"']))(.*?)\\2)", 1, 2), };
+        new NameValueOptionMatcher("[-/]D" + REGEX_MACRO_NAME_SKIP_LEADING_WS + "(?:=)((\\\\([\"']))(.*?)\\2)", 1, 2), };
 
     /*-
      * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgs(java.lang.String)
@@ -378,7 +378,7 @@ class ToolArgumentParsers {
   static class MacroUndefine_C_CL extends MacroUndefineGeneric implements IToolArgumentParser {
 
     private static final NameOptionMatcher optionMatcher = new NameOptionMatcher(
-        "/U" + REGEX_MACRO_NAME_SKIP_LEADING_WS, 1);
+        "[-/]U" + REGEX_MACRO_NAME_SKIP_LEADING_WS, 1);
 
     /*-
      * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgument(java.util.List, java.lang.String)
@@ -397,9 +397,9 @@ class ToolArgumentParsers {
   static class IncludePath_C_CL extends IncludePathGeneric implements IToolArgumentParser {
     private static final NameOptionMatcher[] optionMatchers = {
         /* quoted directory */
-        new NameOptionMatcher("/I" + REGEX_INCLUDEPATH_QUOTED_DIR, 2),
+        new NameOptionMatcher("[-/]I" + REGEX_INCLUDEPATH_QUOTED_DIR, 2),
         /* unquoted directory */
-        new NameOptionMatcher("/I" + REGEX_INCLUDEPATH_UNQUOTED_DIR, 1), };
+        new NameOptionMatcher("[-/]I" + REGEX_INCLUDEPATH_UNQUOTED_DIR, 1), };
 
     /*-
      * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgs(java.lang.String)
