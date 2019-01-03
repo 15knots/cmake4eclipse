@@ -4,15 +4,11 @@
   type='org.eclipse.equinox.internal.p2.metadata.repository.CompositeMetadataRepository' version='1.0.0'>
   <properties size='1'>
     <!-- get new time w/ `date +%s000` -->
-    <property name='p2.timestamp' value='1537721045000' />
+    <property name='p2.timestamp' value='1546541955000' />
     <property name='p2.name' value='cmake4eclipse' />
   </properties>
-  <children size='3'>
+  <children size='1'>
     <child
-      location='jar:https://dl.bintray.com/15knots/p2-zip/cmake4eclipse-1.12.1.zip!/' />
-    <child
-      location='jar:https://dl.bintray.com/15knots/p2-zip/cmake4eclipse-1.12.2.zip!/' />
-    <child
-      location='jar:https://dl.bintray.com/15knots/p2-zip/cmake4eclipse-1.11.2.zip!/' />
+      location='jar:https://dl.bintray.com/15knots/p2-zip/cmake4eclipse-1.13.0.zip!/' />
   </children>
 </repository>
