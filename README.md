@@ -63,7 +63,7 @@ There is a run configuration for eclipse to invoke maven `build cmake4eclipse` p
 
 ---
 # Release Notes
-## 1.13.0 (201?-??-??)
+## 1.13.0 (2019-??-??)
 ### Changes
 - Fix #94: CMAKE_EXPORT_COMPILE_COMMANDS parser fails to parse inline-command-files @<<...<<
 - Fix #97: Adjust documentation to newer CDT versions.
@@ -71,6 +71,7 @@ There is a run configuration for eclipse to invoke maven `build cmake4eclipse` p
 - UI/doc: Use *Cmake4eclipse* instead of just *CMake* to avoid confusion with CDT`s new cmake support.
 - Add optional console view for compiler built-ins detection (#96).
 - Fix: CMAKE_EXPORT_COMPILE_COMMANDS * Parser settings were not persisted for projects.
+- Fix #99: CMAKE_EXPORT_COMPILE_COMMANDS Parser for MSVC does not cover "-" flags.
 
 ## 1.12.2 (2018-09-23)
 ### Changes
