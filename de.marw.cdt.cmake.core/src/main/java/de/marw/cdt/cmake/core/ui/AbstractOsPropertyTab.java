@@ -40,12 +40,12 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Text;
 
 import de.marw.cdt.cmake.core.internal.Activator;
-import de.marw.cdt.cmake.core.internal.CmakeGenerator;
-import de.marw.cdt.cmake.core.internal.settings.AbstractOsPreferences;
-import de.marw.cdt.cmake.core.internal.settings.CMakePreferences;
-import de.marw.cdt.cmake.core.internal.settings.CmakeDefine;
-import de.marw.cdt.cmake.core.internal.settings.CmakeUnDefine;
-import de.marw.cdt.cmake.core.internal.settings.ConfigurationManager;
+import de.marw.cdt.cmake.core.settings.AbstractOsPreferences;
+import de.marw.cdt.cmake.core.settings.CMakePreferences;
+import de.marw.cdt.cmake.core.settings.CmakeDefine;
+import de.marw.cdt.cmake.core.settings.CmakeGenerator;
+import de.marw.cdt.cmake.core.settings.CmakeUnDefine;
+import de.marw.cdt.cmake.core.settings.ConfigurationManager;
 
 /**
  * Generic UI to control host OS specific project properties and preferences for

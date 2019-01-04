@@ -8,7 +8,7 @@
  * Contributors:
  *      Martin Weber - Initial implementation
  *******************************************************************************/
-package de.marw.cdt.cmake.core.internal;
+package de.marw.cdt.cmake.core.settings;
 
 /**
  * Represents a cmake build-script generator including information about the

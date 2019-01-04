@@ -12,9 +12,9 @@ package de.marw.cdt.cmake.core.ui;
 
 import java.util.EnumSet;
 
-import de.marw.cdt.cmake.core.internal.CmakeGenerator;
-import de.marw.cdt.cmake.core.internal.settings.CMakePreferences;
-import de.marw.cdt.cmake.core.internal.settings.LinuxPreferences;
+import de.marw.cdt.cmake.core.settings.CMakePreferences;
+import de.marw.cdt.cmake.core.settings.CmakeGenerator;
+import de.marw.cdt.cmake.core.settings.LinuxPreferences;
 
 /**
  * UI to control host Linux specific project properties and preferences for

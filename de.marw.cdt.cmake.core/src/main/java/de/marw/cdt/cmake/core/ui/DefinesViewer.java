@@ -44,7 +44,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 
-import de.marw.cdt.cmake.core.internal.settings.CmakeDefine;
+import de.marw.cdt.cmake.core.settings.CmakeDefine;
 
 /**
  * Displays a table for the Cmake defines. The created table will be displayed

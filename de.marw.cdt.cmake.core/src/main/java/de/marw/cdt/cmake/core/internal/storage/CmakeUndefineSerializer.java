@@ -12,7 +12,7 @@ package de.marw.cdt.cmake.core.internal.storage;
 
 import org.eclipse.cdt.core.settings.model.ICStorageElement;
 
-import de.marw.cdt.cmake.core.internal.settings.CmakeUnDefine;
+import de.marw.cdt.cmake.core.settings.CmakeUnDefine;
 
 /**
  * Responsible for serialization/de-serialization of CmakeUndefine objects.

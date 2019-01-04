@@ -12,8 +12,8 @@ package de.marw.cdt.cmake.core.internal.storage;
 
 import org.eclipse.cdt.core.settings.model.ICStorageElement;
 
-import de.marw.cdt.cmake.core.internal.settings.CmakeDefine;
-import de.marw.cdt.cmake.core.internal.settings.CmakeVariableType;
+import de.marw.cdt.cmake.core.settings.CmakeDefine;
+import de.marw.cdt.cmake.core.settings.CmakeVariableType;
 
 /**
  * Responsible for serialization/de-serialization of CmakeDefine objects.

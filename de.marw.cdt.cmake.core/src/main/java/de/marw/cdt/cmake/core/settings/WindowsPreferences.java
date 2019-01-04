@@ -8,9 +8,7 @@
  * Contributors:
  *      Martin Weber - Initial implementation
  *******************************************************************************/
-package de.marw.cdt.cmake.core.internal.settings;
-
-import de.marw.cdt.cmake.core.internal.CmakeGenerator;
+package de.marw.cdt.cmake.core.settings;
 
 /**
  * Preferences that override/augment the generic properties when running under

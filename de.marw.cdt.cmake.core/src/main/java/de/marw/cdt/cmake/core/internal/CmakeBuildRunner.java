@@ -54,10 +54,11 @@ import org.osgi.framework.Version;
 
 import de.marw.cdt.cmake.core.cmakecache.CMakeCacheFileParser;
 import de.marw.cdt.cmake.core.cmakecache.CMakeCacheFileParser.EntryFilter;
+import de.marw.cdt.cmake.core.settings.AbstractOsPreferences;
+import de.marw.cdt.cmake.core.settings.CMakePreferences;
+import de.marw.cdt.cmake.core.settings.CmakeGenerator;
+import de.marw.cdt.cmake.core.settings.ConfigurationManager;
 import de.marw.cdt.cmake.core.cmakecache.SimpleCMakeCacheEntry;
-import de.marw.cdt.cmake.core.internal.settings.AbstractOsPreferences;
-import de.marw.cdt.cmake.core.internal.settings.CMakePreferences;
-import de.marw.cdt.cmake.core.internal.settings.ConfigurationManager;
 
 /**
  * An ExternalBuildRunner that injects the build tool command to use and some of

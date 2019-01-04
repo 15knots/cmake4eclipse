@@ -8,7 +8,7 @@
  * Contributors:
  *      Martin Weber - Initial implementation
  *******************************************************************************/
-package de.marw.cdt.cmake.core.internal.settings;
+package de.marw.cdt.cmake.core.settings;
 
 /**
  * Represents a cmake variable to define.

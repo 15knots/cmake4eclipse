@@ -54,11 +54,12 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 
-import de.marw.cdt.cmake.core.internal.settings.AbstractOsPreferences;
-import de.marw.cdt.cmake.core.internal.settings.CMakePreferences;
-import de.marw.cdt.cmake.core.internal.settings.CmakeDefine;
-import de.marw.cdt.cmake.core.internal.settings.CmakeUnDefine;
-import de.marw.cdt.cmake.core.internal.settings.ConfigurationManager;
+import de.marw.cdt.cmake.core.settings.AbstractOsPreferences;
+import de.marw.cdt.cmake.core.settings.CMakePreferences;
+import de.marw.cdt.cmake.core.settings.CmakeDefine;
+import de.marw.cdt.cmake.core.settings.CmakeGenerator;
+import de.marw.cdt.cmake.core.settings.CmakeUnDefine;
+import de.marw.cdt.cmake.core.settings.ConfigurationManager;
 
 /**
  * Generates makefiles and other build scripts from CMake scripts
