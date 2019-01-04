@@ -667,7 +667,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
     }
 
     private Iterable<CompilerBuiltinsDetector> getBuiltinsDetectors() {
-      return builtinDetectors == null ? builtinDetectors = Collections.emptySet()
+      return builtinDetectors == null ? Collections.emptySet()
           : Collections.unmodifiableCollection(builtinDetectors);
     }
 
