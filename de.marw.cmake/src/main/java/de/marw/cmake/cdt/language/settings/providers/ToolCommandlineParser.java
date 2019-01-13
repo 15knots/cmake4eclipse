@@ -40,23 +40,21 @@ class ToolCommandlineParser implements IToolCommandlineParser {
 
   /**
    * @param languageID
-   *          the language ID of the language that the tool compiles
+   *          the language ID of the language that the tool compiles or {@code null} if the language ID should be
+   *          derived from the source file-name extension
    * @param responseFileArgumentParser
-   *          the parsers for the response-file command-line argument for the
-   *          tool of {@code null} if the tool does not recognize a
-   *          response-file argument
+   *          the parsers for the response-file command-line argument for the tool or {@code null} if the tool does not
+   *          recognize a response-file argument
    * @param builtinDetectionType
-   *          the classification of how to detect compiler-built-in macros and
-   *          include paths.
+   *          the classification of how to detect compiler-built-in macros and include paths.
    * @param argumentParsers
-   *          the parsers for the command line arguments of of interest for the
-   *          tool
+   *          the parsers for the command line arguments of of interest for the tool
    * @throws NullPointerException
-   *           if any of the arguments is {@code null}
+   *           if any of the {@code builtinDetectionType} or {@code argumentParsers} arguments is {@code null}
    */
   public ToolCommandlineParser(String languageID, IResponseFileArgumentParser responseFileArgumentParser,
       BuiltinDetectionType builtinDetectionType, IToolArgumentParser... argumentParsers) {
-    this.languageID = Objects.requireNonNull(languageID, "languageID");
+    this.languageID = languageID;
     this.builtinDetectionType = Objects.requireNonNull(builtinDetectionType, "builtinDetectionType");
     this.argumentParsers = Objects.requireNonNull(argumentParsers, "argumentParsers");
     this.responseFileArgumentParser = responseFileArgumentParser;

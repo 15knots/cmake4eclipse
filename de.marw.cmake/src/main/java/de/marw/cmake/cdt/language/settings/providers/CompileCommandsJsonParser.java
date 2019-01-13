@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -60,6 +61,7 @@ import org.w3c.dom.Element;
 
 import de.marw.cmake.CMakePlugin;
 import de.marw.cmake.cdt.language.settings.providers.ParserDetection.MarchResult;
+import de.marw.cmake.cdt.language.settings.providers.builtins.BuiltinDetectionType;
 import de.marw.cmake.cdt.language.settings.providers.builtins.CompilerBuiltinsDetector;
 
 /**
@@ -306,17 +308,24 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
             if (pdr != null) {
               // found a matching command-line parser
               final IToolCommandlineParser parser = pdr.getDetectorWithMethod().getDetector().getParser();
-              // cwdStr is the absolute working directory of the compiler in
-              // CMake-notation (fileSep are forward slashes)
-              final String cwdStr = sourceFileInfo.get("directory").toString();
-              IPath cwd = cwdStr != null ? Path.fromOSString(cwdStr) : new Path("");
-              if (enabled)
+              if (enabled) {
+                // cwdStr is the absolute working directory of the compiler in
+                // CMake-notation (fileSep are forward slashes)
+                final String cwdStr = sourceFileInfo.get("directory").toString();
+                IPath cwd = cwdStr != null ? Path.fromOSString(cwdStr) : new Path("");
                 processCommandLine(storage, parser, files[0], cwd, pdr.getReducedCommandLine());
-
-              CompilerBuiltinsDetector detector = new CompilerBuiltinsDetector(currentCfgDescription,
-                  parser.getLanguageId(), parser.getBuiltinDetectionType(), pdr.getCommandLine().getCommand());
-
-              storage.addBuiltinsDetector(detector);
+              }
+              final BuiltinDetectionType builtinDetectionType = parser.getBuiltinDetectionType();
+              if(builtinDetectionType != BuiltinDetectionType.NONE) {
+                String languageId = parser.getLanguageId();
+                if (languageId == null) {
+                  languageId = determineLanguageId(files[0]);
+                }
+                if (languageId != null) {
+                  storage.addBuiltinsDetector(currentCfgDescription, languageId, builtinDetectionType,
+                      pdr.getCommandLine().getCommand());
+                }
+              }
             } else {
               // no matching parser found
               String message = "No parser for command '" + cmdLine + "'. " + WORKBENCH_WILL_NOT_KNOW_ALL_MSG;
@@ -331,6 +340,36 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
     final String msg = "File format error: " + ": 'file', 'command' or 'directory' missing in JSON object. "
         + WORKBENCH_WILL_NOT_KNOW_ALL_MSG;
     createMarker(jsonFile, msg);
+  }
+
+  /**
+   * Gets the languageID of the specified C/C++ source file from its file name extension.
+   *
+   * @param file
+   *          The file name to examine
+   * @return the language ID or {@code null} if the file name extension is unknown.
+   */
+  private static String determineLanguageId(IFile file) {
+    final String fileExtension = file.getFileExtension();
+    if(fileExtension == null) {
+      return null;
+    }
+    switch (fileExtension) {
+    case "c":
+      return "org.eclipse.cdt.core.gcc";
+    case "C":
+    case "cc":
+    case "cpp":
+    case "CPP":
+    case "cp":
+    case "cxx":
+    case "c++":
+      return "org.eclipse.cdt.core.g++";
+    case "cu":
+      return "com.nvidia.cuda.toolchain.language.cuda.cu";
+    default:
+      return null;
+    }
   }
 
   /**
@@ -463,11 +502,16 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
       IFile sourceFile, IPath cwd, String line) {
     line = ToolCommandlineParser.trimLeadingWS(line);
     final List<ICLanguageSettingEntry> entries = cmdlineParser.processArgs(cwd, line);
-    final String languageId = cmdlineParser.getLanguageId();
     if (entries != null && entries.size() > 0) {
-      handleIncludePathEntries(storage, entries, languageId);
-      // attach settings to sourceFile resource...
-      storage.addSettingEntries(sourceFile, languageId, entries);
+      String languageId = cmdlineParser.getLanguageId();
+      if (languageId == null) {
+        languageId = determineLanguageId(sourceFile);
+      }
+      if (languageId != null) {
+        handleIncludePathEntries(storage, entries, languageId);
+        // attach settings to sourceFile resource...
+        storage.addSettingEntries(sourceFile, languageId, entries);
+      }
     }
   }
 
@@ -625,7 +669,8 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
     /** cached file modification time-stamp of last parse */
     long lastModified = 0;
 
-    private Set<CompilerBuiltinsDetector> builtinDetectors;
+    /** one CompilerBuiltinsDetector for each source file language */
+    private Map<String,CompilerBuiltinsDetector> builtinDetectors;
 
     /**
      * Adds the specified language settings entries for this storages.
@@ -660,15 +705,25 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
       super.setSettingEntries(rcPath, languageId, entries);
     }
 
-    private void addBuiltinsDetector(CompilerBuiltinsDetector detector) {
+    private void addBuiltinsDetector(ICConfigurationDescription cfgDescription, String languageId,
+        BuiltinDetectionType builtinDetectionType, String compilerCommand) {
       if (builtinDetectors == null)
-        builtinDetectors = new HashSet<>(3, 1.0f);
-      builtinDetectors.add(detector);
+        builtinDetectors = new HashMap<>(3, 1.0f);
+      if (!builtinDetectors.containsKey(languageId)) {
+        CompilerBuiltinsDetector detector = new CompilerBuiltinsDetector(cfgDescription, languageId,
+            builtinDetectionType, compilerCommand);
+        builtinDetectors.put(languageId, detector);
+      }
     }
 
+    /**
+     * Gets the compiler built-ins detectors.
+     *
+     * @return the detectors, one for each source file language
+     */
     private Iterable<CompilerBuiltinsDetector> getBuiltinsDetectors() {
       return builtinDetectors == null ? Collections.emptySet()
-          : Collections.unmodifiableCollection(builtinDetectors);
+          : Collections.unmodifiableCollection(builtinDetectors.values());
     }
 
     public TimestampedLanguageSettingsStorage clone() {

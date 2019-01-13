@@ -43,9 +43,7 @@ interface IToolCommandlineParser {
   /**
    * Gets the language ID of the language that the tool compiles.
    *
-   * @return the language ID, {@code null} is allowed if this parser does not
-   *         produce any {@link ICLanguageSettingEntry language settings
-   *         entries}
+   * @return the language ID, or {@code null} if the language ID should be derived from the source file-name extension
    */
   public String getLanguageId();
 
