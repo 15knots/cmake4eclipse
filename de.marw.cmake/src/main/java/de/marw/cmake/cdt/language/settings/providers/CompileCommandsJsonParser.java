@@ -337,7 +337,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
       }
     }
     // unrecognized entry, skipping
-    final String msg = "File format error: " + ": 'file', 'command' or 'directory' missing in JSON object. "
+    final String msg = "File format error: " + "'file', 'command' or 'directory' missing in JSON object. "
         + WORKBENCH_WILL_NOT_KNOW_ALL_MSG;
     createMarker(jsonFile, msg);
   }
