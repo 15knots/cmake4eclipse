@@ -27,7 +27,7 @@ Screenshots can be found at the <a href="https://marketplace.eclipse.org/content
 
 # Quick start
  1. If you do not have any existing code, check out the [Sample Projects](https://github.com/15knots/cmake4eclipse-sample-projects), chose one and fill in your code.
- 1. If you have an existing C/C++ project code, inside Eclipse, goto `Help:Help Contents`, then read the `CMake for CDT User Guide:Getting Started` node to adjust your project settings.
+ 1. If you have an existing C/C++ project code, inside Eclipse, goto `Help:Help Contents`, then read the `Cmake4eclipse User Guide:Getting Started` node to adjust your project settings.
  
 ---
 ## License
