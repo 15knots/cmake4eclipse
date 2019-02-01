@@ -5,23 +5,18 @@
 [![GitHub issues](https://img.shields.io/github/issues/15knots/cmake4eclipse.svg)](https://github.com/15knots/cmake4eclipse/issues)
 
 
-# Introduction
-The [CMake Wiki](https://cmake.org/Wiki/CMake:Eclipse_UNIX_Tutorial#CMake_with_Eclipse) mentions the options to use CMake with Eclipse.
-This Eclipse plugin offers an option to **automatically** generate buildscripts for the Eclipse CDT managed build system from your CMake scripts. 
+# Abstract
+This Eclipse plugin automatically generates build-scripts for the Eclipse CDT managed build system from CMake scripts.
+Its <a id="pc">*Primary claim*</a> is: Co-workers should be able to just **check out the source and build** the project. 
 
-# Why cmake4eclipse?
-Blindly invoked, CMake will generate makefiles (or other build scripts) inside the source tree, cluttering it with lots of files and directories that have to be fleed out from version control: This practice might be ok for simple hello-world-projects, but for larger projects, the CMake developers recommend _You_ to set up a separate directory for building the source.
-
-Annoyingly, these recommended out-of-source-builds impose some tedious tasks on Your co-workers who check out the code and just want to build it:
-  1. leave eclipse workbench,
-  1. manually fire up a command-line shell,
-  1. manually create a directory for the out-of-source-build,
-  1. manually change the CWD to that directory,
-  1. manually invoke cmake, telling it to generate build scripts, which kind of build scripts you want and where source source files live,
-  1. re-enter eclipse workbench, configure the checked out project to use the generated buildscripts.
-
-**Cmake4eclipse** aims to address these tasks: Co-workers can just check out the source and have all the tedious tasks automated.
-
+# Design goals
+1. **Automatic** generation of build scripts. See [Primary claim](#pc): No need to **manually** invoke cmake: Cmake options are persisted in the Eclipse project settings files.
+1. Cmake is a cross-platform build tool. So Eclipse projects [should be cross-platform](#pc) as feasible; without the need for co-workers to adjust Eclipse project settings just to build on **their** platform. 
+1. Take the CMakeLists.txt as the source of truth.
+   - Auto-detect the actual build tool to invoke: make, ninja, nmake, MinGW make, MSYS make, ...
+   - Easy project configuration regarding code completion, symbol-declaration lookup and macro-value tool-tips in the source editor.
+     - Feed include paths and pre-processor symbols from cmake to the CDT-Indexer (CMAKE_EXPORT_COMPILE_COMMANDS Parser).
+      - Retrieve compiler-built-in pre-processor symbols and include paths by interrogating the actual compiler and feed these to the CDT-Indexer (CMAKE_EXPORT_COMPILE_COMMANDS Compiler Built-ins). Well, at least as the compiler supports that (`nvcc` CUDA complier does so).
 ## Screenshots
 Screenshots can be found at the <a href="https://marketplace.eclipse.org/content/cmake4eclipse#group-screenshots" title="Screenshots">Eclipse Marketplace</a>.
 
