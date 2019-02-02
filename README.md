@@ -1,15 +1,15 @@
 [Release Notes](#release-notes) | 
-[Install...](#installation-instructions) | 
+[Install...](#installation) | 
 [![Mailing-list](https://img.shields.io/badge/Mailing-list-blue.svg)](http://groups.google.com/d/forum/cmake4eclipse-users)
 [![Build Status](https://travis-ci.org/15knots/cmake4eclipse.svg?branch=master)](https://travis-ci.org/15knots/cmake4eclipse)
 [![GitHub issues](https://img.shields.io/github/issues/15knots/cmake4eclipse.svg)](https://github.com/15knots/cmake4eclipse/issues)
 
 
-# Abstract
+## Abstract
 This Eclipse plugin automatically generates build-scripts for the Eclipse CDT managed build system from CMake scripts.
 Its <a id="pc">*Primary claim*</a> is: Co-workers should be able to just **check out the source and build** the project. 
 
-# Design goals
+## Design goals
 1. **Automatic** generation of build scripts. See [Primary claim](#pc): No need to **manually** invoke cmake: Cmake options are persisted in the Eclipse project settings files.
 1. Cmake is a cross-platform build tool. So Eclipse projects [should be cross-platform](#pc) as feasible; without the need for co-workers to adjust Eclipse project settings just to build on **their** platform. 
 1. Take the CMakeLists.txt as the source of truth.
@@ -20,7 +20,7 @@ Its <a id="pc">*Primary claim*</a> is: Co-workers should be able to just **check
 ## Screenshots
 Screenshots can be found at the <a href="https://marketplace.eclipse.org/content/cmake4eclipse#group-screenshots" title="Screenshots">Eclipse Marketplace</a>.
 
-# Quick start
+## Quick start
  1. If you do not have any existing code, check out the [Sample Projects](https://github.com/15knots/cmake4eclipse-sample-projects), chose one and fill in your code.
  1. If you have an existing C/C++ project code, inside Eclipse, goto `Help:Help Contents`, then read the `Cmake4eclipse User Guide:Getting Started` node to adjust your project settings.
  
@@ -28,12 +28,12 @@ Screenshots can be found at the <a href="https://marketplace.eclipse.org/content
 ## License
 The plugin is licensed under the <a href="http://www.eclipse.org/legal/epl-v10.html">Eclipse Public License Version 1.0 ("EPL")</a>.
 
-# System Requirements
+## System Requirements
 CDT v 8.7 or newer and Eclipse v 4.5 (Mars) or newer
 
 Java 8 or newer
 
-# Installation Instructions
+## Installation
 The easiest way is to drag this: <a href="http://marketplace.eclipse.org/marketplace-client-intro?mpc_install=2318334" class="drag" title="Drag to your running Eclipse workbench to install cmake4eclipse">
 <img class="img-responsive" src="https://marketplace.eclipse.org/sites/all/themes/solstice/public/images/marketplace/btn-install.png" alt="Drag to your running Eclipse workbench to install" /></a> to your running Eclipse workbench.
 
@@ -43,6 +43,7 @@ Alternatively, **cmake4eclipse** can be installed into Eclipse using the "Instal
 This composite update site is for use in a Eclipse workbench and contains the latest release as well as selected older releases:
 https://raw.githubusercontent.com/15knots/cmake4eclipse/master/releng/comp-update/.
 
+### p2 Repositories
 Tool integrators will find each release at [bintray](https://bintray.com/15knots/p2-zip/cmake4eclipse#files).
 Each release is provided as a standalone zipped p2 repository and can be consumed in a PDE target platform. To add one
 of these repositories to your target platform, add a **Software Site** and enter a URL for the location as
@@ -50,7 +51,7 @@ jar:https://dl.bintray.com/15knots/p2-zip/cmake4eclipse-1.12.1.zip!/ (note the l
 `!/`).
 
 
-### Debug and Build
+## Debug and Build
 This project uses Apache maven as its build system.
 To build from a command-line, run `mvn -f ./parent/pom.xml package` in the root directory of the project source files.
 
@@ -160,19 +161,15 @@ Note that the new parser does not claim to detect *any* cmake message; more inpu
 - Closed #31: CMAKE_EXPORT_COMPILE_COMMANDS Parser fails if compiler executable has a MSDOS "Short path" name. Thanks to @nolange for reporting and testing under windows
 - Requires Java 7 or newer
 
-### Repository URL
-`jar:https://bintray.com/artifact/download/15knots/p2-zip/cmake4eclipse-1.4.8.zip!/`
 ### System Requirements
 CDT v 8.7 or newer and Eclipse v 4.5 (Mars) or newer
 
-Java 8 or newer
+Java 7 or newer
 
 ## 1.4.7 (2017-04-11)
 ### Changes
 - Closed #28: CMAKE_BUILD_TOOL is deprecated in cmake version 3.0
 
-### Repository URL
-`jar:https://bintray.com/artifact/download/15knots/p2-zip/cmake4eclipse-1.4.7.zip!/`
 ### System Requirements
 CDT v 8.1.0 or higher and Eclipse v 3.8.0 (Juno) or higher
 
@@ -180,8 +177,6 @@ CDT v 8.1.0 or higher and Eclipse v 3.8.0 (Juno) or higher
 ### Changes
 - Closed #24: CMake dialog box does not save all modified configs.
 
-### Repository URL
-`jar:https://bintray.com/artifact/download/15knots/p2-zip/cmake4eclipse-1.4.6.zip!/`
 ### System Requirements
 CDT v 8.1.0 or higher and Eclipse v 3.8.0 (Juno) or higher
 
@@ -189,8 +184,6 @@ CDT v 8.1.0 or higher and Eclipse v 3.8.0 (Juno) or higher
 ### Changes
 - Closed #20: CMAKE_EXPORT_COMPILE_COMMANDS Parser treats clang++ as a C compiler.
 
-### Repository URL
-`jar:https://bintray.com/artifact/download/15knots/p2-zip/cmake4eclipse-1.4.5.zip!/`
 ### System Requirements
 CDT v 8.1.0 or higher and Eclipse v 3.8.0 (Juno) or higher
 
@@ -198,8 +191,6 @@ CDT v 8.1.0 or higher and Eclipse v 3.8.0 (Juno) or higher
 ### Changes
 - Closed #17: CMAKE_EXPORT_COMPILE_COMMANDS parser doesn't recognize g++ as a C++ compiler.
 
-### Repository URL
-`jar:https://bintray.com/artifact/download/15knots/p2-zip/cmake4eclipse-1.4.4.zip!/`
 ### System Requirements
 CDT v 8.1.0 or higher and Eclipse v 3.8.0 (Juno) or higher
 
@@ -208,8 +199,6 @@ CDT v 8.1.0 or higher and Eclipse v 3.8.0 (Juno) or higher
 - Closed #16: The CMAKE_EXPORT_COMPILE_COMMANDS parser now knows about GCC cross compilers for C and C++ if the compiler executable follows the naming convention of
 `<target_triplet>-gcc` or `<target_triplet>-g++`. 
 
-### Repository URL
-`jar:https://bintray.com/artifact/download/15knots/p2-zip/cmake4eclipse-1.4.3.zip!/`
 ### System Requirements
 CDT v 8.1.0 or higher and Eclipse v 3.8.0 (Juno) or higher
 
@@ -218,8 +207,6 @@ CDT v 8.1.0 or higher and Eclipse v 3.8.0 (Juno) or higher
 - CMAKE_EXPORT_COMPILE_COMMANDS Parser triggers UI update to show newly detected include paths in project explorer view.
 - Closed #14: Pass variables given in C++ Build->Environment to the cmake process.
 
-### Repository URL
-`jar:https://bintray.com/artifact/download/15knots/p2-zip/cmake4eclipse-1.4.2.zip!/`
 ### System Requirements
 CDT v 8.1.0 or higher and Eclipse v 3.8.0 (Juno) or higher
 
@@ -228,32 +215,29 @@ CDT v 8.1.0 or higher and Eclipse v 3.8.0 (Juno) or higher
 - Closes #9: Improve support for code-completion and symbol browsing in CDT source editors.
 - Closes #10: Can't install version 1.4.0 in eclipse mars.2 release 4.5.2
 
-### Repository URL
-`jar:https://bintray.com/artifact/download/15knots/p2-zip/cmake4eclipse-1.4.1.zip!/`
 ### System Requirements
 CDT v 8.1.0 or higher and Eclipse v 3.8.0 (Juno) or higher
 
 ---
-## Archived Releases
+## Archived Releases (no Changelog)
 These releases are made available as a zipped p2 repository. To install, use the "Install New Software..." menu and paste the appropriate repository URL from below into the "Work with" input field.
 
 ### 1.3.5 (2015-10-14)
-#### Repository URL
-`jar:https://bintray.com/artifact/download/15knots/p2-zip/cmake4eclipse-1.3.5.zip!/`
 #### System Requirements
 CDT v 8.1.0 or higher and Eclipse v 3.8.0 (Juno) or higher
 
 ### 1.3.4 (2015-10-09)
-#### Repository URL
-`jar:https://bintray.com/artifact/download/15knots/p2-zip/cmake4eclipse-1.3.4.zip!/`
 #### System Requirements
 CDT v 8.1.0 or higher and Eclipse v 3.8.0 (Juno) or higher
 
 ### 1.3.3 (2015-05-06)
-#### Repository URL
-`jar:https://bintray.com/artifact/download/15knots/p2-zip/cmake4eclipse-1.3.3.zip!/`
 #### System Requirements
 CDT v 8.1.0 or higher and Eclipse v 3.8.0 (Juno) or higher
+
+---
+## Ancient Releases (the googlecode era)
+These can be found at <a href='https://googledrive.com/host/0B-QU1Qnto3huZUZ0QUdxM01pR0U/'>https://googledrive.com/host/0B-QU1Qnto3huZUZ0QUdxM01pR0U/</a> .<br>
+Do not forget to add the trailing <b>!/</b> to the repository URL!
 
 ### 1.3.2 (2015-03-27)
 #### Repository URL
@@ -285,7 +269,9 @@ CDT v 8.1.0 or higher and Eclipse v 3.8.0 (Juno) or higher
 #### System Requirements
  CDT v 8.1.0 or higher and Eclipse v 3.8.0 (Juno) or higher
 
----
-## Ancient Releases
-Other revisions can be found at <a href='https://googledrive.com/host/0B-QU1Qnto3huZUZ0QUdxM01pR0U/'>https://googledrive.com/host/0B-QU1Qnto3huZUZ0QUdxM01pR0U/</a> .<br>
-Do not forget to add the trailing <b>!/</b> to the repository URL!<br>
+### 0.1.0-SNAPSHOT (2013-11-24) 
+#### Repository URL
+`jar:https://googledrive.com/host/0B-QU1Qnto3huZUZ0QUdxM01pR0U/cmake4eclipsecdt-Update-0.1.0-SNAPSHOT.zip!/`
+#### System Requirements
+ CDT v 8.1.0 or higher and Eclipse v 3.8.0 (Juno) or higher
+ 
