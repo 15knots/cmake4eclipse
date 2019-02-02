@@ -59,6 +59,13 @@ There is a run configuration for eclipse to invoke maven `build cmake4eclipse` p
 
 ---
 # Release Notes
+## 1.14.0 (Unreleased)
+### Changes
+- Fix #101: ParserDetecter for MSVC cannot distinguish between C and C++
+- Fix #95: Provide programmatic access to CMake configuration
+- Fix UnsupportedOperationException at CompileCommandsJsonParser$TimestampedLanguageSettingsStorage.addBuiltinsDetector()
+- Feature #91: ?
+
 ## 1.13.0 (2019-01-03)
 ### Changes
 - Fix #94: CMAKE_EXPORT_COMPILE_COMMANDS parser fails to parse inline-command-files @<<...<<
