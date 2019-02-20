@@ -134,7 +134,7 @@ public class CompilerBuiltinsDetector {
     launcher.setProject(project);
     launcher.showCommand(console != null);
     final Process proc = launcher.execute(new Path(command), argList.toArray(new String[argList.size()]), getEnvp(),
-        null, subMonitor);
+        new Path("."), subMonitor);
     if (proc != null) {
       try {
         // Close the input of the process since we will never write to it
