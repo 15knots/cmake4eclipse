@@ -39,6 +39,7 @@ import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.swt.widgets.Display;
 import org.w3c.dom.Element;
 
 import de.marw.cmake.CMakePlugin;
@@ -181,33 +182,35 @@ public class BuiltinsCompileCommandsJsonParser extends LanguageSettingsSerializa
       }
     } else {
       // per workspace (to populate on startup)
-      IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
-      IProject[] projects = workspaceRoot.getProjects();
-      CCorePlugin ccp = CCorePlugin.getDefault();
-      // detect built-ins for any opened project that has a ScannerConfigNature...
-      for (IProject project : projects) {
-        try {
-          if (project.isOpen() && project.hasNature(ScannerConfigNature.NATURE_ID)) {
-            ICProjectDescription projectDescription = ccp.getProjectDescription(project, false);
-            if (projectDescription != null) {
-              ICConfigurationDescription activeConfiguration = projectDescription.getActiveConfiguration();
-              if (activeConfiguration instanceof ILanguageSettingsProvidersKeeper) {
-                final List<ILanguageSettingsProvider> lsps = ((ILanguageSettingsProvidersKeeper) activeConfiguration)
-                    .getLanguageSettingProviders();
-                for (ILanguageSettingsProvider lsp : lsps) {
-                  if (PROVIDER_ID.equals(lsp.getId())) {
-                    currentCfgDescription = activeConfiguration;
-                    detectBuiltins(true);
-                    break;
+      Display.getDefault().asyncExec(() -> {
+        IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
+        IProject[] projects = workspaceRoot.getProjects();
+        CCorePlugin ccp = CCorePlugin.getDefault();
+        // detect built-ins for any opened project that has a ScannerConfigNature...
+        for (IProject project : projects) {
+          try {
+            if (project.isOpen() && project.hasNature(ScannerConfigNature.NATURE_ID)) {
+              ICProjectDescription projectDescription = ccp.getProjectDescription(project, false);
+              if (projectDescription != null) {
+                ICConfigurationDescription activeConfiguration = projectDescription.getActiveConfiguration();
+                if (activeConfiguration instanceof ILanguageSettingsProvidersKeeper) {
+                  final List<ILanguageSettingsProvider> lsps = ((ILanguageSettingsProvidersKeeper) activeConfiguration)
+                      .getLanguageSettingProviders();
+                  for (ILanguageSettingsProvider lsp : lsps) {
+                    if (PROVIDER_ID.equals(lsp.getId())) {
+                      currentCfgDescription = activeConfiguration;
+                      detectBuiltins(true);
+                      break;
+                    }
                   }
                 }
               }
             }
+          } catch (CoreException ex) {
+            log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, "registerListener()", ex));
           }
-        } catch (CoreException ex) {
-          log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, "registerListener()", ex));
         }
-      }
+      });
     }
     // release resources for garbage collector
     currentCfgDescription = null;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016-2018 Martin Weber.
+ * Copyright (c) 2016-2019 Martin Weber.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -57,6 +57,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jetty.util.ajax.JSON;
+import org.eclipse.swt.widgets.Display;
 import org.w3c.dom.Element;
 
 import de.marw.cmake.CMakePlugin;
@@ -614,7 +615,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
   @Override
   public void registerListener(ICConfigurationDescription cfgDescription) {
     if (cfgDescription != null) {
-      // per-project or null if the user just added this provider on the provider tab
+      // per-project or when the user just added this provider on the provider tab
       currentCfgDescription = cfgDescription;
       try {
         tryParseJson(true, true);
@@ -623,33 +624,35 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
       }
     } else {
       // per workspace (to populate on startup)
-      IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
-      IProject[] projects = workspaceRoot.getProjects();
-      CCorePlugin ccp = CCorePlugin.getDefault();
-      // parse JSOn file for any opened project that has a ScannerConfigNature...
-      for (IProject project : projects) {
-        try {
-          if (project.isOpen() && project.hasNature(ScannerConfigNature.NATURE_ID)) {
-            ICProjectDescription projectDescription = ccp.getProjectDescription(project, false);
-            if (projectDescription != null) {
-              ICConfigurationDescription activeConfiguration = projectDescription.getActiveConfiguration();
-              if (activeConfiguration instanceof ILanguageSettingsProvidersKeeper) {
-                final List<ILanguageSettingsProvider> lsps = ((ILanguageSettingsProvidersKeeper) activeConfiguration)
-                    .getLanguageSettingProviders();
-                for (ILanguageSettingsProvider lsp : lsps) {
-                  if (CompileCommandsJsonParser.PROVIDER_ID.equals(lsp.getId())) {
-                    currentCfgDescription = activeConfiguration;
-                    tryParseJson(true, true);
-                    break;
+      Display.getDefault().asyncExec(() -> {
+        IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
+        IProject[] projects = workspaceRoot.getProjects();
+        CCorePlugin ccp = CCorePlugin.getDefault();
+        // parse JSOn file for any opened project that has a ScannerConfigNature...
+        for (IProject project : projects) {
+          try {
+            if (project.isOpen() && project.hasNature(ScannerConfigNature.NATURE_ID)) {
+              ICProjectDescription projectDescription = ccp.getProjectDescription(project, false);
+              if (projectDescription != null) {
+                ICConfigurationDescription activeConfiguration = projectDescription.getActiveConfiguration();
+                if (activeConfiguration instanceof ILanguageSettingsProvidersKeeper) {
+                  final List<ILanguageSettingsProvider> lsps = ((ILanguageSettingsProvidersKeeper) activeConfiguration)
+                      .getLanguageSettingProviders();
+                  for (ILanguageSettingsProvider lsp : lsps) {
+                    if (CompileCommandsJsonParser.PROVIDER_ID.equals(lsp.getId())) {
+                      currentCfgDescription = activeConfiguration;
+                      tryParseJson(true, true);
+                      break;
+                    }
                   }
                 }
               }
             }
+          } catch (CoreException ex) {
+            log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, "registerListener()", ex));
           }
-        } catch (CoreException ex) {
-          log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, "registerListener()", ex));
         }
-      }
+      });
     }
     // release resources for garbage collector
     currentCfgDescription = null;
