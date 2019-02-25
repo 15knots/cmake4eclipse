@@ -37,7 +37,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.widgets.Display;
 import org.w3c.dom.Element;
@@ -105,7 +104,7 @@ public class BuiltinsCompileCommandsJsonParser extends LanguageSettingsSerializa
         for (CompilerBuiltinsDetector detector : detectors) {
           final String languageId = detector.getLanguageId();
           // entries per language
-          List<ICLanguageSettingEntry> entries = detector.run(new NullProgressMonitor(), isWithConsole());
+          List<ICLanguageSettingEntry> entries = detector.run(isWithConsole());
           // use a Set here to avoid duplicates by name and kind ..
           Set<ICLanguageSettingEntry> allEntries = langMap.get(languageId);
           if (allEntries == null) {

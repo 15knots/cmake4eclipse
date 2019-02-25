@@ -39,11 +39,10 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubMonitor;
 
 import de.marw.cmake.CMakePlugin;
 
@@ -95,16 +94,11 @@ public class CompilerBuiltinsDetector {
 
   /**
    * Run built-in detection command.
-   *
-   * @param monitor
-   *          progress monitor or {@code null}
    * @param withConsole whether to show a console for the command output
+   *
    * @throws CoreException
    */
-  public List<ICLanguageSettingEntry> run(IProgressMonitor monitor, boolean withConsole) throws CoreException {
-    final SubMonitor subMonitor = SubMonitor.convert(monitor, "Built-in settings detection for compiler " + command,
-        IProgressMonitor.UNKNOWN);
-
+  public List<ICLanguageSettingEntry> run(boolean withConsole) throws CoreException {
     List<ICLanguageSettingEntry> entries = Collections.synchronizedList(new ArrayList<ICLanguageSettingEntry>());
 
     boolean silent = false;
@@ -133,8 +127,9 @@ public class CompilerBuiltinsDetector {
         .getCommandLauncher();
     launcher.setProject(project);
     launcher.showCommand(console != null);
+    final NullProgressMonitor monitor = new NullProgressMonitor();
     final Process proc = launcher.execute(new Path(command), argList.toArray(new String[argList.size()]), getEnvp(),
-        new Path("."), subMonitor);
+        new Path("."), monitor);
     if (proc != null) {
       try {
         // Close the input of the process since we will never write to it
