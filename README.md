@@ -16,7 +16,7 @@ Its <a id="pc">*Primary claim*</a> is: Co-workers should be able to just **check
    - Auto-detect the actual build tool to invoke: make, ninja, nmake, MinGW make, MSYS make, ...
    - Easy project configuration regarding code completion, symbol-declaration lookup and macro-value tool-tips in the source editor.
      - Feed include paths and pre-processor symbols from cmake to the CDT-Indexer (CMAKE_EXPORT_COMPILE_COMMANDS Parser).
-      - Retrieve compiler-built-in pre-processor symbols and include paths by interrogating the actual compiler and feed these to the CDT-Indexer (CMAKE_EXPORT_COMPILE_COMMANDS Compiler Built-ins). Well, at least as the compiler supports that (`nvcc` CUDA complier does so).
+     - Retrieve compiler-built-in pre-processor symbols and include paths by interrogating the actual compiler and feed these to the CDT-Indexer (CMAKE_EXPORT_COMPILE_COMMANDS Compiler Built-ins). Well, at least as the compiler supports that (GNU C and `nvcc` CUDA compilers do so).
 ## Screenshots
 Screenshots can be found at the <a href="https://marketplace.eclipse.org/content/cmake4eclipse#group-screenshots" title="Screenshots">Eclipse Marketplace</a>.
 
