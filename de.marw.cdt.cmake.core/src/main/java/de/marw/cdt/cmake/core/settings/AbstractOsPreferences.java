@@ -36,8 +36,8 @@ public abstract class AbstractOsPreferences {
   private CmakeGenerator generator;
   private String buildscriptProcessorCmd;
   private boolean useDefaultCommand;
-  private List<CmakeDefine> defines = new ArrayList<CmakeDefine>(0);
-  private List<CmakeUnDefine> undefines = new ArrayList<CmakeUnDefine>(0);
+  private List<CmakeDefine> defines = new ArrayList<>(0);
+  private List<CmakeUnDefine> undefines = new ArrayList<>(0);
   private CmakeGenerator generatedWith;
 
   /**
@@ -163,7 +163,17 @@ public abstract class AbstractOsPreferences {
    * @return a mutable list, never {@code null}
    */
   public final List<CmakeDefine> getDefines() {
-    return defines;
+    return new ArrayList<>(defines);
+  }
+
+  /**
+   * Replaces the list of cmake variables to define with the specified list.
+   */
+  public void setDefines(List<CmakeDefine> newDefines) {
+    defines.clear();
+    for (CmakeDefine def : newDefines) {
+      defines.add(def.clone());
+    }
   }
 
   /**
@@ -172,7 +182,17 @@ public abstract class AbstractOsPreferences {
    * @return a mutable list, never {@code null}
    */
   public final List<CmakeUnDefine> getUndefines() {
-    return undefines;
+    return new ArrayList<>(undefines);
+  }
+
+  /**
+   * Replaces the list of cmake variables to undefine with the specified list.
+   */
+  public void setUndefines(List<CmakeUnDefine> newDefines) {
+    undefines.clear();
+    for (CmakeUnDefine def : newDefines) {
+      undefines.add(def.clone());
+    }
   }
 
   /**

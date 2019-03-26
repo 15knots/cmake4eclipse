@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014-2017 Martin Weber.
+ * Copyright (c) 2014-2019 Martin Weber.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,7 +13,6 @@ package de.marw.cdt.cmake.core.ui;
 import org.eclipse.cdt.core.settings.model.ICResourceDescription;
 import org.eclipse.cdt.ui.newui.AbstractCPropertyTab;
 import org.eclipse.cdt.ui.newui.ICPropertyTab;
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.PlatformUI;
 
@@ -25,8 +24,6 @@ import org.eclipse.ui.PlatformUI;
 public abstract class QuirklessAbstractCPropertyTab extends AbstractCPropertyTab {
 
   private String helpContextId;
-  /** the last build configuration(s) being edited */
-  private ICResourceDescription lastConfig;
 
   /**
    * Overridden because the super class always prefixes the ID with its own
@@ -66,18 +63,6 @@ public abstract class QuirklessAbstractCPropertyTab extends AbstractCPropertyTab
         performDefaults();
       }
       break;
-    case ICPropertyTab.UPDATE:
-      // the user wants to edit a/some different configurations...
-      if (canBeVisible()) {
-        final ICResourceDescription newConfig = (ICResourceDescription) data;
-        if (newConfig != lastConfig) {
-          final ICResourceDescription lastConfig2 = lastConfig;
-          lastConfig = newConfig;
-          Assert.isTrue(getResDesc() == newConfig);
-          configSelectionChanged(lastConfig2, newConfig);
-        }
-      }
-      break;
     default:
       super.handleTabEvent(kind, data);
       break;
@@ -85,31 +70,18 @@ public abstract class QuirklessAbstractCPropertyTab extends AbstractCPropertyTab
   }
 
   /**
-   * Overridden to have a logic here that <em>I</em> can understand.
+   * Makes the UI display the specified new settings.<br>
+   * Overridden to have documentation. This documentation is reversed engineered from existing CDT code;
+   * AbstractCPropertyTab.java lacks documentation.
+   *
+   * @param resd
+   *          the setting to display
    */
   @Override
-  protected void updateData(ICResourceDescription resd) {
-  }
-
-  /**
-   * Notified, when the user had chosen to edit a/some different build
-   * configuration(s). Also invoked when the dialog opens.
-   *
-   * @param lastConfig
-   *          the last configuration being edited or {@code null} if the
-   *          dialog is opening.
-   * @param newConfig
-   *          the new configuration to edit. Note that
-   *          {@link AbstractCPropertyTab#getResDesc()} will return the new
-   *          build configuration when this method is invoked, we just pass it
-   *          to be in sync with {@link AbstractCPropertyTab#updateData}.
-   *
-   */
-  protected abstract void configSelectionChanged(ICResourceDescription lastConfig, ICResourceDescription newConfig);
+  protected abstract void updateData(ICResourceDescription resd);
 
   @Override
-  public void dispose() {
-    lastConfig = null;
-    super.dispose();
+  protected void updateButtons() {
+    // never called from superclass, but abstract :-)
   }
 }

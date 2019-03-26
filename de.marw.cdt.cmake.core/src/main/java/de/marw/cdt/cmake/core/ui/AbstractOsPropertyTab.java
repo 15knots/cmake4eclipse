@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014-2017 Martin Weber.
+ * Copyright (c) 2014-2019 Martin Weber.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,10 +11,8 @@
 package de.marw.cdt.cmake.core.ui;
 
 import java.util.EnumSet;
-import java.util.List;
 
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
-import org.eclipse.cdt.core.settings.model.ICMultiConfigDescription;
 import org.eclipse.cdt.core.settings.model.ICResourceDescription;
 import org.eclipse.cdt.core.settings.model.ICStorageElement;
 import org.eclipse.cdt.ui.newui.AbstractCPropertyTab;
@@ -42,9 +40,7 @@ import org.eclipse.swt.widgets.Text;
 import de.marw.cdt.cmake.core.internal.Activator;
 import de.marw.cdt.cmake.core.settings.AbstractOsPreferences;
 import de.marw.cdt.cmake.core.settings.CMakePreferences;
-import de.marw.cdt.cmake.core.settings.CmakeDefine;
 import de.marw.cdt.cmake.core.settings.CmakeGenerator;
-import de.marw.cdt.cmake.core.settings.CmakeUnDefine;
 import de.marw.cdt.cmake.core.settings.ConfigurationManager;
 
 /**
@@ -66,7 +62,8 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
 
   /**
    * the preferences associated with our configuration to manage. Initialized in
-   * {@link #configSelectionChanged}
+   * {@link #updateData}. {@code null} if this tab has never been displayed so a user could
+   * have made edits.
    */
   private P prefs;
 
@@ -218,34 +215,6 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
     undefinesViewer = new UnDefinesViewer(usercomp);
   }
 
-  @Override
-  protected void configSelectionChanged(ICResourceDescription lastConfig, ICResourceDescription newConfig) {
-    if (lastConfig != null) {
-      saveToModel();
-    }
-    if (newConfig == null)
-      return;
-
-    if (page.isMultiCfg()) {
-      // we are editing multiple configurations...
-      setAllVisible(false, null);
-      return;
-    } else {
-      setAllVisible(true, null);
-
-      ICConfigurationDescription cfgd = newConfig.getConfiguration();
-      final ConfigurationManager configMgr = ConfigurationManager.getInstance();
-      try {
-        CMakePreferences allPrefs = configMgr.getOrLoad(cfgd);
-        prefs = getOsPreferences(allPrefs);
-      } catch (CoreException ex) {
-        log.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, null, ex));
-      }
-
-      updateDisplay();
-    }
-  }
-
   /**
    * Updates displayed values according to the preferences edited by this tab.
    */
@@ -277,7 +246,9 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
     final IStructuredSelection sel = (IStructuredSelection) c_generator
         .getSelection();
     prefs.setGenerator((CmakeGenerator) sel.getFirstElement());
-    // NB: defines & undefines are modified by the widget listeners directly
+
+    prefs.setDefines(definesViewer.getInput());
+    prefs.setUndefines(undefinesViewer.getInput());
   }
 
   /**
@@ -293,6 +264,31 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
     b_cmdVariables.setEnabled(enabled);
   }
 
+  @Override
+  protected void updateData(ICResourceDescription resd) {
+    if (resd == null)
+      return;
+    if (!page.isMultiCfg()) {
+      // workaround for AbstractCPropertyTab.handleTabEvent() bug, switching from multi-cfg
+      // to single-cfg does not make this tab visible...
+      setAllVisible(true, null);
+    } else {
+      prefs= null;
+      return;
+    }
+
+    ICConfigurationDescription cfgd = resd.getConfiguration();
+    final ConfigurationManager configMgr = ConfigurationManager.getInstance();
+    try {
+      CMakePreferences allPrefs = configMgr.getOrLoad(cfgd);
+      prefs = getOsPreferences(allPrefs);
+    } catch (CoreException ex) {
+      log.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, null, ex));
+    }
+
+    updateDisplay();
+  }
+
   /**
    * Invoked when project configuration changes?? At least when apply button is
    * pressed.
@@ -304,6 +300,8 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
   protected void performApply(ICResourceDescription src,
       ICResourceDescription dst) {
     // make sure the displayed values get applied
+    // AFAICS, src is always == getResDesc(). so saveToModel() effectively
+    // stores to src
     saveToModel();
 
     ICConfigurationDescription srcCfg = src.getConfiguration();
@@ -317,19 +315,13 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
         dstPrefs.setUseDefaultCommand(srcPrefs.getUseDefaultCommand());
         dstPrefs.setCommand(srcPrefs.getCommand());
         dstPrefs.setGenerator(srcPrefs.getGenerator());
-
-        final List<CmakeDefine> defines = dstPrefs.getDefines();
-        defines.clear();
-        for (CmakeDefine def : srcPrefs.getDefines()) {
-          defines.add(def.clone());
-        }
-
-        final List<CmakeUnDefine> undefines = dstPrefs.getUndefines();
-        undefines.clear();
-        for (CmakeUnDefine undef : srcPrefs.getUndefines()) {
-          undefines.add(undef.clone());
-        }
+        dstPrefs.setDefines( srcPrefs.getDefines());
+        dstPrefs.setUndefines( srcPrefs.getUndefines());
       }
+      // To have same behavior as CDT >= 9.4 has: Apply DOES PERSIST settings:
+      // this also solves the problem with different configuration that have been modified and ApplyEd
+      // but would otherwise not be persisted on performOK()
+      persist(dst);
     } catch (CoreException ex) {
       log.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, null, ex));
     }
@@ -337,16 +329,19 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
 
   @Override
   protected void performOK() {
-    final ICResourceDescription resDesc = getResDesc();
-    if (resDesc == null)
+    // make sure the displayed values get saved
+    saveToModel();
+    persist(getResDesc());
+  }
+
+  /**
+   * @param resDesc
+   */
+  private void persist(final ICResourceDescription resDesc) {
+    if (resDesc == null || prefs == null)
       return;
 
     ICConfigurationDescription cfgd= resDesc.getConfiguration();
-    if(cfgd instanceof ICMultiConfigDescription){
-      // this tab does not support editing of multiple configurations
-      return;
-    }
-    saveToModel();
     try {
       // save as project settings..
       ICStorageElement storage = cfgd.getStorage(
@@ -359,12 +354,9 @@ public abstract class AbstractOsPropertyTab<P extends AbstractOsPreferences>
 
   @Override
   protected void performDefaults() {
+    if (prefs == null)
+      return;
     prefs.reset();
     updateDisplay();
-  }
-
-  @Override
-  protected void updateButtons() {
-    // never called from superclass, but abstract :-)
   }
 }

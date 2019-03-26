@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2014-2017 Martin Weber.
+ * Copyright (c) 2014-2019 Martin Weber.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -92,6 +92,14 @@ import de.marw.cdt.cmake.core.settings.CmakeDefine;
     // Get the content for the viewer, setInput will call getElements in the
     // contentProvider
     tableViewer.setInput(defines);
+  }
+
+  /**
+   * Gets the list of cmake defines that are displayed by the viewer.
+   */
+  @SuppressWarnings("unchecked")
+  public List<CmakeDefine> getInput() {
+    return (List<CmakeDefine>) tableViewer.getInput();
   }
 
   private TableViewer createViewer(Composite parent) {

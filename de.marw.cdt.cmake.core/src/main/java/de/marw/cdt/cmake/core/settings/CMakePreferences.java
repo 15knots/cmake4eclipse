@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013-2018 Martin Weber.
+ * Copyright (c) 2013-2019 Martin Weber.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -279,21 +279,41 @@ public class CMakePreferences {
   }
 
   /**
-   * Gets the list of cmake variable to define on the cmake command-line.
+   * Gets the list of cmake variables to define on the cmake command-line.
    *
    * @return a mutable list, never {@code null}
    */
   public List<CmakeDefine> getDefines() {
-    return defines;
+    return new ArrayList<>(defines);
   }
 
   /**
-   * Gets the list of cmake variable to undefine on the cmake command-line.
+   * Replaces the list of cmake variables to define with the specified list.
+   */
+  public void setDefines(List<CmakeDefine> newDefines) {
+    defines.clear();
+    for (CmakeDefine def : newDefines) {
+      defines.add(def.clone());
+    }
+  }
+
+  /**
+   * Gets the list of cmake variables to undefine on the cmake command-line.
    *
    * @return a mutable list, never {@code null}
    */
   public List<CmakeUnDefine> getUndefines() {
-    return undefines;
+    return new ArrayList<>(undefines);
+  }
+
+  /**
+   * Replaces the list of cmake variables to undefine with the specified list.
+   */
+  public void setUndefines(List<CmakeUnDefine> newDefines) {
+    undefines.clear();
+    for (CmakeUnDefine def : newDefines) {
+      undefines.add(def.clone());
+    }
   }
 
   public LinuxPreferences getLinuxPreferences() {

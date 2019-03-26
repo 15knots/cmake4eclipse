@@ -66,7 +66,7 @@ public final class ConfigurationManager {
    *         description.
    */
   public CMakePreferences getOrCreate(ICConfigurationDescription cfgd) {
-    CMakePreferences pref = map.get(cfgd.getId());
+    CMakePreferences pref = get(cfgd);
     if (pref == null) {
       pref = new CMakePreferences();
       map.put(cfgd.getId(), pref);

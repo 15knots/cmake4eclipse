@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013-2018 Martin Weber.
+ * Copyright (c) 2013-2019 Martin Weber.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -77,7 +77,8 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
 
   /**
    * the preferences associated with our configurations to manage. Initialized
-   * in {@link #updateData}
+   * in {@link #updateData}. {@code null} if this tab has never been displayed so a user could
+   * have made edits.
    */
   private CMakePreferences[] prefs;
 
@@ -209,36 +210,6 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
       } // cmake prepopulate cache group
     } // cmake options group
 
-  }
-
-  @Override
-  protected void configSelectionChanged(ICResourceDescription lastConfig, ICResourceDescription newConfig) {
-    if (lastConfig != null) {
-      saveToModel();
-    }
-    if (newConfig == null)
-      return;
-
-    ICConfigurationDescription cfgd = newConfig.getConfiguration();
-    final ConfigurationManager configMgr = ConfigurationManager.getInstance();
-    try {
-      if (cfgd instanceof ICMultiConfigDescription) {
-        // we are editing multiple configurations...
-        ICConfigurationDescription[] cfgs = (ICConfigurationDescription[]) ((ICMultiConfigDescription) cfgd).getItems();
-
-        prefs = new CMakePreferences[cfgs.length];
-        for (int i = 0; i < cfgs.length; i++) {
-          prefs[i] = configMgr.getOrLoad(cfgs[i]);
-        }
-      } else {
-        // we are editing a single configuration...
-        prefs = new CMakePreferences[1];
-        prefs[0] = configMgr.getOrLoad(cfgd);
-      }
-    } catch (CoreException ex) {
-      log.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, null, ex));
-    }
-    updateDisplay();
   }
 
   /**
@@ -381,6 +352,7 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
       CMakePreferences pref = prefs[0];
       enterToggleMode(b_clearCache, pref.isClearCache());
       enterToggleMode(b_warnNoDev, pref.isWarnNoDev());
+      enterToggleMode(b_debugTryCompile, pref.isDebugTryCompile());
       enterToggleMode(b_debug, pref.isDebugOutput());
       enterToggleMode(b_trace, pref.isTrace());
       enterToggleMode(b_warnUnitialized, pref.isWarnUnitialized());
@@ -398,6 +370,8 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
    * @see #updateDisplay()
    */
   private void saveToModel() {
+    if (prefs == null)
+      return;
     if (prefs.length > 1) {
       // we are editing multiple configurations...
       for (int i = 0; i < prefs.length; i++) {
@@ -491,6 +465,32 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
     return !(card == numBits || card == 0);
   }
 
+  @Override
+  protected void updateData(ICResourceDescription resd) {
+    if (resd == null)
+      return;
+    final ICConfigurationDescription cfgd= resd.getConfiguration();
+    final ConfigurationManager configMgr = ConfigurationManager.getInstance();
+    try {
+      if (cfgd instanceof ICMultiConfigDescription) {
+        // we are editing multiple configurations...
+        ICConfigurationDescription[] cfgs = (ICConfigurationDescription[]) ((ICMultiConfigDescription) cfgd).getItems();
+
+        prefs = new CMakePreferences[cfgs.length];
+        for (int i = 0; i < cfgs.length; i++) {
+          prefs[i] = configMgr.getOrLoad(cfgs[i]);
+        }
+      } else {
+        // we are editing a single configuration...
+        prefs = new CMakePreferences[1];
+        prefs[0] = configMgr.getOrLoad(cfgd);
+      }
+    } catch (CoreException ex) {
+      log.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, null, ex));
+    }
+    updateDisplay();
+  }
+
   /**
    * Invoked when project configuration changes??
    *
@@ -507,26 +507,34 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
     ICConfigurationDescription srcCfg = src.getConfiguration();
     ICConfigurationDescription dstCfg = dst.getConfiguration();
 
-    if (srcCfg instanceof ICMultiConfigDescription) {
-      ICConfigurationDescription[] srcCfgs = (ICConfigurationDescription[]) ((ICMultiConfigDescription) srcCfg)
-          .getItems();
-      ICConfigurationDescription[] dstCfgs = (ICConfigurationDescription[]) ((ICMultiConfigDescription) dstCfg)
-          .getItems();
-      for (int i = 0; i < srcCfgs.length; i++) {
-        applyConfig(srcCfgs[i], dstCfgs[i]);
+    try {
+      if (srcCfg instanceof ICMultiConfigDescription) {
+        ICConfigurationDescription[] srcCfgs = (ICConfigurationDescription[]) ((ICMultiConfigDescription) srcCfg)
+            .getItems();
+        ICConfigurationDescription[] dstCfgs = (ICConfigurationDescription[]) ((ICMultiConfigDescription) dstCfg)
+            .getItems();
+        for (int i = 0; i < srcCfgs.length; i++) {
+          applyConfig(srcCfgs[i], dstCfgs[i]);
+        }
+      } else {
+        applyConfig(srcCfg, dstCfg);
       }
-    } else {
-      applyConfig(srcCfg, dstCfg);
+      // save behavior as CDT has: Apply does persist settings:
+      // this also solves the problem with different configuration that have been modified, apply but would
+      // otherwise not be persisted on performOK()
+      persist(dst);
+    } catch (CoreException ex) {
+      log.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, null, ex));
     }
   }
 
   /**
    * @param srcCfg
    * @param dstCfg
+   * @throws CoreException
    */
-  private static void applyConfig(ICConfigurationDescription srcCfg, ICConfigurationDescription dstCfg) {
+  private static void applyConfig(ICConfigurationDescription srcCfg, ICConfigurationDescription dstCfg) throws CoreException {
     final ConfigurationManager configMgr = ConfigurationManager.getInstance();
-    try {
       CMakePreferences srcPrefs = configMgr.getOrLoad(srcCfg);
       CMakePreferences dstPrefs = configMgr.getOrCreate(dstCfg);
       if (srcPrefs != dstPrefs) {
@@ -538,18 +546,23 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
         dstPrefs.setWarnUnitialized(srcPrefs.isWarnUnitialized());
         dstPrefs.setWarnUnused(srcPrefs.isWarnUnused());
         dstPrefs.setCacheFile(srcPrefs.getCacheFile());
+        dstPrefs.setBuildDirectory(srcPrefs.getBuildDirectory());
       }
-    } catch (CoreException ex) {
-      log.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, null, ex));
-    }
   }
 
   protected void performOK() {
-    final ICResourceDescription resDesc = getResDesc();
-    if (resDesc == null)
+    // make sure the displayed values get saved
+    saveToModel();
+    persist(getResDesc());
+  }
+
+  /**
+   * @param resDesc
+   */
+  private void persist(final ICResourceDescription resDesc) {
+    if (resDesc == null || prefs == null)
       return;
 
-    saveToModel();
     ICConfigurationDescription cfgd = resDesc.getConfiguration();
     // save project properties..
     try {
@@ -590,6 +603,8 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
    */
   @Override
   protected void performDefaults() {
+    if (prefs == null)
+      return;
     for (CMakePreferences pref : prefs) {
       pref.reset();
     }
@@ -600,11 +615,6 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
   @Override
   public boolean canBeVisible() {
     return page.isForProject();
-  }
-
-  @Override
-  protected void updateButtons() {
-    // never called from superclass, but abstract :-)
   }
 
   ////////////////////////////////////////////////////////////////////
