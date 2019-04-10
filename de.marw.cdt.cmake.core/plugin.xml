@@ -149,7 +149,7 @@
       </tab>
       <tab
             class="de.marw.cdt.cmake.core.ui.LinuxPropertyTab"
-            helpId="de.marw.cdt.cmake.core.t_cmake_options_OS"
+            helpId="de.marw.cdt.cmake.core.t_cmake_options_general"
             name="&amp;Linux/default"
             parent="de.marw.cdt.cmake.core.ui.HostOSPropertyPage"
             tooltip="Properties applied under Linux or unkown OS"
@@ -157,7 +157,7 @@
       </tab>
       <tab
             class="de.marw.cdt.cmake.core.ui.WindowsPropertyTab"
-            helpId="de.marw.cdt.cmake.core.t_cmake_options_OS"
+            helpId="de.marw.cdt.cmake.core.t_cmake_options_general"
             name="&amp;Windows"
             parent="de.marw.cdt.cmake.core.ui.HostOSPropertyPage"
             tooltip="Properties applied under windows"
@@ -189,12 +189,8 @@
             name="defined by CMakeLists.txt"/>
    </extension>
  <extension point="org.eclipse.help.toc">
-    <toc file="doc/toc.xml" primary="true">
-    </toc>
- </extension>
- <extension point="org.eclipse.help.toc">
-    <toc file="doc/topics_Tasks.xml">
-    </toc>
+    <toc file="doc/toc.xml" primary="true"/>
+    <toc file="doc/topics_Tasks.xml"/>
  </extension>
  <extension
        point="org.eclipse.help.contexts">

@@ -7,12 +7,11 @@
 
 <body>
   <h2>Cmake4eclipse User Guide</h2>
-  <p>
-    Cmake4eclipse is a plugin that integrates the <a
+  <p>Cmake4eclipse is a plugin that integrates the <a
       href="http://www.cmake.org/">CMake</a> cross-platform buildscript
     generator into the C/C++ Development Toolkit (CDT).
   </p>
-  <h2>Why Cmake4eclipse?</h2>
+  <h2>Why does Cmake4eclipse exist?</h2>
   <p>Blindly invoked, CMake will generate makefiles (or other build scripts)
     inside the source tree, cluttering it with lots of files and directories
     that have to be fleed out from version control: This practice might be ok
@@ -24,13 +23,13 @@
     some tedious tasks on Your co-workers who check out the code and just want
     to build it:
   <ol>
-    <li>leave eclipse workbench,</li>
-    <li>manually fire up a command-line shell,</li>
-    <li>manually create a directory for the out-of-source-build,</li>
-    <li>manually change the CWD to that directory,</li>
-    <li>manually invoke cmake, telling it to generate build scripts, which
+    <li>Leave eclipse workbench,</li>
+    <li>Manually fire up a command-line shell,</li>
+    <li>Manually create a directory for the out-of-source-build,</li>
+    <li>Manually change the CWD to that directory,</li>
+    <li>Manually invoke cmake, telling it to generate build scripts, which
       kind of build scripts you want and where source source files live,</li>
-    <li>re-enter eclipse workbench, configure the checked out project to
+    <li>Re-enter eclipse workbench, configure the checked out project to
       use the generated buildscripts.</li>
   </ol>
   </p>
@@ -40,6 +39,7 @@
     <ul>
 	<li>Automatic generation of build scripts. No need to manually invoke <code>cmake</code>.</li>
 	<li>Takes your <em>CMakeLists.txt</em> as the source of truth.</li>
+	<li>Stores options for cmake in your Eclipse project.</li>
 	<li>Supports the <code><a href="https://github.com/ninja-build/ninja">ninja</a></code> build system.</li>
 	<li>Aims to make Eclipse project cross-platform compatible without the need to change platform-specifc project settings.</li>
 	<li>Its Language Settings Provider can feed include paths and pre-processor symbols from cmake to the CDT-Indexer.</li>

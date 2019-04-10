@@ -1,10 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<toc label="Tasks" topic="doc/html/o_tasks.html">
-    <anchor id="cmake4cdt_Tasks_Anchor"/>
-    <topic href="doc/html/t_enable_generator.html" label="Enabling buildscript generation through cmake">
+<toc label="Tasks" link_to="cmake4eclipse_Tasks_Anchor" topic="doc/html/o_tasks.html">
+  <topic label="Build">
+    <topic href="doc/html/t_enable_generator.html"
+      label="Enabling buildscript generation through cmake">
+      <topic href="doc/html/builders.html" label="Project Builders">
+      </topic>
     </topic>
-    <topic href="doc/html/t_cmake_options_general.html" label="Adjusting general options for cmake">
+    <topic href="doc/html/t_cmake_options_general.html" label="Adjusting options for cmake">
+      <topic href="doc/html/t_cmake_symbols_general.html"
+        label="Creating and removing cmake cache entries">
+      </topic>
     </topic>
-    <topic href="doc/html/t_MinGW_setup.html" label="Tips for MinGW on Windows">
+  </topic>
+  <topic href="doc/html/languageSettingsProviders.html" label="Syntax Highlighting Suuport">
+    <topic href="doc/html/builtins-detection.html" label="Compiler Built-ins Detection">
     </topic>
+  </topic>
+  <anchor id="cmake4eclipse_TasksInsertAnchor" />
 </toc>

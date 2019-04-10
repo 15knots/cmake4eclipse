@@ -6,28 +6,27 @@
 </head>
 <body>
 	<h1>Preprocessor Include Paths, Macros</h1>
-	<P>Include paths and preprocessor macros for the C/C++ indexer are supplied by
+	<P>Include paths and preprocessor macros for the CDT source code indexer are supplied by
 	<strong>Language Settings Providers</strong> using the
-	<a href="PLUGINS_ROOT/org.eclipse.cdt.doc.user/concepts/cdt_c_scanner_discovery.htm">Scanner Discovery</a>
-	mechanism. The C/C++/CUDA editors use the C/C++ indexer to improve syntax highlighting, to allow you to jump to
+        <a href="PLUGINS_ROOT/org.eclipse.cdt.doc.user/tasks/cdt_t_sd.htm">Scanner Discovery</a>
+	mechanism. The C/C++/CUDA editors use the indexer to improve syntax highlighting, allowing you to jump to
 	macro definitions and to browse through include files.
 	</P>
-	<p>The Cmake4eclipse plugin provides these <strong>Settings Providers</strong>:</p>
+	<p>The Cmake4eclipse plugin provides two <a href="PLUGINS_ROOT/org.eclipse.cdt.doc.user/concepts/cdt_c_scanner_discovery.htm">Language Settings Providers</a>:</p>
 
 	<h3>CMAKE_EXPORT_COMPILE_COMMANDS Parser</h3>
 	<p>This provider instructs CMake to generate a file that contains all the compiler command-lines
 	which will be executed when a project is build.<br/>
-	The plugin will parse that file and feed any preprocessor include path, macro definition or 
+	The provider will parse that file and feed any preprocessor include path, macro definition or 
 	macro undefine that originates from your <em>CMakeLists.txt</em> files to the indexer.<br/>
 	Parsing is done rarely, since the internal cache is invalidated only when the
 	file`s time-stamp is newer, so it should be reasonably fast.
 	</p>
-	
 	<h3>CMAKE_EXPORT_COMPILE_COMMANDS Compiler Built-ins</h3>
-	<p>This provider works similar to <quote>CMAKE_EXPORT_COMPILE_COMMANDS Parser</quote>, but invokes 
+	<p>This provider works similar to <q>CMAKE_EXPORT_COMPILE_COMMANDS Parser</q>, but invokes 
 	the compiler with arguments to get the include paths and preprocessor macros 
 	<strong>built-in to the compiler</strong>.<br/>
-	Note thtat this works only for compilers that support this.
+	Note that this works only for compilers that supporting it.
 	See <a href="builtins-detection.html">built-ins detection</a> for supported compilers.
 	</p>
 </body>
