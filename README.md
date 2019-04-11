@@ -59,9 +59,10 @@ There is a run configuration for eclipse to invoke maven `build cmake4eclipse` p
 
 ---
 # Release Notes
-## 1.1?.0 (Unreleased)
+## 1.14.1 (Unreleased)
 ### Changes
-- Feature #91: ?
+- Fix #112: cmake cache entries only saved for one configuration.
+- Reviewed online help.
 
 ## 1.14.0 (2019-02-26)
 ### Changes
