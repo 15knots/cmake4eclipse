@@ -61,7 +61,7 @@ import org.eclipse.swt.widgets.Display;
 import org.w3c.dom.Element;
 
 import de.marw.cmake.CMakePlugin;
-import de.marw.cmake.cdt.language.settings.providers.ParserDetection.MarchResult;
+import de.marw.cmake.cdt.language.settings.providers.ParserDetection.MatchResult;
 import de.marw.cmake.cdt.language.settings.providers.builtins.BuiltinDetectionType;
 import de.marw.cmake.cdt.language.settings.providers.builtins.CompilerBuiltinsDetector;
 
@@ -443,7 +443,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
   private ParserDetection.ParserDetectionResult fastDetermineDetector(String line) {
     // try last known matching detector first...
     if (lastDetector != null) {
-      MarchResult cmdline = null;
+      MatchResult cmdline = null;
       final ParserDetection.ParserDetector detector = lastDetector.getDetector();
       switch (lastDetector.getHow()) {
       case BASENAME:
