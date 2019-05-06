@@ -10,10 +10,7 @@
  *******************************************************************************/
 package de.marw.cmake.cdt.language.settings.providers;
 
-import static org.junit.Assert.*;
-
-import java.util.ArrayList;
-import java.util.List;
+import static org.junit.Assert.assertEquals;
 
 import org.eclipse.cdt.core.settings.model.ICLanguageSettingEntry;
 import org.eclipse.cdt.core.settings.model.ICSettingEntry;
@@ -22,6 +19,7 @@ import org.eclipse.core.runtime.Path;
 import org.junit.Before;
 import org.junit.Test;
 
+import de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser.IParseContext;
 import de.marw.cmake.cdt.language.settings.providers.ToolArgumentParsers.MacroUndefine_C_POSIX;
 
 /**
@@ -41,34 +39,34 @@ public class MacroUndefine_C_POSIXTest {
 
   /**
    * Test method for
-   * {@link de.marw.cmake.cdt.language.settings.providers.ToolArgumentParsers.MacroUndefine_C_POSIX#processArgument(java.util.List, IPath, java.lang.String)}
+   * {@link de.marw.cmake.cdt.language.settings.providers.ToolArgumentParsers.MacroUndefine_C_POSIX#processArgument(IParseContext, IPath, java.lang.String)}
    * .
    */
   @Test
   public final void testProcessArgument() {
     final String more = " -g -MMD -MT CMakeFiles/execut1.dir/util1.c.o -MF \"CMakeFiles/execut1.dir/util1.c.o.d\""
         + " -o CMakeFiles/execut1.dir/util1.c.o -c /testprojects/C-subsrc/src/src-sub/main1.c";
-    List<ICLanguageSettingEntry> entries = new ArrayList<>();
+    ParseContext entries;
     ICLanguageSettingEntry parsed;
     final IPath cwd= new Path("");
 
     String name = "FOO";
     // -UFOO
-    entries.clear();
+    entries = new ParseContext();
     assertEquals(2 + name.length(),
         testee.processArgument(entries, cwd, "-U" + name + more));
-    assertEquals("#entries", 1, entries.size());
-    parsed = entries.get(0);
+    assertEquals("#entries", 1, entries.getSettingEntries().size());
+    parsed = entries.getSettingEntries().get(0);
     assertEquals("kind", ICSettingEntry.MACRO, parsed.getKind());
     assertEquals("kind", ICSettingEntry.UNDEFINED, (parsed.getFlags()&ICSettingEntry.UNDEFINED));
     assertEquals("name", name, parsed.getName());
     assertEquals("value", "", parsed.getValue());
     // -U  FOO
-    entries.clear();
+    entries = new ParseContext();
     assertEquals(2 +2+ name.length(),
         testee.processArgument(entries, cwd, "-U  " + name + more));
-    assertEquals("#entries", 1, entries.size());
-    parsed = entries.get(0);
+    assertEquals("#entries", 1, entries.getSettingEntries().size());
+    parsed = entries.getSettingEntries().get(0);
     assertEquals("kind", ICSettingEntry.MACRO, parsed.getKind());
     assertEquals("kind", ICSettingEntry.UNDEFINED, (parsed.getFlags()&ICSettingEntry.UNDEFINED));
     assertEquals("name", name, parsed.getName());

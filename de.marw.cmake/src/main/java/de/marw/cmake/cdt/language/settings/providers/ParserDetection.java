@@ -53,6 +53,11 @@ class ParserDetection {
         new ToolArgumentParsers.MacroDefine_C_POSIX(), new ToolArgumentParsers.MacroUndefine_C_POSIX(),
         // not defined by POSIX, but does not harm..
         new ToolArgumentParsers.SystemIncludePath_C() };
+    final IToolArgumentParser[] gcc_args = { new ToolArgumentParsers.IncludePath_C_POSIX(),
+        new ToolArgumentParsers.MacroDefine_C_POSIX(), new ToolArgumentParsers.MacroUndefine_C_POSIX(),
+        new ToolArgumentParsers.SystemIncludePath_C(), new ToolArgumentParsers.LangStd_GCC(),
+        new ToolArgumentParsers.Sysroot_GCC()};
+
     // POSIX compatible C compilers =================================
     {
       final ToolCommandlineParser cc = new ToolCommandlineParser("org.eclipse.cdt.core.gcc",
@@ -71,7 +76,7 @@ class ParserDetection {
     // GNU C compatible compilers ====
     {
       final ToolCommandlineParser gcc = new ToolCommandlineParser("org.eclipse.cdt.core.gcc",
-          new ResponseFileArgumentParsers.At(), BuiltinDetectionType.GCC, posix_cc_args);
+          new ResponseFileArgumentParsers.At(), BuiltinDetectionType.GCC, gcc_args);
       parserDetectors.add(new ParserDetector("gcc", gcc));
       parserDetectors.add(new ParserDetectorExt("gcc", "exe", gcc));
       parserDetectors.add(new ParserDetector("clang", gcc));
@@ -83,7 +88,7 @@ class ParserDetection {
     // GNU C++ compatible compilers ====
     {
       final ToolCommandlineParser gxx = new ToolCommandlineParser("org.eclipse.cdt.core.g++",
-          new ResponseFileArgumentParsers.At(), BuiltinDetectionType.GCC, posix_cc_args);
+          new ResponseFileArgumentParsers.At(), BuiltinDetectionType.GCC, gcc_args);
       parserDetectors.add(new ParserDetector("g\\+\\+", gxx));
       parserDetectors.add(new ParserDetectorExt("g\\+\\+", "exe", gxx));
       parserDetectors.add(new ParserDetector("clang\\+\\+", gxx));
@@ -123,7 +128,8 @@ class ParserDetection {
     {
       final IToolArgumentParser[] nvcc_args = { new ToolArgumentParsers.IncludePath_C_POSIX(),
           new ToolArgumentParsers.MacroDefine_C_POSIX(), new ToolArgumentParsers.MacroUndefine_C_POSIX(),
-          new ToolArgumentParsers.SystemIncludePath_nvcc(), new ToolArgumentParsers.SystemIncludePath_C() };
+          new ToolArgumentParsers.SystemIncludePath_nvcc(), new ToolArgumentParsers.SystemIncludePath_C(),
+          new ToolArgumentParsers.LangStd_nvcc()};
 
       final ToolCommandlineParser nvcc = new ToolCommandlineParser("com.nvidia.cuda.toolchain.language.cuda.cu",
           new ResponseFileArgumentParsers.At(), BuiltinDetectionType.NVCC, nvcc_args);

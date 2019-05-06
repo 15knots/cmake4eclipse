@@ -61,6 +61,7 @@ import org.eclipse.swt.widgets.Display;
 import org.w3c.dom.Element;
 
 import de.marw.cmake.CMakePlugin;
+import de.marw.cmake.cdt.language.settings.providers.IToolCommandlineParser.IResult;
 import de.marw.cmake.cdt.language.settings.providers.ParserDetection.MatchResult;
 import de.marw.cmake.cdt.language.settings.providers.builtins.BuiltinDetectionType;
 import de.marw.cmake.cdt.language.settings.providers.builtins.CompilerBuiltinsDetector;
@@ -284,8 +285,8 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
    *          where to store language settings
    * @param enabled
    *          {@code true} if this provider is present in the project's list of settings providers, otherwise false. If
-   *          {@code false}, this method will just determine the compiler-built-in processors and not perform any
-   *          command line parsing
+   *          {@code false}, this method will just determine the compiler-built-in processors and and options
+   *          but not add any language settings
    * @param sourceFileInfo
    *          a Map of type Map<String,String>
    * @param jsonFile
@@ -309,13 +310,12 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
             if (pdr != null) {
               // found a matching command-line parser
               final IToolCommandlineParser parser = pdr.getDetectorWithMethod().getDetector().getParser();
-              if (enabled) {
-                // cwdStr is the absolute working directory of the compiler in
-                // CMake-notation (fileSep are forward slashes)
-                final String cwdStr = sourceFileInfo.get("directory").toString();
-                IPath cwd = cwdStr != null ? Path.fromOSString(cwdStr) : new Path("");
-                processCommandLine(storage, parser, files[0], cwd, pdr.getReducedCommandLine());
-              }
+              // cwdStr is the absolute working directory of the compiler in
+              // CMake-notation (fileSep are forward slashes)
+              final String cwdStr = sourceFileInfo.get("directory").toString();
+              IPath cwd = cwdStr != null ? Path.fromOSString(cwdStr) : new Path("");
+              IResult result = processCommandLine(storage, enabled, parser, files[0], cwd, pdr.getReducedCommandLine());
+
               final BuiltinDetectionType builtinDetectionType = parser.getBuiltinDetectionType();
               if(builtinDetectionType != BuiltinDetectionType.NONE) {
                 String languageId = parser.getLanguageId();
@@ -324,7 +324,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
                 }
                 if (languageId != null) {
                   storage.addBuiltinsDetector(currentCfgDescription, languageId, builtinDetectionType,
-                      pdr.getCommandLine().getCommand());
+                      pdr.getCommandLine().getCommand(), result.getBuiltinDetctionArgs());
                 }
               }
             } else {
@@ -490,6 +490,10 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
    *
    * @param storage
    *          where to store language settings
+   * @param enabled
+   *          {@code true} if this provider is present in the project's list of settings providers, otherwise false. If
+   *          {@code false}, this method will just determine the compiler-built-in processors and and options
+   *          but not add any language settings
    * @param cmdlineParser
    *          the tool detector and its tool option parsers
    * @param sourceFile
@@ -498,22 +502,27 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
    *          the current working directory of the compiler at its invocation
    * @param line
    *          the command line to process
+   * @return the result of command-line parsing
    */
-  private void processCommandLine(TimestampedLanguageSettingsStorage storage, IToolCommandlineParser cmdlineParser,
-      IFile sourceFile, IPath cwd, String line) {
+  private IResult processCommandLine(TimestampedLanguageSettingsStorage storage, boolean enabled,
+      IToolCommandlineParser cmdlineParser, IFile sourceFile, IPath cwd, String line) {
     line = ToolCommandlineParser.trimLeadingWS(line);
-    final List<ICLanguageSettingEntry> entries = cmdlineParser.processArgs(cwd, line);
-    if (entries != null && entries.size() > 0) {
-      String languageId = cmdlineParser.getLanguageId();
-      if (languageId == null) {
-        languageId = determineLanguageId(sourceFile);
-      }
-      if (languageId != null) {
-        handleIncludePathEntries(storage, entries, languageId);
-        // attach settings to sourceFile resource...
-        storage.addSettingEntries(sourceFile, languageId, entries);
+    final IResult result = cmdlineParser.processArgs(cwd, line);
+    if (enabled) {
+      final List<ICLanguageSettingEntry> entries = result.getSettingEntries();
+      if (entries.size() > 0) {
+        String languageId = cmdlineParser.getLanguageId();
+        if (languageId == null) {
+          languageId = determineLanguageId(sourceFile);
+        }
+        if (languageId != null) {
+          handleIncludePathEntries(storage, entries, languageId);
+          // attach settings to sourceFile resource...
+          storage.addSettingEntries(sourceFile, languageId, entries);
+        }
       }
     }
+    return result;
   }
 
   /**
@@ -708,13 +717,19 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
       super.setSettingEntries(rcPath, languageId, entries);
     }
 
+    /**
+     * @param builtinDetctionArgs
+     *          the compiler arguments from the command-line that affect built-in detection. For the GNU compilers,
+     *          these are options like {@code --sysroot} and options that specify the language's standard
+     *          ({@code -std=c++17}.
+     */
     private void addBuiltinsDetector(ICConfigurationDescription cfgDescription, String languageId,
-        BuiltinDetectionType builtinDetectionType, String compilerCommand) {
+        BuiltinDetectionType builtinDetectionType, String compilerCommand, List<String> builtinDetctionArgs) {
       if (builtinDetectors == null)
         builtinDetectors = new HashMap<>(3, 1.0f);
       if (!builtinDetectors.containsKey(languageId)) {
         CompilerBuiltinsDetector detector = new CompilerBuiltinsDetector(cfgDescription, languageId,
-            builtinDetectionType, compilerCommand);
+            builtinDetectionType, compilerCommand, builtinDetctionArgs);
         builtinDetectors.put(languageId, detector);
       }
     }
