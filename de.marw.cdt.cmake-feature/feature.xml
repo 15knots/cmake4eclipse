@@ -2,7 +2,7 @@
 <feature
       id="de.marw.cdt.cmake"
       label="cmake4eclipse"
-      version="1.14.1.qualifier"
+      version="1.15.0.qualifier"
       provider-name="Martin Weber">
 
    <description url="https://github.com/15knots/cmake4eclipse">

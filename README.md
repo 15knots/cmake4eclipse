@@ -59,6 +59,10 @@ There is a run configuration for eclipse to invoke maven `build cmake4eclipse` p
 
 ---
 # Release Notes
+## 1.15.0 (2019-05-??)
+### Changes
+- Fix #96 and #108: Pass compiler flags that affect compiler built-ins detection to the compiler when detecting built-ins.
+
 ## 1.14.1 (2019-04-13)
 ### Changes
 - Fix #112: cmake cache entries only saved for one configuration.
