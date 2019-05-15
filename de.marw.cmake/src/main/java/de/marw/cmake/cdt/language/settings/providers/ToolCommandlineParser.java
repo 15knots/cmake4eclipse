@@ -10,12 +10,9 @@
  *******************************************************************************/
 package de.marw.cmake.cdt.language.settings.providers;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 
-import org.eclipse.cdt.core.settings.model.ICLanguageSettingEntry;
 import org.eclipse.core.runtime.IPath;
 
 import de.marw.cmake.cdt.language.settings.providers.builtins.BuiltinDetectionType;
@@ -33,8 +30,8 @@ class ToolCommandlineParser implements IToolCommandlineParser {
   private final IResponseFileArgumentParser responseFileArgumentParser;
   private final BuiltinDetectionType builtinDetectionType;
 
-  /** gathers all entries */
-  private List<ICLanguageSettingEntry> entries;
+  /** gathers the result */
+  private ParseContext result;
 
   private IPath cwd;
 
@@ -61,13 +58,13 @@ class ToolCommandlineParser implements IToolCommandlineParser {
   }
 
   @Override
-  public List<ICLanguageSettingEntry> processArgs(IPath cwd, String args) {
-    this.entries = new ArrayList<>();
+  public IResult processArgs(IPath cwd, String args) {
+    this.result = new ParseContext();
     this.cwd = Objects.requireNonNull(cwd, "cwd");
 
     ParserHandler ph = new ParserHandler();
     ph.parseArguments(responseFileArgumentParser, args);
-    return entries;
+    return result;
   }
 
   @Override
@@ -143,7 +140,7 @@ class ToolCommandlineParser implements IToolCommandlineParser {
         // parse with first parser that can handle the first argument on the
         // command-line
         for (IToolArgumentParser tap : argumentParsers) {
-          consumed = tap.processArgument(entries, cwd, args);
+          consumed = tap.processArgument(result, cwd, args);
           if (consumed > 0) {
             args = args.substring(consumed);
             argParsed = true;

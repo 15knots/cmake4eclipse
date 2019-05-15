@@ -16,8 +16,6 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.eclipse.cdt.core.settings.model.ICLanguageSettingEntry;
 import org.eclipse.cdt.core.settings.model.ICSettingEntry;
@@ -25,7 +23,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.junit.Test;
 
-import de.marw.cmake.cdt.language.settings.providers.ToolArgumentParsers.IncludePath_C_POSIX;
+import de.marw.cmake.cdt.language.settings.providers.IToolCommandlineParser.IResult;
 import de.marw.cmake.cdt.language.settings.providers.builtins.BuiltinDetectionType;
 
 /**
@@ -37,9 +35,10 @@ public class ToolCommandlineParserTest {
   public final void testResponseFileArgumentParser_At() throws Exception {
 
     ToolCommandlineParser testee = new ToolCommandlineParser("egal", new ResponseFileArgumentParsers.At(),
-        BuiltinDetectionType.NONE, new ToolArgumentParsers.IncludePath_C_POSIX(), new ToolArgumentParsers.MacroDefine_C_POSIX());
+        BuiltinDetectionType.NONE, new ToolArgumentParsers.IncludePath_C_POSIX(),
+        new ToolArgumentParsers.MacroDefine_C_POSIX());
 
-    List<ICLanguageSettingEntry> entries;
+    IResult entries;
 
     final String more = " -g -MMD  -o CMakeFiles/execut1.dir/util1.c.o"
         + " -c /testprojects/C-subsrc/src/src-sub/main.c";
@@ -63,34 +62,33 @@ public class ToolCommandlineParserTest {
     }
     // @a/response/file.txt
     entries = testee.processArgs(new Path(cwdP.toString()), "@" + relRspP.toString() + " -D" + defName + more);
-    assertEquals("#entries", 4, entries.size());
-    parsed = entries.get(0);
+    assertEquals("#entries", 4, entries.getSettingEntries().size());
+    parsed = entries.getSettingEntries().get(0);
     assertEquals("kind", ICSettingEntry.MACRO, parsed.getKind());
     assertEquals("name", def1Name, parsed.getName());
-    parsed = entries.get(1);
+    parsed = entries.getSettingEntries().get(1);
     assertEquals("kind", ICSettingEntry.INCLUDE_PATH, parsed.getKind());
     assertEquals("name", cwdP.resolve(incDirName).toString(), parsed.getName());
-    parsed = entries.get(2);
+    parsed = entries.getSettingEntries().get(2);
     assertEquals("kind", ICSettingEntry.MACRO, parsed.getKind());
     assertEquals("name", def2Name, parsed.getName());
-    parsed = entries.get(3);
+    parsed = entries.getSettingEntries().get(3);
     assertEquals("kind", ICSettingEntry.MACRO, parsed.getKind());
     assertEquals("name", defName, parsed.getName());
 
-
-     // @ a/response.file.txt
+    // @ a/response.file.txt
     entries = testee.processArgs(new Path(cwdP.toString()), "@ " + relRspP.toString() + " -D" + defName + more);
-    assertEquals("#entries", 4, entries.size());
-    parsed = entries.get(0);
+    assertEquals("#entries", 4, entries.getSettingEntries().size());
+    parsed = entries.getSettingEntries().get(0);
     assertEquals("kind", ICSettingEntry.MACRO, parsed.getKind());
     assertEquals("name", def1Name, parsed.getName());
-    parsed = entries.get(1);
+    parsed = entries.getSettingEntries().get(1);
     assertEquals("kind", ICSettingEntry.INCLUDE_PATH, parsed.getKind());
     assertEquals("name", cwdP.resolve(incDirName).toString(), parsed.getName());
-    parsed = entries.get(2);
+    parsed = entries.getSettingEntries().get(2);
     assertEquals("kind", ICSettingEntry.MACRO, parsed.getKind());
     assertEquals("name", def2Name, parsed.getName());
-    parsed = entries.get(3);
+    parsed = entries.getSettingEntries().get(3);
     assertEquals("kind", ICSettingEntry.MACRO, parsed.getKind());
     assertEquals("name", defName, parsed.getName());
 
@@ -108,16 +106,16 @@ public class ToolCommandlineParserTest {
 
     final String more = " -g -MMD  -o CMakeFiles/execut1.dir/util1.c.o"
         + " -c /testprojects/C-subsrc/src/src-sub/main.c";
-    List<ICLanguageSettingEntry> entries = new ArrayList<>();
+    IResult entries;
     ICLanguageSettingEntry parsed;
 
     String name = "/ye/olde/Include/Pathe";
     IPath cwd = new Path("");
-    entries.clear();
+    entries = new ParseContext();
     // @<< ... <<
     entries = testee.processArgs(cwd, "@<<" + " -I" + name + " <<" + more);
-    assertEquals("#entries", 1, entries.size());
-    parsed = entries.get(0);
+    assertEquals("#entries", 1, entries.getSettingEntries().size());
+    parsed = entries.getSettingEntries().get(0);
     assertEquals("kind", ICSettingEntry.INCLUDE_PATH, parsed.getKind());
     assertEquals("name", name, parsed.getName());
   }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Martin Weber.
+ * Copyright (c) 2016-2019 Martin Weber.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -33,12 +33,10 @@ interface IToolCommandlineParser {
    * @param args
    *          the command line arguments to process
    *
-   * @return the language setting entries produced or {@code null} or an empty
-   *         list if no entries where produced
    * @throws NullPointerException
    *           if any of the arguments is {@code null}
    */
-  public List<ICLanguageSettingEntry> processArgs(IPath cwd, String args);
+  public IResult processArgs(IPath cwd, String args);
 
   /**
    * Gets the language ID of the language that the tool compiles.
@@ -50,4 +48,25 @@ interface IToolCommandlineParser {
   /** Gets the {@code BuiltinDetectionType}.
    */
   public BuiltinDetectionType getBuiltinDetectionType();
+
+  /**
+   * The result of processing a compiler command-line.
+   *
+   * @author Martin Weber
+   *
+   * @see IToolCommandlineParser#processArgs(IPath, String)
+   */
+  interface IResult {
+    /**
+     * Gets the language setting entries produced during processing.
+     *
+     * @return the language setting entries
+     */
+    List<ICLanguageSettingEntry> getSettingEntries();
+    /**
+     * Gets the compiler arguments from the command-line that affect built-in detection. For the GNU compilers, these are options like {@code --sysroot}
+     * and options that specify the language's standard ({@code -std=c++17}.
+     */
+    List<String> getBuiltinDetctionArgs();
+  } // IResult
 }

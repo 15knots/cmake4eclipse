@@ -66,6 +66,8 @@ public class CompilerBuiltinsDetector {
 
   private String command;
 
+  private List<String> builtinDetctionArgs;
+
   private BuiltinDetectionType builtinDetectionType;
 
   /**
@@ -77,11 +79,15 @@ public class CompilerBuiltinsDetector {
    *          the compiler classification
    * @param command
    *          the compiler command (arg 0)
+   * @param builtinDetctionArgs
+   *          the compiler arguments from the command-line that affect built-in detection. For the GNU compilers, these
+   *          are options like {@code --sysroot} and options that specify the language's standard ({@code -std=c++17}.
    */
   public CompilerBuiltinsDetector(ICConfigurationDescription cfgDescription, String languageId,
-      BuiltinDetectionType builtinDetectionType, String command) {
+      BuiltinDetectionType builtinDetectionType, String command, List<String> builtinDetctionArgs) {
     this.languageId = Objects.requireNonNull(languageId, "languageId");
     this.command = Objects.requireNonNull(command, "command");
+    this.builtinDetctionArgs = Objects.requireNonNull(builtinDetctionArgs, "builtinDetctionArgs");
     this.builtinDetectionType = Objects.requireNonNull(builtinDetectionType, "builtinDetectionType");
     this.cfgDescription = Objects.requireNonNull(cfgDescription);
   }
@@ -93,8 +99,8 @@ public class CompilerBuiltinsDetector {
   }
 
   /**
-   * Run built-in detection command.
-   * @param withConsole whether to show a console for the command output
+   * Run built-in detection builtinDetctionArgs.
+   * @param withConsole whether to show a console for the builtinDetctionArgs output
    *
    * @throws CoreException
    */
@@ -115,6 +121,7 @@ public class CompilerBuiltinsDetector {
     }
 
     final List<String> argList = getCompilerArguments(languageId, builtinDetectionType);
+    argList.addAll(builtinDetctionArgs);
 
     IConsole console= null;
     if (withConsole) {
@@ -147,7 +154,7 @@ public class CompilerBuiltinsDetector {
         final int exitValue = proc.exitValue();
         if (exitValue != 0 && !silent) {
           // compiler had errors...
-          String errMsg = String.format("%1$s exited with status %2$d.", command, exitValue);
+          String errMsg = String.format("%1$s exited with status %2$d.", builtinDetctionArgs.get(0), exitValue);
           createMarker(errMsg);
         }
       }
@@ -220,7 +227,7 @@ public class CompilerBuiltinsDetector {
       // of the language as long as the encoding is set to UTF-8.
       // English language is set for parser because it relies on English
       // messages
-      // in the output of the 'gcc -v' command.
+      // in the output of the 'gcc -v' builtinDetctionArgs.
 
       List<String> env = new ArrayList<>(Arrays.asList(getEnvp(cfgDescription)));
       for (Iterator<String> iterator = env.iterator(); iterator.hasNext();) {
@@ -259,7 +266,7 @@ public class CompilerBuiltinsDetector {
     // Include paths with locale characters will be handled properly regardless
     // of the language as long as the encoding is set to UTF-8.
     // English language is set for parser because it relies on English messages
-    // in the output of the 'gcc -v' command.
+    // in the output of the 'gcc -v' builtinDetctionArgs.
     strings.add("LANGUAGE" + "=en"); // override for GNU gettext
     strings.add("LC_ALL" + "=C.UTF-8"); // for other parts of the system
                                         // libraries

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015 Martin Weber.
+ * Copyright (c) 2015-2019 Martin Weber.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,7 +10,6 @@
  *******************************************************************************/
 package de.marw.cmake.cdt.language.settings.providers;
 
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -19,6 +18,8 @@ import org.eclipse.cdt.core.settings.model.ICSettingEntry;
 import org.eclipse.cdt.core.settings.model.util.CDataUtil;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+
+import de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser.IParseContext;
 
 /**
  * Various tool argument parser implementations.
@@ -134,7 +135,7 @@ class ToolArgumentParsers {
    */
   private static abstract class MacroDefineGeneric {
 
-    protected final int processArgument(List<ICLanguageSettingEntry> returnedEntries, String args,
+    protected final int processArgument(IParseContext parseContext, String args,
         NameValueOptionMatcher[] optionMatchers) {
       for (NameValueOptionMatcher oMatcher : optionMatchers) {
         final Matcher matcher = oMatcher.matcher;
@@ -145,7 +146,7 @@ class ToolArgumentParsers {
           final String value = oMatcher.valueGroup== -1? null: matcher.group(oMatcher.valueGroup);
           final ICLanguageSettingEntry entry = CDataUtil.createCMacroEntry(name, value,
               ICSettingEntry.READONLY);
-          returnedEntries.add(entry);
+          parseContext.addSettingEntry(entry);
           final int end = matcher.end();
           return end;
         }
@@ -162,7 +163,7 @@ class ToolArgumentParsers {
     /*-
      * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgument(java.util.List, java.lang.String)
      */
-    protected final int processArgument(List<ICLanguageSettingEntry> returnedEntries, String argsLine,
+    protected final int processArgument(IParseContext parseContext, String argsLine,
         NameOptionMatcher optionMatcher) {
       final Matcher oMatcher = optionMatcher.matcher;
 
@@ -171,7 +172,7 @@ class ToolArgumentParsers {
         final String name = oMatcher.group(1);
         final ICLanguageSettingEntry entry = CDataUtil.createCMacroEntry(name, null,
             ICSettingEntry.UNDEFINED | ICSettingEntry.READONLY);
-        returnedEntries.add(entry);
+        parseContext.addSettingEntry(entry);
         final int end = oMatcher.end();
         return end;
       }
@@ -186,9 +187,9 @@ class ToolArgumentParsers {
     /**
      * @param cwd
      *          the current working directory of the compiler at its invocation
-     * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgument(List, IPath, String)
+     * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgument(IParseContext, IPath, String)
      */
-    protected final int processArgument(List<ICLanguageSettingEntry> returnedEntries, IPath cwd,
+    protected final int processArgument(IParseContext parseContext, IPath cwd,
         String argsLine, NameOptionMatcher[] optionMatchers) {
       for (NameOptionMatcher oMatcher : optionMatchers) {
         final Matcher matcher = oMatcher.matcher;
@@ -206,7 +207,7 @@ class ToolArgumentParsers {
 
           final ICLanguageSettingEntry entry = CDataUtil.createCIncludePathEntry(name,
               ICSettingEntry.READONLY);
-          returnedEntries.add(entry);
+          parseContext.addSettingEntry(entry);
           final int end = matcher.end();
           return end;
         }
@@ -249,8 +250,8 @@ class ToolArgumentParsers {
      * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgs(java.lang.String)
      */
     @Override
-    public int processArgument(List<ICLanguageSettingEntry> returnedEntries, IPath cwd, String argsLine) {
-      return processArgument(returnedEntries, argsLine, optionMatchers);
+    public int processArgument(IParseContext parseContext, IPath cwd, String argsLine) {
+      return processArgument(parseContext, argsLine, optionMatchers);
     }
 
   }
@@ -269,8 +270,8 @@ class ToolArgumentParsers {
      * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgument(java.util.List, java.lang.String)
      */
     @Override
-    public int processArgument(List<ICLanguageSettingEntry> returnedEntries, IPath cwd, String argsLine) {
-      return processArgument(returnedEntries, argsLine, optionMatcher);
+    public int processArgument(IParseContext parseContext, IPath cwd, String argsLine) {
+      return processArgument(parseContext, argsLine, optionMatcher);
     }
   }
 
@@ -290,8 +291,8 @@ class ToolArgumentParsers {
      * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgs(java.lang.String)
      */
     @Override
-    public int processArgument(List<ICLanguageSettingEntry> returnedEntries, IPath cwd, String argsLine) {
-      return processArgument(returnedEntries, cwd, argsLine, optionMatchers);
+    public int processArgument(IParseContext parseContext, IPath cwd, String argsLine) {
+      return processArgument(parseContext, cwd, argsLine, optionMatchers);
     }
   }
 
@@ -311,8 +312,8 @@ class ToolArgumentParsers {
      * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgs(java.lang.String)
      */
     @Override
-    public int processArgument(List<ICLanguageSettingEntry> returnedEntries, IPath cwd, String argsLine) {
-      return processArgument(returnedEntries, cwd, argsLine, optionMatchers);
+    public int processArgument(IParseContext parseContext, IPath cwd, String argsLine) {
+      return processArgument(parseContext, cwd, argsLine, optionMatchers);
     }
   }
 
@@ -336,8 +337,8 @@ class ToolArgumentParsers {
      * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgs(java.lang.String)
      */
     @Override
-    public int processArgument(List<ICLanguageSettingEntry> returnedEntries, IPath cwd, String argsLine) {
-      return processArgument(returnedEntries, cwd, argsLine, optionMatchers);
+    public int processArgument(IParseContext parseContext, IPath cwd, String argsLine) {
+      return processArgument(parseContext, cwd, argsLine, optionMatchers);
     }
   }
 
@@ -364,8 +365,8 @@ class ToolArgumentParsers {
      * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgs(java.lang.String)
      */
     @Override
-    public int processArgument(List<ICLanguageSettingEntry> returnedEntries, IPath cwd, String argsLine) {
-      return processArgument(returnedEntries, argsLine, optionMatchers);
+    public int processArgument(IParseContext parseContext, IPath cwd, String argsLine) {
+      return processArgument(parseContext, argsLine, optionMatchers);
     }
 
   }
@@ -384,8 +385,8 @@ class ToolArgumentParsers {
      * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgument(java.util.List, java.lang.String)
      */
     @Override
-    public int processArgument(List<ICLanguageSettingEntry> returnedEntries, IPath cwd, String argsLine) {
-      return processArgument(returnedEntries, argsLine, optionMatcher);
+    public int processArgument(IParseContext parseContext, IPath cwd, String argsLine) {
+      return processArgument(parseContext, argsLine, optionMatcher);
     }
   }
 
@@ -405,8 +406,89 @@ class ToolArgumentParsers {
      * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgs(java.lang.String)
      */
     @Override
-    public int processArgument(List<ICLanguageSettingEntry> returnedEntries, IPath cwd, String argsLine) {
-      return processArgument(returnedEntries, cwd, argsLine, optionMatchers);
+    public int processArgument(IParseContext parseContext, IPath cwd, String argsLine) {
+      return processArgument(parseContext, cwd, argsLine, optionMatchers);
+    }
+  }
+
+  ////////////////////////////////////////////////////////////////////
+  // compiler built-ins detection
+  ////////////////////////////////////////////////////////////////////
+  /**
+   * A tool argument parser capable to parse arguments from the command-line that affect built-in detection.
+   */
+  private static abstract class BuiltinDetctionArgsGeneric {
+    /**
+     * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgument(IParseContext, IPath, String)
+     */
+    protected final int processArgument(IParseContext parseContext, String argsLine, Matcher[] optionMatchers) {
+      for (Matcher matcher : optionMatchers) {
+        matcher.reset(argsLine);
+        if (matcher.lookingAt()) {
+          parseContext.addBuiltinDetctionArgument(matcher.group());
+          return matcher.end();
+        }
+      }
+      return 0;// no input consumed
+    }
+  }
+
+  ////////////////////////////////////////////////////////////////////
+  /**
+   * A tool argument parser capable to parse a GCC option to specify paths {@code --sysrooot}.
+   */
+  static class Sysroot_GCC extends BuiltinDetctionArgsGeneric implements IToolArgumentParser {
+    private static final Matcher[] optionMatchers = {
+        /* "--sysroot=" quoted directory */
+        Pattern.compile("--sysroot=" + REGEX_INCLUDEPATH_QUOTED_DIR).matcher(""),
+        /* "--sysroot=" unquoted directory */
+        Pattern.compile("--sysroot=" + REGEX_INCLUDEPATH_UNQUOTED_DIR).matcher(""),
+        /* "-isysroot=" quoted directory */
+        Pattern.compile("-isysroot=" + REGEX_INCLUDEPATH_QUOTED_DIR).matcher(""),
+        /* "-isysroot=" unquoted directory */
+        Pattern.compile("-isysroot=" + REGEX_INCLUDEPATH_UNQUOTED_DIR).matcher(""),
+        /* "--no-sysroot-prefix" */
+        Pattern.compile("--no-sysroot-prefix").matcher("") };
+
+    /*-
+     * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgs(java.lang.String)
+     */
+    @Override
+    public int processArgument(IParseContext parseContext, IPath cwd, String argsLine) {
+      return processArgument(parseContext, argsLine, optionMatchers);
+    }
+  }
+
+  ////////////////////////////////////////////////////////////////////
+  /**
+   * A tool argument parser capable to parse a GCC option to specify the language standard {@code -std=xxx}.
+   */
+  static class LangStd_GCC extends BuiltinDetctionArgsGeneric implements IToolArgumentParser {
+    private static final Matcher[] optionMatchers = { Pattern.compile("-std=\\S+").matcher(""),
+        Pattern.compile("-ansi").matcher(""), };
+
+    /*-
+     * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgs(java.lang.String)
+     */
+    @Override
+    public int processArgument(IParseContext parseContext, IPath cwd, String argsLine) {
+      return processArgument(parseContext, argsLine, optionMatchers);
+    }
+  }
+
+  /**
+   * A tool argument parser capable to parse a nvcc option to specify the language standard {@code --std=xxx}.
+   */
+  static class LangStd_nvcc extends BuiltinDetctionArgsGeneric implements IToolArgumentParser {
+    private static final Matcher[] optionMatchers = { Pattern.compile("--std \\S+").matcher(""),
+        Pattern.compile("-std \\S+").matcher(""), };
+
+    /*-
+     * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgs(java.lang.String)
+     */
+    @Override
+    public int processArgument(IParseContext parseContext, IPath cwd, String argsLine) {
+      return processArgument(parseContext, argsLine, optionMatchers);
     }
   }
 
