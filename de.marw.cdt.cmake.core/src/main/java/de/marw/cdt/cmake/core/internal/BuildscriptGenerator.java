@@ -1,5 +1,5 @@
 /* ******************************************************************************
- * Copyright (c) 2013-2018 Martin Weber.
+ * Copyright (c) 2013-2019 Martin Weber.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -43,6 +43,7 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
+import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.IResourceStatus;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ILog;
@@ -170,19 +171,36 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
   }
 
   /**
-   * Invoked on incremental build.
+   * Invoked on incremental build?
    */
   @Override
   public MultiStatus generateMakefiles(IResourceDelta delta) throws CoreException {
-    return regenerateMakefiles();
+    CMakeListsVisitor visitor = new CMakeListsVisitor();
+    // did the user modify one of the CMakeLists.txt?
+    delta.accept(visitor);
+    /*
+     * If one of the CMakeLists.txt has changed, the generated build scripts will run cmake in order to update the
+     * scripts during the build. But CDT's ICommandLauncher intermixes the stdout and stderr streams of the cmake
+     * process, making it impossible to code a cmake error parser implementation of IErrorParser that works. So we force
+     * to run cmake in advance to feeds its output to an error parser that WORKS.
+     */
+    return generateBuildscripts(visitor.hasChanges);
   }
 
   /**
-   * Invoked on full build.
+   * Invoked on full build?
    */
   @Override
   public MultiStatus regenerateMakefiles() throws CoreException {
+    return generateBuildscripts(false);
+  }
 
+  /**
+   * @param forceGeneration
+   *          <code>true</code> if cmake must be run, regardless whether the build-scripts have already been generated
+   */
+  private MultiStatus generateBuildscripts(boolean forceGeneration) throws CoreException {
+    final Date startDate = new Date();
     project.deleteMarkers(MARKER_ID, false, IResource.DEPTH_ZERO);
 
     final ICConfigurationDescription cfgDes = ManagedBuildManager.getDescriptionForConfiguration(config);
@@ -213,7 +231,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     // See if the user has cancelled the build
     checkCancel();
 
-    boolean mustGenerate= false;
+    boolean mustGenerate= forceGeneration;
 
     final IFolder buildFolder = getBuildFolder();
     final File buildDir = buildFolder.getLocation().toFile();
@@ -224,9 +242,10 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
 //      System.out.println("DEL "+cacheFile);
       // tell the workspace about file removal
       buildFolder.getFile("CMakeCache.txt").refreshLocal(IResource.DEPTH_ZERO, monitor);
+      mustGenerate= true;
     }
     final File makefile = new File(buildDir, getMakefileName());
-    if (!buildDir.exists() || !cacheFile.exists() || !makefile.exists()) {
+    if (!mustGenerate && (!cacheFile.exists() || !makefile.exists())) {
       mustGenerate= true;
     }
 
@@ -237,13 +256,14 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     // Create the top-level directory for the build output
     createFolder(buildFolder);
     /*
-     * the make sure the directory REALLY exists in the file system. If it
-     * doesn't, the (buggy?) ICommandLauncher instance will create will cd to
+     * make sure the directory REALLY exists in the file system. If it
+     * doesn't, the (buggy?) ICommandLauncher instance will cd to
      * the current working directory, which is plainly wrong, NOTE:
-     * resource.refreshLocal() does not work here.
+     * resource.refreshLocal() does not seem to work here.
      */
     buildDir.mkdirs();
 
+    updateMonitor("Execute CMake for " + project.getName());
     // See if the user has cancelled the build
     checkCancel();
 
@@ -253,17 +273,11 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     // create makefile, assuming the first source directory contains a
     // CMakeLists.txt
     final ICSourceEntry srcEntry = srcEntries[0]; // project relative
-    updateMonitor("Execute CMake for " + project.getName());
     try {
       final ConsoleOutputStream cis = console.getInfoStream();
-      cis.write(SimpleDateFormat.getTimeInstance().format(new Date()).getBytes());
-      cis.write(" Buildscript generation: ".getBytes());
-      cis.write(project.getName().getBytes());
-      cis.write("::".getBytes());
-      cis.write(config.getName().getBytes());
-      cis.write(" in ".getBytes());
-      cis.write(buildDir.getAbsolutePath().getBytes());
-      cis.write("\n".getBytes());
+      String msg = String.format("%tT Buildscript generation: %s::%s in %s\n", startDate, project.getName(),
+          config.getName(), buildDir.getAbsolutePath());
+      cis.write(msg.getBytes());
     } catch (IOException ignore) {
     }
     final IPath srcPath = srcEntry.getFullPath();
@@ -280,6 +294,14 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       return status;
     }
 
+    try {
+      final ConsoleOutputStream cis = console.getInfoStream();
+      Date endDate = new Date();
+      String msg = String.format("%tT Buildscript generation finished (took %d ms)\n", endDate,
+          endDate.getTime() - startDate.getTime());
+      cis.write(msg.getBytes());
+    } catch (IOException ignore) {
+    }
     return new MultiStatus(Activator.PLUGIN_ID, IStatus.OK, "", null);
   }
 
@@ -627,6 +649,22 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     } catch (CoreException ex) {
       // resource is not (yet) known by the workbench
       // ignore
+    }
+  }
+
+  private static class CMakeListsVisitor implements IResourceDeltaVisitor {
+    private boolean hasChanges = false;
+
+    public boolean visit(IResourceDelta delta) {
+      switch (delta.getKind()) {
+      case IResourceDelta.CHANGED:
+        IResource resource = delta.getResource();
+        if (resource.getType() == IResource.FILE && resource.getName().equals("CMakeLists.txt")) {
+          hasChanges= true;
+          return false;
+        }
+      }
+      return true;
     }
   }
 }

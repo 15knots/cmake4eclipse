@@ -156,7 +156,6 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
       Group gr = WidgetHelper.createGroup(usercomp, SWT.FILL, 2, "Build Behavior", 2);
 
       b_clearCache = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2, "Forc&e cmake to run with each build");
-      b_clearCache.setToolTipText("Useful if you are configuring a new project");
       b_clearCache.addListener(SWT.Selection, tsl);
     }
 
