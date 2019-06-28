@@ -63,7 +63,6 @@ There is a run configuration for eclipse to invoke maven `build cmake4eclipse` p
 ### Changes
 - Fix #116: CMake errors are not detected if a project is re-build.
 
-# Release Notes
 ## 1.15.0 (2019-05-16)
 ### Changes
 - Fix #96 and #108: Pass compiler flags that affect compiler built-ins detection to the compiler when detecting built-ins.
