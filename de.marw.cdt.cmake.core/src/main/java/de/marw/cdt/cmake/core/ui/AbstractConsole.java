@@ -27,7 +27,7 @@ public abstract class AbstractConsole implements IConsole{
   /**
    * Gets a console manager that is configured to the console`s display-name, the ID and icon.
    *
-   * @see org.eclipse.cdt.ui.CUIPlugin#getConsoleManager(String, String, URL)
+   * @see org.eclipse.cdt.ui.CUIPlugin#getConsoleManager(String, String)
    */
   protected abstract IBuildConsoleManager getConsoleManager();
 
