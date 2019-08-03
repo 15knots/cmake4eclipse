@@ -41,6 +41,10 @@ public enum BuiltinDetectionType {
    */
   CL,
   /**
+   * ARM C or C++ compiler: --list_macros for macros
+   */
+  ARMCC,
+  /**
    * detection of compiler built-ins is not support or not implemented yet
    */
   NONE;

@@ -68,7 +68,23 @@
 	<td>N/A</td>
 	<td>N/A</td>
 	</tr>
-	</tbody>
+      <tr>
+        <td>armclang</td>
+        <td>Arm</td>
+        <td>N/A</td>
+        <td>N/A</td>
+        <td>N/A</td>
+        <td>N/A</td>
+      </tr>
+      <tr>
+        <td>armcc</td>
+        <td>Arm</td>
+        <td>implemented</td>
+        <td>NYI</td>
+        <td>N/A</td>
+        <td>N/A</td>
+      </tr>
+    </tbody>
 	</table>
 	</p>
 	
@@ -113,7 +129,7 @@
 	<td>nvcc</td>
 	<td>NVidia</td>
 	<td><code>-std</code>, <code>--std</code>: tested</td>
-	<td>N/A??? <a href="#fw-help-icc">[6]</a></td>
+	<td>N/A??? <a href="#fw-help-test">[5]</a><a href="#fw-help-test2">[6]</a></td>
 	</tr>
 	</tbody>
 	</table>
@@ -122,11 +138,11 @@
 	Please note that for performance reasons, cmake4eclipse assumes that compiler built-ins
 	are the <strong>same for each source-file</strong> in a CMake project and built-ins detection is run only for the
 	first source-file.<br/>
-	In contast, CMake has commands like <code>add_compile_options</code>, <code>target_compile_features</code> and 
+	In contrast, CMake has commands like <code>add_compile_options</code>, <code>target_compile_features</code> and 
 	<code>target_compile_options</code> allowing you to specify the language standard and 
-	non-ntandard system include paths on a
+	non-standard system include paths on a
 	<strong>per-source-directory</strong> or <strong>per-artifact</strong> level. 
-	Hence the siytax highlighting may not always exactly reflect the built-ins specified on that levels.
+	Hence the syntax highlighting may not always exactly reflect the built-ins specified on that levels.
 	</p>
 	<p>Remarks:
 	<ul style="list-style-type:none">
@@ -136,12 +152,12 @@
 	running	on OSX is needed.</li>
 	<li id="fw-help-nvcc">[3] Help wanted! To implement this, the output of <code>nvcc -E -Xcompiler -P -Xcompiler -dD -Xcompiler -v emty.cu</code>
 	running	on OSX is needed.</li>
-	<li id="fw-help-icc">[4] Help wanted! To implement this, the output of <code>icc -EP -dM emty.c</code> 
+	<li id="fw-help-icc">[4] Help wanted! To implement this, the output of <code>icc -EP -dM empty.c</code> 
 	is needed.</li>
 	<li id="help-test">[5] If you can test it, please do so and report your findings on the 
 	<a href="http://groups.google.com/d/forum/cmake4eclipse-users">mailing-list</a> or on the
 	<a href="https://github.com/15knots/cmake4eclipse/issues">issue-tracker</a>.</li>
-	<li id="help-test">[6] If you know better, please do so and report your findings on the 
+	<li id="help-test2">[6] If you know better, please do so and report your findings on the 
 	<a href="http://groups.google.com/d/forum/cmake4eclipse-users">mailing-list</a> or on the
 	<a href="https://github.com/15knots/cmake4eclipse/issues">issue-tracker</a>.</li>
 	</ul>

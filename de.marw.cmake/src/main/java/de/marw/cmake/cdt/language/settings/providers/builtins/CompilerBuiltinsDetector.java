@@ -176,6 +176,7 @@ public class CompilerBuiltinsDetector {
     case GCC:
     case GCC_MAYBE:
     case NVCC:
+    case ARMCC:
       return new GccOutputProcessor(entries);
     // case ICC:
     // case CL:

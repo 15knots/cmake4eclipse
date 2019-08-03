@@ -343,6 +343,27 @@ class ToolArgumentParsers {
   }
 
   ////////////////////////////////////////////////////////////////////
+  /**
+   * A tool argument parser capable to parse a armcc-compiler system include path
+   * argument: {@code -Jdir}.
+   */
+  static class SystemIncludePath_armcc extends IncludePathGeneric implements IToolArgumentParser {
+    static final NameOptionMatcher[] optionMatchers = {
+        /* quoted directory */
+        new NameOptionMatcher("-J" + "([\"'])(.+?)\\1", 2),
+        /* unquoted directory */
+        new NameOptionMatcher("-J" + "([^\\s]+)", 1), };
+
+    /*-
+     * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgs(java.lang.String)
+     */
+    @Override
+    public int processArgument(IParseContext parseContext, IPath cwd, String argsLine) {
+      return processArgument(parseContext, cwd, argsLine, optionMatchers);
+    }
+  }
+
+  ////////////////////////////////////////////////////////////////////
   // POSIX compatible option parsers
   ////////////////////////////////////////////////////////////////////
   /**

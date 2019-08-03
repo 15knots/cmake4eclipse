@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Martin Weber.
+ * Copyright (c) 2017-2019 Martin Weber.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -132,6 +132,25 @@ class ParserDetection {
           new ResponseFileArgumentParsers.At(), BuiltinDetectionType.NVCC, nvcc_args);
       parserDetectors.add(new ParserDetector("nvcc", nvcc));
       parserDetectors.add(new ParserDetectorExt("nvcc", "exe", nvcc));
+    }
+
+    // ARM.com armclang compiler ====
+    {
+      final IToolArgumentParser[] armclang_args = { new ToolArgumentParsers.IncludePath_C_POSIX(),
+          new ToolArgumentParsers.MacroDefine_C_POSIX(), new ToolArgumentParsers.MacroUndefine_C_POSIX(), };
+      final ToolCommandlineParser armclang = new ToolCommandlineParser(null, new ResponseFileArgumentParsers.At(),
+          BuiltinDetectionType.NONE, armclang_args);
+      parserDetectors.add(new ParserDetector("armclang", armclang));
+      parserDetectors.add(new ParserDetectorExt("armclang", "exe", armclang));
+    }
+    // ARM.com armcc compiler ====
+    {
+      final IToolArgumentParser[] armcc_args = { new ToolArgumentParsers.IncludePath_C_POSIX(),
+          new ToolArgumentParsers.MacroDefine_C_POSIX(), new ToolArgumentParsers.MacroUndefine_C_POSIX(), };
+      final ToolCommandlineParser armclang = new ToolCommandlineParser(null, null,
+          BuiltinDetectionType.ARMCC, armcc_args);
+      parserDetectors.add(new ParserDetector("armcc", armclang));
+      parserDetectors.add(new ParserDetectorExt("armcc", "exe", armclang));
     }
 
     // add detectors for windows NTFS
