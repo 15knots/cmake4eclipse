@@ -116,6 +116,27 @@ public class ParserDetectionTest {
     assertEquals("C", "org.eclipse.cdt.core.gcc", result.getDetectorWithMethod().getDetector().getParser().getLanguageId());
   }
 
+  /**
+   * Test method for
+   * {@link de.marw.cmake.cdt.language.settings.providers.ParserDetection#determineDetector(String, String,boolean)}
+   * .
+   * <a href="https://wiki.osdev.org/Target_Triplet"/>
+   */
+  @Test
+  public void testDetermineParserForCommandline_armcc() {
+    ParserDetection.ParserDetectionResult result = ParserDetection.determineDetector("/usr/bin/armcc -C blah.c", null,
+        true);
+    assertNotNull(result);
+    // verify that we got a C parser: not possible, language depends on source file extension
+//    assertEquals("C", "org.eclipse.cdt.core.gcc", result.getDetectorWithMethod().getDetector().getParser().getLanguageId());
+
+    result = ParserDetection.determineDetector("/usr/bin/armcc.exe -C blah.c", null,
+        true);
+    assertNotNull(result);
+    // verify that we got a C parser: not possible, language depends on source file extension
+//    assertEquals("C", "org.eclipse.cdt.core.gcc", result.getDetectorWithMethod().getDetector().getParser().getLanguageId());
+  }
+
   @Test
   public void testDetermineParserForCommandline_withVersion() {
     final String versionSuffixRegex = "-?\\d+(\\.\\d+)*";

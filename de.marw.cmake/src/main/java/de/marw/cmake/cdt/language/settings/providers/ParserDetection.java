@@ -146,11 +146,12 @@ class ParserDetection {
     // ARM.com armcc compiler ====
     {
       final IToolArgumentParser[] armcc_args = { new ToolArgumentParsers.IncludePath_C_POSIX(),
-          new ToolArgumentParsers.MacroDefine_C_POSIX(), new ToolArgumentParsers.MacroUndefine_C_POSIX(), };
-      final ToolCommandlineParser armclang = new ToolCommandlineParser(null, null,
+          new ToolArgumentParsers.MacroDefine_C_POSIX(), new ToolArgumentParsers.MacroUndefine_C_POSIX(),
+          new ToolArgumentParsers.SystemIncludePath_armcc() };
+      final ToolCommandlineParser armcc = new ToolCommandlineParser(null, null,
           BuiltinDetectionType.ARMCC, armcc_args);
-      parserDetectors.add(new ParserDetector("armcc", armclang));
-      parserDetectors.add(new ParserDetectorExt("armcc", "exe", armclang));
+      parserDetectors.add(new ParserDetector("armcc", armcc));
+      parserDetectors.add(new ParserDetectorExt("armcc", "exe", armcc));
     }
 
     // add detectors for windows NTFS
