@@ -329,6 +329,10 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
               }
             } else {
               // no matching parser found
+              if (determineLanguageId(files[0]) == null) {
+                // do not complain if source file is a fortran, assembler or other one we do not care for
+                return;
+              }
               String message = "No parser for command '" + cmdLine + "'. " + WORKBENCH_WILL_NOT_KNOW_ALL_MSG;
               createMarker(jsonFile, message);
             }
