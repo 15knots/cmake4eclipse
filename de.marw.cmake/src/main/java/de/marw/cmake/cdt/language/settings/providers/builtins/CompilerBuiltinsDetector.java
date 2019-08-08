@@ -154,7 +154,7 @@ public class CompilerBuiltinsDetector {
         final int exitValue = proc.exitValue();
         if (exitValue != 0 && !silent) {
           // compiler had errors...
-          String errMsg = String.format("%1$s exited with status %2$d.", builtinDetctionArgs.get(0), exitValue);
+          String errMsg = String.format("%1$s exited with status %2$d.", command, exitValue);
           createMarker(errMsg);
         }
       }
