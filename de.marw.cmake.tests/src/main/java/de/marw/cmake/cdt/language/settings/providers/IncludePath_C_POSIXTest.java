@@ -191,5 +191,38 @@ public class IncludePath_C_POSIXTest {
     assertEquals("kind", ICSettingEntry.INCLUDE_PATH, parsed.getKind());
     String absPath = cwd.append(name).toString();
     assertEquals("name", absPath, parsed.getName());
-  }
+
+    name = (new Path("a\\relative\\Include\\Path")).toOSString();
+    cwd= new Path("\\compiler\\working\\dir");
+    entries = new ParseContext();
+    assertEquals(2 + name.length(),
+        testee.processArgument(entries, cwd, "-I" + name + more));
+    assertEquals("#entries", 1, entries.getSettingEntries().size());
+    parsed = entries.getSettingEntries().get(0);
+    assertEquals("kind", ICSettingEntry.INCLUDE_PATH, parsed.getKind());
+    absPath = cwd.append(name).toString();
+    assertEquals("name", absPath, parsed.getName());
+
+    name = (new Path("../../src/Include/Path")).toOSString();
+    cwd= new Path("/compiler/working/dir");
+    entries = new ParseContext();
+    assertEquals(2 + name.length(),
+        testee.processArgument(entries, cwd, "-I" + name + more));
+    assertEquals("#entries", 1, entries.getSettingEntries().size());
+    parsed = entries.getSettingEntries().get(0);
+    assertEquals("kind", ICSettingEntry.INCLUDE_PATH, parsed.getKind());
+    absPath = cwd.append(name).toString();
+    assertEquals("name", absPath, parsed.getName());
+
+    name = (new Path("..\\..\\src\\Include\\Path")).toOSString();
+    cwd= new Path("\\compiler\\working\\dir");
+    entries = new ParseContext();
+    assertEquals(2 + name.length(),
+        testee.processArgument(entries, cwd, "-I" + name + more));
+    assertEquals("#entries", 1, entries.getSettingEntries().size());
+    parsed = entries.getSettingEntries().get(0);
+    assertEquals("kind", ICSettingEntry.INCLUDE_PATH, parsed.getKind());
+    absPath = cwd.append(name).toString();
+    assertEquals("name", absPath, parsed.getName());
+}
 }
