@@ -254,9 +254,13 @@ class ParserDetection {
    * See <a href="https://github.com/15knots/cmake4eclipse/issues/31">issue #31
    */
   private static String expandShortFileName(String commandLine) {
+    if (commandLine.indexOf('~', 6) == -1) {
+      // not a short file name
+      return commandLine;
+    }
     String command;
-    // split at first space character
     StringBuilder commandLine2 = new StringBuilder();
+    // split at first space character
     int idx = commandLine.indexOf(' ');
     if (idx != -1) {
       command = commandLine.substring(0, idx);
@@ -270,9 +274,9 @@ class ParserDetection {
       commandLine2.insert(0, command);
       return commandLine2.toString();
     } catch (IOException e) {
-      log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, "CompileCommandsJsonParser#expandShortFileName()", e));
+      log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, command, e));
     }
-    return null;
+    return commandLine;
   }
 
   /**
