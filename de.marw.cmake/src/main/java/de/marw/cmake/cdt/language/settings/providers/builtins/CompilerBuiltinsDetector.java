@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Martin Weber.
+ * Copyright (c) 2018-2019 Martin Weber.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,6 +37,7 @@ import org.eclipse.cdt.core.settings.model.ICLanguageSettingEntry;
 import org.eclipse.cdt.managedbuilder.core.ManagedBuildManager;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
@@ -135,8 +136,10 @@ public class CompilerBuiltinsDetector {
     launcher.setProject(project);
     launcher.showCommand(console != null);
     final NullProgressMonitor monitor = new NullProgressMonitor();
+    final IPath builderCWD = cfgDescription.getBuildSetting().getBuilderCWD();
+    IPath buildRoot = ResourcesPlugin.getWorkspace().getRoot().getFolder(builderCWD).getLocation();
     final Process proc = launcher.execute(new Path(command), argList.toArray(new String[argList.size()]), getEnvp(),
-        new Path("."), monitor);
+        buildRoot, monitor);
     if (proc != null) {
       try {
         // Close the input of the process since we will never write to it
@@ -209,6 +212,8 @@ public class CompilerBuiltinsDetector {
       return Arrays.asList("-EP", "-dM");
     case CL:
       return Arrays.asList("/nologo", "/EP", "/dM");
+    case ARMCC:
+      return Arrays.asList("--list_macros");
     default:
       return Arrays.asList();
     }
@@ -279,19 +284,18 @@ public class CompilerBuiltinsDetector {
    * Get path to source file which is the input for the compiler.
    *
    * @param languageId
-   *          - language ID.
+   *          the language ID.
    * @return full path to the source file.
    */
   private String getInputFile(String languageId) {
+    String specFileName = "detect_compiler_builtins";
     String specExt = getSpecFileExtension(languageId);
-    String ext = ""; //$NON-NLS-1$
     if (specExt != null) {
-      ext = '.' + specExt;
+      specFileName += '.' + specExt;
     }
 
-    String specFileName = "spec" + ext;
-    IPath workingLocation = CMakePlugin.getDefault().getStateLocation();
-    IPath fileLocation = workingLocation.append(specFileName);
+    final IPath builderCWD = cfgDescription.getBuildSetting().getBuilderCWD();
+    IPath fileLocation = ResourcesPlugin.getWorkspace().getRoot().getFolder(builderCWD).getLocation().append(specFileName);
 
     File specFile = new java.io.File(fileLocation.toOSString());
     if (!specFile.exists()) {
@@ -300,7 +304,7 @@ public class CompilerBuiltinsDetector {
         specFile.createNewFile();
       } catch (IOException e) {
         CMakePlugin.getDefault().getLog()
-            .log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, "registerListener()", e));
+            .log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, "getInputFile()", e));
       }
     }
 
