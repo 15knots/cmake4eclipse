@@ -59,6 +59,11 @@ There is a run configuration for eclipse to invoke maven `build cmake4eclipse` p
 
 ---
 # Release Notes
+## 1.15.2 (2019-09-07)
+### Changes
+- make short file name expansion on windows more robust, log file-name on error.
+- fix IndexOutOfBoundsException during built-ins detection.
+
 ## 1.15.1 (2019-07-01)
 ### Changes
 - Fix #116: CMake errors are not detected if a project is re-build.
