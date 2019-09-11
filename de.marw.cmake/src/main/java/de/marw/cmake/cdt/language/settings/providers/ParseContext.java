@@ -15,6 +15,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.cdt.core.settings.model.ICLanguageSettingEntry;
+import org.eclipse.core.runtime.Platform;
+
+import de.marw.cmake.CMakePlugin;
 
 /**
  * Default implementation of IParseContext.
@@ -22,11 +25,15 @@ import org.eclipse.cdt.core.settings.model.ICLanguageSettingEntry;
  * @author Martin Weber
  */
 class ParseContext implements IToolArgumentParser.IParseContext, IToolCommandlineParser.IResult {
+  private static final boolean DEBUG = Boolean
+      .parseBoolean(Platform.getDebugOption(CMakePlugin.PLUGIN_ID + "/CECC/entries"));
   private final List<ICLanguageSettingEntry> entries = new ArrayList<>();
   private final List<String> args = new ArrayList<>();
 
   @Override
   public void addSettingEntry(ICLanguageSettingEntry entry) {
+    if (DEBUG)
+      System.out.printf("    Added entry: %s%n", entry);
     entries.add(entry);
   }
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2016 Martin Weber.
+ * Copyright (c) 2016-2019 Martin Weber.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,7 +14,9 @@ import java.util.Arrays;
 import java.util.Objects;
 
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Platform;
 
+import de.marw.cmake.CMakePlugin;
 import de.marw.cmake.cdt.language.settings.providers.builtins.BuiltinDetectionType;
 
 /**
@@ -24,6 +26,8 @@ import de.marw.cmake.cdt.language.settings.providers.builtins.BuiltinDetectionTy
  * @author Martin Weber
  */
 class ToolCommandlineParser implements IToolCommandlineParser {
+  private static final boolean DEBUG = Boolean
+      .parseBoolean(Platform.getDebugOption(CMakePlugin.PLUGIN_ID + "/CECC/args"));
 
   private final IToolArgumentParser[] argumentParsers;
   private final String languageID;
@@ -139,18 +143,29 @@ class ToolCommandlineParser implements IToolCommandlineParser {
         int consumed;
         // parse with first parser that can handle the first argument on the
         // command-line
+        if (DEBUG)
+          System.out.printf(">> Looking up parser for argument '%s ...'%n", args.substring(0, Math.min(50, args.length())));
         for (IToolArgumentParser tap : argumentParsers) {
+          if (DEBUG)
+            System.out.printf("   Trying parser %s%n", tap.getClass().getSimpleName());
           consumed = tap.processArgument(result, cwd, args);
           if (consumed > 0) {
+            if (DEBUG)
+              System.out.printf("<< PARSED ARGUMENT '%s'%n", args.substring(0, consumed));
             args = args.substring(consumed);
             argParsed = true;
+            break;
           }
         }
 
         // try response file
-        if (responseFileArgumentParser != null) {
+        if (!argParsed && responseFileArgumentParser != null) {
+          if (DEBUG)
+            System.out.printf("   Trying parser %s%n", responseFileArgumentParser.getClass().getSimpleName());
           consumed = responseFileArgumentParser.process(this, args);
           if (consumed > 0) {
+            if (DEBUG)
+              System.out.printf("<< PARSED ARGUMENT '%s'%n", args.substring(0, consumed));
             args = args.substring(consumed);
             argParsed = true;
           }
@@ -158,6 +173,9 @@ class ToolCommandlineParser implements IToolCommandlineParser {
         if (!argParsed && !args.isEmpty()) {
           // tried all parsers, argument is still not parsed,
           // skip argument
+          if (DEBUG)
+            System.out.printf("<< IGNORING ARGUMENT, no parser found for it: '%s ...'%n",
+                args.substring(0, Math.min(50, args.length())));
           consumed = skipArgument(args);
           if (consumed > 0) {
             args = args.substring(consumed);

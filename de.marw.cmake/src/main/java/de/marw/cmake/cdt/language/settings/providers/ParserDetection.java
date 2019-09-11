@@ -19,6 +19,7 @@ import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 
 import de.marw.cmake.CMakePlugin;
@@ -33,6 +34,8 @@ import de.marw.cmake.cdt.language.settings.providers.builtins.BuiltinDetectionTy
  */
 class ParserDetection {
   private static final ILog log = CMakePlugin.getDefault().getLog();
+  private static final boolean DEBUG_PARSER_DETECTION = Boolean
+      .parseBoolean(Platform.getDebugOption(CMakePlugin.PLUGIN_ID + "/CECC/parser"));
 
   /**
    * tool detectors and their tool option parsers for each tool of interest that
@@ -189,6 +192,10 @@ class ParserDetection {
   public static ParserDetectionResult determineDetector(String line, String versionSuffixRegex,
       boolean tryWindowsDectors) {
     ParserDetectionResult result;
+    if (DEBUG_PARSER_DETECTION) {
+      System.out.printf("> Command-line '%s'%n", line);
+      System.out.printf("> Looking up detector for command '%s ...'%n", line.substring(0, Math.min(40, line.length())));
+    }
     // try default detectors
     result = determineDetector(line, parserDetectors, versionSuffixRegex);
     if (result == null && tryWindowsDectors) {
@@ -203,6 +210,12 @@ class ParserDetection {
           result = determineDetector(shortPathExpanded, parserDetectors, versionSuffixRegex);
         }
       }
+    }
+    if (result != null) {
+      if (DEBUG_PARSER_DETECTION)
+        System.out.printf("< Found detector for command '%s': %s (%s)%n", result.getCommandLine().getCommand(),
+            result.getDetectorWithMethod().getDetector().getParser().getClass().getSimpleName(),
+            result.getDetectorWithMethod().getHow());
     }
     return result;
   }
@@ -229,6 +242,9 @@ class ParserDetection {
     MatchResult cmdline;
     // try basenames
     for (ParserDetector pd : detectors) {
+      if (DEBUG_PARSER_DETECTION)
+        System.out.printf("  Trying detector %s (%s)%n", pd.getParser().getClass().getSimpleName(),
+            DetectorWithMethod.DetectionMethod.BASENAME);
       if ((cmdline = pd.basenameMatches(commandLine)) != null) {
         return new ParserDetectionResult(new DetectorWithMethod(pd, DetectorWithMethod.DetectionMethod.BASENAME),
             cmdline);
@@ -237,6 +253,8 @@ class ParserDetection {
     if (versionSuffixRegex != null) {
       // try with version pattern
       for (ParserDetector pd : detectors) {
+        if (DEBUG_PARSER_DETECTION)
+          System.out.printf("  Trying detector %s (%s)%n", pd.getParser().getClass().getSimpleName(), DetectorWithMethod.DetectionMethod.WITH_VERSION);
         if ((cmdline = pd.basenameWithVersionMatches(commandLine, versionSuffixRegex)) != null) {
           return new ParserDetectionResult(new DetectorWithMethod(pd, DetectorWithMethod.DetectionMethod.WITH_VERSION),
               cmdline);
@@ -245,19 +263,27 @@ class ParserDetection {
     }
     // try with extension
     for (ParserDetector pd : detectors) {
-      if (pd instanceof ParserDetectorExt
-          && (cmdline = ((ParserDetectorExt) pd).basenameWithExtensionMatches(commandLine)) != null) {
-        return new ParserDetectionResult(new DetectorWithMethod(pd, DetectorWithMethod.DetectionMethod.WITH_EXTENSION),
-            cmdline);
+      if (pd instanceof ParserDetectorExt) {
+        if (DEBUG_PARSER_DETECTION)
+          System.out.printf("  Trying detector %s (%s)%n",  pd.getParser().getClass().getSimpleName(), DetectorWithMethod.DetectionMethod.WITH_EXTENSION);
+        if ((cmdline = ((ParserDetectorExt) pd).basenameWithExtensionMatches(commandLine)) != null) {
+          return new ParserDetectionResult(
+              new DetectorWithMethod(pd, DetectorWithMethod.DetectionMethod.WITH_EXTENSION), cmdline);
+        }
       }
     }
     if (versionSuffixRegex != null) {
       // try with extension and version
       for (ParserDetector pd : detectors) {
-        if (pd instanceof ParserDetectorExt && (cmdline = ((ParserDetectorExt) pd)
-            .basenameWithVersionAndExtensionMatches(commandLine, versionSuffixRegex)) != null) {
-          return new ParserDetectionResult(
-              new DetectorWithMethod(pd, DetectorWithMethod.DetectionMethod.WITH_VERSION_EXTENSION), cmdline);
+        if (pd instanceof ParserDetectorExt) {
+          if (DEBUG_PARSER_DETECTION)
+            System.out.printf("  Trying detector %s (%s)%n", pd.getParser().getClass().getSimpleName() + " ("
+                + DetectorWithMethod.DetectionMethod.WITH_VERSION_EXTENSION);
+          if ((cmdline = ((ParserDetectorExt) pd)
+              .basenameWithVersionAndExtensionMatches(commandLine, versionSuffixRegex)) != null) {
+            return new ParserDetectionResult(
+                new DetectorWithMethod(pd, DetectorWithMethod.DetectionMethod.WITH_VERSION_EXTENSION), cmdline);
+          }
         }
       }
     }

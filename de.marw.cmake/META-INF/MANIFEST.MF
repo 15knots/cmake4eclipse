@@ -40,4 +40,5 @@ Import-Package: de.marw.cdt.cmake.core.cmakecache,
  org.osgi.framework
 Bundle-Activator: de.marw.cmake.CMakePlugin
 Export-Package: de.marw.cmake.cdt.language.settings.providers
-Require-Bundle: org.eclipse.ui.workbench;bundle-version="3.8.0"
+Require-Bundle: org.eclipse.ui.workbench;bundle-version="3.8.0",
+ org.eclipse.ui.trace

@@ -55,6 +55,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jetty.util.ajax.JSON;
 import org.eclipse.swt.widgets.Display;
@@ -682,6 +683,8 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
   // inner classes
   ////////////////////////////////////////////////////////////////////
   private static class TimestampedLanguageSettingsStorage extends LanguageSettingsStorage {
+    private static final boolean DEBUG = Boolean
+        .parseBoolean(Platform.getDebugOption(CMakePlugin.PLUGIN_ID + "/CECC/indexer-entries"));
     /** cached file modification time-stamp of last parse */
     long lastModified = 0;
 
@@ -702,6 +705,11 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
     private void addSettingEntries(IResource rc, String languageId, List<ICLanguageSettingEntry> entries) {
       if (entries.size() == 0)
         return;
+      if (DEBUG) {
+        System.out.printf("ADDING %d entries for language %s, resource %s, ...%n", entries.size(), languageId, rc);
+        entries.stream().sorted((o1, o2) -> o1.getName().compareTo(o2.getName()))
+            .forEach(e -> System.out.printf("  %s%n", e));
+      }
       /*
        * compile_commands.json holds entries per-file only and does not contain per-project or per-folder entries. So we
        * map the latter as project entries (=> null) to make the UI show the include directories we detected.
