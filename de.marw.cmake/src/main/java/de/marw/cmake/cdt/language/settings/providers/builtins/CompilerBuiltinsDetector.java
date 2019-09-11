@@ -301,6 +301,7 @@ public class CompilerBuiltinsDetector {
     if (!specFile.exists()) {
       try {
         // In the typical case it is sufficient to have an empty file.
+        specFile.getParentFile().mkdirs(); // no build ran yet, must create dirs
         specFile.createNewFile();
       } catch (IOException e) {
         CMakePlugin.getDefault().getLog()
