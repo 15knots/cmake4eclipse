@@ -3,6 +3,14 @@
 <head>
 <meta charset="UTF-8"/>
 <title>Available Language Settings Providers</title>
+<style>
+table, th, td {
+	border: 1px solid black;
+}
+th, td {
+	padding: 2pt;
+}
+</style>
 </head>
 <body>
 	<h1>Preprocessor Include Paths, Macros</h1>
@@ -22,6 +30,151 @@
 	Parsing is done rarely, since the internal cache is invalidated only when the
 	file`s time-stamp is newer, so it should be reasonably fast.
 	</p>
+	<p>The following table lists the compiler executables supported by the CMAKE_EXPORT_COMPILE_COMMANDS Parser.
+	<table id="overview_table" style="border-collapse:collapse">
+	<thead>
+	<tr>
+	<th>Compiler</th>
+	<th>Vendor/Standard</th>
+	<th>Language</th>
+	<th>Macros</th>
+	<th>Include directories</th>
+	<th>System include<br/>directories</th>
+	<th>Compiler executables</th>
+	</tr>
+	</thead>
+	<tbody>
+	<tr>
+	<td>gcc</td>
+	<td>GNU Project</td>
+	<td>C</td>
+	<td>Yes</td>
+	<td>Yes</td>
+	<td>Yes</td>
+	<td>cc, cc.exe, gcc, gcc.exe, <a href="#fw-gcc-cross">".+-gcc"</a>, <a href="#fw-gcc-cross">".+-gcc.exe"</a></td>
+	</tr>
+	<tr>
+	<td>g++</td>
+	<td>GNU Project</td>
+	<td>C++</td>
+	<td>Yes</td>
+	<td>Yes</td>
+	<td>Yes</td>
+	<td>c++, c++.exe, g++, g++.exe, <a href="#fw-g++-cross">".+-g\+\+"</a>, <a href="#fw-g++-cross">".+-g\+\+.exe"</a></td>
+	</tr>
+	<tr>
+	<td>clang</td>
+	<td>LLVM Project</td>
+	<td>C</td>
+	<td>Yes</td>
+	<td>Yes</td>
+	<td>Yes</td>
+	<td>clang, clang.exe</td>
+	</tr>
+	<tr>
+	<td>clang++</td>
+	<td>LLVM Project</td>
+	<td>C++</td>
+	<td>Yes</td>
+	<td>Yes</td>
+	<td>Yes</td>
+	<td>clang++, clang++.exe</td>
+	</tr>
+	<tr>
+	<td>cc</td>
+	<td>POSIX</td>
+	<td>C</td>
+	<td>Yes</td>
+	<td>Yes</td>
+	<td>No</td>
+	<td>cc, cc.exe</td>
+	</tr>
+	<tr>
+	<td>c++</td>
+	<td>POSIX</td>
+	<td>C++</td>
+	<td>Yes</td>
+	<td>Yes</td>
+	<td>No</td>
+	<td>c++, c++.exe</td>
+	</tr>
+	<tr>
+	<td>nvcc</td>
+	<td>NVidia</td>
+	<td>CUDA</td>
+	<td>Yes</td>
+	<td>Yes</td>
+	<td>Yes</td>
+	<td>nvcc, nvcc.exe</td>
+	</tr>
+	<tr>
+	<td>icc</td>
+	<td>Intel</td>
+	<td>C</td>
+	<td>Yes</td>
+	<td>Yes</td>
+	<td>No</td>
+	<td>icc, icl</td>
+	</tr>
+	<tr>
+	<td>icpc</td>
+	<td>Intel</td>
+	<td>C++</td>
+	<td>Yes</td>
+	<td>Yes</td>
+	<td>No</td>
+	<td>icpc, icl++</td>
+	</tr>
+	<tr>
+	<td>icl</td>
+	<td>Intel</td>
+	<td>C/C++</td>
+	<td>Yes</td>
+	<td>Yes</td>
+	<td>No</td>
+	<td>icl.exe</td>
+	</tr>
+	<tr>
+	<td>cl</td>
+	<td>Microsoft</td>
+	<td>C/C++</td>
+	<td>Yes</td>
+	<td>Yes</td>
+	<td>No</td>
+	<td>cl.exe</td>
+	</tr>
+      <tr>
+        <td>armclang</td>
+        <td>ARM</td>
+	<td>C/C++</td>
+	<td>Yes</td>
+	<td>Yes</td>
+	<td>No</td>
+	<td>armclang, armclang.exe</td>
+      </tr>
+      <tr>
+        <td>armcc</td>
+        <td>ARM</td>
+	<td>C/C++</td>
+	<td>Yes</td>
+	<td>Yes</td>
+	<td>Yes</td>
+	<td>armcc, armcc.exe</td>
+      </tr>
+    </tbody>
+	</table>
+	</p>
+	<p>Remarks:
+	<ul style="list-style-type:none">
+	<li id="fw-help-gcc-cross">".+-gcc" This representes a Java regular expression that also matches
+	a <a href="https://wiki.osdev.org/Target_Triplet#Structure">target triplet</a>, thus allowing to work with cross-compilers
+	named like e.g. <code>arm-none-eabi-gcc</code>.</li>
+	<li id="fw-help-gcc-cross">".+-g\+\+" This representes a Java regular expression that also matches
+	a <a href="https://wiki.osdev.org/Target_Triplet#Structure">target triplet</a>, thus allowing to work with cross-compilers
+	named like e.g. <code>arm-none-eabi-g++</code>.</li>
+	</ul>
+	</p>
+
 	<h3>CMAKE_EXPORT_COMPILE_COMMANDS Compiler Built-ins</h3>
 	<p>This provider works similar to <q>CMAKE_EXPORT_COMPILE_COMMANDS Parser</q>, but invokes 
 	the compiler with arguments to get the include paths and preprocessor macros 
