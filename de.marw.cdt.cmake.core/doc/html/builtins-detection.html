@@ -3,6 +3,17 @@
 <head>
 <meta charset="UTF-8"/>
 <title>Compiler Built-ins Detection Support Overview</title>
+<style>
+table,
+th,
+td {
+	border: 1px solid black;
+}
+th,
+td {
+	padding: 2pt;
+}
+</style>
 </head>
 <body>
 	<h1>Compiler Built-ins Detection Support Overview</h1>
@@ -16,7 +27,7 @@
 	
 	<h2>Invariant Built-ins Detection Support</h2>
 	<p>The following table shows the compilers and their supported features detected.
-	<table id="overview_table" style="border:1px solid black; border-collapse:separate; padding:3px">
+	<table id="overview_table" style="border-collapse:collapse">
 	<thead>
 	<tr>
 	<th>Compiler</th>
@@ -79,8 +90,8 @@
       <tr>
         <td>armcc</td>
         <td>Arm</td>
-        <td>implemented</td>
-        <td>NYI</td>
+        <td>tested</td>
+        <td>N/A</td>
         <td>N/A</td>
         <td>N/A</td>
       </tr>
@@ -100,10 +111,10 @@
 
 	<h2>Enhanced Built-ins Detection Support</h2>
 	<p>Some compilers, mainly those of the GNU Compiler Collection and derivatives, report different built-ins
-	depending on the arguments passed to the compiler. These arguments can be used to specify a non-default language level
-	or to specify a non-standard default system include directories.
+	depending on the arguments passed to the compiler. These arguments specify a non-default language level
+	or specify non-standard default system include directories.
 	The table below shows an overview of the supported compilers and the recognized command-line options.
-	<table  id="overview_table_eh" style="border:1px solid black; border-collapse:separate; padding:3px">
+	<table  id="overview_table_eh" style="border-collapse:collapse">
 	<thead>
 	<tr>
 	<th>Compiler</th>
