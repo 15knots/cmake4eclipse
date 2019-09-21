@@ -59,6 +59,12 @@ There is a run configuration for eclipse to invoke maven `build cmake4eclipse` p
 
 ---
 # Release Notes
+## 1.16.0 (2019-09-21)
+### Changes
+- Close #117: CMAKE_EXPORT_COMPILE_COMMANDS Parser: support ARM compiler toolchain.
+- Make windows short file name expansion more robust.
+- Add tracing support.
+
 ## 1.15.2 (2019-09-07)
 ### Changes
 - make short file name expansion on windows more robust, log file-name on error.
