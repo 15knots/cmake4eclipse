@@ -93,10 +93,18 @@ class ParserDetection {
       parserDetectors.add(new ParserDetectorExt("g\\+\\+", "exe", gxx));
       parserDetectors.add(new ParserDetector("clang\\+\\+", gxx));
       parserDetectors.add(new ParserDetectorExt("clang\\+\\+", "exe", gxx));
-      // cross compilers, e.g. arm-none-eabi-gcc ====
+      // cross compilers, e.g. arm-none-eabi-g++ ====
       parserDetectors.add(new ParserDetector(".+-g\\+\\+", gxx));
       parserDetectors.add(new ParserDetectorExt(".+-g\\+\\+", "exe", gxx));
     }
+    {
+      // cross compilers, e.g. arm-none-eabi-c++ ====
+      final ToolCommandlineParser cxx = new ToolCommandlineParser("org.eclipse.cdt.core.g++",
+          new ResponseFileArgumentParsers.At(), BuiltinDetectionType.GCC_MAYBE, gcc_args);
+      parserDetectors.add(new ParserDetector(".+-c\\+\\+", cxx));
+      parserDetectors.add(new ParserDetectorExt(".+-c\\+\\+", "exe", cxx));
+    }
+
     // ms C + C++ compiler ==========================================
     {
       final IToolArgumentParser[] cl_cc_args = { new ToolArgumentParsers.IncludePath_C_CL(),
