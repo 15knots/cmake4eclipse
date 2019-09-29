@@ -332,17 +332,49 @@ class ParserDetection {
    * @author Martin Weber
    */
   static class ParserDetector {
-    /** pattern part that matches linux filesystem paths */
-    protected static final String REGEX_CMD_HEAD = "^(.*?/)??(";
-    /** pattern part that matches win32 filesystem paths */
-    protected static final String REGEX_CMD_HEAD_WIN = "^(.*?" + Pattern.quote("\\") + ")??(";
-    protected static final String REGEX_CMD_TAIL = ")\\s";
+    /** start of the named capturing group that holds the command name (w/o quotes, if any) */
+    protected static final String REGEX_GROUP_CMD = "cmd";
+
+    /** pattern part that matches file-system paths with forward slashes */
+    protected static final String REGEX_CMD_PATH_SLASH = "\\A(?<" + REGEX_GROUP_CMD
+        + ">"
+        + "(.*?/)??(";
+    /** end of pattern part that matches file-system paths with forward slashes */
+    protected static final String REGEX_CMD_PATH_SLASH_END = "))\\s";
+    /** pattern part that matches file-system paths with forward slashes and is in quotes */
+    protected static final String REGEX_CMD_PATH_SLASH_QUOTE = "\\A"
+        + "([\"'])"
+        + "(?<" + REGEX_GROUP_CMD
+        + ">"
+        + "(.*?/)??(";
+    /** end of pattern part that matches file-system paths with forward slashes and is in quotes */
+    protected static final String REGEX_CMD_PATH_SLASH_QUOTE_END = "))\\1\\s";
+
+    /** pattern part that matches win32 file-system paths */
+    protected static final String REGEX_CMD_PATH_BSLASH =
+        "\\A(?<" + REGEX_GROUP_CMD
+        + ">"
+        + "(.*?"
+        + Pattern.quote("\\")
+        + ")??(";
+    /** end of pattern part that matches win32 file-system paths */
+    protected static final String REGEX_CMD_PATH_BSLASH_END = "))\\s";
+    /** pattern part that matches file-system paths with back slashes and is in quotes */
+    protected static final String REGEX_CMD_PATH_BSLASH_QUOTE = "\\A"
+        + "([\"'])"
+        + "(?<" + REGEX_GROUP_CMD
+        + ">"
+        + "(.*?"
+        + Pattern.quote("\\")
+        + ")??(";
+    /** end of pattern part that matches file-system paths with back slashes and is in quotes */
+    protected static final String REGEX_CMD_PATH_BSLASH_QUOTE_END = "))\\1\\s";
 
     /**
      * the Matcher that matches the name of the tool (including its path, BUT
      * WITHOUT its filename extension) on a given command-line
      */
-    private final Matcher toolNameMatcher;
+    private final Matcher[] toolNameMatcher;
     /**
      * the corresponding parser for the tool arguments
      */
@@ -374,21 +406,25 @@ class ParserDetection {
      * Creates a {@code ParserDetector}.
      *
      * @param basenameRegex
-     *          a regular expression that matches the base name of the tool to
-     *          detect
+     *          a regular expression that matches the base name of the tool to detect
      * @param matchBackslash
-     *          whether to match a Linux path (which has a forward slash) or a
-     *          Windows path with backSlashes.
+     *          whether to match a Linux path (which has a forward slash) or a Windows path with backSlashes.
      * @param parser
      *          the corresponding parser for the tool arguments
      */
     public ParserDetector(String basenameRegex, boolean matchBackslash, IToolCommandlineParser parser) {
-      this.toolNameMatcher = matchBackslash
-          ? Pattern.compile(REGEX_CMD_HEAD_WIN + basenameRegex + REGEX_CMD_TAIL).matcher("")
-          : Pattern.compile(REGEX_CMD_HEAD + basenameRegex + REGEX_CMD_TAIL).matcher("");
       this.basenameRegex = basenameRegex;
       this.parser = parser;
       this.matchBackslash = matchBackslash;
+      if (matchBackslash) {
+        this.toolNameMatcher = new Matcher[] {
+            Pattern.compile(REGEX_CMD_PATH_BSLASH_QUOTE + basenameRegex + REGEX_CMD_PATH_BSLASH_QUOTE_END).matcher(""),
+            Pattern.compile(REGEX_CMD_PATH_BSLASH + basenameRegex + REGEX_CMD_PATH_BSLASH_END).matcher("") };
+      } else {
+        this.toolNameMatcher = new Matcher[] {
+            Pattern.compile(REGEX_CMD_PATH_SLASH_QUOTE + basenameRegex + REGEX_CMD_PATH_SLASH_QUOTE_END).matcher(""),
+            Pattern.compile(REGEX_CMD_PATH_SLASH + basenameRegex + REGEX_CMD_PATH_SLASH_END).matcher("") };
+      }
     }
 
     /**
@@ -413,7 +449,13 @@ class ParserDetection {
      *         MatchResult holding the de-composed command-line is returned.
      */
     public MatchResult basenameMatches(String commandLine) {
-      return matcherMatches(toolNameMatcher, commandLine);
+      for (Matcher matcher : toolNameMatcher) {
+        MatchResult result = matcherMatches(matcher, commandLine);
+        if (result != null) {
+          return result;
+        }
+      }
+      return null;
     }
 
     /**
@@ -433,8 +475,25 @@ class ParserDetection {
      *         MatchResult holding the de-composed command-line is returned.
      */
     public MatchResult basenameWithVersionMatches(String commandLine, String versionRegex) {
-      Matcher matcher = Pattern.compile(REGEX_CMD_HEAD + basenameRegex + versionRegex + REGEX_CMD_TAIL).matcher("");
-      return matcherMatches(matcher, commandLine);
+      Matcher[] toolNameMatchers;
+      final String regex = basenameRegex + versionRegex;
+      if (matchBackslash) {
+        toolNameMatchers = new Matcher[] {
+            Pattern.compile(REGEX_CMD_PATH_BSLASH_QUOTE + regex + REGEX_CMD_PATH_BSLASH_QUOTE_END).matcher(""),
+            Pattern.compile(REGEX_CMD_PATH_BSLASH + regex + REGEX_CMD_PATH_BSLASH_END).matcher("") };
+      } else {
+        toolNameMatchers = new Matcher[] {
+            Pattern.compile(REGEX_CMD_PATH_SLASH_QUOTE + regex + REGEX_CMD_PATH_SLASH_QUOTE_END).matcher(""),
+            Pattern.compile(REGEX_CMD_PATH_SLASH + regex + REGEX_CMD_PATH_SLASH_END).matcher("") };
+      }
+
+      for (Matcher matcher : toolNameMatchers) {
+        MatchResult result = matcherMatches(matcher, commandLine);
+        if (result != null) {
+          return result;
+        }
+      }
+      return null;
     }
 
     /**
@@ -455,8 +514,7 @@ class ParserDetection {
     protected final MatchResult matcherMatches(Matcher matcher, String commandLine) {
       matcher.reset(commandLine);
       if (matcher.lookingAt()) {
-        return new MatchResult(commandLine.substring(matcher.start(), matcher.end()).trim(),
-            commandLine.substring(matcher.end()));
+        return new MatchResult(matcher.group(REGEX_GROUP_CMD), commandLine.substring(matcher.end()));
       }
       return null;
     }
@@ -474,7 +532,7 @@ class ParserDetection {
      * the Matcher that matches the name of the tool (including its path AND its
      * filename extension) on a given command-line or {@code null}
      */
-    private final Matcher toolNameMatcherExt;
+    private final Matcher[] toolNameMatcherExt;
     private final String extensionRegex;
 
     /**
@@ -511,10 +569,18 @@ class ParserDetection {
     public ParserDetectorExt(String basenameRegex, boolean matchBackslash, String extensionRegex,
         IToolCommandlineParser parser) {
       super(basenameRegex, matchBackslash, parser);
-      String head = matchBackslash ? REGEX_CMD_HEAD_WIN : REGEX_CMD_HEAD;
-      this.toolNameMatcherExt = Pattern
-          .compile(head + basenameRegex + Pattern.quote(".") + extensionRegex + REGEX_CMD_TAIL).matcher("");
       this.extensionRegex = extensionRegex;
+
+      final String regex = basenameRegex + "\\." + extensionRegex;
+      if (matchBackslash) {
+        this.toolNameMatcherExt = new Matcher[] {
+            Pattern.compile(REGEX_CMD_PATH_BSLASH_QUOTE + regex + REGEX_CMD_PATH_BSLASH_QUOTE_END).matcher(""),
+            Pattern.compile(REGEX_CMD_PATH_BSLASH + regex + REGEX_CMD_PATH_BSLASH_END).matcher("") };
+      } else {
+        this.toolNameMatcherExt = new Matcher[] {
+            Pattern.compile(REGEX_CMD_PATH_SLASH_QUOTE + regex + REGEX_CMD_PATH_SLASH_QUOTE_END).matcher(""),
+            Pattern.compile(REGEX_CMD_PATH_SLASH + regex + REGEX_CMD_PATH_SLASH_END).matcher("") };
+      }
     }
 
     /**
@@ -529,7 +595,13 @@ class ParserDetection {
      *         MatchResult holding the de-composed command-line is returned.
      */
     public MatchResult basenameWithExtensionMatches(String commandLine) {
-      return matcherMatches(toolNameMatcherExt, commandLine);
+      for (Matcher matcher : toolNameMatcherExt) {
+        MatchResult result = matcherMatches(matcher, commandLine);
+        if (result != null) {
+          return result;
+        }
+      }
+      return null;
     }
 
     /**
@@ -549,13 +621,26 @@ class ParserDetection {
      *         MatchResult holding the de-composed command-line is returned.
      */
     public MatchResult basenameWithVersionAndExtensionMatches(String commandLine, String versionRegex) {
-      String head = matchBackslash ? REGEX_CMD_HEAD_WIN : REGEX_CMD_HEAD;
-      Matcher matcher = Pattern
-          .compile(head + basenameRegex + versionRegex + Pattern.quote(".") + extensionRegex + REGEX_CMD_TAIL)
-          .matcher("");
-      return matcherMatches(matcher, commandLine);
-    }
+      Matcher[] toolNameMatchers;
+      final String regex = basenameRegex + versionRegex + "\\." + extensionRegex ;
+      if (matchBackslash) {
+        toolNameMatchers = new Matcher[] {
+            Pattern.compile(REGEX_CMD_PATH_BSLASH_QUOTE + regex + REGEX_CMD_PATH_BSLASH_QUOTE_END).matcher(""),
+            Pattern.compile(REGEX_CMD_PATH_BSLASH + regex + REGEX_CMD_PATH_BSLASH_END).matcher("") };
+      } else {
+        toolNameMatchers = new Matcher[] {
+            Pattern.compile(REGEX_CMD_PATH_SLASH_QUOTE + regex + REGEX_CMD_PATH_SLASH_QUOTE_END).matcher(""),
+            Pattern.compile(REGEX_CMD_PATH_SLASH + regex + REGEX_CMD_PATH_SLASH_END).matcher("") };
+      }
 
+      for (Matcher matcher : toolNameMatchers) {
+        MatchResult result = matcherMatches(matcher, commandLine);
+        if (result != null) {
+          return result;
+        }
+      }
+      return null;
+    }
   }
 
   // has package scope for unittest purposes
@@ -617,10 +702,10 @@ class ParserDetection {
 
     /**
      * @param command
-     *          the command from the command-line, without the argument string
+     *          the command from the command-line, without the argument string. . If the command contains space
+     *          characters, the surrounding quotes must have been removed,
      * @param arguments
-     *          the remaining arguments from the command-line, without the
-     *          command
+     *          the remaining arguments from the command-line, without the command
      */
     public MatchResult(String command, String arguments) {
       this.command = command;
@@ -628,7 +713,8 @@ class ParserDetection {
     }
 
     /**
-     * Gets the command from the command-line, without the argument string.
+     * Gets the command from the command-line, without the argument string. If the command contains space characters,
+     * the surrounding quotes have been removed,
      */
     public String getCommand() {
       return this.command;

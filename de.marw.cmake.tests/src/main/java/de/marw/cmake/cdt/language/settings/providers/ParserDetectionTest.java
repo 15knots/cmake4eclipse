@@ -183,4 +183,32 @@ public class ParserDetectionTest {
     assertEquals("org.eclipse.cdt.core.g++", result.getDetectorWithMethod().getDetector().getParser().getLanguageId());
   }
 
+  @Test
+  public void testDetermineParserForCommandline_quoted() {
+    String more = " -DFoo=bar -C blah.c";
+
+    String name = "/us r/bi n/cc";
+    ParserDetection.ParserDetectionResult result = ParserDetection.determineDetector(
+        "\"" + name +"\"" +more, null, false);
+    assertNotNull(result);
+    assertEquals(name, result.getCommandLine().getCommand());
+
+    name = "C;/us r/bi n/cc";
+    result = ParserDetection.determineDetector(
+        "\"" + name +"\"" +more, null, false);
+    assertNotNull(result);
+    assertEquals(name, result.getCommandLine().getCommand());
+
+    name = "C;\\us r\\bi n\\cc";
+    result = ParserDetection.determineDetector(
+        "\"" + name +"\"" +more, null, true);
+    assertNotNull(result);
+    assertEquals(name, result.getCommandLine().getCommand());
+
+    name = "C;\\us r\\bi n\\cc.exe";
+    result = ParserDetection.determineDetector(
+        "\"" + name +"\"" +more, null, true);
+    assertNotNull(result);
+    assertEquals(name, result.getCommandLine().getCommand());
+}
 }
