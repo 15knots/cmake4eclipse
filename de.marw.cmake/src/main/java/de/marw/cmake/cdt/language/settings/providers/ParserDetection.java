@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -344,43 +345,30 @@ class ParserDetection {
     protected static final String REGEX_GROUP_CMD = "cmd";
 
     /** pattern part that matches file-system paths with forward slashes */
-    protected static final String REGEX_CMD_PATH_SLASH = "\\A(?<" + REGEX_GROUP_CMD
-        + ">"
-        + "(.*?/)??(";
+    protected static final String REGEX_CMD_PATH_SLASH = String.format(Locale.ROOT, "\\A(?<%s>(.*?%s)??(",
+        REGEX_GROUP_CMD, "/");
     /** end of pattern part that matches file-system paths with forward slashes */
     protected static final String REGEX_CMD_PATH_SLASH_END = "))\\s";
     /** pattern part that matches file-system paths with forward slashes and is in quotes */
-    protected static final String REGEX_CMD_PATH_SLASH_QUOTE = "\\A"
-        + "([\"'])"
-        + "(?<" + REGEX_GROUP_CMD
-        + ">"
-        + "(.*?/)??(";
+    protected static final String REGEX_CMD_PATH_SLASH_QUOTE = String.format(Locale.ROOT, "\\A([\"'])(?<%s>(.*?%s)??(",
+        REGEX_GROUP_CMD, "/");
     /** end of pattern part that matches file-system paths with forward slashes and is in quotes */
     protected static final String REGEX_CMD_PATH_SLASH_QUOTE_END = "))\\1\\s";
 
     /** pattern part that matches win32 file-system paths */
-    protected static final String REGEX_CMD_PATH_BSLASH =
-        "\\A(?<" + REGEX_GROUP_CMD
-        + ">"
-        + "(.*?"
-        + Pattern.quote("\\")
-        + ")??(";
+    protected static final String REGEX_CMD_PATH_BSLASH = String.format(Locale.ROOT, "\\A(?<%s>(.*?%s)??(",
+        REGEX_GROUP_CMD, Pattern.quote("\\"));
     /** end of pattern part that matches win32 file-system paths */
     protected static final String REGEX_CMD_PATH_BSLASH_END = "))\\s";
     /** pattern part that matches file-system paths with back slashes and is in quotes */
-    protected static final String REGEX_CMD_PATH_BSLASH_QUOTE = "\\A"
-        + "([\"'])"
-        + "(?<" + REGEX_GROUP_CMD
-        + ">"
-        + "(.*?"
-        + Pattern.quote("\\")
-        + ")??(";
+    protected static final String REGEX_CMD_PATH_BSLASH_QUOTE = String.format(Locale.ROOT, "\\A([\"'])(?<%s>(.*?%s)??(",
+        REGEX_GROUP_CMD, Pattern.quote("\\"));
     /** end of pattern part that matches file-system paths with back slashes and is in quotes */
     protected static final String REGEX_CMD_PATH_BSLASH_QUOTE_END = "))\\1\\s";
 
     /**
-     * the Matcher that matches the name of the tool (including its path, BUT
-     * WITHOUT its filename extension) on a given command-line
+     * the Matchers to match the name of the tool (including its path, BUT WITHOUT its filename extension) on a given
+     * command-line
      */
     private final Matcher[] toolNameMatcher;
     /**
@@ -424,14 +412,22 @@ class ParserDetection {
       this.basenameRegex = basenameRegex;
       this.parser = parser;
       this.matchBackslash = matchBackslash;
+
       if (matchBackslash) {
         this.toolNameMatcher = new Matcher[] {
-            Pattern.compile(REGEX_CMD_PATH_BSLASH_QUOTE + basenameRegex + REGEX_CMD_PATH_BSLASH_QUOTE_END).matcher(""),
-            Pattern.compile(REGEX_CMD_PATH_BSLASH + basenameRegex + REGEX_CMD_PATH_BSLASH_END).matcher("") };
+            Pattern.compile(String.format(Locale.ROOT, "%s%s%s", REGEX_CMD_PATH_BSLASH_QUOTE, basenameRegex,
+                REGEX_CMD_PATH_BSLASH_QUOTE_END)).matcher(""),
+            Pattern.compile(
+                String.format(Locale.ROOT, "%s%s%s", REGEX_CMD_PATH_BSLASH, basenameRegex, REGEX_CMD_PATH_BSLASH_END))
+                .matcher("") };
       } else {
         this.toolNameMatcher = new Matcher[] {
-            Pattern.compile(REGEX_CMD_PATH_SLASH_QUOTE + basenameRegex + REGEX_CMD_PATH_SLASH_QUOTE_END).matcher(""),
-            Pattern.compile(REGEX_CMD_PATH_SLASH + basenameRegex + REGEX_CMD_PATH_SLASH_END).matcher("") };
+            Pattern.compile(String.format(Locale.ROOT, "%s%s%s", REGEX_CMD_PATH_SLASH_QUOTE, basenameRegex,
+                REGEX_CMD_PATH_SLASH_QUOTE_END)).matcher(""),
+            Pattern
+                .compile(
+                    String.format(Locale.ROOT, "%s%s%s", REGEX_CMD_PATH_SLASH, basenameRegex, REGEX_CMD_PATH_SLASH_END))
+                .matcher("") };
       }
     }
 
@@ -484,15 +480,19 @@ class ParserDetection {
      */
     public MatchResult basenameWithVersionMatches(String commandLine, String versionRegex) {
       Matcher[] toolNameMatchers;
-      final String regex = basenameRegex + versionRegex;
+
       if (matchBackslash) {
         toolNameMatchers = new Matcher[] {
-            Pattern.compile(REGEX_CMD_PATH_BSLASH_QUOTE + regex + REGEX_CMD_PATH_BSLASH_QUOTE_END).matcher(""),
-            Pattern.compile(REGEX_CMD_PATH_BSLASH + regex + REGEX_CMD_PATH_BSLASH_END).matcher("") };
+            Pattern.compile(String.format(Locale.ROOT, "%s%s%s%s", REGEX_CMD_PATH_BSLASH_QUOTE, basenameRegex,
+                versionRegex, REGEX_CMD_PATH_BSLASH_QUOTE_END)).matcher(""),
+            Pattern.compile(String.format(Locale.ROOT, "%s%s%s%s", REGEX_CMD_PATH_BSLASH, basenameRegex, versionRegex,
+                REGEX_CMD_PATH_BSLASH_END)).matcher("") };
       } else {
         toolNameMatchers = new Matcher[] {
-            Pattern.compile(REGEX_CMD_PATH_SLASH_QUOTE + regex + REGEX_CMD_PATH_SLASH_QUOTE_END).matcher(""),
-            Pattern.compile(REGEX_CMD_PATH_SLASH + regex + REGEX_CMD_PATH_SLASH_END).matcher("") };
+            Pattern.compile(String.format(Locale.ROOT, "%s%s%s%s", REGEX_CMD_PATH_SLASH_QUOTE, basenameRegex,
+                versionRegex, REGEX_CMD_PATH_SLASH_QUOTE_END)).matcher(""),
+            Pattern.compile(String.format(Locale.ROOT, "%s%s%s%s", REGEX_CMD_PATH_SLASH, basenameRegex, versionRegex,
+                REGEX_CMD_PATH_SLASH_END)).matcher("") };
       }
 
       for (Matcher matcher : toolNameMatchers) {
@@ -579,15 +579,18 @@ class ParserDetection {
       super(basenameRegex, matchBackslash, parser);
       this.extensionRegex = extensionRegex;
 
-      final String regex = basenameRegex + "\\." + extensionRegex;
       if (matchBackslash) {
         this.toolNameMatcherExt = new Matcher[] {
-            Pattern.compile(REGEX_CMD_PATH_BSLASH_QUOTE + regex + REGEX_CMD_PATH_BSLASH_QUOTE_END).matcher(""),
-            Pattern.compile(REGEX_CMD_PATH_BSLASH + regex + REGEX_CMD_PATH_BSLASH_END).matcher("") };
+            Pattern.compile(String.format(Locale.ROOT, "%s%s\\.%s%s", REGEX_CMD_PATH_BSLASH_QUOTE, basenameRegex,
+                extensionRegex, REGEX_CMD_PATH_BSLASH_QUOTE_END)).matcher(""),
+            Pattern.compile(String.format(Locale.ROOT, "%s%s\\.%s%s", REGEX_CMD_PATH_BSLASH, basenameRegex,
+                extensionRegex, REGEX_CMD_PATH_BSLASH_END)).matcher("") };
       } else {
         this.toolNameMatcherExt = new Matcher[] {
-            Pattern.compile(REGEX_CMD_PATH_SLASH_QUOTE + regex + REGEX_CMD_PATH_SLASH_QUOTE_END).matcher(""),
-            Pattern.compile(REGEX_CMD_PATH_SLASH + regex + REGEX_CMD_PATH_SLASH_END).matcher("") };
+            Pattern.compile(String.format(Locale.ROOT, "%s%s\\.%s%s", REGEX_CMD_PATH_SLASH_QUOTE, basenameRegex,
+                extensionRegex, REGEX_CMD_PATH_SLASH_QUOTE_END)).matcher(""),
+            Pattern.compile(String.format(Locale.ROOT, "%s%s\\.%s%s", REGEX_CMD_PATH_SLASH, basenameRegex,
+                extensionRegex, REGEX_CMD_PATH_SLASH_END)).matcher("") };
       }
     }
 
@@ -630,15 +633,27 @@ class ParserDetection {
      */
     public MatchResult basenameWithVersionAndExtensionMatches(String commandLine, String versionRegex) {
       Matcher[] toolNameMatchers;
-      final String regex = basenameRegex + versionRegex + "\\." + extensionRegex ;
+
       if (matchBackslash) {
         toolNameMatchers = new Matcher[] {
-            Pattern.compile(REGEX_CMD_PATH_BSLASH_QUOTE + regex + REGEX_CMD_PATH_BSLASH_QUOTE_END).matcher(""),
-            Pattern.compile(REGEX_CMD_PATH_BSLASH + regex + REGEX_CMD_PATH_BSLASH_END).matcher("") };
+            Pattern.compile(String.format(Locale.ROOT, "%s%s%s\\.%s%s",
+                REGEX_CMD_PATH_BSLASH_QUOTE , basenameRegex , versionRegex , extensionRegex
+                    , REGEX_CMD_PATH_BSLASH_QUOTE_END))
+                .matcher(""),
+            Pattern
+                .compile(String.format(Locale.ROOT, "%s%s%s\\.%s%s",
+                    REGEX_CMD_PATH_BSLASH , basenameRegex , versionRegex , extensionRegex , REGEX_CMD_PATH_BSLASH_END))
+                .matcher("") };
       } else {
         toolNameMatchers = new Matcher[] {
-            Pattern.compile(REGEX_CMD_PATH_SLASH_QUOTE + regex + REGEX_CMD_PATH_SLASH_QUOTE_END).matcher(""),
-            Pattern.compile(REGEX_CMD_PATH_SLASH + regex + REGEX_CMD_PATH_SLASH_END).matcher("") };
+            Pattern.compile(String.format(Locale.ROOT, "%s%s%s\\.%s%s",
+                REGEX_CMD_PATH_SLASH_QUOTE , basenameRegex , versionRegex , extensionRegex
+                    , REGEX_CMD_PATH_SLASH_QUOTE_END))
+                .matcher(""),
+            Pattern
+                .compile(String.format(Locale.ROOT, "%s%s%s\\.%s%s",
+                    REGEX_CMD_PATH_SLASH , basenameRegex , versionRegex , extensionRegex , REGEX_CMD_PATH_SLASH_END))
+                .matcher("") };
       }
 
       for (Matcher matcher : toolNameMatchers) {
