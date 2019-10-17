@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
  *
  * @author Martin Weber
  */
-public class ParserDetector {
+public class DefaultToolDetectionParticiant implements IToolDetectionParticiant {
   /** start of the named capturing group that holds the command name (w/o quotes, if any) */
   protected static final String REGEX_GROUP_CMD = "cmd";
 
@@ -78,7 +78,7 @@ public class ParserDetector {
 
 
   /**
-   * Creates a {@code ParserDetector} that matches linux paths in the tool
+   * Creates a {@code DefaultToolDetectionParticiant} that matches linux paths in the tool
    * name.
    *
    * @param basenameRegex
@@ -89,12 +89,12 @@ public class ParserDetector {
    * @throws NullPointerException
    *           if one of the arguments is {@code null}
    */
-  public ParserDetector(String basenameRegex, IToolCommandlineParser parser) {
+  public DefaultToolDetectionParticiant(String basenameRegex, IToolCommandlineParser parser) {
     this(basenameRegex, false, parser);
   }
 
   /**
-   * Creates a {@code ParserDetector}.
+   * Creates a {@code DefaultToolDetectionParticiant}.
    *
    * @param basenameRegex
    *          a regular expression that matches the base name of the tool to detect
@@ -105,7 +105,7 @@ public class ParserDetector {
    * @param parser
    *          the corresponding parser for the tool arguments
    */
-  public ParserDetector(String basenameRegex, boolean alsoHandleNtfsPaths, IToolCommandlineParser parser) {
+  public DefaultToolDetectionParticiant(String basenameRegex, boolean alsoHandleNtfsPaths, IToolCommandlineParser parser) {
     this(basenameRegex, alsoHandleNtfsPaths, null, parser);
  }
 
@@ -121,12 +121,12 @@ public class ParserDetector {
    * @param parser
    *          the corresponding parser for the tool arguments
    */
-  public ParserDetector(String basenameRegex, String extensionRegex, IToolCommandlineParser parser) {
+  public DefaultToolDetectionParticiant(String basenameRegex, String extensionRegex, IToolCommandlineParser parser) {
     this(basenameRegex, false, extensionRegex, parser);
   }
 
   /**
-   * Creates a {@code ParserDetector}.
+   * Creates a {@code DefaultToolDetectionParticiant}.
    *
    * @param basenameRegex
    *          a regular expression that matches the base name of the tool to
@@ -141,7 +141,7 @@ public class ParserDetector {
    * @param parser
    *          the corresponding parser for the tool arguments
    */
-  public ParserDetector(String basenameRegex, boolean alsoHandleNtfsPaths, String extensionRegex,
+  public DefaultToolDetectionParticiant(String basenameRegex, boolean alsoHandleNtfsPaths, String extensionRegex,
       IToolCommandlineParser parser) {
     this.basenameRegex = basenameRegex;
     this.parser = parser;
@@ -187,39 +187,23 @@ public class ParserDetector {
     }
   }
 
-  /**
-   * Gets the IToolCommandlineParser.
-   *
-   * @return the parser, never {@code null}
-   */
+  @Override
   public IToolCommandlineParser getParser() {
     return parser;
   }
 
-  /**
-   * @return the alsoHandleNtfsPaths
-   */
+  @Override
   public boolean canHandleNtfsPaths() {
     return alsoHandleNtfsPaths;
   }
 
-  /**
-   * Gets, whether the parser for the tool arguments can properly parse the specified command-line string. If so, the
-   * remaining arguments of the command-line are returned.
-   * @param commandLine
-   *          the command line to match
-   * @param matchBackslash
-   *          whether to match on file system paths with backslashes in the compiler argument or to match an paths
-   *          with forward slashes
-   * @return {@code null} if the matcher did not match the tool name in the command-line string. Otherwise, if the
-   *         tool name matches, a MatchResult holding the de-composed command-line is returned.
-   */
-  public ParserDetector.MatchResult basenameMatches(String commandLine, boolean matchBackslash) {
+  @Override
+  public DefaultToolDetectionParticiant.MatchResult basenameMatches(String commandLine, boolean matchBackslash) {
     if(matchBackslash && !canHandleNtfsPaths()) {
       return null;
     }
     for (Matcher matcher : matchBackslash ? toolNameMatchersBackslash : toolNameMatchers) {
-      ParserDetector.MatchResult result = matcherMatches(matcher, commandLine);
+      DefaultToolDetectionParticiant.MatchResult result = matcherMatches(matcher, commandLine);
       if (result != null) {
         return result;
       }
@@ -227,22 +211,8 @@ public class ParserDetector {
     return null;
   }
 
-  /**
-   * Gets, whether the parser for the tool arguments can properly parse the specified command-line string. If so, the
-   * remaining arguments of the command-line are returned. This is time-consuming, since it creates a Matcher object
-   * on each invocation.
-   *
-   * @param commandLine
-   *          the command-line to match
-   * @param matchBackslash
-   *          whether to match on file system paths with backslashes in the compiler argument or to match an paths
-   *          with forward slashes
-   * @param versionRegex
-   *          a regular expression that matches the version string in the name of the tool to detect.
-   * @return {@code null} if the matcher did not match the tool name in the command-line string. Otherwise, if the
-   *         tool name matches, a MatchResult holding the de-composed command-line is returned.
-   */
-  public ParserDetector.MatchResult basenameWithVersionMatches(String commandLine, boolean matchBackslash, String versionRegex) {
+  @Override
+  public DefaultToolDetectionParticiant.MatchResult basenameWithVersionMatches(String commandLine, boolean matchBackslash, String versionRegex) {
     if(matchBackslash && !canHandleNtfsPaths()) {
       return null;
     }
@@ -263,7 +233,7 @@ public class ParserDetector {
     }
 
     for (Matcher matcher : toolNameMatchers) {
-      ParserDetector.MatchResult result = matcherMatches(matcher, commandLine);
+      DefaultToolDetectionParticiant.MatchResult result = matcherMatches(matcher, commandLine);
       if (result != null) {
         return result;
       }
@@ -271,23 +241,13 @@ public class ParserDetector {
     return null;
   }
 
-  /**
-   * Gets, whether the parser for the tool arguments can properly parse the specified command-line string. If so, the
-   * remaining arguments of the command-line are returned.
-   * @param commandLine
-   *          the command-line to match
-   * @param matchBackslash
-   *          whether to match on file system paths with backslashes in the compiler argument or to match an paths
-   *          with forward slashes
-   * @return {@code null} if the matcher did not match the tool name in the command-line string. Otherwise, if the
-   *         tool name matches, a MatchResult holding the de-composed command-line is returned.
-   */
-  public ParserDetector.MatchResult basenameWithExtensionMatches(String commandLine, boolean matchBackslash) {
+  @Override
+  public DefaultToolDetectionParticiant.MatchResult basenameWithExtensionMatches(String commandLine, boolean matchBackslash) {
     if(matchBackslash && !canHandleNtfsPaths()) {
       return null;
     }
     for (Matcher matcher : matchBackslash ? toolNameMatchersExtBackslash: toolNameMatchersExt) {
-      ParserDetector.MatchResult result = matcherMatches(matcher, commandLine);
+      DefaultToolDetectionParticiant.MatchResult result = matcherMatches(matcher, commandLine);
       if (result != null) {
         return result;
       }
@@ -295,22 +255,8 @@ public class ParserDetector {
     return null;
   }
 
-  /**
-   * Gets, whether the parser for the tool arguments can properly parse the specified command-line string. If so, the
-   * remaining arguments of the command-line are returned. This is time-consuming, since it creates a Matcher object
-   * on each invocation.
-   *
-   * @param commandLine
-   *          the command-line to match
-   * @param matchBackslash
-   *          whether to match on file system paths with backslashes in the compiler argument or to match an paths
-   *          with forward slashes
-   * @param versionRegex
-   *          a regular expression that matches the version string in the name of the tool to detect.
-   * @return {@code null} if the matcher did not match the tool name in the command-line string. Otherwise, if the
-   *         tool name matches, a MatchResult holding the de-composed command-line is returned.
-   */
-  public ParserDetector.MatchResult basenameWithVersionAndExtensionMatches(String commandLine, boolean matchBackslash, String versionRegex) {
+  @Override
+  public DefaultToolDetectionParticiant.MatchResult basenameWithVersionAndExtensionMatches(String commandLine, boolean matchBackslash, String versionRegex) {
     if(matchBackslash && !canHandleNtfsPaths()) {
       return null;
     }
@@ -339,7 +285,7 @@ public class ParserDetector {
     }
 
     for (Matcher matcher : toolNameMatchers) {
-      ParserDetector.MatchResult result = matcherMatches(matcher, commandLine);
+      DefaultToolDetectionParticiant.MatchResult result = matcherMatches(matcher, commandLine);
       if (result != null) {
         return result;
       }
@@ -361,46 +307,12 @@ public class ParserDetector {
    *         command-line string. Otherwise, if the tool name matches, a
    *         MatchResult holding the de-composed command-line is returned.
    */
-  private ParserDetector.MatchResult matcherMatches(Matcher matcher, String commandLine) {
+  private DefaultToolDetectionParticiant.MatchResult matcherMatches(Matcher matcher, String commandLine) {
     matcher.reset(commandLine);
     if (matcher.lookingAt()) {
-      return new ParserDetector.MatchResult(matcher.group(REGEX_GROUP_CMD), commandLine.substring(matcher.end()));
+      return new DefaultToolDetectionParticiant.MatchResult(matcher.group(REGEX_GROUP_CMD), commandLine.substring(matcher.end()));
     }
     return null;
   }
 
-  /** The result of matching a commandline string.
-   */
-  public static class MatchResult {
-    private final String command;
-    private final String arguments;
-
-    /**
-     * @param command
-     *          the command from the command-line, without the argument string. . If the command contains space
-     *          characters, the surrounding quotes must have been removed,
-     * @param arguments
-     *          the remaining arguments from the command-line, without the command
-     */
-    public MatchResult(String command, String arguments) {
-      this.command = command;
-      this.arguments = arguments;
-    }
-
-    /**
-     * Gets the command from the command-line, without the argument string. If the command contains space characters,
-     * the surrounding quotes have been removed,
-     */
-    public String getCommand() {
-      return this.command;
-    }
-
-    /**
-     * Gets the remaining arguments from the command-line, without the command.
-     */
-    public String getArguments() {
-      return this.arguments;
-    }
-  } // MatchResult
-
-} // ParserDetector
+} // DefaultToolDetectionParticiant
