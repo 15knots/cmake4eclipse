@@ -38,7 +38,8 @@ Import-Package: de.marw.cdt.cmake.core.cmakecache,
  org.eclipse.swt.widgets,
  org.eclipse.ui.plugin,
  org.osgi.framework
-Bundle-Activator: de.marw.cmake.CMakePlugin
-Export-Package: de.marw.cmake.cdt.language.settings.providers
+Bundle-Activator: de.marw.cmake.cdt.internal.CMakePlugin
+Export-Package: de.marw.cmake.cdt.language.settings.providers;uses:="org.eclipse.core.runtime,org.eclipse.cdt.core.settings.model,de.marw.cmake.cdt.language.settings.providers.builtins",
+ de.marw.cmake.cdt.language.settings.providers.builtins
 Require-Bundle: org.eclipse.ui.workbench;bundle-version="3.8.0",
  org.eclipse.ui.trace

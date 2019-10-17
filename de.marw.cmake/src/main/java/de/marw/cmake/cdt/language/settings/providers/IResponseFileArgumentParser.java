@@ -16,7 +16,7 @@ package de.marw.cmake.cdt.language.settings.providers;
  *
  * @author Martin Weber
  */
-interface IResponseFileArgumentParser {
+public interface IResponseFileArgumentParser {
 
   /**
    * Detects whether the first argument on the given {@code argsLine} argument

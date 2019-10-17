@@ -18,7 +18,7 @@ import org.eclipse.core.runtime.IPath;
  *
  * @author Martin Weber
  */
-interface IParserHandler {
+public interface IParserHandler {
 
   /**
    * Parses the given String with the first parser that can handle the first

@@ -26,7 +26,7 @@ import de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser.IParseC
  *
  * @author Martin Weber
  */
-class ToolArgumentParsers {
+public class ToolArgumentParsers {
 
   /** matches a macro name, with optional macro parameter list */
   private static final String REGEX_MACRO_NAME = "([\\w$]+)(?:\\([\\w$, ]*?\\))?";
@@ -223,7 +223,7 @@ class ToolArgumentParsers {
    * A tool argument parser capable to parse a POSIX compatible C-compiler macro
    * definition argument: {@code -DNAME=value}.
    */
-  static class MacroDefine_C_POSIX extends MacroDefineGeneric implements IToolArgumentParser {
+  public static class MacroDefine_C_POSIX extends MacroDefineGeneric implements IToolArgumentParser {
 
     private static final NameValueOptionMatcher[] optionMatchers = {
         /* string or char literal value, with whitespace in value and escaped quotes */
@@ -261,7 +261,7 @@ class ToolArgumentParsers {
    * A tool argument parser capable to parse a POSIX compatible C-compiler macro
    * cancel argument: {@code -UNAME}.
    */
-  static class MacroUndefine_C_POSIX extends MacroUndefineGeneric implements IToolArgumentParser {
+  public static class MacroUndefine_C_POSIX extends MacroUndefineGeneric implements IToolArgumentParser {
 
     private static final NameOptionMatcher optionMatcher = new NameOptionMatcher(
         "-U" + REGEX_MACRO_NAME_SKIP_LEADING_WS, 1);
@@ -280,7 +280,7 @@ class ToolArgumentParsers {
    * A tool argument parser capable to parse a POSIX compatible C-compiler
    * include path argument: {@code -Ipath}.
    */
-  static class IncludePath_C_POSIX extends IncludePathGeneric implements IToolArgumentParser {
+  public static class IncludePath_C_POSIX extends IncludePathGeneric implements IToolArgumentParser {
     private static final NameOptionMatcher[] optionMatchers = {
         /* quoted directory */
         new NameOptionMatcher("-I" + REGEX_INCLUDEPATH_QUOTED_DIR, 2),
@@ -301,7 +301,7 @@ class ToolArgumentParsers {
    * A tool argument parser capable to parse a C-compiler system include path
    * argument: {@code -system path}.
    */
-  static class SystemIncludePath_C extends IncludePathGeneric implements IToolArgumentParser {
+  public static class SystemIncludePath_C extends IncludePathGeneric implements IToolArgumentParser {
     static final NameOptionMatcher[] optionMatchers = {
         /* quoted directory */
         new NameOptionMatcher("-isystem" + REGEX_INCLUDEPATH_QUOTED_DIR, 2),
@@ -326,7 +326,7 @@ class ToolArgumentParsers {
    * <q>If dir begins with "=", then the "=" will be replaced by the sysroot
    * prefix; see --sysroot and -isysroot.</q>
    */
-  static class SystemIncludePath_nvcc extends IncludePathGeneric implements IToolArgumentParser {
+  public static class SystemIncludePath_nvcc extends IncludePathGeneric implements IToolArgumentParser {
     static final NameOptionMatcher[] optionMatchers = {
         /* quoted directory */
         new NameOptionMatcher("-isystem=" + "([\"'])(.+?)\\1", 2),
@@ -347,7 +347,7 @@ class ToolArgumentParsers {
    * A tool argument parser capable to parse a armcc-compiler system include path
    * argument: {@code -Jdir}.
    */
-  static class SystemIncludePath_armcc extends IncludePathGeneric implements IToolArgumentParser {
+  public static class SystemIncludePath_armcc extends IncludePathGeneric implements IToolArgumentParser {
     static final NameOptionMatcher[] optionMatchers = {
         /* quoted directory */
         new NameOptionMatcher("-J" + "([\"'])(.+?)\\1", 2),
@@ -370,7 +370,7 @@ class ToolArgumentParsers {
    * A tool argument parser capable to parse a cl (Microsoft c compiler)
    * compatible C-compiler macro definition argument: {@code /DNAME=value}.
    */
-  static class MacroDefine_C_CL extends MacroDefineGeneric implements IToolArgumentParser {
+  public static class MacroDefine_C_CL extends MacroDefineGeneric implements IToolArgumentParser {
 
     private static final NameValueOptionMatcher[] optionMatchers = {
         /* quoted value, whitespace in value, w/ macro arglist */
@@ -397,7 +397,7 @@ class ToolArgumentParsers {
    * A tool argument parser capable to parse a cl (Microsoft c compiler)
    * compatible C-compiler macro cancel argument: {@code /UNAME}.
    */
-  static class MacroUndefine_C_CL extends MacroUndefineGeneric implements IToolArgumentParser {
+  public static class MacroUndefine_C_CL extends MacroUndefineGeneric implements IToolArgumentParser {
 
     private static final NameOptionMatcher optionMatcher = new NameOptionMatcher(
         "[-/]U" + REGEX_MACRO_NAME_SKIP_LEADING_WS, 1);
@@ -416,7 +416,7 @@ class ToolArgumentParsers {
    * A tool argument parser capable to parse a cl (Microsoft c compiler)
    * compatible C-compiler include path argument: {@code /Ipath}.
    */
-  static class IncludePath_C_CL extends IncludePathGeneric implements IToolArgumentParser {
+  public static class IncludePath_C_CL extends IncludePathGeneric implements IToolArgumentParser {
     private static final NameOptionMatcher[] optionMatchers = {
         /* quoted directory */
         new NameOptionMatcher("[-/]I" + REGEX_INCLUDEPATH_QUOTED_DIR, 2),
@@ -446,7 +446,7 @@ class ToolArgumentParsers {
       for (Matcher matcher : optionMatchers) {
         matcher.reset(argsLine);
         if (matcher.lookingAt()) {
-          parseContext.addBuiltinDetctionArgument(matcher.group());
+          parseContext.addBuiltinDetectionArgument(matcher.group());
           return matcher.end();
         }
       }
@@ -458,7 +458,7 @@ class ToolArgumentParsers {
   /**
    * A tool argument parser capable to parse a GCC option to specify paths {@code --sysrooot}.
    */
-  static class Sysroot_GCC extends BuiltinDetctionArgsGeneric implements IToolArgumentParser {
+  public static class Sysroot_GCC extends BuiltinDetctionArgsGeneric implements IToolArgumentParser {
     private static final Matcher[] optionMatchers = {
         /* "--sysroot=" quoted directory */
         Pattern.compile("--sysroot=" + REGEX_INCLUDEPATH_QUOTED_DIR).matcher(""),
@@ -484,7 +484,7 @@ class ToolArgumentParsers {
   /**
    * A tool argument parser capable to parse a GCC option to specify the language standard {@code -std=xxx}.
    */
-  static class LangStd_GCC extends BuiltinDetctionArgsGeneric implements IToolArgumentParser {
+  public static class LangStd_GCC extends BuiltinDetctionArgsGeneric implements IToolArgumentParser {
     private static final Matcher[] optionMatchers = { Pattern.compile("-std=\\S+").matcher(""),
         Pattern.compile("-ansi").matcher(""), };
 
@@ -500,7 +500,7 @@ class ToolArgumentParsers {
   /**
    * A tool argument parser capable to parse a nvcc option to specify the language standard {@code --std=xxx}.
    */
-  static class LangStd_nvcc extends BuiltinDetctionArgsGeneric implements IToolArgumentParser {
+  public static class LangStd_nvcc extends BuiltinDetctionArgsGeneric implements IToolArgumentParser {
     private static final Matcher[] optionMatchers = { Pattern.compile("--std \\S+").matcher(""),
         Pattern.compile("-std \\S+").matcher(""), };
 

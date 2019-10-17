@@ -5,12 +5,12 @@
  <extension
        point="org.eclipse.cdt.core.LanguageSettingsProvider">
     <provider
-          class="de.marw.cmake.cdt.language.settings.providers.CompileCommandsJsonParser"
+          class="de.marw.cmake.cdt.internal.lsp.CompileCommandsJsonParser"
           id="de.marw.cmake.cdt.language.settings.providers.CompileCommandsJsonParser"
           name="CMAKE_EXPORT_COMPILE_COMMANDS Parser">
     </provider>
     <provider
-          class="de.marw.cmake.cdt.language.settings.providers.BuiltinsCompileCommandsJsonParser"
+          class="de.marw.cmake.cdt.internal.lsp.BuiltinsCompileCommandsJsonParser"
           id="de.marw.cmake.cdt.language.settings.providers.BuiltinsCompileCommandsJsonParser"
           name="CMAKE_EXPORT_COMPILE_COMMANDS Compiler Built-ins">
     </provider>
@@ -30,14 +30,14 @@
  <extension
        point="org.eclipse.cdt.ui.LanguageSettingsProviderAssociation">
     <class-association
-          class="de.marw.cmake.cdt.language.settings.providers.CompileCommandsJsonParser"
+          class="de.marw.cmake.cdt.internal.lsp.CompileCommandsJsonParser"
           icon="icons/CMakeLogo.gif"
-          page="de.marw.cmake.cdt.ui.language.settings.providers.CompileCommandsJsonParserOptionPage">
+          page="de.marw.cmake.cdt.internal.ui.lsp.CompileCommandsJsonParserOptionPage">
     </class-association>
     <class-association
-          class="de.marw.cmake.cdt.language.settings.providers.BuiltinsCompileCommandsJsonParser"
+          class="de.marw.cmake.cdt.internal.lsp.BuiltinsCompileCommandsJsonParser"
           icon="icons/CMakeLogo.gif"
-          page="de.marw.cmake.cdt.ui.language.settings.providers.BuiltinsCompilerCommandOptionPage">
+          page="de.marw.cmake.cdt.internal.ui.lsp.BuiltinsCompilerCommandOptionPage">
     </class-association>
  </extension>
  <extension

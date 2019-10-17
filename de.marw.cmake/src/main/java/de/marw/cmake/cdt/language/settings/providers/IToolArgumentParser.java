@@ -57,6 +57,6 @@ public interface IToolArgumentParser {
      * Adds a compiler argument that affects built-in detection to the result. For the GNU compilers, these are options
      * like {@code --sysroot} and options that specify the language's standard ({@code -std=c++17}.
      */
-    void addBuiltinDetctionArgument(String argument);;
+    void addBuiltinDetectionArgument(String argument);;
   }
 }

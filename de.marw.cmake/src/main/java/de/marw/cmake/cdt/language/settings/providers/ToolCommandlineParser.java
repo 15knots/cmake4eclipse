@@ -16,7 +16,8 @@ import java.util.Objects;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Platform;
 
-import de.marw.cmake.CMakePlugin;
+import de.marw.cmake.cdt.internal.CMakePlugin;
+import de.marw.cmake.cdt.internal.lsp.ParseContext;
 import de.marw.cmake.cdt.language.settings.providers.builtins.BuiltinDetectionType;
 
 /**
@@ -25,7 +26,7 @@ import de.marw.cmake.cdt.language.settings.providers.builtins.BuiltinDetectionTy
  *
  * @author Martin Weber
  */
-class ToolCommandlineParser implements IToolCommandlineParser {
+public class ToolCommandlineParser implements IToolCommandlineParser {
   private static final boolean DEBUG = Boolean
       .parseBoolean(Platform.getDebugOption(CMakePlugin.PLUGIN_ID + "/CECC/args"));
 
@@ -89,24 +90,6 @@ class ToolCommandlineParser implements IToolCommandlineParser {
   }
 
   /**
-   * Returns a copy of the string, with leading whitespace omitted.
-   *
-   * @param string
-   *          the string to remove whitespace from
-   * @return A copy of the string with leading white space removed, or the
-   *         string if it has no leading white space.
-   */
-  /* package */static String trimLeadingWS(String string) {
-    int len = string.length();
-    int st = 0;
-
-    while ((st < len) && (string.charAt(st) <= ' ')) {
-      st++;
-    }
-    return st > 0 ? string.substring(st, len) : string;
-  }
-
-  /**
    * @param buildOutput
    *          the command line arguments to process
    * @return the number of characters consumed
@@ -138,7 +121,7 @@ class ToolCommandlineParser implements IToolCommandlineParser {
      */
     private void parseArguments(IResponseFileArgumentParser responseFileArgumentParser, String args) {
       // eat buildOutput string argument by argument..
-      while (!(args = ToolCommandlineParser.trimLeadingWS(args)).isEmpty()) {
+      while (!(args = StringUtil.trimLeadingWS(args)).isEmpty()) {
         boolean argParsed = false;
         int consumed;
         // parse with first parser that can handle the first argument on the

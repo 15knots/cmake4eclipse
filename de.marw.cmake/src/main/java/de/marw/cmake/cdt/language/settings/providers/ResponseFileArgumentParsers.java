@@ -26,7 +26,7 @@ import de.marw.cmake.cdt.language.settings.providers.ToolArgumentParsers.NameOpt
  *
  * @author Martin Weber
  */
-class ResponseFileArgumentParsers {
+public class ResponseFileArgumentParsers {
   /**
    * matches a response file name with quoted file name. Name in matcher group 2
    */
@@ -40,7 +40,7 @@ class ResponseFileArgumentParsers {
   /**
    * Handles a response file argument that starts with the '@' character.
    */
-  static class At implements IResponseFileArgumentParser {
+  public static class At implements IResponseFileArgumentParser {
     private static final NameOptionMatcher[] optionMatchers = {
         /* unquoted directory */
         new NameOptionMatcher("@" + REGEX_UNQUOTED_FILE, 1),

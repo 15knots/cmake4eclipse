@@ -23,7 +23,7 @@ import de.marw.cmake.cdt.language.settings.providers.builtins.BuiltinDetectionTy
  *
  * @author Martin Weber
  */
-interface IToolCommandlineParser {
+public interface IToolCommandlineParser {
   /**
    * Parses all arguments given to the tool.
    *
