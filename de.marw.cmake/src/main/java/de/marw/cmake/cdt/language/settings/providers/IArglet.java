@@ -19,7 +19,7 @@ import org.eclipse.core.runtime.IPath;
  *
  * @author Martin Weber
  */
-public interface IToolArgumentParser {
+public interface IArglet {
 
   /**
    * Parses the next command-line argument and extracts all detected

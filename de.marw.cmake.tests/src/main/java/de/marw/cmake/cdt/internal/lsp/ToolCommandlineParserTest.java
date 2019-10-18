@@ -24,8 +24,8 @@ import org.eclipse.core.runtime.Path;
 import org.junit.Test;
 
 import de.marw.cmake.cdt.internal.lsp.ParseContext;
-import de.marw.cmake.cdt.language.settings.providers.ResponseFileArgumentParsers;
-import de.marw.cmake.cdt.language.settings.providers.ToolArgumentParsers;
+import de.marw.cmake.cdt.language.settings.providers.ResponseFileArglets;
+import de.marw.cmake.cdt.language.settings.providers.Arglets;
 import de.marw.cmake.cdt.language.settings.providers.ToolCommandlineParser;
 import de.marw.cmake.cdt.language.settings.providers.IToolCommandlineParser.IResult;
 import de.marw.cmake.cdt.language.settings.providers.builtins.BuiltinDetectionType;
@@ -38,9 +38,9 @@ public class ToolCommandlineParserTest {
   @Test
   public final void testResponseFileArgumentParser_At() throws Exception {
 
-    ToolCommandlineParser testee = new ToolCommandlineParser("egal", new ResponseFileArgumentParsers.At(),
-        BuiltinDetectionType.NONE, new ToolArgumentParsers.IncludePath_C_POSIX(),
-        new ToolArgumentParsers.MacroDefine_C_POSIX());
+    ToolCommandlineParser testee = new ToolCommandlineParser("egal", new ResponseFileArglets.At(),
+        BuiltinDetectionType.NONE, new Arglets.IncludePath_C_POSIX(),
+        new Arglets.MacroDefine_C_POSIX());
 
     IResult entries;
 
@@ -104,9 +104,9 @@ public class ToolCommandlineParserTest {
    */
   @Test
   public final void testResponseFileArgumentParser_At_heredoc() throws Exception {
-    ToolCommandlineParser testee = new ToolCommandlineParser("egal", new ResponseFileArgumentParsers.At(),
-        BuiltinDetectionType.NONE, new ToolArgumentParsers.IncludePath_C_POSIX(),
-        new ToolArgumentParsers.MacroDefine_C_POSIX());
+    ToolCommandlineParser testee = new ToolCommandlineParser("egal", new ResponseFileArglets.At(),
+        BuiltinDetectionType.NONE, new Arglets.IncludePath_C_POSIX(),
+        new Arglets.MacroDefine_C_POSIX());
 
     final String more = " -g -MMD  -o CMakeFiles/execut1.dir/util1.c.o"
         + " -c /testprojects/C-subsrc/src/src-sub/main.c";

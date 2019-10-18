@@ -19,14 +19,14 @@ import org.eclipse.cdt.core.settings.model.util.CDataUtil;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
-import de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser.IParseContext;
+import de.marw.cmake.cdt.language.settings.providers.IArglet.IParseContext;
 
 /**
- * Various tool argument parser implementations.
+ * Various Arglet implementation for parsing tool arguments.
  *
  * @author Martin Weber
  */
-public class ToolArgumentParsers {
+public class Arglets {
 
   /** matches a macro name, with optional macro parameter list */
   private static final String REGEX_MACRO_NAME = "([\\w$]+)(?:\\([\\w$, ]*?\\))?";
@@ -49,7 +49,7 @@ public class ToolArgumentParsers {
   /**
    * nothing to instantiate
    */
-  private ToolArgumentParsers() {
+  private Arglets() {
   }
 
   ////////////////////////////////////////////////////////////////////
@@ -161,7 +161,7 @@ public class ToolArgumentParsers {
   private static class MacroUndefineGeneric {
 
     /*-
-     * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgument(java.util.List, java.lang.String)
+     * @see de.marw.cmake.cdt.language.settings.providers.IArglet#processArgument(java.util.List, java.lang.String)
      */
     protected final int processArgument(IParseContext parseContext, String argsLine,
         NameOptionMatcher optionMatcher) {
@@ -187,7 +187,7 @@ public class ToolArgumentParsers {
     /**
      * @param cwd
      *          the current working directory of the compiler at its invocation
-     * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgument(IParseContext, IPath, String)
+     * @see de.marw.cmake.cdt.language.settings.providers.IArglet#processArgument(IParseContext, IPath, String)
      */
     protected final int processArgument(IParseContext parseContext, IPath cwd,
         String argsLine, NameOptionMatcher[] optionMatchers) {
@@ -223,7 +223,7 @@ public class ToolArgumentParsers {
    * A tool argument parser capable to parse a POSIX compatible C-compiler macro
    * definition argument: {@code -DNAME=value}.
    */
-  public static class MacroDefine_C_POSIX extends MacroDefineGeneric implements IToolArgumentParser {
+  public static class MacroDefine_C_POSIX extends MacroDefineGeneric implements IArglet {
 
     private static final NameValueOptionMatcher[] optionMatchers = {
         /* string or char literal value, with whitespace in value and escaped quotes */
@@ -247,7 +247,7 @@ public class ToolArgumentParsers {
         };
 
     /*-
-     * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgs(java.lang.String)
+     * @see de.marw.cmake.cdt.language.settings.providers.IArglet#processArgs(java.lang.String)
      */
     @Override
     public int processArgument(IParseContext parseContext, IPath cwd, String argsLine) {
@@ -261,13 +261,13 @@ public class ToolArgumentParsers {
    * A tool argument parser capable to parse a POSIX compatible C-compiler macro
    * cancel argument: {@code -UNAME}.
    */
-  public static class MacroUndefine_C_POSIX extends MacroUndefineGeneric implements IToolArgumentParser {
+  public static class MacroUndefine_C_POSIX extends MacroUndefineGeneric implements IArglet {
 
     private static final NameOptionMatcher optionMatcher = new NameOptionMatcher(
         "-U" + REGEX_MACRO_NAME_SKIP_LEADING_WS, 1);
 
     /*-
-     * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgument(java.util.List, java.lang.String)
+     * @see de.marw.cmake.cdt.language.settings.providers.IArglet#processArgument(java.util.List, java.lang.String)
      */
     @Override
     public int processArgument(IParseContext parseContext, IPath cwd, String argsLine) {
@@ -280,7 +280,7 @@ public class ToolArgumentParsers {
    * A tool argument parser capable to parse a POSIX compatible C-compiler
    * include path argument: {@code -Ipath}.
    */
-  public static class IncludePath_C_POSIX extends IncludePathGeneric implements IToolArgumentParser {
+  public static class IncludePath_C_POSIX extends IncludePathGeneric implements IArglet {
     private static final NameOptionMatcher[] optionMatchers = {
         /* quoted directory */
         new NameOptionMatcher("-I" + REGEX_INCLUDEPATH_QUOTED_DIR, 2),
@@ -288,7 +288,7 @@ public class ToolArgumentParsers {
         new NameOptionMatcher("-I" + REGEX_INCLUDEPATH_UNQUOTED_DIR, 1) };
 
     /*-
-     * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgs(java.lang.String)
+     * @see de.marw.cmake.cdt.language.settings.providers.IArglet#processArgs(java.lang.String)
      */
     @Override
     public int processArgument(IParseContext parseContext, IPath cwd, String argsLine) {
@@ -301,7 +301,7 @@ public class ToolArgumentParsers {
    * A tool argument parser capable to parse a C-compiler system include path
    * argument: {@code -system path}.
    */
-  public static class SystemIncludePath_C extends IncludePathGeneric implements IToolArgumentParser {
+  public static class SystemIncludePath_C extends IncludePathGeneric implements IArglet {
     static final NameOptionMatcher[] optionMatchers = {
         /* quoted directory */
         new NameOptionMatcher("-isystem" + REGEX_INCLUDEPATH_QUOTED_DIR, 2),
@@ -309,7 +309,7 @@ public class ToolArgumentParsers {
         new NameOptionMatcher("-isystem" + REGEX_INCLUDEPATH_UNQUOTED_DIR, 1), };
 
     /*-
-     * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgs(java.lang.String)
+     * @see de.marw.cmake.cdt.language.settings.providers.IArglet#processArgs(java.lang.String)
      */
     @Override
     public int processArgument(IParseContext parseContext, IPath cwd, String argsLine) {
@@ -326,7 +326,7 @@ public class ToolArgumentParsers {
    * <q>If dir begins with "=", then the "=" will be replaced by the sysroot
    * prefix; see --sysroot and -isysroot.</q>
    */
-  public static class SystemIncludePath_nvcc extends IncludePathGeneric implements IToolArgumentParser {
+  public static class SystemIncludePath_nvcc extends IncludePathGeneric implements IArglet {
     static final NameOptionMatcher[] optionMatchers = {
         /* quoted directory */
         new NameOptionMatcher("-isystem=" + "([\"'])(.+?)\\1", 2),
@@ -334,7 +334,7 @@ public class ToolArgumentParsers {
         new NameOptionMatcher("-isystem=" + "([^\\s]+)", 1), };
 
     /*-
-     * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgs(java.lang.String)
+     * @see de.marw.cmake.cdt.language.settings.providers.IArglet#processArgs(java.lang.String)
      */
     @Override
     public int processArgument(IParseContext parseContext, IPath cwd, String argsLine) {
@@ -347,7 +347,7 @@ public class ToolArgumentParsers {
    * A tool argument parser capable to parse a armcc-compiler system include path
    * argument: {@code -Jdir}.
    */
-  public static class SystemIncludePath_armcc extends IncludePathGeneric implements IToolArgumentParser {
+  public static class SystemIncludePath_armcc extends IncludePathGeneric implements IArglet {
     static final NameOptionMatcher[] optionMatchers = {
         /* quoted directory */
         new NameOptionMatcher("-J" + "([\"'])(.+?)\\1", 2),
@@ -355,7 +355,7 @@ public class ToolArgumentParsers {
         new NameOptionMatcher("-J" + "([^\\s]+)", 1), };
 
     /*-
-     * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgs(java.lang.String)
+     * @see de.marw.cmake.cdt.language.settings.providers.IArglet#processArgs(java.lang.String)
      */
     @Override
     public int processArgument(IParseContext parseContext, IPath cwd, String argsLine) {
@@ -370,7 +370,7 @@ public class ToolArgumentParsers {
    * A tool argument parser capable to parse a cl (Microsoft c compiler)
    * compatible C-compiler macro definition argument: {@code /DNAME=value}.
    */
-  public static class MacroDefine_C_CL extends MacroDefineGeneric implements IToolArgumentParser {
+  public static class MacroDefine_C_CL extends MacroDefineGeneric implements IArglet {
 
     private static final NameValueOptionMatcher[] optionMatchers = {
         /* quoted value, whitespace in value, w/ macro arglist */
@@ -383,7 +383,7 @@ public class ToolArgumentParsers {
         new NameValueOptionMatcher("[-/]D" + REGEX_MACRO_NAME_SKIP_LEADING_WS + "(?:=)((\\\\([\"']))(.*?)\\2)", 1, 2), };
 
     /*-
-     * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgs(java.lang.String)
+     * @see de.marw.cmake.cdt.language.settings.providers.IArglet#processArgs(java.lang.String)
      */
     @Override
     public int processArgument(IParseContext parseContext, IPath cwd, String argsLine) {
@@ -397,13 +397,13 @@ public class ToolArgumentParsers {
    * A tool argument parser capable to parse a cl (Microsoft c compiler)
    * compatible C-compiler macro cancel argument: {@code /UNAME}.
    */
-  public static class MacroUndefine_C_CL extends MacroUndefineGeneric implements IToolArgumentParser {
+  public static class MacroUndefine_C_CL extends MacroUndefineGeneric implements IArglet {
 
     private static final NameOptionMatcher optionMatcher = new NameOptionMatcher(
         "[-/]U" + REGEX_MACRO_NAME_SKIP_LEADING_WS, 1);
 
     /*-
-     * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgument(java.util.List, java.lang.String)
+     * @see de.marw.cmake.cdt.language.settings.providers.IArglet#processArgument(java.util.List, java.lang.String)
      */
     @Override
     public int processArgument(IParseContext parseContext, IPath cwd, String argsLine) {
@@ -416,7 +416,7 @@ public class ToolArgumentParsers {
    * A tool argument parser capable to parse a cl (Microsoft c compiler)
    * compatible C-compiler include path argument: {@code /Ipath}.
    */
-  public static class IncludePath_C_CL extends IncludePathGeneric implements IToolArgumentParser {
+  public static class IncludePath_C_CL extends IncludePathGeneric implements IArglet {
     private static final NameOptionMatcher[] optionMatchers = {
         /* quoted directory */
         new NameOptionMatcher("[-/]I" + REGEX_INCLUDEPATH_QUOTED_DIR, 2),
@@ -424,7 +424,7 @@ public class ToolArgumentParsers {
         new NameOptionMatcher("[-/]I" + REGEX_INCLUDEPATH_UNQUOTED_DIR, 1), };
 
     /*-
-     * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgs(java.lang.String)
+     * @see de.marw.cmake.cdt.language.settings.providers.IArglet#processArgs(java.lang.String)
      */
     @Override
     public int processArgument(IParseContext parseContext, IPath cwd, String argsLine) {
@@ -440,7 +440,7 @@ public class ToolArgumentParsers {
    */
   private static abstract class BuiltinDetctionArgsGeneric {
     /**
-     * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgument(IParseContext, IPath, String)
+     * @see de.marw.cmake.cdt.language.settings.providers.IArglet#processArgument(IParseContext, IPath, String)
      */
     protected final int processArgument(IParseContext parseContext, String argsLine, Matcher[] optionMatchers) {
       for (Matcher matcher : optionMatchers) {
@@ -458,7 +458,7 @@ public class ToolArgumentParsers {
   /**
    * A tool argument parser capable to parse a GCC option to specify paths {@code --sysrooot}.
    */
-  public static class Sysroot_GCC extends BuiltinDetctionArgsGeneric implements IToolArgumentParser {
+  public static class Sysroot_GCC extends BuiltinDetctionArgsGeneric implements IArglet {
     private static final Matcher[] optionMatchers = {
         /* "--sysroot=" quoted directory */
         Pattern.compile("--sysroot=" + REGEX_INCLUDEPATH_QUOTED_DIR).matcher(""),
@@ -472,7 +472,7 @@ public class ToolArgumentParsers {
         Pattern.compile("--no-sysroot-prefix").matcher("") };
 
     /*-
-     * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgs(java.lang.String)
+     * @see de.marw.cmake.cdt.language.settings.providers.IArglet#processArgs(java.lang.String)
      */
     @Override
     public int processArgument(IParseContext parseContext, IPath cwd, String argsLine) {
@@ -484,12 +484,12 @@ public class ToolArgumentParsers {
   /**
    * A tool argument parser capable to parse a GCC option to specify the language standard {@code -std=xxx}.
    */
-  public static class LangStd_GCC extends BuiltinDetctionArgsGeneric implements IToolArgumentParser {
+  public static class LangStd_GCC extends BuiltinDetctionArgsGeneric implements IArglet {
     private static final Matcher[] optionMatchers = { Pattern.compile("-std=\\S+").matcher(""),
         Pattern.compile("-ansi").matcher(""), };
 
     /*-
-     * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgs(java.lang.String)
+     * @see de.marw.cmake.cdt.language.settings.providers.IArglet#processArgs(java.lang.String)
      */
     @Override
     public int processArgument(IParseContext parseContext, IPath cwd, String argsLine) {
@@ -500,12 +500,12 @@ public class ToolArgumentParsers {
   /**
    * A tool argument parser capable to parse a nvcc option to specify the language standard {@code --std=xxx}.
    */
-  public static class LangStd_nvcc extends BuiltinDetctionArgsGeneric implements IToolArgumentParser {
+  public static class LangStd_nvcc extends BuiltinDetctionArgsGeneric implements IArglet {
     private static final Matcher[] optionMatchers = { Pattern.compile("--std \\S+").matcher(""),
         Pattern.compile("-std \\S+").matcher(""), };
 
     /*-
-     * @see de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser#processArgs(java.lang.String)
+     * @see de.marw.cmake.cdt.language.settings.providers.IArglet#processArgs(java.lang.String)
      */
     @Override
     public int processArgument(IParseContext parseContext, IPath cwd, String argsLine) {

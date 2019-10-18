@@ -20,8 +20,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import de.marw.cmake.cdt.internal.lsp.ParseContext;
-import de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser.IParseContext;
-import de.marw.cmake.cdt.language.settings.providers.ToolArgumentParsers.IncludePath_C_POSIX;
+import de.marw.cmake.cdt.language.settings.providers.IArglet.IParseContext;
+import de.marw.cmake.cdt.language.settings.providers.Arglets.IncludePath_C_POSIX;
 
 /**
  * @author Martin Weber
@@ -40,7 +40,7 @@ public class IncludePath_C_POSIXTest {
 
   /**
    * Test method for
-   * {@link de.marw.cmake.cdt.internal.lsp.ToolArgumentParsers.IncludePath_C_POSIX#processArgument(IParseContext, IPath, java.lang.String)}
+   * {@link de.marw.cmake.cdt.internal.lsp.Arglets.IncludePath_C_POSIX#processArgument(IParseContext, IPath, java.lang.String)}
    * .
    */
   @Test
@@ -115,7 +115,7 @@ public class IncludePath_C_POSIXTest {
 
   /**
    * Test method for
-   * {@link de.marw.cmake.cdt.internal.lsp.ToolArgumentParsers.IncludePath_C_POSIX#processArgument(IParseContext, IPath, java.lang.String)}
+   * {@link de.marw.cmake.cdt.internal.lsp.Arglets.IncludePath_C_POSIX#processArgument(IParseContext, IPath, java.lang.String)}
    */
   @Test
   public final void testProcessArgument_WS() {
@@ -173,7 +173,7 @@ public class IncludePath_C_POSIXTest {
 
   /**
    * Test method for
-   * {@link de.marw.cmake.cdt.internal.lsp.ToolArgumentParsers.IncludePath_C_POSIX#processArgument(IParseContext, IPath, java.lang.String)}
+   * {@link de.marw.cmake.cdt.internal.lsp.Arglets.IncludePath_C_POSIX#processArgument(IParseContext, IPath, java.lang.String)}
    * .
    */
   @Test

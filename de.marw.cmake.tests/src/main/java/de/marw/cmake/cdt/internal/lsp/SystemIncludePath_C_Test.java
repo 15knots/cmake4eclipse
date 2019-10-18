@@ -20,8 +20,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import de.marw.cmake.cdt.internal.lsp.ParseContext;
-import de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser.IParseContext;
-import de.marw.cmake.cdt.language.settings.providers.ToolArgumentParsers.SystemIncludePath_C;
+import de.marw.cmake.cdt.language.settings.providers.IArglet.IParseContext;
+import de.marw.cmake.cdt.language.settings.providers.Arglets.SystemIncludePath_C;
 
 /**
  * @author Martin Weber
@@ -95,7 +95,7 @@ public class SystemIncludePath_C_Test {
 
   /**
    * Test method for
-   * {@link de.marw.cmake.cdt.internal.lsp.ToolArgumentParsers.IncludePath_C_POSIX#processArgument(IParseContext, IPath, java.lang.String)}
+   * {@link de.marw.cmake.cdt.internal.lsp.Arglets.IncludePath_C_POSIX#processArgument(IParseContext, IPath, java.lang.String)}
    */
   @Test
   public final void testProcessArgument_WS() {

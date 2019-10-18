@@ -67,7 +67,8 @@ import de.marw.cmake.cdt.internal.lsp.ParserDetection.ParserDetectionResult;
 import de.marw.cmake.cdt.internal.lsp.builtins.CompilerBuiltinsDetector;
 import de.marw.cmake.cdt.language.settings.providers.IToolCommandlineParser;
 import de.marw.cmake.cdt.language.settings.providers.IToolCommandlineParser.IResult;
-import de.marw.cmake.cdt.language.settings.providers.ParserDetector;
+import de.marw.cmake.cdt.language.settings.providers.IToolDetectionParticiant;
+import de.marw.cmake.cdt.language.settings.providers.DefaultToolDetectionParticiant;
 import de.marw.cmake.cdt.language.settings.providers.StringUtil;
 import de.marw.cmake.cdt.language.settings.providers.builtins.BuiltinDetectionType;
 
@@ -452,8 +453,8 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
   private ParserDetectionResult fastDetermineDetector(String line) {
     // try last known matching detector first...
     if (lastDetector != null) {
-      ParserDetector.MatchResult matchResult = null;
-      final ParserDetector detector = lastDetector.getDetector();
+      DefaultToolDetectionParticiant.MatchResult matchResult = null;
+      final IToolDetectionParticiant detector = lastDetector.getDetector();
       switch (lastDetector.getHow()) {
       case BASENAME:
         matchResult = detector.basenameMatches(line, lastDetector.isMatchBackslash());

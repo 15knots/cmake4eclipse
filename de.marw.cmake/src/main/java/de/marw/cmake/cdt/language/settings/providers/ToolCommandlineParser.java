@@ -30,7 +30,7 @@ public class ToolCommandlineParser implements IToolCommandlineParser {
   private static final boolean DEBUG = Boolean
       .parseBoolean(Platform.getDebugOption(CMakePlugin.PLUGIN_ID + "/CECC/args"));
 
-  private final IToolArgumentParser[] argumentParsers;
+  private final IArglet[] argumentParsers;
   private final String languageID;
   private final IResponseFileArgumentParser responseFileArgumentParser;
   private final BuiltinDetectionType builtinDetectionType;
@@ -55,7 +55,7 @@ public class ToolCommandlineParser implements IToolCommandlineParser {
    *           if any of the {@code builtinDetectionType} or {@code argumentParsers} arguments is {@code null}
    */
   public ToolCommandlineParser(String languageID, IResponseFileArgumentParser responseFileArgumentParser,
-      BuiltinDetectionType builtinDetectionType, IToolArgumentParser... argumentParsers) {
+      BuiltinDetectionType builtinDetectionType, IArglet... argumentParsers) {
     this.languageID = languageID;
     this.builtinDetectionType = Objects.requireNonNull(builtinDetectionType, "builtinDetectionType");
     this.argumentParsers = Objects.requireNonNull(argumentParsers, "argumentParsers");
@@ -128,7 +128,7 @@ public class ToolCommandlineParser implements IToolCommandlineParser {
         // command-line
         if (DEBUG)
           System.out.printf(">> Looking up parser for argument '%s ...'%n", args.substring(0, Math.min(50, args.length())));
-        for (IToolArgumentParser tap : argumentParsers) {
+        for (IArglet tap : argumentParsers) {
           if (DEBUG)
             System.out.printf("   Trying parser %s%n", tap.getClass().getSimpleName());
           consumed = tap.processArgument(result, cwd, args);

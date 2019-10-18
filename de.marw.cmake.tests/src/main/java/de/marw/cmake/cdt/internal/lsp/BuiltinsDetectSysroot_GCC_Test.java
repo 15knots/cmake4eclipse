@@ -18,8 +18,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import de.marw.cmake.cdt.internal.lsp.ParseContext;
-import de.marw.cmake.cdt.language.settings.providers.ToolArgumentParsers;
-import de.marw.cmake.cdt.language.settings.providers.ToolArgumentParsers.Sysroot_GCC;
+import de.marw.cmake.cdt.language.settings.providers.Arglets;
+import de.marw.cmake.cdt.language.settings.providers.Arglets.Sysroot_GCC;
 
 /**
  * @author Martin Weber
@@ -37,7 +37,7 @@ public class BuiltinsDetectSysroot_GCC_Test {
   }
 
   /**
-   * Test method for {@link ToolArgumentParsers.Sysroot_GCC#processArgument}.
+   * Test method for {@link Arglets.Sysroot_GCC#processArgument}.
    */
   @Test
   public final void testProcessArgument_sysroot() {
@@ -65,7 +65,7 @@ public class BuiltinsDetectSysroot_GCC_Test {
   }
 
   /**
-   * Test method for {@link ToolArgumentParsers.Sysroot_GCC#processArgument}.
+   * Test method for {@link Arglets.Sysroot_GCC#processArgument}.
    */
   @Test
   public final void testProcessArgument_isysroot() {
@@ -93,7 +93,7 @@ public class BuiltinsDetectSysroot_GCC_Test {
   }
 
   /**
-   * Test method for {@link ToolArgumentParsers.Sysroot_GCC#processArgument}.
+   * Test method for {@link Arglets.Sysroot_GCC#processArgument}.
    */
   @Test
   public final void testProcessArgument_no_sysroot_prefix() {

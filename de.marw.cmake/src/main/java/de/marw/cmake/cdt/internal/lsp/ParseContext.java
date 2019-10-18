@@ -18,7 +18,7 @@ import org.eclipse.cdt.core.settings.model.ICLanguageSettingEntry;
 import org.eclipse.core.runtime.Platform;
 
 import de.marw.cmake.cdt.internal.CMakePlugin;
-import de.marw.cmake.cdt.language.settings.providers.IToolArgumentParser;
+import de.marw.cmake.cdt.language.settings.providers.IArglet;
 import de.marw.cmake.cdt.language.settings.providers.IToolCommandlineParser;
 
 /**
@@ -26,7 +26,7 @@ import de.marw.cmake.cdt.language.settings.providers.IToolCommandlineParser;
  *
  * @author Martin Weber
  */
-public class ParseContext implements IToolArgumentParser.IParseContext, IToolCommandlineParser.IResult {
+public class ParseContext implements IArglet.IParseContext, IToolCommandlineParser.IResult {
   private static final boolean DEBUG = Boolean
       .parseBoolean(Platform.getDebugOption(CMakePlugin.PLUGIN_ID + "/CECC/entries"));
   private final List<ICLanguageSettingEntry> entries = new ArrayList<>();

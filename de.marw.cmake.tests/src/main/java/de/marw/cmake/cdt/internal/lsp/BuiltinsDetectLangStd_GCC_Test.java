@@ -18,8 +18,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import de.marw.cmake.cdt.internal.lsp.ParseContext;
-import de.marw.cmake.cdt.language.settings.providers.ToolArgumentParsers;
-import de.marw.cmake.cdt.language.settings.providers.ToolArgumentParsers.LangStd_GCC;
+import de.marw.cmake.cdt.language.settings.providers.Arglets;
+import de.marw.cmake.cdt.language.settings.providers.Arglets.LangStd_GCC;
 
 /**
  * @author Martin Weber
@@ -37,7 +37,7 @@ public class BuiltinsDetectLangStd_GCC_Test {
   }
 
   /**
-   * Test method for {@link ToolArgumentParsers.LangStd_GCC#processArgument}.
+   * Test method for {@link Arglets.LangStd_GCC#processArgument}.
    */
   @Test
   public final void testProcessArgument_std() {
@@ -79,7 +79,7 @@ public class BuiltinsDetectLangStd_GCC_Test {
   }
 
   /**
-   * Test method for {@link ToolArgumentParsers.LangStd_GCC#processArgument}.
+   * Test method for {@link Arglets.LangStd_GCC#processArgument}.
    */
   @Test
   public final void testProcessArgument_ansi() {

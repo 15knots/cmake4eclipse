@@ -19,14 +19,14 @@ import java.util.regex.Matcher;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
-import de.marw.cmake.cdt.language.settings.providers.ToolArgumentParsers.NameOptionMatcher;
+import de.marw.cmake.cdt.language.settings.providers.Arglets.NameOptionMatcher;
 
 /**
  * Various response-file argument parser implementations.
  *
  * @author Martin Weber
  */
-public class ResponseFileArgumentParsers {
+public class ResponseFileArglets {
   /**
    * matches a response file name with quoted file name. Name in matcher group 2
    */

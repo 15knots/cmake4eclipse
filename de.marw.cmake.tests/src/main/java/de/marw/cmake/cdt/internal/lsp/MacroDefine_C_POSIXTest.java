@@ -20,8 +20,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import de.marw.cmake.cdt.internal.lsp.ParseContext;
-import de.marw.cmake.cdt.language.settings.providers.ToolArgumentParsers;
-import de.marw.cmake.cdt.language.settings.providers.ToolArgumentParsers.MacroDefine_C_POSIX;
+import de.marw.cmake.cdt.language.settings.providers.Arglets;
+import de.marw.cmake.cdt.language.settings.providers.Arglets.MacroDefine_C_POSIX;
 
 /**
  * @author Martin Weber
@@ -40,7 +40,7 @@ public class MacroDefine_C_POSIXTest {
 
   /**
    * Test method for
-   * {@link ToolArgumentParsers.MacroDefine_C_POSIX#processArgument}.
+   * {@link Arglets.MacroDefine_C_POSIX#processArgument}.
    */
   @Test
   public final void testProcessArgument() {
@@ -77,7 +77,7 @@ public class MacroDefine_C_POSIXTest {
 
   /**
    * Test method for
-   * {@link ToolArgumentParsers.MacroDefine_C_POSIX#processArgument}.
+   * {@link Arglets.MacroDefine_C_POSIX#processArgument}.
    */
   @Test
   public final void testProcessArgument_Value() {
@@ -137,7 +137,7 @@ public class MacroDefine_C_POSIXTest {
 
   /**
    * Test method for
-   * {@link ToolArgumentParsers.MacroDefine_C_POSIX#processArgument}.
+   * {@link Arglets.MacroDefine_C_POSIX#processArgument}.
    */
   @Test
   public final void testProcessArgument_Value_CharLiteral() {
@@ -244,7 +244,7 @@ public class MacroDefine_C_POSIXTest {
 
   /**
    * Test method for
-   * {@link ToolArgumentParsers.MacroDefine_C_POSIX#processArgument}.
+   * {@link Arglets.MacroDefine_C_POSIX#processArgument}.
    */
   @Test
   public final void testProcessArgument_Value_StringLiteral() {
@@ -364,7 +364,7 @@ public class MacroDefine_C_POSIXTest {
 
   /**
    * Test method for
-   * {@link ToolArgumentParsers.MacroDefine_C_POSIX#processArgument}.
+   * {@link Arglets.MacroDefine_C_POSIX#processArgument}.
    */
   @Test
   public final void testProcessArgument_MacroWithArgs() {
