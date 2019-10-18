@@ -27,7 +27,7 @@ import de.marw.cmake.cdt.language.settings.providers.IToolDetectionParticiant;
 import de.marw.cmake.cdt.language.settings.providers.DefaultToolDetectionParticiant;
 import de.marw.cmake.cdt.language.settings.providers.ResponseFileArglets;
 import de.marw.cmake.cdt.language.settings.providers.Arglets;
-import de.marw.cmake.cdt.language.settings.providers.ToolCommandlineParser;
+import de.marw.cmake.cdt.language.settings.providers.DefaultToolCommandlineParser;
 import de.marw.cmake.cdt.language.settings.providers.builtins.BuiltinDetectionType;
 
 /**
@@ -59,20 +59,20 @@ class ParserDetection {
 
     // POSIX compatible C compilers =================================
     {
-      final IToolCommandlineParser cc = new ToolCommandlineParser("org.eclipse.cdt.core.gcc",
+      final IToolCommandlineParser cc = new DefaultToolCommandlineParser("org.eclipse.cdt.core.gcc",
           new ResponseFileArglets.At(), BuiltinDetectionType.GCC_MAYBE, gcc_args);
       parserDetectors.add(new DefaultToolDetectionParticiant("cc", true, "exe", cc));
     }
     // POSIX compatible C++ compilers ===============================
     {
-      final IToolCommandlineParser cxx = new ToolCommandlineParser("org.eclipse.cdt.core.g++",
+      final IToolCommandlineParser cxx = new DefaultToolCommandlineParser("org.eclipse.cdt.core.g++",
           new ResponseFileArglets.At(), BuiltinDetectionType.GCC_MAYBE, gcc_args);
       parserDetectors.add(new DefaultToolDetectionParticiant("c\\+\\+", true, "exe", cxx));
     }
 
     // GNU C compatible compilers ====
     {
-      final IToolCommandlineParser gcc = new ToolCommandlineParser("org.eclipse.cdt.core.gcc",
+      final IToolCommandlineParser gcc = new DefaultToolCommandlineParser("org.eclipse.cdt.core.gcc",
           new ResponseFileArglets.At(), BuiltinDetectionType.GCC, gcc_args);
       parserDetectors.add(new DefaultToolDetectionParticiant("gcc", true, "exe", gcc));
       parserDetectors.add(new DefaultToolDetectionParticiant("clang", true, "exe", gcc));
@@ -81,7 +81,7 @@ class ParserDetection {
     }
     // GNU C++ compatible compilers ====
     {
-      final IToolCommandlineParser gxx = new ToolCommandlineParser("org.eclipse.cdt.core.g++",
+      final IToolCommandlineParser gxx = new DefaultToolCommandlineParser("org.eclipse.cdt.core.g++",
           new ResponseFileArglets.At(), BuiltinDetectionType.GCC, gcc_args);
       parserDetectors.add(new DefaultToolDetectionParticiant("g\\+\\+", true, "exe", gxx));
       parserDetectors.add(new DefaultToolDetectionParticiant("clang\\+\\+", true, "exe", gxx));
@@ -90,7 +90,7 @@ class ParserDetection {
     }
     {
       // cross compilers, e.g. arm-none-eabi-c++ ====
-      final IToolCommandlineParser cxx = new ToolCommandlineParser("org.eclipse.cdt.core.g++",
+      final IToolCommandlineParser cxx = new DefaultToolCommandlineParser("org.eclipse.cdt.core.g++",
           new ResponseFileArglets.At(), BuiltinDetectionType.GCC_MAYBE, gcc_args);
       parserDetectors.add(new DefaultToolDetectionParticiant(".+-c\\+\\+", true, "exe", cxx));
     }
@@ -99,15 +99,15 @@ class ParserDetection {
     {
       final IArglet[] cl_cc_args = { new Arglets.IncludePath_C_CL(),
           new Arglets.MacroDefine_C_CL(), new Arglets.MacroUndefine_C_CL() };
-      final IToolCommandlineParser cl = new ToolCommandlineParser(null, new ResponseFileArglets.At(),
+      final IToolCommandlineParser cl = new DefaultToolCommandlineParser(null, new ResponseFileArglets.At(),
           BuiltinDetectionType.NONE, cl_cc_args);
       parserDetectors.add(new DefaultToolDetectionParticiant("cl", true, "exe", cl));
     }
     // Intel C compilers ============================================
     {
-      final IToolCommandlineParser icc = new ToolCommandlineParser("org.eclipse.cdt.core.gcc",
+      final IToolCommandlineParser icc = new DefaultToolCommandlineParser("org.eclipse.cdt.core.gcc",
           new ResponseFileArglets.At(), BuiltinDetectionType.ICC, gcc_args);
-      final IToolCommandlineParser icpc = new ToolCommandlineParser("org.eclipse.cdt.core.g++",
+      final IToolCommandlineParser icpc = new DefaultToolCommandlineParser("org.eclipse.cdt.core.g++",
           new ResponseFileArglets.At(), BuiltinDetectionType.ICC, gcc_args);
       // Linux & OS X, EDG
       parserDetectors.add(new DefaultToolDetectionParticiant("icc", icc));
@@ -129,7 +129,7 @@ class ParserDetection {
           new Arglets.SystemIncludePath_nvcc(), new Arglets.SystemIncludePath_C(),
           new Arglets.LangStd_nvcc()};
 
-      final IToolCommandlineParser nvcc = new ToolCommandlineParser("com.nvidia.cuda.toolchain.language.cuda.cu",
+      final IToolCommandlineParser nvcc = new DefaultToolCommandlineParser("com.nvidia.cuda.toolchain.language.cuda.cu",
           new ResponseFileArglets.At(), BuiltinDetectionType.NVCC, nvcc_args);
       parserDetectors.add(new DefaultToolDetectionParticiant("nvcc", true, "exe", nvcc));
     }
@@ -138,7 +138,7 @@ class ParserDetection {
     {
       final IArglet[] armclang_args = { new Arglets.IncludePath_C_POSIX(),
           new Arglets.MacroDefine_C_POSIX(), new Arglets.MacroUndefine_C_POSIX(), };
-      final IToolCommandlineParser armclang = new ToolCommandlineParser(null, new ResponseFileArglets.At(),
+      final IToolCommandlineParser armclang = new DefaultToolCommandlineParser(null, new ResponseFileArglets.At(),
           BuiltinDetectionType.NONE, armclang_args);
       parserDetectors.add(new DefaultToolDetectionParticiant("armclang", true, "exe", armclang));
     }
@@ -147,7 +147,7 @@ class ParserDetection {
       final IArglet[] armcc_args = { new Arglets.IncludePath_C_POSIX(),
           new Arglets.MacroDefine_C_POSIX(), new Arglets.MacroUndefine_C_POSIX(),
           new Arglets.SystemIncludePath_armcc() };
-      final IToolCommandlineParser armcc = new ToolCommandlineParser(null, null,
+      final IToolCommandlineParser armcc = new DefaultToolCommandlineParser(null, null,
           BuiltinDetectionType.ARMCC, armcc_args);
       parserDetectors.add(new DefaultToolDetectionParticiant("armcc", true, "exe", armcc));
     }

@@ -26,7 +26,7 @@ import org.junit.Test;
 import de.marw.cmake.cdt.internal.lsp.ParseContext;
 import de.marw.cmake.cdt.language.settings.providers.ResponseFileArglets;
 import de.marw.cmake.cdt.language.settings.providers.Arglets;
-import de.marw.cmake.cdt.language.settings.providers.ToolCommandlineParser;
+import de.marw.cmake.cdt.language.settings.providers.DefaultToolCommandlineParser;
 import de.marw.cmake.cdt.language.settings.providers.IToolCommandlineParser.IResult;
 import de.marw.cmake.cdt.language.settings.providers.builtins.BuiltinDetectionType;
 
@@ -38,7 +38,7 @@ public class ToolCommandlineParserTest {
   @Test
   public final void testResponseFileArgumentParser_At() throws Exception {
 
-    ToolCommandlineParser testee = new ToolCommandlineParser("egal", new ResponseFileArglets.At(),
+    DefaultToolCommandlineParser testee = new DefaultToolCommandlineParser("egal", new ResponseFileArglets.At(),
         BuiltinDetectionType.NONE, new Arglets.IncludePath_C_POSIX(),
         new Arglets.MacroDefine_C_POSIX());
 
@@ -104,7 +104,7 @@ public class ToolCommandlineParserTest {
    */
   @Test
   public final void testResponseFileArgumentParser_At_heredoc() throws Exception {
-    ToolCommandlineParser testee = new ToolCommandlineParser("egal", new ResponseFileArglets.At(),
+    DefaultToolCommandlineParser testee = new DefaultToolCommandlineParser("egal", new ResponseFileArglets.At(),
         BuiltinDetectionType.NONE, new Arglets.IncludePath_C_POSIX(),
         new Arglets.MacroDefine_C_POSIX());
 

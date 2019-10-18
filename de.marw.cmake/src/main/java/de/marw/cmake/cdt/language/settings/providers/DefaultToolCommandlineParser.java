@@ -26,7 +26,7 @@ import de.marw.cmake.cdt.language.settings.providers.builtins.BuiltinDetectionTy
  *
  * @author Martin Weber
  */
-public class ToolCommandlineParser implements IToolCommandlineParser {
+public class DefaultToolCommandlineParser implements IToolCommandlineParser {
   private static final boolean DEBUG = Boolean
       .parseBoolean(Platform.getDebugOption(CMakePlugin.PLUGIN_ID + "/CECC/args"));
 
@@ -54,7 +54,7 @@ public class ToolCommandlineParser implements IToolCommandlineParser {
    * @throws NullPointerException
    *           if any of the {@code builtinDetectionType} or {@code argumentParsers} arguments is {@code null}
    */
-  public ToolCommandlineParser(String languageID, IResponseFileArgumentParser responseFileArgumentParser,
+  public DefaultToolCommandlineParser(String languageID, IResponseFileArgumentParser responseFileArgumentParser,
       BuiltinDetectionType builtinDetectionType, IArglet... argumentParsers) {
     this.languageID = languageID;
     this.builtinDetectionType = Objects.requireNonNull(builtinDetectionType, "builtinDetectionType");
