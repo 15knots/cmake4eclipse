@@ -21,14 +21,18 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 
 import de.marw.cmake.cdt.internal.CMakePlugin;
+import de.marw.cmake.cdt.internal.lsp.builtins.ArmccBuiltinDetectionBehavior;
+import de.marw.cmake.cdt.internal.lsp.builtins.GccBuiltinDetectionBehavior;
+import de.marw.cmake.cdt.internal.lsp.builtins.MaybeGccBuiltinDetectionBehavior;
+import de.marw.cmake.cdt.internal.lsp.builtins.NvccBuiltinDetectionBehavior;
 import de.marw.cmake.cdt.language.settings.providers.IArglet;
 import de.marw.cmake.cdt.language.settings.providers.IToolCommandlineParser;
 import de.marw.cmake.cdt.language.settings.providers.IToolDetectionParticiant;
 import de.marw.cmake.cdt.language.settings.providers.DefaultToolDetectionParticiant;
 import de.marw.cmake.cdt.language.settings.providers.ResponseFileArglets;
+import de.marw.cmake.cdt.language.settings.providers.builtins.IBuiltinsDetectionBehavior;
 import de.marw.cmake.cdt.language.settings.providers.Arglets;
 import de.marw.cmake.cdt.language.settings.providers.DefaultToolCommandlineParser;
-import de.marw.cmake.cdt.language.settings.providers.builtins.BuiltinDetectionType;
 
 /**
  * Utility classes and methods to detect a parser for a compiler given on a
@@ -57,23 +61,26 @@ class ParserDetection {
         new Arglets.SystemIncludePath_C(), new Arglets.LangStd_GCC(),
         new Arglets.Sysroot_GCC() };
 
+    IBuiltinsDetectionBehavior btbGccMaybee= new MaybeGccBuiltinDetectionBehavior();
+    IBuiltinsDetectionBehavior btbGcc= new GccBuiltinDetectionBehavior();
+
     // POSIX compatible C compilers =================================
     {
       final IToolCommandlineParser cc = new DefaultToolCommandlineParser("org.eclipse.cdt.core.gcc",
-          new ResponseFileArglets.At(), BuiltinDetectionType.GCC_MAYBE, gcc_args);
+          new ResponseFileArglets.At(), btbGccMaybee, gcc_args);
       parserDetectors.add(new DefaultToolDetectionParticiant("cc", true, "exe", cc));
     }
     // POSIX compatible C++ compilers ===============================
     {
       final IToolCommandlineParser cxx = new DefaultToolCommandlineParser("org.eclipse.cdt.core.g++",
-          new ResponseFileArglets.At(), BuiltinDetectionType.GCC_MAYBE, gcc_args);
+          new ResponseFileArglets.At(), btbGccMaybee, gcc_args);
       parserDetectors.add(new DefaultToolDetectionParticiant("c\\+\\+", true, "exe", cxx));
     }
 
     // GNU C compatible compilers ====
     {
       final IToolCommandlineParser gcc = new DefaultToolCommandlineParser("org.eclipse.cdt.core.gcc",
-          new ResponseFileArglets.At(), BuiltinDetectionType.GCC, gcc_args);
+          new ResponseFileArglets.At(), btbGcc, gcc_args);
       parserDetectors.add(new DefaultToolDetectionParticiant("gcc", true, "exe", gcc));
       parserDetectors.add(new DefaultToolDetectionParticiant("clang", true, "exe", gcc));
       // cross compilers, e.g. arm-none-eabi-gcc ====
@@ -82,7 +89,7 @@ class ParserDetection {
     // GNU C++ compatible compilers ====
     {
       final IToolCommandlineParser gxx = new DefaultToolCommandlineParser("org.eclipse.cdt.core.g++",
-          new ResponseFileArglets.At(), BuiltinDetectionType.GCC, gcc_args);
+          new ResponseFileArglets.At(), btbGcc, gcc_args);
       parserDetectors.add(new DefaultToolDetectionParticiant("g\\+\\+", true, "exe", gxx));
       parserDetectors.add(new DefaultToolDetectionParticiant("clang\\+\\+", true, "exe", gxx));
       // cross compilers, e.g. arm-none-eabi-g++ ====
@@ -91,7 +98,7 @@ class ParserDetection {
     {
       // cross compilers, e.g. arm-none-eabi-c++ ====
       final IToolCommandlineParser cxx = new DefaultToolCommandlineParser("org.eclipse.cdt.core.g++",
-          new ResponseFileArglets.At(), BuiltinDetectionType.GCC_MAYBE, gcc_args);
+          new ResponseFileArglets.At(), btbGccMaybee, gcc_args);
       parserDetectors.add(new DefaultToolDetectionParticiant(".+-c\\+\\+", true, "exe", cxx));
     }
 
@@ -100,15 +107,16 @@ class ParserDetection {
       final IArglet[] cl_cc_args = { new Arglets.IncludePath_C_CL(),
           new Arglets.MacroDefine_C_CL(), new Arglets.MacroUndefine_C_CL() };
       final IToolCommandlineParser cl = new DefaultToolCommandlineParser(null, new ResponseFileArglets.At(),
-          BuiltinDetectionType.NONE, cl_cc_args);
+          null, cl_cc_args);
       parserDetectors.add(new DefaultToolDetectionParticiant("cl", true, "exe", cl));
     }
     // Intel C compilers ============================================
     {
+      // for the recod: builtin detection: -EP -dM for macros, -H for include FILES. NOTE: Windows: /QdM.
       final IToolCommandlineParser icc = new DefaultToolCommandlineParser("org.eclipse.cdt.core.gcc",
-          new ResponseFileArglets.At(), BuiltinDetectionType.ICC, gcc_args);
+          new ResponseFileArglets.At(), null, gcc_args);
       final IToolCommandlineParser icpc = new DefaultToolCommandlineParser("org.eclipse.cdt.core.g++",
-          new ResponseFileArglets.At(), BuiltinDetectionType.ICC, gcc_args);
+          new ResponseFileArglets.At(), null, gcc_args);
       // Linux & OS X, EDG
       parserDetectors.add(new DefaultToolDetectionParticiant("icc", icc));
       // OS X, clang
@@ -130,7 +138,7 @@ class ParserDetection {
           new Arglets.LangStd_nvcc()};
 
       final IToolCommandlineParser nvcc = new DefaultToolCommandlineParser("com.nvidia.cuda.toolchain.language.cuda.cu",
-          new ResponseFileArglets.At(), BuiltinDetectionType.NVCC, nvcc_args);
+          new ResponseFileArglets.At(), new NvccBuiltinDetectionBehavior(), nvcc_args);
       parserDetectors.add(new DefaultToolDetectionParticiant("nvcc", true, "exe", nvcc));
     }
 
@@ -139,7 +147,7 @@ class ParserDetection {
       final IArglet[] armclang_args = { new Arglets.IncludePath_C_POSIX(),
           new Arglets.MacroDefine_C_POSIX(), new Arglets.MacroUndefine_C_POSIX(), };
       final IToolCommandlineParser armclang = new DefaultToolCommandlineParser(null, new ResponseFileArglets.At(),
-          BuiltinDetectionType.NONE, armclang_args);
+          null, armclang_args);
       parserDetectors.add(new DefaultToolDetectionParticiant("armclang", true, "exe", armclang));
     }
     // ARM.com armcc compiler ====
@@ -148,7 +156,7 @@ class ParserDetection {
           new Arglets.MacroDefine_C_POSIX(), new Arglets.MacroUndefine_C_POSIX(),
           new Arglets.SystemIncludePath_armcc() };
       final IToolCommandlineParser armcc = new DefaultToolCommandlineParser(null, null,
-          BuiltinDetectionType.ARMCC, armcc_args);
+          new ArmccBuiltinDetectionBehavior(), armcc_args);
       parserDetectors.add(new DefaultToolDetectionParticiant("armcc", true, "exe", armcc));
     }
   }

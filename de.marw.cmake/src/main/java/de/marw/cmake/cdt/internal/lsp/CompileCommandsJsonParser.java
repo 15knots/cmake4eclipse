@@ -70,7 +70,7 @@ import de.marw.cmake.cdt.language.settings.providers.IToolCommandlineParser.IRes
 import de.marw.cmake.cdt.language.settings.providers.IToolDetectionParticiant;
 import de.marw.cmake.cdt.language.settings.providers.DefaultToolDetectionParticiant;
 import de.marw.cmake.cdt.language.settings.providers.StringUtil;
-import de.marw.cmake.cdt.language.settings.providers.builtins.BuiltinDetectionType;
+import de.marw.cmake.cdt.language.settings.providers.builtins.IBuiltinsDetectionBehavior;
 
 /**
  * A ILanguageSettingsProvider that parses the file 'compile_commands.json' produced by cmake when option
@@ -322,14 +322,14 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
               IPath cwd = cwdStr != null ? Path.fromOSString(cwdStr) : new Path("");
               IResult result = processCommandLine(storage, enabled, parser, files[0], cwd, pdr.getReducedCommandLine());
 
-              final BuiltinDetectionType builtinDetectionType = parser.getBuiltinDetectionType();
-              if(builtinDetectionType != BuiltinDetectionType.NONE) {
+              final IBuiltinsDetectionBehavior builtinDetection = parser.getIBuiltinsDetectionBehavior();
+              if(builtinDetection != null) {
                 String languageId = parser.getLanguageId();
                 if (languageId == null) {
                   languageId = determineLanguageId(files[0]);
                 }
                 if (languageId != null) {
-                  storage.addBuiltinsDetector(currentCfgDescription, languageId, builtinDetectionType,
+                  storage.addBuiltinsDetector(currentCfgDescription, languageId, builtinDetection,
                       pdr.getCommandLine().getCommand(), result.getBuiltinDetctionArgs());
                 }
               }
@@ -741,12 +741,12 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
      *          ({@code -std=c++17}.
      */
     private void addBuiltinsDetector(ICConfigurationDescription cfgDescription, String languageId,
-        BuiltinDetectionType builtinDetectionType, String compilerCommand, List<String> builtinDetctionArgs) {
+        IBuiltinsDetectionBehavior builtinDetection, String compilerCommand, List<String> builtinDetctionArgs) {
       if (builtinDetectors == null)
         builtinDetectors = new HashMap<>(3, 1.0f);
       if (!builtinDetectors.containsKey(languageId)) {
         CompilerBuiltinsDetector detector = new CompilerBuiltinsDetector(cfgDescription, languageId,
-            builtinDetectionType, compilerCommand, builtinDetctionArgs);
+            builtinDetection, compilerCommand, builtinDetctionArgs);
         builtinDetectors.put(languageId, detector);
       }
     }

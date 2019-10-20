@@ -16,9 +16,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 import org.eclipse.cdt.core.settings.model.ICLanguageSettingEntry;
 import org.junit.Before;
@@ -31,7 +28,6 @@ import org.junit.Test;
  */
 public class GccOutputProcessorTest {
 
-  private List<ICLanguageSettingEntry> entries;
   private GccOutputProcessor testee;
 
   /**
@@ -39,21 +35,21 @@ public class GccOutputProcessorTest {
    */
   @Before
   public void setUp() throws Exception {
-    entries = Collections.synchronizedList(new ArrayList<ICLanguageSettingEntry>());
-    testee = new GccOutputProcessor(entries);
+    testee = new GccOutputProcessor();
   }
 
   @Test
   @Ignore
   public void testProcessLine() {
-    testee.processLine("#define AAA xyz");
+    testee.processLine("#define AAA xyz", new ProcessingContext());
   }
 
   @Test
   public void testProcessFile() throws IOException {
     // pass resource content line-wise to the testee...
+    ProcessingContext pc = new ProcessingContext();
     try (InputStream is = getClass().getResourceAsStream("cbd-gcc.output.txt");
-        OutputSniffer os = new OutputSniffer(testee, null)) {
+        OutputSniffer os = new OutputSniffer(testee, null, pc)) {
       byte[] buffer = new byte[1024];
       int length;
       while ((length = is.read(buffer)) > 0) {
@@ -62,7 +58,7 @@ public class GccOutputProcessorTest {
     }
 
     // check __GNUC__
-    for (ICLanguageSettingEntry entry : entries) {
+    for (ICLanguageSettingEntry entry : pc.getSettingEntries()) {
       if (entry.getKind() == ICLanguageSettingEntry.MACRO) {
         if ("__GNUC__".equals(entry.getName()))
           assertEquals("value (" + entry.getName() + ")", "4", entry.getValue() );
@@ -71,7 +67,7 @@ public class GccOutputProcessorTest {
 
     int inc = 0;
     int macro = 0;
-    for (ICLanguageSettingEntry entry : entries) {
+    for (ICLanguageSettingEntry entry : pc.getSettingEntries()) {
       if (entry.getKind() == ICLanguageSettingEntry.INCLUDE_PATH) {
         inc++;
         assertTrue("path", !"".equals(entry.getName()));

@@ -26,7 +26,7 @@ public interface IArglet {
    * LanguageSettings objects.
    *
    * @param parseContext
-   *        the buffer that receives the new {@code LanguageSettings}
+   *        the buffer that receives the new {@code LanguageSetting} entries
    * @param cwd
    *          the current working directory of the compiler at its invocation
    * @param argsLine

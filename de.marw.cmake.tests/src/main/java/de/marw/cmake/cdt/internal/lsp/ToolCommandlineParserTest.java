@@ -28,7 +28,6 @@ import de.marw.cmake.cdt.language.settings.providers.ResponseFileArglets;
 import de.marw.cmake.cdt.language.settings.providers.Arglets;
 import de.marw.cmake.cdt.language.settings.providers.DefaultToolCommandlineParser;
 import de.marw.cmake.cdt.language.settings.providers.IToolCommandlineParser.IResult;
-import de.marw.cmake.cdt.language.settings.providers.builtins.BuiltinDetectionType;
 
 /**
  * @author Martin Weber
@@ -39,7 +38,7 @@ public class ToolCommandlineParserTest {
   public final void testResponseFileArgumentParser_At() throws Exception {
 
     DefaultToolCommandlineParser testee = new DefaultToolCommandlineParser("egal", new ResponseFileArglets.At(),
-        BuiltinDetectionType.NONE, new Arglets.IncludePath_C_POSIX(),
+        null, new Arglets.IncludePath_C_POSIX(),
         new Arglets.MacroDefine_C_POSIX());
 
     IResult entries;
@@ -105,7 +104,7 @@ public class ToolCommandlineParserTest {
   @Test
   public final void testResponseFileArgumentParser_At_heredoc() throws Exception {
     DefaultToolCommandlineParser testee = new DefaultToolCommandlineParser("egal", new ResponseFileArglets.At(),
-        BuiltinDetectionType.NONE, new Arglets.IncludePath_C_POSIX(),
+        null, new Arglets.IncludePath_C_POSIX(),
         new Arglets.MacroDefine_C_POSIX());
 
     final String more = " -g -MMD  -o CMakeFiles/execut1.dir/util1.c.o"

@@ -18,7 +18,7 @@ import org.eclipse.core.runtime.Platform;
 
 import de.marw.cmake.cdt.internal.CMakePlugin;
 import de.marw.cmake.cdt.internal.lsp.ParseContext;
-import de.marw.cmake.cdt.language.settings.providers.builtins.BuiltinDetectionType;
+import de.marw.cmake.cdt.language.settings.providers.builtins.IBuiltinsDetectionBehavior;
 
 /**
  * Parses the build output produced by a specific tool invocation and detects
@@ -32,8 +32,8 @@ public class DefaultToolCommandlineParser implements IToolCommandlineParser {
 
   private final IArglet[] argumentParsers;
   private final String languageID;
-  private final IResponseFileArgumentParser responseFileArgumentParser;
-  private final BuiltinDetectionType builtinDetectionType;
+  private final IResponseFileArglet responseFileArglet;
+  private final IBuiltinsDetectionBehavior builtinsDetection;
 
   /** gathers the result */
   private ParseContext result;
@@ -41,25 +41,36 @@ public class DefaultToolCommandlineParser implements IToolCommandlineParser {
   private IPath cwd;
 
   /**
+   * Constructs a new object with the given values.
+   * <p>
+   * NOTE: Concerning the {@code languageID} argument, please note that CDT expects "org.eclipse.cdt.core.gcc" for the C
+   * language and "org.eclipse.cdt.core.g++" for the C++ language. Some extension to CDT may recogize different language
+   * IDs, such as "com.nvidia.cuda.toolchain.language.cuda.cu"
+   * </p>
+   *
    * @param languageID
    *          the language ID of the language that the tool compiles or {@code null} if the language ID should be
    *          derived from the source file-name extension
-   * @param responseFileArgumentParser
+   * @param responseFileArglet
    *          the parsers for the response-file command-line argument for the tool or {@code null} if the tool does not
    *          recognize a response-file argument
-   * @param builtinDetectionType
-   *          the classification of how to detect compiler-built-in macros and include paths.
+   * @param builtinsDetectionBehavior
+   *          the {@code IBuiltinsDetectionBehavior} which specifies how built-in compiler macros and include path
+   *          detection is handled for a specific compiler or {@null} if the compiler does not support built-in
+   *          detection.
    * @param argumentParsers
    *          the parsers for the command line arguments of of interest for the tool
    * @throws NullPointerException
-   *           if any of the {@code builtinDetectionType} or {@code argumentParsers} arguments is {@code null}
+   *           if any of the {@code builtinsDetection} or {@code argumentParsers} arguments is {@code null}
+   * @see Arglets various IArglet implementations you may want to use
+   * @see ResponseFileArglets IArglet implementations for response file arguments you may want to use
    */
-  public DefaultToolCommandlineParser(String languageID, IResponseFileArgumentParser responseFileArgumentParser,
-      BuiltinDetectionType builtinDetectionType, IArglet... argumentParsers) {
+  public DefaultToolCommandlineParser(String languageID, IResponseFileArglet responseFileArglet,
+      IBuiltinsDetectionBehavior builtinsDetectionBehavior, IArglet... argumentParsers) {
     this.languageID = languageID;
-    this.builtinDetectionType = Objects.requireNonNull(builtinDetectionType, "builtinDetectionType");
+    this.builtinsDetection = builtinsDetectionBehavior;
     this.argumentParsers = Objects.requireNonNull(argumentParsers, "argumentParsers");
-    this.responseFileArgumentParser = responseFileArgumentParser;
+    this.responseFileArglet = responseFileArglet;
   }
 
   @Override
@@ -68,7 +79,7 @@ public class DefaultToolCommandlineParser implements IToolCommandlineParser {
     this.cwd = Objects.requireNonNull(cwd, "cwd");
 
     ParserHandler ph = new ParserHandler();
-    ph.parseArguments(responseFileArgumentParser, args);
+    ph.parseArguments(responseFileArglet, args);
     return result;
   }
 
@@ -77,11 +88,9 @@ public class DefaultToolCommandlineParser implements IToolCommandlineParser {
     return languageID;
   }
 
-  /** Gets the {@code BuiltinDetectionType}.
-   */
   @Override
-  public BuiltinDetectionType getBuiltinDetectionType() {
-    return builtinDetectionType;
+  public IBuiltinsDetectionBehavior getIBuiltinsDetectionBehavior() {
+    return builtinsDetection;
   }
 
   @Override
@@ -115,11 +124,11 @@ public class DefaultToolCommandlineParser implements IToolCommandlineParser {
   private class ParserHandler implements IParserHandler {
 
     /**
-     * @param responseFileArgumentParser
+     * @param responseFileArglet
      * @param args
      *          the command line arguments to process
      */
-    private void parseArguments(IResponseFileArgumentParser responseFileArgumentParser, String args) {
+    private void parseArguments(IResponseFileArglet responseFileArglet, String args) {
       // eat buildOutput string argument by argument..
       while (!(args = StringUtil.trimLeadingWS(args)).isEmpty()) {
         boolean argParsed = false;
@@ -142,10 +151,10 @@ public class DefaultToolCommandlineParser implements IToolCommandlineParser {
         }
 
         // try response file
-        if (!argParsed && responseFileArgumentParser != null) {
+        if (!argParsed && responseFileArglet != null) {
           if (DEBUG)
-            System.out.printf("   Trying parser %s%n", responseFileArgumentParser.getClass().getSimpleName());
-          consumed = responseFileArgumentParser.process(this, args);
+            System.out.printf("   Trying parser %s%n", responseFileArglet.getClass().getSimpleName());
+          consumed = responseFileArglet.process(this, args);
           if (consumed > 0) {
             if (DEBUG)
               System.out.printf("<< PARSED ARGUMENT '%s'%n", args.substring(0, consumed));

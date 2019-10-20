@@ -40,7 +40,7 @@ public class IncludePath_C_POSIXTest {
 
   /**
    * Test method for
-   * {@link de.marw.cmake.cdt.internal.lsp.Arglets.IncludePath_C_POSIX#processArgument(IParseContext, IPath, java.lang.String)}
+   * {@link IncludePath_C_POSIX#processArgument(IParseContext, IPath, java.lang.String)}
    * .
    */
   @Test
@@ -115,7 +115,7 @@ public class IncludePath_C_POSIXTest {
 
   /**
    * Test method for
-   * {@link de.marw.cmake.cdt.internal.lsp.Arglets.IncludePath_C_POSIX#processArgument(IParseContext, IPath, java.lang.String)}
+   * {@link IncludePath_C_POSIX#processArgument(IParseContext, IPath, java.lang.String)}
    */
   @Test
   public final void testProcessArgument_WS() {
@@ -173,7 +173,7 @@ public class IncludePath_C_POSIXTest {
 
   /**
    * Test method for
-   * {@link de.marw.cmake.cdt.internal.lsp.Arglets.IncludePath_C_POSIX#processArgument(IParseContext, IPath, java.lang.String)}
+   * {@link IncludePath_C_POSIX#processArgument(IParseContext, IPath, java.lang.String)}
    * .
    */
   @Test

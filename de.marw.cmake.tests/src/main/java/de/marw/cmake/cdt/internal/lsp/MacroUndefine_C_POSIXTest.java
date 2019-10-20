@@ -19,9 +19,8 @@ import org.eclipse.core.runtime.Path;
 import org.junit.Before;
 import org.junit.Test;
 
-import de.marw.cmake.cdt.internal.lsp.ParseContext;
-import de.marw.cmake.cdt.language.settings.providers.IArglet.IParseContext;
 import de.marw.cmake.cdt.language.settings.providers.Arglets.MacroUndefine_C_POSIX;
+import de.marw.cmake.cdt.language.settings.providers.IArglet.IParseContext;
 
 /**
  * @author Martin Weber
@@ -40,7 +39,7 @@ public class MacroUndefine_C_POSIXTest {
 
   /**
    * Test method for
-   * {@link de.marw.cmake.cdt.internal.lsp.Arglets.MacroUndefine_C_POSIX#processArgument(IParseContext, IPath, java.lang.String)}
+   * {@link MacroUndefine_C_POSIX#processArgument(IParseContext, IPath, java.lang.String)}
    * .
    */
   @Test

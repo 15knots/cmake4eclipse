@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -46,7 +45,8 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 
 import de.marw.cmake.cdt.internal.CMakePlugin;
-import de.marw.cmake.cdt.language.settings.providers.builtins.BuiltinDetectionType;
+import de.marw.cmake.cdt.language.settings.providers.builtins.IBuiltinsDetectionBehavior;
+import de.marw.cmake.cdt.language.settings.providers.builtins.IBuiltinsOutputProcessor;
 
 /**
  * Detects preprocessor macros and include paths that are built-in to a compiler.
@@ -64,33 +64,33 @@ public class CompilerBuiltinsDetector {
   /** environment variables, lazily instantiated */
   private String[] envp;
 
-  private String languageId;
+  private final String languageId;
 
-  private String command;
+  private final String command;
 
-  private List<String> builtinDetctionArgs;
+  private List<String> builtinsDetectionArgs;
 
-  private BuiltinDetectionType builtinDetectionType;
+  private final IBuiltinsDetectionBehavior builtinsDetectionBehavior;
 
   /**
    * @param cfgDescription
    *          configuration description.
    * @param languageId
    *          language id
-   * @param builtinDetectionType
-   *          the compiler classification
+   * @param builtinsDetectionBehavior
+   *          how compiler built-ins are to be detected
    * @param command
    *          the compiler command (arg 0)
-   * @param builtinDetctionArgs
+   * @param builtinsDetectionArgs
    *          the compiler arguments from the command-line that affect built-in detection. For the GNU compilers, these
    *          are options like {@code --sysroot} and options that specify the language's standard ({@code -std=c++17}.
    */
   public CompilerBuiltinsDetector(ICConfigurationDescription cfgDescription, String languageId,
-      BuiltinDetectionType builtinDetectionType, String command, List<String> builtinDetctionArgs) {
+      IBuiltinsDetectionBehavior builtinsDetectionBehavior, String command, List<String> builtinsDetectionArgs) {
     this.languageId = Objects.requireNonNull(languageId, "languageId");
+    this.builtinsDetectionBehavior = Objects.requireNonNull(builtinsDetectionBehavior, "builtinsDetectionBehavior");
     this.command = Objects.requireNonNull(command, "command");
-    this.builtinDetctionArgs = Objects.requireNonNull(builtinDetctionArgs, "builtinDetctionArgs");
-    this.builtinDetectionType = Objects.requireNonNull(builtinDetectionType, "builtinDetectionType");
+    this.builtinsDetectionArgs = Objects.requireNonNull(builtinsDetectionArgs, "builtinsDetectionArgs");
     this.cfgDescription = Objects.requireNonNull(cfgDescription);
   }
 
@@ -101,29 +101,16 @@ public class CompilerBuiltinsDetector {
   }
 
   /**
-   * Run built-in detection builtinDetctionArgs.
-   * @param withConsole whether to show a console for the builtinDetctionArgs output
+   * Run built-in detection builtinsDetectionArgs.
+   * @param withConsole whether to show a console for the builtinsDetectionArgs output
    *
    * @throws CoreException
    */
   public List<ICLanguageSettingEntry> run(boolean withConsole) throws CoreException {
-    List<ICLanguageSettingEntry> entries = Collections.synchronizedList(new ArrayList<ICLanguageSettingEntry>());
+    ProcessingContext entries = new ProcessingContext();
 
-    boolean silent = false;
-    switch (builtinDetectionType) {
-    case NONE:
-    case ICC: // TODO implement when someone demands it and comes with example output
-      return entries;
-    case GCC_MAYBE:
-      // 'gcc' recognized as 'cc' by cmake: try detection, but do not report errors on failure
-      silent = true;
-      break;
-    default:
-      break;
-    }
-
-    final List<String> argList = getCompilerArguments(languageId, builtinDetectionType);
-    argList.addAll(builtinDetctionArgs);
+    final List<String> argList = getCompilerArguments(languageId);
+    argList.addAll(builtinsDetectionArgs);
 
     IConsole console= null;
     if (withConsole) {
@@ -149,14 +136,14 @@ public class CompilerBuiltinsDetector {
       }
       // NOTE: we need 2 of these, since the output streams are not synchronized, causing loss of
       // the internal processor state
-      final BuiltinsOutputProcessor bopOut = createCompilerOutputProcessor(entries, builtinDetectionType);
-      final BuiltinsOutputProcessor bopErr = createCompilerOutputProcessor(entries, builtinDetectionType);
-      int state = launcher.waitAndRead(new OutputSniffer(bopOut, console == null ? null : console.getOutputStream()),
-          new OutputSniffer(bopErr, console == null ? null : console.getErrorStream()), monitor);
+      final IBuiltinsOutputProcessor bopOut = builtinsDetectionBehavior.createCompilerOutputProcessor();
+      final IBuiltinsOutputProcessor bopErr = builtinsDetectionBehavior.createCompilerOutputProcessor();
+      int state = launcher.waitAndRead(new OutputSniffer(bopOut, console == null ? null : console.getOutputStream(), new ProcessingContext()),
+          new OutputSniffer(bopErr, console == null ? null : console.getErrorStream(), new ProcessingContext()), monitor);
       if (state != ICommandLauncher.COMMAND_CANCELED) {
         // check exit status
         final int exitValue = proc.exitValue();
-        if (exitValue != 0 && !silent) {
+        if (exitValue != 0 && !builtinsDetectionBehavior.suppressErrormessage()) {
           // compiler had errors...
           String errMsg = String.format("%1$s exited with status %2$d.", command, exitValue);
           createMarker(errMsg);
@@ -166,58 +153,17 @@ public class CompilerBuiltinsDetector {
       // process start failed
       createMarker(launcher.getErrorMessage());
     }
-    return entries;
+    return entries.getSettingEntries();
   }
 
   /**
-   * @param entries
-   *          where to place the {@code ICLanguageSettingEntry}s found during processing.
-   * @param builtinDetectionType
+   * Gets the compiler-arguments corresponding to the specified language ID and the builtinDetection.
    */
-  private BuiltinsOutputProcessor createCompilerOutputProcessor(List<ICLanguageSettingEntry> entries,
-      BuiltinDetectionType builtinDetectionType) {
-    switch (builtinDetectionType) {
-    case GCC:
-    case GCC_MAYBE:
-    case NVCC:
-    case ARMCC:
-      return new GccOutputProcessor(entries);
-    // case ICC:
-    // case CL:
-    default:
-    }
-    return null;
-  }
-
-  /**
-   * Gets the compiler-arguments corresponding to the specified language ID and BuiltinDetectionType.
-   */
-  private List<String> getCompilerArguments(String languageId, BuiltinDetectionType builtinDetectionType) {
+  private List<String> getCompilerArguments(String languageId) {
     List<String> args = new ArrayList<>();
-    args.addAll(getDetectionTypeArguments(builtinDetectionType));
+    args.addAll(builtinsDetectionBehavior.getBuiltinsOutputEnablingArgs());
     args.add(getInputFile(languageId));
     return args;
-  }
-
-  /**
-   * Gets the compiler-arguments corresponding to the specified BuiltinDetectionType.
-   */
-  private List<? extends String> getDetectionTypeArguments(BuiltinDetectionType builtinDetectionType) {
-    switch (builtinDetectionType) {
-    case GCC:
-    case GCC_MAYBE:
-      return Arrays.asList("-E", "-P", "-dM", "-Wp,-v");
-    case NVCC:
-      return Arrays.asList("-E", "-Xcompiler", "-P", "-Xcompiler", "-dM", "-Xcompiler", "-v");
-    case ICC:
-      return Arrays.asList("-EP", "-dM");
-    case CL:
-      return Arrays.asList("/nologo", "/EP", "/dM");
-    case ARMCC:
-      return Arrays.asList("--list_macros");
-    default:
-      return Arrays.asList();
-    }
   }
 
   /**
@@ -234,7 +180,7 @@ public class CompilerBuiltinsDetector {
       // of the language as long as the encoding is set to UTF-8.
       // English language is set for parser because it relies on English
       // messages
-      // in the output of the 'gcc -v' builtinDetctionArgs.
+      // in the output of the 'gcc -v' builtinsDetectionArgs.
 
       List<String> env = new ArrayList<>(Arrays.asList(getEnvp(cfgDescription)));
       for (Iterator<String> iterator = env.iterator(); iterator.hasNext();) {
@@ -273,7 +219,7 @@ public class CompilerBuiltinsDetector {
     // Include paths with locale characters will be handled properly regardless
     // of the language as long as the encoding is set to UTF-8.
     // English language is set for parser because it relies on English messages
-    // in the output of the 'gcc -v' builtinDetctionArgs.
+    // in the output of the 'gcc -v' builtinsDetectionArgs.
     strings.add("LANGUAGE" + "=en"); // override for GNU gettext
     strings.add("LC_ALL" + "=C.UTF-8"); // for other parts of the system
                                         // libraries

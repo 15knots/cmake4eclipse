@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 Martin Weber.
+ * Copyright (c) 2017-2019 Martin Weber.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,7 +40,7 @@ public class ResponseFileArglets {
   /**
    * Handles a response file argument that starts with the '@' character.
    */
-  public static class At implements IResponseFileArgumentParser {
+  public static class At implements IResponseFileArglet {
     private static final NameOptionMatcher[] optionMatchers = {
         /* unquoted directory */
         new NameOptionMatcher("@" + REGEX_UNQUOTED_FILE, 1),
@@ -51,7 +51,7 @@ public class ResponseFileArglets {
      * (non-Javadoc)
      *
      * @see
-     * de.marw.cmake.cdt.language.settings.providers.IResponseFileArgumentParser
+     * de.marw.cmake.cdt.language.settings.providers.IResponseFileArglet
      * #process(de.marw.cmake.cdt.language.settings.providers.IParserHandler,
      * java.lang.String)
      */
