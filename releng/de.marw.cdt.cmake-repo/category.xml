@@ -3,7 +3,9 @@
    <feature id="de.marw.cdt.cmake">
       <category name="cmake"/>
    </feature>
-
+   <feature id="de.marw.cdt.cmake.source">
+      <category name="cmake"/>
+   </feature>
    <category-def name="cmake" label="CMake">
       <description>CMake</description>
    </category-def>
