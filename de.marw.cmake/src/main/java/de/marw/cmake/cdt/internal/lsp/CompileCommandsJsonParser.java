@@ -65,10 +65,10 @@ import de.marw.cmake.cdt.internal.CMakePlugin;
 import de.marw.cmake.cdt.internal.lsp.ParserDetection.DetectorWithMethod;
 import de.marw.cmake.cdt.internal.lsp.ParserDetection.ParserDetectionResult;
 import de.marw.cmake.cdt.internal.lsp.builtins.CompilerBuiltinsDetector;
+import de.marw.cmake.cdt.language.settings.providers.DefaultToolDetectionParticipant;
 import de.marw.cmake.cdt.language.settings.providers.IToolCommandlineParser;
 import de.marw.cmake.cdt.language.settings.providers.IToolCommandlineParser.IResult;
-import de.marw.cmake.cdt.language.settings.providers.IToolDetectionParticiant;
-import de.marw.cmake.cdt.language.settings.providers.DefaultToolDetectionParticiant;
+import de.marw.cmake.cdt.language.settings.providers.IToolDetectionParticipant;
 import de.marw.cmake.cdt.language.settings.providers.StringUtil;
 import de.marw.cmake.cdt.language.settings.providers.builtins.IBuiltinsDetectionBehavior;
 
@@ -324,10 +324,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
 
               final IBuiltinsDetectionBehavior builtinDetection = parser.getIBuiltinsDetectionBehavior();
               if(builtinDetection != null) {
-                String languageId = parser.getLanguageId();
-                if (languageId == null) {
-                  languageId = determineLanguageId(files[0]);
-                }
+                String languageId = parser.getLanguageId(files[0].getFileExtension());
                 if (languageId != null) {
                   storage.addBuiltinsDetector(currentCfgDescription, languageId, builtinDetection,
                       pdr.getCommandLine().getCommand(), result.getBuiltinDetctionArgs());
@@ -335,7 +332,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
               }
             } else {
               // no matching parser found
-              if (determineLanguageId(files[0]) == null) {
+              if (!isKnownLanguage(files[0])) {
                 // do not complain if source file is a fortran, assembler or other one we do not care for
                 return;
               }
@@ -354,20 +351,19 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
   }
 
   /**
-   * Gets the languageID of the specified C/C++ source file from its file name extension.
+   * Gets whether the specified source file name extension is one of our supported languages.
    *
    * @param file
-   *          The file name to examine
-   * @return the language ID or {@code null} if the file name extension is unknown.
+   *          The file name extension to examine
+   * @return {@code false} if the language is unknown and not supported.
    */
-  private static String determineLanguageId(IFile file) {
+  private static boolean isKnownLanguage(IFile file) {
     final String fileExtension = file.getFileExtension();
     if(fileExtension == null) {
-      return null;
+      return false;
     }
     switch (fileExtension) {
     case "c":
-      return "org.eclipse.cdt.core.gcc";
     case "C":
     case "cc":
     case "cpp":
@@ -375,11 +371,10 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
     case "cp":
     case "cxx":
     case "c++":
-      return "org.eclipse.cdt.core.g++";
     case "cu":
-      return "com.nvidia.cuda.toolchain.language.cuda.cu";
+      return true;
     default:
-      return null;
+      return false;
     }
   }
 
@@ -453,8 +448,8 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
   private ParserDetectionResult fastDetermineDetector(String line) {
     // try last known matching detector first...
     if (lastDetector != null) {
-      DefaultToolDetectionParticiant.MatchResult matchResult = null;
-      final IToolDetectionParticiant detector = lastDetector.getDetector();
+      DefaultToolDetectionParticipant.MatchResult matchResult = null;
+      final IToolDetectionParticipant detector = lastDetector.getDetector();
       switch (lastDetector.getHow()) {
       case BASENAME:
         matchResult = detector.basenameMatches(line, lastDetector.isMatchBackslash());
@@ -521,10 +516,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
     if (enabled) {
       final List<ICLanguageSettingEntry> entries = result.getSettingEntries();
       if (entries.size() > 0) {
-        String languageId = cmdlineParser.getLanguageId();
-        if (languageId == null) {
-          languageId = determineLanguageId(sourceFile);
-        }
+        String languageId = cmdlineParser.getLanguageId(sourceFile.getFileExtension());
         if (languageId != null) {
           handleIncludePathEntries(storage, entries, languageId);
           // attach settings to sourceFile resource...

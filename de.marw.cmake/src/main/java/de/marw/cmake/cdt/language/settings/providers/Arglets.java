@@ -61,7 +61,7 @@ public class Arglets {
    *
    * @author Martin Weber
    */
-  static class NameOptionMatcher {
+  public static class NameOptionMatcher {
     final Matcher matcher;
     final int nameGroup;
 
@@ -90,7 +90,7 @@ public class Arglets {
    *
    * @author Martin Weber
    */
-  static class NameValueOptionMatcher extends NameOptionMatcher {
+  public static class NameValueOptionMatcher extends NameOptionMatcher {
     /**
      * the number of the value group, or {@code -1} for a pattern that does not
      * recognize a macro value
@@ -133,7 +133,7 @@ public class Arglets {
    * A tool argument parser capable to parse a C-compiler macro definition
    * argument.
    */
-  private static abstract class MacroDefineGeneric {
+  public  static abstract class MacroDefineGeneric {
 
     protected final int processArgument(IParseContext parseContext, String args,
         NameValueOptionMatcher[] optionMatchers) {
@@ -158,7 +158,7 @@ public class Arglets {
   /**
    * A tool argument parser capable to parse a C-compiler macro cancel argument.
    */
-  private static class MacroUndefineGeneric {
+  public  static class MacroUndefineGeneric {
 
     /*-
      * @see de.marw.cmake.cdt.language.settings.providers.IArglet#processArgument(java.util.List, java.lang.String)
@@ -183,7 +183,7 @@ public class Arglets {
   /**
    * A tool argument parser capable to parse a C-compiler include path argument.
    */
-  private static abstract class IncludePathGeneric {
+  public static abstract class IncludePathGeneric {
     /**
      * @param cwd
      *          the current working directory of the compiler at its invocation
@@ -366,72 +366,8 @@ public class Arglets {
   ////////////////////////////////////////////////////////////////////
   // POSIX compatible option parsers
   ////////////////////////////////////////////////////////////////////
-  /**
-   * A tool argument parser capable to parse a cl (Microsoft c compiler)
-   * compatible C-compiler macro definition argument: {@code /DNAME=value}.
-   */
-  public static class MacroDefine_C_CL extends MacroDefineGeneric implements IArglet {
-
-    private static final NameValueOptionMatcher[] optionMatchers = {
-        /* quoted value, whitespace in value, w/ macro arglist */
-        new NameValueOptionMatcher("[-/]D" + REGEX_MACRO_NAME_SKIP_LEADING_WS + "((?:=)([\"'])(.+?)\\4)", 1, 5),
-        /* w/ macro arglist */
-        new NameValueOptionMatcher("[-/]D" + REGEX_MACRO_NAME_SKIP_LEADING_WS + "((?:=)(\\S+))?", 1, 3),
-        /* quoted name, whitespace in value, w/ macro arglist */
-        new NameValueOptionMatcher("[-/]D" + REGEX_MACRO_NAME_SKIP_LEADING_WS + "((?:=)(.+?))?\\1", 2, 5),
-        /* w/ macro arglist, shell escapes \' and \" in value */
-        new NameValueOptionMatcher("[-/]D" + REGEX_MACRO_NAME_SKIP_LEADING_WS + "(?:=)((\\\\([\"']))(.*?)\\2)", 1, 2), };
-
-    /*-
-     * @see de.marw.cmake.cdt.language.settings.providers.IArglet#processArgs(java.lang.String)
-     */
-    @Override
-    public int processArgument(IParseContext parseContext, IPath cwd, String argsLine) {
-      return processArgument(parseContext, argsLine, optionMatchers);
-    }
-
-  }
 
   ////////////////////////////////////////////////////////////////////
-  /**
-   * A tool argument parser capable to parse a cl (Microsoft c compiler)
-   * compatible C-compiler macro cancel argument: {@code /UNAME}.
-   */
-  public static class MacroUndefine_C_CL extends MacroUndefineGeneric implements IArglet {
-
-    private static final NameOptionMatcher optionMatcher = new NameOptionMatcher(
-        "[-/]U" + REGEX_MACRO_NAME_SKIP_LEADING_WS, 1);
-
-    /*-
-     * @see de.marw.cmake.cdt.language.settings.providers.IArglet#processArgument(java.util.List, java.lang.String)
-     */
-    @Override
-    public int processArgument(IParseContext parseContext, IPath cwd, String argsLine) {
-      return processArgument(parseContext, argsLine, optionMatcher);
-    }
-  }
-
-  ////////////////////////////////////////////////////////////////////
-  /**
-   * A tool argument parser capable to parse a cl (Microsoft c compiler)
-   * compatible C-compiler include path argument: {@code /Ipath}.
-   */
-  public static class IncludePath_C_CL extends IncludePathGeneric implements IArglet {
-    private static final NameOptionMatcher[] optionMatchers = {
-        /* quoted directory */
-        new NameOptionMatcher("[-/]I" + REGEX_INCLUDEPATH_QUOTED_DIR, 2),
-        /* unquoted directory */
-        new NameOptionMatcher("[-/]I" + REGEX_INCLUDEPATH_UNQUOTED_DIR, 1), };
-
-    /*-
-     * @see de.marw.cmake.cdt.language.settings.providers.IArglet#processArgs(java.lang.String)
-     */
-    @Override
-    public int processArgument(IParseContext parseContext, IPath cwd, String argsLine) {
-      return processArgument(parseContext, cwd, argsLine, optionMatchers);
-    }
-  }
-
   ////////////////////////////////////////////////////////////////////
   // compiler built-ins detection
   ////////////////////////////////////////////////////////////////////

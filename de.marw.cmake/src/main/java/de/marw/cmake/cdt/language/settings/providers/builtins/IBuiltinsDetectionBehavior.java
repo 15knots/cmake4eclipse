@@ -32,7 +32,7 @@ public interface IBuiltinsDetectionBehavior {
 
   /**
    * Gets whether to suppress the error-message that is printed if the compiler process exited with a non-zero exit
-   * status code. Except for some special cases, most implementations, should be returned {@false} here.
+   * status code. Except for some special cases, most implementations, should be returned {@code false} here.
    */
   boolean suppressErrormessage();
 }

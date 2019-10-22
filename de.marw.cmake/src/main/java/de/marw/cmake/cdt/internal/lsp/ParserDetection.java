@@ -25,14 +25,14 @@ import de.marw.cmake.cdt.internal.lsp.builtins.ArmccBuiltinDetectionBehavior;
 import de.marw.cmake.cdt.internal.lsp.builtins.GccBuiltinDetectionBehavior;
 import de.marw.cmake.cdt.internal.lsp.builtins.MaybeGccBuiltinDetectionBehavior;
 import de.marw.cmake.cdt.internal.lsp.builtins.NvccBuiltinDetectionBehavior;
-import de.marw.cmake.cdt.language.settings.providers.IArglet;
-import de.marw.cmake.cdt.language.settings.providers.IToolCommandlineParser;
-import de.marw.cmake.cdt.language.settings.providers.IToolDetectionParticiant;
-import de.marw.cmake.cdt.language.settings.providers.DefaultToolDetectionParticiant;
-import de.marw.cmake.cdt.language.settings.providers.ResponseFileArglets;
-import de.marw.cmake.cdt.language.settings.providers.builtins.IBuiltinsDetectionBehavior;
 import de.marw.cmake.cdt.language.settings.providers.Arglets;
 import de.marw.cmake.cdt.language.settings.providers.DefaultToolCommandlineParser;
+import de.marw.cmake.cdt.language.settings.providers.DefaultToolDetectionParticipant;
+import de.marw.cmake.cdt.language.settings.providers.IArglet;
+import de.marw.cmake.cdt.language.settings.providers.IToolCommandlineParser;
+import de.marw.cmake.cdt.language.settings.providers.IToolDetectionParticipant;
+import de.marw.cmake.cdt.language.settings.providers.ResponseFileArglets;
+import de.marw.cmake.cdt.language.settings.providers.builtins.IBuiltinsDetectionBehavior;
 
 /**
  * Utility classes and methods to detect a parser for a compiler given on a
@@ -51,7 +51,7 @@ class ParserDetection {
    * takes part in the current build. The Matcher detects whether a command line
    * is an invocation of the tool.
    */
-  private static final List<DefaultToolDetectionParticiant> parserDetectors = new ArrayList<>(22);
+  private static final List<DefaultToolDetectionParticipant> parserDetectors = new ArrayList<>(22);
 
   static {
     /** Names of known tools along with their command line argument parsers */
@@ -68,66 +68,63 @@ class ParserDetection {
     {
       final IToolCommandlineParser cc = new DefaultToolCommandlineParser("org.eclipse.cdt.core.gcc",
           new ResponseFileArglets.At(), btbGccMaybee, gcc_args);
-      parserDetectors.add(new DefaultToolDetectionParticiant("cc", true, "exe", cc));
+      parserDetectors.add(new DefaultToolDetectionParticipant("cc", true, "exe", cc));
     }
     // POSIX compatible C++ compilers ===============================
     {
       final IToolCommandlineParser cxx = new DefaultToolCommandlineParser("org.eclipse.cdt.core.g++",
           new ResponseFileArglets.At(), btbGccMaybee, gcc_args);
-      parserDetectors.add(new DefaultToolDetectionParticiant("c\\+\\+", true, "exe", cxx));
+      parserDetectors.add(new DefaultToolDetectionParticipant("c\\+\\+", true, "exe", cxx));
     }
 
     // GNU C compatible compilers ====
     {
       final IToolCommandlineParser gcc = new DefaultToolCommandlineParser("org.eclipse.cdt.core.gcc",
           new ResponseFileArglets.At(), btbGcc, gcc_args);
-      parserDetectors.add(new DefaultToolDetectionParticiant("gcc", true, "exe", gcc));
-      parserDetectors.add(new DefaultToolDetectionParticiant("clang", true, "exe", gcc));
+      parserDetectors.add(new DefaultToolDetectionParticipant("gcc", true, "exe", gcc));
+      parserDetectors.add(new DefaultToolDetectionParticipant("clang", true, "exe", gcc));
       // cross compilers, e.g. arm-none-eabi-gcc ====
-      parserDetectors.add(new DefaultToolDetectionParticiant(".+-gcc", true, "exe", gcc));
+      parserDetectors.add(new DefaultToolDetectionParticipant(".+-gcc", true, "exe", gcc));
     }
     // GNU C++ compatible compilers ====
     {
       final IToolCommandlineParser gxx = new DefaultToolCommandlineParser("org.eclipse.cdt.core.g++",
           new ResponseFileArglets.At(), btbGcc, gcc_args);
-      parserDetectors.add(new DefaultToolDetectionParticiant("g\\+\\+", true, "exe", gxx));
-      parserDetectors.add(new DefaultToolDetectionParticiant("clang\\+\\+", true, "exe", gxx));
+      parserDetectors.add(new DefaultToolDetectionParticipant("g\\+\\+", true, "exe", gxx));
+      parserDetectors.add(new DefaultToolDetectionParticipant("clang\\+\\+", true, "exe", gxx));
       // cross compilers, e.g. arm-none-eabi-g++ ====
-      parserDetectors.add(new DefaultToolDetectionParticiant(".+-g\\+\\+", true, "exe", gxx));
+      parserDetectors.add(new DefaultToolDetectionParticipant(".+-g\\+\\+", true, "exe", gxx));
     }
     {
       // cross compilers, e.g. arm-none-eabi-c++ ====
       final IToolCommandlineParser cxx = new DefaultToolCommandlineParser("org.eclipse.cdt.core.g++",
           new ResponseFileArglets.At(), btbGccMaybee, gcc_args);
-      parserDetectors.add(new DefaultToolDetectionParticiant(".+-c\\+\\+", true, "exe", cxx));
+      parserDetectors.add(new DefaultToolDetectionParticipant(".+-c\\+\\+", true, "exe", cxx));
     }
 
     // ms C + C++ compiler ==========================================
     {
-      final IArglet[] cl_cc_args = { new Arglets.IncludePath_C_CL(),
-          new Arglets.MacroDefine_C_CL(), new Arglets.MacroUndefine_C_CL() };
-      final IToolCommandlineParser cl = new DefaultToolCommandlineParser(null, new ResponseFileArglets.At(),
-          null, cl_cc_args);
-      parserDetectors.add(new DefaultToolDetectionParticiant("cl", true, "exe", cl));
+      final IToolCommandlineParser cl = new MsclToolCommandlineParser();
+      parserDetectors.add(new DefaultToolDetectionParticipant("cl", true, "exe", cl));
     }
     // Intel C compilers ============================================
     {
-      // for the recod: builtin detection: -EP -dM for macros, -H for include FILES. NOTE: Windows: /QdM.
+      // for the record: builtin detection: -EP -dM for macros, -H for include FILES. NOTE: Windows: /QdM.
       final IToolCommandlineParser icc = new DefaultToolCommandlineParser("org.eclipse.cdt.core.gcc",
           new ResponseFileArglets.At(), null, gcc_args);
       final IToolCommandlineParser icpc = new DefaultToolCommandlineParser("org.eclipse.cdt.core.g++",
           new ResponseFileArglets.At(), null, gcc_args);
       // Linux & OS X, EDG
-      parserDetectors.add(new DefaultToolDetectionParticiant("icc", icc));
+      parserDetectors.add(new DefaultToolDetectionParticipant("icc", icc));
       // OS X, clang
-      parserDetectors.add(new DefaultToolDetectionParticiant("icl", icc));
+      parserDetectors.add(new DefaultToolDetectionParticipant("icl", icc));
       // Intel C++ compiler
       // Linux & OS X, EDG
-      parserDetectors.add(new DefaultToolDetectionParticiant("icpc", icpc));
+      parserDetectors.add(new DefaultToolDetectionParticipant("icpc", icpc));
       // OS X, clang
-      parserDetectors.add(new DefaultToolDetectionParticiant("icl\\+\\+", icpc));
+      parserDetectors.add(new DefaultToolDetectionParticipant("icl\\+\\+", icpc));
       // Windows C + C++, EDG
-      parserDetectors.add(new DefaultToolDetectionParticiant("icl", true, "exe", icc));
+      parserDetectors.add(new DefaultToolDetectionParticipant("icl", true, "exe", icc));
     }
 
     // CUDA: nvcc compilers (POSIX compatible) =================================
@@ -139,7 +136,7 @@ class ParserDetection {
 
       final IToolCommandlineParser nvcc = new DefaultToolCommandlineParser("com.nvidia.cuda.toolchain.language.cuda.cu",
           new ResponseFileArglets.At(), new NvccBuiltinDetectionBehavior(), nvcc_args);
-      parserDetectors.add(new DefaultToolDetectionParticiant("nvcc", true, "exe", nvcc));
+      parserDetectors.add(new DefaultToolDetectionParticipant("nvcc", true, "exe", nvcc));
     }
 
     // ARM.com armclang compiler ====
@@ -148,7 +145,7 @@ class ParserDetection {
           new Arglets.MacroDefine_C_POSIX(), new Arglets.MacroUndefine_C_POSIX(), };
       final IToolCommandlineParser armclang = new DefaultToolCommandlineParser(null, new ResponseFileArglets.At(),
           null, armclang_args);
-      parserDetectors.add(new DefaultToolDetectionParticiant("armclang", true, "exe", armclang));
+      parserDetectors.add(new DefaultToolDetectionParticipant("armclang", true, "exe", armclang));
     }
     // ARM.com armcc compiler ====
     {
@@ -157,7 +154,7 @@ class ParserDetection {
           new Arglets.SystemIncludePath_armcc() };
       final IToolCommandlineParser armcc = new DefaultToolCommandlineParser(null, null,
           new ArmccBuiltinDetectionBehavior(), armcc_args);
-      parserDetectors.add(new DefaultToolDetectionParticiant("armcc", true, "exe", armcc));
+      parserDetectors.add(new DefaultToolDetectionParticipant("armcc", true, "exe", armcc));
     }
   }
 
@@ -231,11 +228,11 @@ class ParserDetection {
    *         Otherwise, if the tool name matches, a {@code ParserDetectionResult} holding the de-compose command-line is
    *         returned.
    */
-  private static ParserDetectionResult determineDetector(String commandLine, List<DefaultToolDetectionParticiant> detectors,
+  private static ParserDetectionResult determineDetector(String commandLine, List<DefaultToolDetectionParticipant> detectors,
       String versionSuffixRegex, boolean matchBackslash) {
-    DefaultToolDetectionParticiant.MatchResult cmdline;
+    DefaultToolDetectionParticipant.MatchResult cmdline;
     // try basenames
-    for (IToolDetectionParticiant pd : detectors) {
+    for (IToolDetectionParticipant pd : detectors) {
       if (DEBUG_PARSER_DETECTION)
         System.out.printf("  Trying detector %s (%s)%n", pd.getParser().getClass().getSimpleName(),
             DetectorWithMethod.DetectionMethod.BASENAME);
@@ -246,7 +243,7 @@ class ParserDetection {
     }
     if (versionSuffixRegex != null) {
       // try with version pattern
-      for (IToolDetectionParticiant pd : detectors) {
+      for (IToolDetectionParticipant pd : detectors) {
         if (DEBUG_PARSER_DETECTION)
           System.out.printf("  Trying detector %s (%s)%n", pd.getParser().getClass().getSimpleName(), DetectorWithMethod.DetectionMethod.WITH_VERSION);
         if ((cmdline = pd.basenameWithVersionMatches(commandLine, matchBackslash, versionSuffixRegex)) != null) {
@@ -256,7 +253,7 @@ class ParserDetection {
       }
     }
     // try with extension
-    for (IToolDetectionParticiant pd : detectors) {
+    for (IToolDetectionParticipant pd : detectors) {
       if (DEBUG_PARSER_DETECTION)
         System.out.printf("  Trying detector %s (%s)%n", pd.getParser().getClass().getSimpleName(),
             DetectorWithMethod.DetectionMethod.WITH_EXTENSION);
@@ -267,7 +264,7 @@ class ParserDetection {
     }
     if (versionSuffixRegex != null) {
       // try with extension and version
-      for (IToolDetectionParticiant pd : detectors) {
+      for (IToolDetectionParticipant pd : detectors) {
         if (DEBUG_PARSER_DETECTION)
           System.out.printf("  Trying detector %s (%s)%n", pd.getParser().getClass().getSimpleName() + " ("
               + DetectorWithMethod.DetectionMethod.WITH_VERSION_EXTENSION);
@@ -323,24 +320,24 @@ class ParserDetection {
     }
 
     /**
-     * the DefaultToolDetectionParticiant that matched the name of the tool on a given
+     * the DefaultToolDetectionParticipant that matched the name of the tool on a given
      * command-line
      */
-    private final IToolDetectionParticiant detector;
+    private final IToolDetectionParticipant detector;
     /** describes the method that was used to match */
     private final DetectionMethod how;
     private final boolean matchBackslash;
 
     /**
      * @param detector
-     *          the DefaultToolDetectionParticiant that matched the name of the tool on a given command-line
+     *          the DefaultToolDetectionParticipant that matched the name of the tool on a given command-line
      * @param how
      *          describes the method that was used to match
      * @param matchBackslash
      *          whether the match is on file system paths with backslashes in the compiler argument or to match an paths
      *          with forward slashes
      */
-    public DetectorWithMethod(IToolDetectionParticiant detector, DetectionMethod how, boolean matchBackslash) {
+    public DetectorWithMethod(IToolDetectionParticipant detector, DetectionMethod how, boolean matchBackslash) {
       if (detector == null)
         throw new NullPointerException("detector");
       if (how == null)
@@ -351,12 +348,12 @@ class ParserDetection {
     }
 
     /**
-     * Gets the DefaultToolDetectionParticiant that matched the name of the tool on a given
+     * Gets the DefaultToolDetectionParticipant that matched the name of the tool on a given
      * command-line.
      *
      * @return the detector, never {@code null}
      */
-    public IToolDetectionParticiant getDetector() {
+    public IToolDetectionParticipant getDetector() {
       return detector;
     }
 
@@ -382,24 +379,24 @@ class ParserDetection {
   static class ParserDetectionResult {
 
     private final DetectorWithMethod detectorWMethod;
-    private final DefaultToolDetectionParticiant.MatchResult commandLine;
+    private final DefaultToolDetectionParticipant.MatchResult commandLine;
 
     /**
      * @param detectorWMethod
-     *          the DefaultToolDetectionParticiant that matched the name of the tool on a given
+     *          the DefaultToolDetectionParticipant that matched the name of the tool on a given
      *          command-line
      * @param commandLine
      *          the de-composed command-line, after the matcher has matched the
      *          tool name
      */
-    public ParserDetectionResult(DetectorWithMethod detectorWMethod, DefaultToolDetectionParticiant.MatchResult commandLine) {
+    public ParserDetectionResult(DetectorWithMethod detectorWMethod, DefaultToolDetectionParticipant.MatchResult commandLine) {
       this.detectorWMethod = detectorWMethod;
       this.commandLine = commandLine;
     }
 
     /** Gets the de-composed command-line.
      */
-    public DefaultToolDetectionParticiant.MatchResult getCommandLine() {
+    public DefaultToolDetectionParticipant.MatchResult getCommandLine() {
       return commandLine;
     }
 
@@ -412,7 +409,7 @@ class ParserDetection {
     }
 
     /**
-     * Gets the DefaultToolDetectionParticiant that matched the name of the tool on a given
+     * Gets the DefaultToolDetectionParticipant that matched the name of the tool on a given
      * command-line
      *
      * @return the detectorWMethod

@@ -17,7 +17,7 @@ package de.marw.cmake.cdt.language.settings.providers;
  *
  * @author Martin Weber
  */
-public interface IToolDetectionParticiant {
+public interface IToolDetectionParticipant {
 
   /**
    * Gets the for the parser for the tool-specific command-line arguments.

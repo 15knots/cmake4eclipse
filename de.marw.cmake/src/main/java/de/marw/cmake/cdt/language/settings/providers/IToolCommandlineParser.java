@@ -37,17 +37,27 @@ public interface IToolCommandlineParser {
   public IResult processArgs(IPath cwd, String args);
 
   /**
-   * Gets the language ID of the language that the tool compiles.
+   * Gets the language ID of the language that the tool compiles. If the tool is able to compile for multiple
+   * programming languages, the specified {@code sourceFileExtension} may be used to compute the Language ID.
+   * <p>
+   * NOTE: CDT expects "org.eclipse.cdt.core.gcc" for the C language and "org.eclipse.cdt.core.g++" for the C++
+   * language, so one of that IDs should be returned here. (Some extension to CDT may recognize different language IDs,
+   * such as "com.nvidia.cuda.toolchain.language.cuda.cu".)
+   * </p>
    *
-   * @return the language ID, or {@code null} if the language ID should be derived from the source file-name extension
+   * @param sourceFileExtension
+   *          the extension of the source file name
+   *
+   * @return a valid language ID, or {@code null}. If {@code null} or an invalid language ID, the results of argument
+   *         processing will be ignored by CDT.
    */
-  public String getLanguageId();
+  public String getLanguageId(String sourceFileExtension);
 
   /**
    * Gets the {@code IBuiltinsDetectionBehavior} which specifies how built-in compiler macros and include path detection
    * is handled for a specific compiler.
    *
-   * @return the {@code IBuiltinsDetectionBehavior} or {@null} if the compiler does not support built-in detection
+   * @return the {@code IBuiltinsDetectionBehavior} or {@code null} if the compiler does not support built-in detection
    */
   public IBuiltinsDetectionBehavior getIBuiltinsDetectionBehavior();
 

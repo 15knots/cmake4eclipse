@@ -21,8 +21,7 @@ import de.marw.cmake.cdt.internal.lsp.ParseContext;
 import de.marw.cmake.cdt.language.settings.providers.builtins.IBuiltinsDetectionBehavior;
 
 /**
- * Parses the build output produced by a specific tool invocation and detects
- * LanguageSettings.
+ * Parses the build output produced by a specific tool invocation and detects LanguageSettings.
  *
  * @author Martin Weber
  */
@@ -44,8 +43,8 @@ public class DefaultToolCommandlineParser implements IToolCommandlineParser {
    * Constructs a new object with the given values.
    * <p>
    * NOTE: Concerning the {@code languageID} argument, please note that CDT expects "org.eclipse.cdt.core.gcc" for the C
-   * language and "org.eclipse.cdt.core.g++" for the C++ language. Some extension to CDT may recogize different language
-   * IDs, such as "com.nvidia.cuda.toolchain.language.cuda.cu"
+   * language and "org.eclipse.cdt.core.g++" for the C++ language. Some extension to CDT may recognize different
+   * language IDs, such as "com.nvidia.cuda.toolchain.language.cuda.cu"
    * </p>
    *
    * @param languageID
@@ -56,7 +55,7 @@ public class DefaultToolCommandlineParser implements IToolCommandlineParser {
    *          recognize a response-file argument
    * @param builtinsDetectionBehavior
    *          the {@code IBuiltinsDetectionBehavior} which specifies how built-in compiler macros and include path
-   *          detection is handled for a specific compiler or {@null} if the compiler does not support built-in
+   *          detection is handled for a specific compiler or {@code null} if the compiler does not support built-in
    *          detection.
    * @param argumentParsers
    *          the parsers for the command line arguments of of interest for the tool
@@ -84,8 +83,32 @@ public class DefaultToolCommandlineParser implements IToolCommandlineParser {
   }
 
   @Override
-  public String getLanguageId() {
+  public String getLanguageId(String sourceFileExtension) {
     return languageID;
+  }
+
+  /**
+   * Gets the languageID of the specified file name extension. This is a convenience method for subclasses.
+   *
+   * @param sourceFileExtension
+   *          The file name extension to examine
+   * @return the language ID or {@code null} if the file name extension is unknown.
+   */
+  protected String determineLanguageId(String sourceFileExtension) {
+    switch (sourceFileExtension) {
+    case "c":
+      return "org.eclipse.cdt.core.gcc";
+    case "C":
+    case "cc":
+    case "cpp":
+    case "CPP":
+    case "cp":
+    case "cxx":
+    case "c++":
+      return "org.eclipse.cdt.core.g++";
+    default:
+      return null;
+    }
   }
 
   @Override
@@ -136,7 +159,8 @@ public class DefaultToolCommandlineParser implements IToolCommandlineParser {
         // parse with first parser that can handle the first argument on the
         // command-line
         if (DEBUG)
-          System.out.printf(">> Looking up parser for argument '%s ...'%n", args.substring(0, Math.min(50, args.length())));
+          System.out.printf(">> Looking up parser for argument '%s ...'%n",
+              args.substring(0, Math.min(50, args.length())));
         for (IArglet tap : argumentParsers) {
           if (DEBUG)
             System.out.printf("   Trying parser %s%n", tap.getClass().getSimpleName());
@@ -177,8 +201,7 @@ public class DefaultToolCommandlineParser implements IToolCommandlineParser {
     }
 
     /**
-     * Parses the given String with the first parser that can handle the first
-     * argument on the command-line.
+     * Parses the given String with the first parser that can handle the first argument on the command-line.
      *
      * @param args
      *          the command line arguments to process
@@ -191,8 +214,7 @@ public class DefaultToolCommandlineParser implements IToolCommandlineParser {
     /*
      * (non-Javadoc)
      *
-     * @see de.marw.cmake.cdt.language.settings.providers.IParserHandler#
-     * getCompilerWorkingDirectory()
+     * @see de.marw.cmake.cdt.language.settings.providers.IParserHandler# getCompilerWorkingDirectory()
      */
     @Override
     public IPath getCompilerWorkingDirectory() {

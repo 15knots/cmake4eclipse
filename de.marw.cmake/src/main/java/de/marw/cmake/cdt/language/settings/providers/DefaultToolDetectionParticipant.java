@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
  *
  * @author Martin Weber
  */
-public class DefaultToolDetectionParticiant implements IToolDetectionParticiant {
+public class DefaultToolDetectionParticipant implements IToolDetectionParticipant {
   /** start of the named capturing group that holds the command name (w/o quotes, if any) */
   protected static final String REGEX_GROUP_CMD = "cmd";
 
@@ -78,7 +78,7 @@ public class DefaultToolDetectionParticiant implements IToolDetectionParticiant 
 
 
   /**
-   * Creates a {@code DefaultToolDetectionParticiant} that matches linux paths in the tool
+   * Creates a {@code DefaultToolDetectionParticipant} that matches linux paths in the tool
    * name.
    *
    * @param basenameRegex
@@ -89,12 +89,12 @@ public class DefaultToolDetectionParticiant implements IToolDetectionParticiant 
    * @throws NullPointerException
    *           if one of the arguments is {@code null}
    */
-  public DefaultToolDetectionParticiant(String basenameRegex, IToolCommandlineParser parser) {
+  public DefaultToolDetectionParticipant(String basenameRegex, IToolCommandlineParser parser) {
     this(basenameRegex, false, parser);
   }
 
   /**
-   * Creates a {@code DefaultToolDetectionParticiant}.
+   * Creates a {@code DefaultToolDetectionParticipant}.
    *
    * @param basenameRegex
    *          a regular expression that matches the base name of the tool to detect
@@ -105,7 +105,7 @@ public class DefaultToolDetectionParticiant implements IToolDetectionParticiant 
    * @param parser
    *          the corresponding parser for the tool arguments
    */
-  public DefaultToolDetectionParticiant(String basenameRegex, boolean alsoHandleNtfsPaths, IToolCommandlineParser parser) {
+  public DefaultToolDetectionParticipant(String basenameRegex, boolean alsoHandleNtfsPaths, IToolCommandlineParser parser) {
     this(basenameRegex, alsoHandleNtfsPaths, null, parser);
  }
 
@@ -121,12 +121,12 @@ public class DefaultToolDetectionParticiant implements IToolDetectionParticiant 
    * @param parser
    *          the corresponding parser for the tool arguments
    */
-  public DefaultToolDetectionParticiant(String basenameRegex, String extensionRegex, IToolCommandlineParser parser) {
+  public DefaultToolDetectionParticipant(String basenameRegex, String extensionRegex, IToolCommandlineParser parser) {
     this(basenameRegex, false, extensionRegex, parser);
   }
 
   /**
-   * Creates a {@code DefaultToolDetectionParticiant}.
+   * Creates a {@code DefaultToolDetectionParticipant}.
    *
    * @param basenameRegex
    *          a regular expression that matches the base name of the tool to
@@ -141,7 +141,7 @@ public class DefaultToolDetectionParticiant implements IToolDetectionParticiant 
    * @param parser
    *          the corresponding parser for the tool arguments
    */
-  public DefaultToolDetectionParticiant(String basenameRegex, boolean alsoHandleNtfsPaths, String extensionRegex,
+  public DefaultToolDetectionParticipant(String basenameRegex, boolean alsoHandleNtfsPaths, String extensionRegex,
       IToolCommandlineParser parser) {
     this.basenameRegex = basenameRegex;
     this.parser = parser;
@@ -198,12 +198,12 @@ public class DefaultToolDetectionParticiant implements IToolDetectionParticiant 
   }
 
   @Override
-  public DefaultToolDetectionParticiant.MatchResult basenameMatches(String commandLine, boolean matchBackslash) {
+  public DefaultToolDetectionParticipant.MatchResult basenameMatches(String commandLine, boolean matchBackslash) {
     if(matchBackslash && !canHandleNtfsPaths()) {
       return null;
     }
     for (Matcher matcher : matchBackslash ? toolNameMatchersBackslash : toolNameMatchers) {
-      DefaultToolDetectionParticiant.MatchResult result = matcherMatches(matcher, commandLine);
+      DefaultToolDetectionParticipant.MatchResult result = matcherMatches(matcher, commandLine);
       if (result != null) {
         return result;
       }
@@ -212,7 +212,7 @@ public class DefaultToolDetectionParticiant implements IToolDetectionParticiant 
   }
 
   @Override
-  public DefaultToolDetectionParticiant.MatchResult basenameWithVersionMatches(String commandLine, boolean matchBackslash, String versionRegex) {
+  public DefaultToolDetectionParticipant.MatchResult basenameWithVersionMatches(String commandLine, boolean matchBackslash, String versionRegex) {
     if(matchBackslash && !canHandleNtfsPaths()) {
       return null;
     }
@@ -233,7 +233,7 @@ public class DefaultToolDetectionParticiant implements IToolDetectionParticiant 
     }
 
     for (Matcher matcher : toolNameMatchers) {
-      DefaultToolDetectionParticiant.MatchResult result = matcherMatches(matcher, commandLine);
+      DefaultToolDetectionParticipant.MatchResult result = matcherMatches(matcher, commandLine);
       if (result != null) {
         return result;
       }
@@ -242,12 +242,12 @@ public class DefaultToolDetectionParticiant implements IToolDetectionParticiant 
   }
 
   @Override
-  public DefaultToolDetectionParticiant.MatchResult basenameWithExtensionMatches(String commandLine, boolean matchBackslash) {
+  public DefaultToolDetectionParticipant.MatchResult basenameWithExtensionMatches(String commandLine, boolean matchBackslash) {
     if(matchBackslash && !canHandleNtfsPaths()) {
       return null;
     }
     for (Matcher matcher : matchBackslash ? toolNameMatchersExtBackslash: toolNameMatchersExt) {
-      DefaultToolDetectionParticiant.MatchResult result = matcherMatches(matcher, commandLine);
+      DefaultToolDetectionParticipant.MatchResult result = matcherMatches(matcher, commandLine);
       if (result != null) {
         return result;
       }
@@ -256,7 +256,7 @@ public class DefaultToolDetectionParticiant implements IToolDetectionParticiant 
   }
 
   @Override
-  public DefaultToolDetectionParticiant.MatchResult basenameWithVersionAndExtensionMatches(String commandLine, boolean matchBackslash, String versionRegex) {
+  public DefaultToolDetectionParticipant.MatchResult basenameWithVersionAndExtensionMatches(String commandLine, boolean matchBackslash, String versionRegex) {
     if(matchBackslash && !canHandleNtfsPaths()) {
       return null;
     }
@@ -285,7 +285,7 @@ public class DefaultToolDetectionParticiant implements IToolDetectionParticiant 
     }
 
     for (Matcher matcher : toolNameMatchers) {
-      DefaultToolDetectionParticiant.MatchResult result = matcherMatches(matcher, commandLine);
+      DefaultToolDetectionParticipant.MatchResult result = matcherMatches(matcher, commandLine);
       if (result != null) {
         return result;
       }
@@ -307,12 +307,12 @@ public class DefaultToolDetectionParticiant implements IToolDetectionParticiant 
    *         command-line string. Otherwise, if the tool name matches, a
    *         MatchResult holding the de-composed command-line is returned.
    */
-  private DefaultToolDetectionParticiant.MatchResult matcherMatches(Matcher matcher, String commandLine) {
+  private DefaultToolDetectionParticipant.MatchResult matcherMatches(Matcher matcher, String commandLine) {
     matcher.reset(commandLine);
     if (matcher.lookingAt()) {
-      return new DefaultToolDetectionParticiant.MatchResult(matcher.group(REGEX_GROUP_CMD), commandLine.substring(matcher.end()));
+      return new DefaultToolDetectionParticipant.MatchResult(matcher.group(REGEX_GROUP_CMD), commandLine.substring(matcher.end()));
     }
     return null;
   }
 
-} // DefaultToolDetectionParticiant
+} // DefaultToolDetectionParticipant

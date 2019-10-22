@@ -57,7 +57,7 @@ public class ParserLookupResultTest {
     ParserDetection.ParserDetectionResult result = ParserDetection.determineDetector(cmd, null, false);
     assertNotNull(result);
     // verify that we got a C++ parser
-    assertEquals("C++", "org.eclipse.cdt.core.g++", result.getDetectorWithMethod().getDetector().getParser().getLanguageId());
+    assertEquals("C++", "org.eclipse.cdt.core.g++", result.getDetectorWithMethod().getDetector().getParser().getLanguageId("cpp"));
     assertEquals("reducedCommandLine", args, result.getReducedCommandLine());
 
     // test without leading path
@@ -66,7 +66,7 @@ public class ParserLookupResultTest {
     result = ParserDetection.determineDetector(cmd, null, false);
     assertNotNull(result);
     // verify that we got a C++ parser
-    assertEquals("C++", "org.eclipse.cdt.core.g++", result.getDetectorWithMethod().getDetector().getParser().getLanguageId());
+    assertEquals("C++", "org.eclipse.cdt.core.g++", result.getDetectorWithMethod().getDetector().getParser().getLanguageId("cpp"));
     assertEquals("reducedCommandLine", args, result.getReducedCommandLine());
   }
 
@@ -85,7 +85,7 @@ public class ParserLookupResultTest {
     ParserDetection.ParserDetectionResult result = ParserDetection.determineDetector(cmd, null, false);
     assertNotNull(result);
     // verify that we got a C++ parser
-    assertEquals("C++", "org.eclipse.cdt.core.g++", result.getDetectorWithMethod().getDetector().getParser().getLanguageId());
+    assertEquals("C++", "org.eclipse.cdt.core.g++", result.getDetectorWithMethod().getDetector().getParser().getLanguageId("cpp"));
     assertEquals("command", compiler, result.getCommandLine().getCommand());
     assertEquals("args", args, result.getCommandLine().getArguments());
 
@@ -95,7 +95,7 @@ public class ParserLookupResultTest {
     result = ParserDetection.determineDetector(cmd, null, false);
     assertNotNull(result);
     // verify that we got a C++ parser
-    assertEquals("C++", "org.eclipse.cdt.core.g++", result.getDetectorWithMethod().getDetector().getParser().getLanguageId());
+    assertEquals("C++", "org.eclipse.cdt.core.g++", result.getDetectorWithMethod().getDetector().getParser().getLanguageId("cpp"));
     assertEquals("command", compiler, result.getCommandLine().getCommand());
     assertEquals("args", args, result.getCommandLine().getArguments());
   }
