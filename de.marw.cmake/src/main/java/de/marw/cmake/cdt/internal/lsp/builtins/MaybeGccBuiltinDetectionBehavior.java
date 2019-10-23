@@ -43,4 +43,15 @@ public class MaybeGccBuiltinDetectionBehavior implements IBuiltinsDetectionBehav
     // a POSIX compiler that does not understand the arguments that enable built-in detection
     return true;
   }
+
+  @Override
+  public String getInputFileExtension(String languageId) {
+    if (languageId.equals("org.eclipse.cdt.core.gcc")) {
+      return "c";
+    }
+    if (languageId.equals("org.eclipse.cdt.core.g++")) {
+      return "cpp";
+    }
+    return null;
+  }
 }

@@ -80,7 +80,7 @@ public class CompilerBuiltinsDetector {
    * @param builtinsDetectionBehavior
    *          how compiler built-ins are to be detected
    * @param command
-   *          the compiler command (arg 0)
+   *          the compiler command (argument # 0)
    * @param builtinsDetectionArgs
    *          the compiler arguments from the command-line that affect built-in detection. For the GNU compilers, these
    *          are options like {@code --sysroot} and options that specify the language's standard ({@code -std=c++17}.
@@ -162,7 +162,10 @@ public class CompilerBuiltinsDetector {
   private List<String> getCompilerArguments(String languageId) {
     List<String> args = new ArrayList<>();
     args.addAll(builtinsDetectionBehavior.getBuiltinsOutputEnablingArgs());
-    args.add(getInputFile(languageId));
+    String inputFile = getInputFile(languageId);
+    if (inputFile != null) {
+      args.add(inputFile);
+    }
     return args;
   }
 
@@ -235,45 +238,26 @@ public class CompilerBuiltinsDetector {
    * @return full path to the source file.
    */
   private String getInputFile(String languageId) {
-    String specFileName = "detect_compiler_builtins";
-    String specExt = getSpecFileExtension(languageId);
+    String specExt = builtinsDetectionBehavior.getInputFileExtension(languageId);
     if (specExt != null) {
-      specFileName += '.' + specExt;
-    }
+      String specFileName = "detect_compiler_builtins" + '.' + specExt;
 
-    final IPath builderCWD = cfgDescription.getBuildSetting().getBuilderCWD();
-    IPath fileLocation = ResourcesPlugin.getWorkspace().getRoot().getFolder(builderCWD).getLocation().append(specFileName);
+      final IPath builderCWD = cfgDescription.getBuildSetting().getBuilderCWD();
+      IPath fileLocation = ResourcesPlugin.getWorkspace().getRoot().getFolder(builderCWD).getLocation()
+          .append(specFileName);
 
-    File specFile = new java.io.File(fileLocation.toOSString());
-    if (!specFile.exists()) {
-      try {
-        // In the typical case it is sufficient to have an empty file.
-        specFile.getParentFile().mkdirs(); // no build ran yet, must create dirs
-        specFile.createNewFile();
-      } catch (IOException e) {
-        CMakePlugin.getDefault().getLog()
-            .log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, "getInputFile()", e));
+      File specFile = new java.io.File(fileLocation.toOSString());
+      if (!specFile.exists()) {
+        try {
+          // In the typical case it is sufficient to have an empty file.
+          specFile.getParentFile().mkdirs(); // no build ran yet, must create dirs
+          specFile.createNewFile();
+        } catch (IOException e) {
+          CMakePlugin.getDefault().getLog().log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, "getInputFile()", e));
+        }
       }
-    }
 
-    return fileLocation.toString();
-  }
-
-  /**
-   * Gets the extension for the compiler input file used to detect built-in settings.
-   *
-   * @param languageId
-   *          the ID of the compiler language
-   */
-  private String getSpecFileExtension(String languageId) {
-    if (languageId.equals("org.eclipse.cdt.core.gcc")) {
-      return "c";
-    }
-    if (languageId.equals("org.eclipse.cdt.core.g++")) {
-      return "cpp";
-    }
-    if (languageId.equals("com.nvidia.cuda.toolchain.language.cuda.cu")) {
-      return "cu";
+      return fileLocation.toString();
     }
     return null;
   }

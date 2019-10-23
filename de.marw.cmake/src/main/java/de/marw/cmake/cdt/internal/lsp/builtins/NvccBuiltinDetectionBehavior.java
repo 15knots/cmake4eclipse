@@ -41,4 +41,18 @@ public class NvccBuiltinDetectionBehavior implements IBuiltinsDetectionBehavior 
     // report an error, if the compiler does not understand the arguments that enable built-in detection
     return false;
   }
+
+  @Override
+  public String getInputFileExtension(String languageId) {
+    if (languageId.equals("org.eclipse.cdt.core.gcc")) {
+      return "c";
+    }
+    if (languageId.equals("org.eclipse.cdt.core.g++")) {
+      return "cpp";
+    }
+    if (languageId.equals("com.nvidia.cuda.toolchain.language.cuda.cu")) {
+      return "cu";
+    }
+    return null;
+  }
 }

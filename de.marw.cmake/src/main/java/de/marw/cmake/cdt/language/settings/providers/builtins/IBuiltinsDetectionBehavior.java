@@ -35,4 +35,14 @@ public interface IBuiltinsDetectionBehavior {
    * status code. Except for some special cases, most implementations, should be returned {@code false} here.
    */
   boolean suppressErrormessage();
+
+  /**
+   * Gets the filename extension for the input file. An empty input file will be created and its name will be given on
+   * the command-line when the compiler is invoked for built-ins detection.
+   *
+   * @param languageID
+   *          the language ID
+   * @return the filename extension or {@code null} if no filename argument needs to be given for built-ins detection
+   */
+  String getInputFileExtension(String languageID);
 }
