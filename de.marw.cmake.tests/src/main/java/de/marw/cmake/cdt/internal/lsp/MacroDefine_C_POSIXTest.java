@@ -20,8 +20,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import de.marw.cmake.cdt.internal.lsp.ParseContext;
-import de.marw.cmake.cdt.language.settings.providers.Arglets;
-import de.marw.cmake.cdt.language.settings.providers.Arglets.MacroDefine_C_POSIX;
+import de.marw.cmake.cdt.lsp.Arglets;
+import de.marw.cmake.cdt.lsp.Arglets.MacroDefine_C_POSIX;
 
 /**
  * @author Martin Weber

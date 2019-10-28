@@ -9,7 +9,7 @@
  *      Martin Weber - Initial implementation
  *******************************************************************************/
 
-package de.marw.cmake.cdt.language.settings.providers;
+package de.marw.cmake.cdt.lsp;
 
 import java.util.Locale;
 import java.util.regex.Matcher;

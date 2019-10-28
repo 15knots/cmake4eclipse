@@ -19,8 +19,8 @@ import org.eclipse.core.runtime.Path;
 import org.junit.Before;
 import org.junit.Test;
 
-import de.marw.cmake.cdt.language.settings.providers.Arglets.MacroUndefine_C_POSIX;
-import de.marw.cmake.cdt.language.settings.providers.IArglet.IParseContext;
+import de.marw.cmake.cdt.lsp.Arglets.MacroUndefine_C_POSIX;
+import de.marw.cmake.cdt.lsp.IArglet.IParseContext;
 
 /**
  * @author Martin Weber

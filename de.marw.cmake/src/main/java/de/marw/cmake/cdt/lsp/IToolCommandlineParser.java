@@ -8,14 +8,14 @@
  * Contributors:
  *      Martin Weber - Initial implementation
  *******************************************************************************/
-package de.marw.cmake.cdt.language.settings.providers;
+package de.marw.cmake.cdt.lsp;
 
 import java.util.List;
 
 import org.eclipse.cdt.core.settings.model.ICLanguageSettingEntry;
 import org.eclipse.core.runtime.IPath;
 
-import de.marw.cmake.cdt.language.settings.providers.builtins.IBuiltinsDetectionBehavior;
+import de.marw.cmake.cdt.lsp.builtins.IBuiltinsDetectionBehavior;
 
 /**
  * Parses the command-line produced by a specific tool invocation and detects LanguageSettings.

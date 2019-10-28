@@ -65,12 +65,11 @@ import de.marw.cmake.cdt.internal.CMakePlugin;
 import de.marw.cmake.cdt.internal.lsp.ParserDetection.DetectorWithMethod;
 import de.marw.cmake.cdt.internal.lsp.ParserDetection.ParserDetectionResult;
 import de.marw.cmake.cdt.internal.lsp.builtins.CompilerBuiltinsDetector;
-import de.marw.cmake.cdt.language.settings.providers.DefaultToolDetectionParticipant;
-import de.marw.cmake.cdt.language.settings.providers.IToolCommandlineParser;
-import de.marw.cmake.cdt.language.settings.providers.IToolCommandlineParser.IResult;
-import de.marw.cmake.cdt.language.settings.providers.IToolDetectionParticipant;
-import de.marw.cmake.cdt.language.settings.providers.StringUtil;
-import de.marw.cmake.cdt.language.settings.providers.builtins.IBuiltinsDetectionBehavior;
+import de.marw.cmake.cdt.lsp.DefaultToolDetectionParticipant;
+import de.marw.cmake.cdt.lsp.IToolCommandlineParser;
+import de.marw.cmake.cdt.lsp.IToolDetectionParticipant;
+import de.marw.cmake.cdt.lsp.IToolCommandlineParser.IResult;
+import de.marw.cmake.cdt.lsp.builtins.IBuiltinsDetectionBehavior;
 
 /**
  * A ILanguageSettingsProvider that parses the file 'compile_commands.json' produced by cmake when option
@@ -315,7 +314,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
             ParserDetection.ParserDetectionResult pdr = fastDetermineDetector(cmdLine);
             if (pdr != null) {
               // found a matching command-line parser
-              final IToolCommandlineParser parser = pdr.getDetectorWithMethod().getDetector().getParser();
+              final IToolCommandlineParser parser = pdr.getDetectorWithMethod().getToolDetectionParticipant().getParser();
               // cwdStr is the absolute working directory of the compiler in
               // CMake-notation (fileSep are forward slashes)
               final String cwdStr = sourceFileInfo.get("directory").toString();
@@ -449,7 +448,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
     // try last known matching detector first...
     if (lastDetector != null) {
       DefaultToolDetectionParticipant.MatchResult matchResult = null;
-      final IToolDetectionParticipant detector = lastDetector.getDetector();
+      final IToolDetectionParticipant detector = lastDetector.getToolDetectionParticipant();
       switch (lastDetector.getHow()) {
       case BASENAME:
         matchResult = detector.basenameMatches(line, lastDetector.isMatchBackslash());

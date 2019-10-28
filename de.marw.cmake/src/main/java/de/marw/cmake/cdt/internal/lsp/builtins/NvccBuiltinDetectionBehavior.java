@@ -14,8 +14,9 @@ package de.marw.cmake.cdt.internal.lsp.builtins;
 import java.util.Arrays;
 import java.util.List;
 
-import de.marw.cmake.cdt.language.settings.providers.builtins.IBuiltinsDetectionBehavior;
-import de.marw.cmake.cdt.language.settings.providers.builtins.IBuiltinsOutputProcessor;
+import de.marw.cmake.cdt.lsp.builtins.GccOutputProcessor;
+import de.marw.cmake.cdt.lsp.builtins.IBuiltinsDetectionBehavior;
+import de.marw.cmake.cdt.lsp.builtins.IBuiltinsOutputProcessor;
 
 /**
  * The {link IBuiltinsDetectionBehavior} for the NVidia CUDA compiler.

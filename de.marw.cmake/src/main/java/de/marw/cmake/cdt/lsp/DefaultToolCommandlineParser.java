@@ -8,7 +8,7 @@
  * Contributors:
  *      Martin Weber - Initial implementation
  *******************************************************************************/
-package de.marw.cmake.cdt.language.settings.providers;
+package de.marw.cmake.cdt.lsp;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -18,7 +18,8 @@ import org.eclipse.core.runtime.Platform;
 
 import de.marw.cmake.cdt.internal.CMakePlugin;
 import de.marw.cmake.cdt.internal.lsp.ParseContext;
-import de.marw.cmake.cdt.language.settings.providers.builtins.IBuiltinsDetectionBehavior;
+import de.marw.cmake.cdt.internal.lsp.StringUtil;
+import de.marw.cmake.cdt.lsp.builtins.IBuiltinsDetectionBehavior;
 
 /**
  * Parses the build output produced by a specific tool invocation and detects LanguageSettings.
@@ -82,9 +83,16 @@ public class DefaultToolCommandlineParser implements IToolCommandlineParser {
     return result;
   }
 
+  /**
+   * Implemented to determine the language ID from the source file name extension, if the language ID of this object is
+   * {@code null}.
+   */
   @Override
   public String getLanguageId(String sourceFileExtension) {
-    return languageID;
+    if(languageID != null) {
+      return languageID;
+    }
+    return determineLanguageId(sourceFileExtension);
   }
 
   /**
@@ -214,7 +222,7 @@ public class DefaultToolCommandlineParser implements IToolCommandlineParser {
     /*
      * (non-Javadoc)
      *
-     * @see de.marw.cmake.cdt.language.settings.providers.IParserHandler# getCompilerWorkingDirectory()
+     * @see de.marw.cmake.cdt.lsp.IParserHandler# getCompilerWorkingDirectory()
      */
     @Override
     public IPath getCompilerWorkingDirectory() {

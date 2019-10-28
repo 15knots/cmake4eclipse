@@ -8,7 +8,7 @@
  * Contributors:
  *      Martin Weber - Initial implementation
  *******************************************************************************/
-package de.marw.cmake.cdt.language.settings.providers;
+package de.marw.cmake.cdt.lsp;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -19,7 +19,7 @@ import org.eclipse.cdt.core.settings.model.util.CDataUtil;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
-import de.marw.cmake.cdt.language.settings.providers.IArglet.IParseContext;
+import de.marw.cmake.cdt.lsp.IArglet.IParseContext;
 
 /**
  * Various Arglet implementation for parsing tool arguments.
@@ -161,7 +161,7 @@ public class Arglets {
   public  static class MacroUndefineGeneric {
 
     /*-
-     * @see de.marw.cmake.cdt.language.settings.providers.IArglet#processArgument(java.util.List, java.lang.String)
+     * @see de.marw.cmake.cdt.lsp.IArglet#processArgument(java.util.List, java.lang.String)
      */
     protected final int processArgument(IParseContext parseContext, String argsLine,
         NameOptionMatcher optionMatcher) {
@@ -187,7 +187,7 @@ public class Arglets {
     /**
      * @param cwd
      *          the current working directory of the compiler at its invocation
-     * @see de.marw.cmake.cdt.language.settings.providers.IArglet#processArgument(IParseContext, IPath, String)
+     * @see de.marw.cmake.cdt.lsp.IArglet#processArgument(IParseContext, IPath, String)
      */
     protected final int processArgument(IParseContext parseContext, IPath cwd,
         String argsLine, NameOptionMatcher[] optionMatchers) {
@@ -247,7 +247,7 @@ public class Arglets {
         };
 
     /*-
-     * @see de.marw.cmake.cdt.language.settings.providers.IArglet#processArgs(java.lang.String)
+     * @see de.marw.cmake.cdt.lsp.IArglet#processArgs(java.lang.String)
      */
     @Override
     public int processArgument(IParseContext parseContext, IPath cwd, String argsLine) {
@@ -267,7 +267,7 @@ public class Arglets {
         "-U" + REGEX_MACRO_NAME_SKIP_LEADING_WS, 1);
 
     /*-
-     * @see de.marw.cmake.cdt.language.settings.providers.IArglet#processArgument(java.util.List, java.lang.String)
+     * @see de.marw.cmake.cdt.lsp.IArglet#processArgument(java.util.List, java.lang.String)
      */
     @Override
     public int processArgument(IParseContext parseContext, IPath cwd, String argsLine) {
@@ -288,7 +288,7 @@ public class Arglets {
         new NameOptionMatcher("-I" + REGEX_INCLUDEPATH_UNQUOTED_DIR, 1) };
 
     /*-
-     * @see de.marw.cmake.cdt.language.settings.providers.IArglet#processArgs(java.lang.String)
+     * @see de.marw.cmake.cdt.lsp.IArglet#processArgs(java.lang.String)
      */
     @Override
     public int processArgument(IParseContext parseContext, IPath cwd, String argsLine) {
@@ -309,7 +309,7 @@ public class Arglets {
         new NameOptionMatcher("-isystem" + REGEX_INCLUDEPATH_UNQUOTED_DIR, 1), };
 
     /*-
-     * @see de.marw.cmake.cdt.language.settings.providers.IArglet#processArgs(java.lang.String)
+     * @see de.marw.cmake.cdt.lsp.IArglet#processArgs(java.lang.String)
      */
     @Override
     public int processArgument(IParseContext parseContext, IPath cwd, String argsLine) {
@@ -334,7 +334,7 @@ public class Arglets {
         new NameOptionMatcher("-isystem=" + "([^\\s]+)", 1), };
 
     /*-
-     * @see de.marw.cmake.cdt.language.settings.providers.IArglet#processArgs(java.lang.String)
+     * @see de.marw.cmake.cdt.lsp.IArglet#processArgs(java.lang.String)
      */
     @Override
     public int processArgument(IParseContext parseContext, IPath cwd, String argsLine) {
@@ -355,7 +355,7 @@ public class Arglets {
         new NameOptionMatcher("-J" + "([^\\s]+)", 1), };
 
     /*-
-     * @see de.marw.cmake.cdt.language.settings.providers.IArglet#processArgs(java.lang.String)
+     * @see de.marw.cmake.cdt.lsp.IArglet#processArgs(java.lang.String)
      */
     @Override
     public int processArgument(IParseContext parseContext, IPath cwd, String argsLine) {
@@ -376,7 +376,7 @@ public class Arglets {
    */
   private static abstract class BuiltinDetctionArgsGeneric {
     /**
-     * @see de.marw.cmake.cdt.language.settings.providers.IArglet#processArgument(IParseContext, IPath, String)
+     * @see de.marw.cmake.cdt.lsp.IArglet#processArgument(IParseContext, IPath, String)
      */
     protected final int processArgument(IParseContext parseContext, String argsLine, Matcher[] optionMatchers) {
       for (Matcher matcher : optionMatchers) {
@@ -408,7 +408,7 @@ public class Arglets {
         Pattern.compile("--no-sysroot-prefix").matcher("") };
 
     /*-
-     * @see de.marw.cmake.cdt.language.settings.providers.IArglet#processArgs(java.lang.String)
+     * @see de.marw.cmake.cdt.lsp.IArglet#processArgs(java.lang.String)
      */
     @Override
     public int processArgument(IParseContext parseContext, IPath cwd, String argsLine) {
@@ -425,7 +425,7 @@ public class Arglets {
         Pattern.compile("-ansi").matcher(""), };
 
     /*-
-     * @see de.marw.cmake.cdt.language.settings.providers.IArglet#processArgs(java.lang.String)
+     * @see de.marw.cmake.cdt.lsp.IArglet#processArgs(java.lang.String)
      */
     @Override
     public int processArgument(IParseContext parseContext, IPath cwd, String argsLine) {
@@ -441,7 +441,7 @@ public class Arglets {
         Pattern.compile("-std \\S+").matcher(""), };
 
     /*-
-     * @see de.marw.cmake.cdt.language.settings.providers.IArglet#processArgs(java.lang.String)
+     * @see de.marw.cmake.cdt.lsp.IArglet#processArgs(java.lang.String)
      */
     @Override
     public int processArgument(IParseContext parseContext, IPath cwd, String argsLine) {

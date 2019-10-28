@@ -24,10 +24,10 @@ import org.eclipse.core.runtime.Path;
 import org.junit.Test;
 
 import de.marw.cmake.cdt.internal.lsp.ParseContext;
-import de.marw.cmake.cdt.language.settings.providers.ResponseFileArglets;
-import de.marw.cmake.cdt.language.settings.providers.Arglets;
-import de.marw.cmake.cdt.language.settings.providers.DefaultToolCommandlineParser;
-import de.marw.cmake.cdt.language.settings.providers.IToolCommandlineParser.IResult;
+import de.marw.cmake.cdt.lsp.Arglets;
+import de.marw.cmake.cdt.lsp.DefaultToolCommandlineParser;
+import de.marw.cmake.cdt.lsp.ResponseFileArglets;
+import de.marw.cmake.cdt.lsp.IToolCommandlineParser.IResult;
 
 /**
  * @author Martin Weber

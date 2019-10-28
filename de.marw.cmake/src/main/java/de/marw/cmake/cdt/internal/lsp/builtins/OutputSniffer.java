@@ -15,8 +15,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Objects;
 
-import de.marw.cmake.cdt.language.settings.providers.builtins.IBuiltinsOutputProcessor;
-import de.marw.cmake.cdt.language.settings.providers.builtins.IBuiltinsOutputProcessor.IProcessingContext;
+import de.marw.cmake.cdt.lsp.builtins.IBuiltinsOutputProcessor;
+import de.marw.cmake.cdt.lsp.builtins.IBuiltinsOutputProcessor.IProcessingContext;
 
 /**
  * An OutputStream that passes each line written to it to a IBuiltinsOutputProcessor.

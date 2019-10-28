@@ -9,7 +9,7 @@
  *      Martin Weber - Initial implementation
  *******************************************************************************/
 
-package de.marw.cmake.cdt.language.settings.providers;
+package de.marw.cmake.cdt.internal.lsp;
 
 /**
  * String manipulation functions.

@@ -9,7 +9,7 @@
  *      Martin Weber - Initial implementation
  *******************************************************************************/
 
-package de.marw.cmake.cdt.internal.lsp.builtins;
+package de.marw.cmake.cdt.lsp.builtins;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -18,14 +18,12 @@ import org.eclipse.cdt.core.settings.model.ICLanguageSettingEntry;
 import org.eclipse.cdt.core.settings.model.ICSettingEntry;
 import org.eclipse.cdt.core.settings.model.util.CDataUtil;
 
-import de.marw.cmake.cdt.language.settings.providers.builtins.IBuiltinsOutputProcessor;
-
 /**
  * A {link IBuiltinsOutputProcessor} for the GNU C and GNU C++ compiler.
  *
  * @author Martin Weber
  */
-class GccOutputProcessor implements IBuiltinsOutputProcessor {
+public class GccOutputProcessor implements IBuiltinsOutputProcessor {
   private static final OutputLineProcessor[] macros = {
       new OutputLineProcessor("#define\\s+(\\S+)\\s*(.*)", 1, 2, false, 0),
       new OutputLineProcessor("#define\\s+(\\S+)\\(.*?\\)\\s*(.*)", 1, 2, false, 0),

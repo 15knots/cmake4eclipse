@@ -9,7 +9,7 @@
  *      Martin Weber - Initial implementation
  *******************************************************************************/
 
-package de.marw.cmake.cdt.language.settings.providers.builtins;
+package de.marw.cmake.cdt.lsp.builtins;
 
 import java.util.List;
 

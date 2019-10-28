@@ -19,7 +19,7 @@ import org.eclipse.cdt.core.settings.model.ICLanguageSettingEntry;
 import org.eclipse.core.runtime.Platform;
 
 import de.marw.cmake.cdt.internal.CMakePlugin;
-import de.marw.cmake.cdt.language.settings.providers.builtins.IBuiltinsOutputProcessor;
+import de.marw.cmake.cdt.lsp.builtins.IBuiltinsOutputProcessor;
 
 /**
  * Default implementation of IProcessingContext.
@@ -32,6 +32,9 @@ class ProcessingContext implements IBuiltinsOutputProcessor.IProcessingContext, 
 
   private final List<ICLanguageSettingEntry> entries = Collections
       .synchronizedList(new ArrayList<ICLanguageSettingEntry>());
+
+  public ProcessingContext() {
+  }
 
   @Override
   public boolean addSettingEntry(ICLanguageSettingEntry entry) {

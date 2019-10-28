@@ -45,8 +45,8 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 
 import de.marw.cmake.cdt.internal.CMakePlugin;
-import de.marw.cmake.cdt.language.settings.providers.builtins.IBuiltinsDetectionBehavior;
-import de.marw.cmake.cdt.language.settings.providers.builtins.IBuiltinsOutputProcessor;
+import de.marw.cmake.cdt.lsp.builtins.IBuiltinsDetectionBehavior;
+import de.marw.cmake.cdt.lsp.builtins.IBuiltinsOutputProcessor;
 
 /**
  * Detects preprocessor macros and include paths that are built-in to a compiler.
@@ -138,8 +138,8 @@ public class CompilerBuiltinsDetector {
       // the internal processor state
       final IBuiltinsOutputProcessor bopOut = builtinsDetectionBehavior.createCompilerOutputProcessor();
       final IBuiltinsOutputProcessor bopErr = builtinsDetectionBehavior.createCompilerOutputProcessor();
-      int state = launcher.waitAndRead(new OutputSniffer(bopOut, console == null ? null : console.getOutputStream(), new ProcessingContext()),
-          new OutputSniffer(bopErr, console == null ? null : console.getErrorStream(), new ProcessingContext()), monitor);
+      int state = launcher.waitAndRead(new OutputSniffer(bopOut, console == null ? null : console.getOutputStream(), entries),
+          new OutputSniffer(bopErr, console == null ? null : console.getErrorStream(), entries), monitor);
       if (state != ICommandLauncher.COMMAND_CANCELED) {
         // check exit status
         final int exitValue = proc.exitValue();

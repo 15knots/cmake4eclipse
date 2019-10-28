@@ -20,7 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import de.marw.cmake.cdt.internal.lsp.ParseContext;
-import de.marw.cmake.cdt.language.settings.providers.Arglets.SystemIncludePath_nvcc;
+import de.marw.cmake.cdt.lsp.Arglets.SystemIncludePath_nvcc;
 
 /**
  * @author Martin Weber

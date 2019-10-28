@@ -19,9 +19,9 @@ import org.eclipse.core.runtime.Path;
 import org.junit.Before;
 import org.junit.Test;
 
-import de.marw.cmake.cdt.language.settings.providers.Arglets.IncludePath_C_POSIX;
-import de.marw.cmake.cdt.language.settings.providers.Arglets.SystemIncludePath_C;
-import de.marw.cmake.cdt.language.settings.providers.IArglet.IParseContext;
+import de.marw.cmake.cdt.lsp.Arglets.IncludePath_C_POSIX;
+import de.marw.cmake.cdt.lsp.Arglets.SystemIncludePath_C;
+import de.marw.cmake.cdt.lsp.IArglet.IParseContext;
 
 /**
  * @author Martin Weber

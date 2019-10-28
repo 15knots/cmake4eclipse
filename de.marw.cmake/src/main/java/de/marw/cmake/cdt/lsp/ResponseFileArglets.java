@@ -9,7 +9,7 @@
  *      Martin Weber - Initial implementation
  *******************************************************************************/
 
-package de.marw.cmake.cdt.language.settings.providers;
+package de.marw.cmake.cdt.lsp;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -19,7 +19,7 @@ import java.util.regex.Matcher;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
-import de.marw.cmake.cdt.language.settings.providers.Arglets.NameOptionMatcher;
+import de.marw.cmake.cdt.lsp.Arglets.NameOptionMatcher;
 
 /**
  * Various response-file argument parser implementations.
@@ -51,8 +51,8 @@ public class ResponseFileArglets {
      * (non-Javadoc)
      *
      * @see
-     * de.marw.cmake.cdt.language.settings.providers.IResponseFileArglet
-     * #process(de.marw.cmake.cdt.language.settings.providers.IParserHandler,
+     * de.marw.cmake.cdt.lsp.IResponseFileArglet
+     * #process(de.marw.cmake.cdt.lsp.IParserHandler,
      * java.lang.String)
      */
     @Override

@@ -34,7 +34,7 @@ public class ParserDetectionTest {
         true);
     assertNotNull(result);
     // verify that we got a C parser
-    assertEquals("C", "org.eclipse.cdt.core.gcc", result.getDetectorWithMethod().getDetector().getParser().getLanguageId("c"));
+    assertEquals("C", "org.eclipse.cdt.core.gcc", result.getDetectorWithMethod().getToolDetectionParticipant().getParser().getLanguageId("c"));
   }
 
   @Test
@@ -43,7 +43,7 @@ public class ParserDetectionTest {
         true);
     assertNotNull(result);
     // verify that we got a C++ parser
-    assertEquals("C++", "org.eclipse.cdt.core.g++", result.getDetectorWithMethod().getDetector().getParser().getLanguageId("c"));
+    assertEquals("C++", "org.eclipse.cdt.core.g++", result.getDetectorWithMethod().getToolDetectionParticipant().getParser().getLanguageId("c"));
   }
 
   @Test
@@ -51,7 +51,7 @@ public class ParserDetectionTest {
     ParserDetection.ParserDetectionResult result = ParserDetection.determineDetector("clang++ -C blah.c", null, false);
     assertNotNull(result);
     // verify that we got a C++ parser
-    assertEquals("C++", "org.eclipse.cdt.core.g++", result.getDetectorWithMethod().getDetector().getParser().getLanguageId("c"));
+    assertEquals("C++", "org.eclipse.cdt.core.g++", result.getDetectorWithMethod().getToolDetectionParticipant().getParser().getLanguageId("c"));
   }
 
   /**
@@ -66,13 +66,13 @@ public class ParserDetectionTest {
         true);
     assertNotNull(result);
     // verify that we got a C parser
-    assertEquals("C", "org.eclipse.cdt.core.gcc", result.getDetectorWithMethod().getDetector().getParser().getLanguageId("c"));
+    assertEquals("C", "org.eclipse.cdt.core.gcc", result.getDetectorWithMethod().getToolDetectionParticipant().getParser().getLanguageId("c"));
 
     result = ParserDetection.determineDetector("/usr/bin/arm-none-eabi-gcc.exe -C blah.c", null,
         true);
     assertNotNull(result);
     // verify that we got a C parser
-    assertEquals("C", "org.eclipse.cdt.core.gcc", result.getDetectorWithMethod().getDetector().getParser().getLanguageId("c"));
+    assertEquals("C", "org.eclipse.cdt.core.gcc", result.getDetectorWithMethod().getToolDetectionParticipant().getParser().getLanguageId("c"));
   }
 
   /**
@@ -84,13 +84,13 @@ public class ParserDetectionTest {
         true);
     assertNotNull(result);
     // verify that we got a C++ parser
-    assertEquals("C++", "org.eclipse.cdt.core.g++", result.getDetectorWithMethod().getDetector().getParser().getLanguageId("c"));
+    assertEquals("C++", "org.eclipse.cdt.core.g++", result.getDetectorWithMethod().getToolDetectionParticipant().getParser().getLanguageId("c"));
 
     result = ParserDetection.determineDetector("/usr/bin/arm-none-eabi-g++.exe -C blah.c", null,
         true);
     assertNotNull(result);
     // verify that we got a C++ parser
-    assertEquals("C++", "org.eclipse.cdt.core.g++", result.getDetectorWithMethod().getDetector().getParser().getLanguageId("c"));
+    assertEquals("C++", "org.eclipse.cdt.core.g++", result.getDetectorWithMethod().getToolDetectionParticipant().getParser().getLanguageId("c"));
   }
 
   /**
@@ -101,12 +101,12 @@ public class ParserDetectionTest {
     ParserDetection.ParserDetectionResult result = ParserDetection.determineDetector("arm-none-eabi-g++ -C blah.c", null, false);
     assertNotNull(result);
     // verify that we got a C++ parser
-    assertEquals("C++", "org.eclipse.cdt.core.g++", result.getDetectorWithMethod().getDetector().getParser().getLanguageId("c"));
+    assertEquals("C++", "org.eclipse.cdt.core.g++", result.getDetectorWithMethod().getToolDetectionParticipant().getParser().getLanguageId("c"));
 
     result = ParserDetection.determineDetector("arm-none-eabi-g++.exe -C blah.c", null, false);
     assertNotNull(result);
     // verify that we got a C++ parser
-    assertEquals("C++", "org.eclipse.cdt.core.g++", result.getDetectorWithMethod().getDetector().getParser().getLanguageId("c"));}
+    assertEquals("C++", "org.eclipse.cdt.core.g++", result.getDetectorWithMethod().getToolDetectionParticipant().getParser().getLanguageId("c"));}
 
   @Test
   @Ignore("Requires NFTS to run")
@@ -115,28 +115,7 @@ public class ParserDetectionTest {
         .determineDetector("C:\\PROGRA2\\Atmel\\AVR8-G1\\bin\\AVR-G_~1.EXE -C blah.c", null, true);
     assertNotNull(result);
     // verify that we got a C parser
-    assertEquals("C", "org.eclipse.cdt.core.gcc", result.getDetectorWithMethod().getDetector().getParser().getLanguageId("c"));
-  }
-
-  /**
-   * Test method for
-   * {@link de.marw.cmake.cdt.internal.lsp.ParserDetection#determineDetector(String, String,boolean)}
-   * .
-   * <a href="https://wiki.osdev.org/Target_Triplet"/>
-   */
-  @Test
-  public void testDetermineParserForCommandline_armcc() {
-    ParserDetection.ParserDetectionResult result = ParserDetection.determineDetector("/usr/bin/armcc -C blah.c", null,
-        true);
-    assertNotNull(result);
-    // verify that we got a C parser: not possible, language depends on source file extension
-//    assertEquals("C", "org.eclipse.cdt.core.gcc", result.getDetectorWithMethod().getDetector().getParser().getLanguageId());
-
-    result = ParserDetection.determineDetector("/usr/bin/armcc.exe -C blah.c", null,
-        true);
-    assertNotNull(result);
-    // verify that we got a C parser: not possible, language depends on source file extension
-//    assertEquals("C", "org.eclipse.cdt.core.gcc", result.getDetectorWithMethod().getDetector().getParser().getLanguageId());
+    assertEquals("C", "org.eclipse.cdt.core.gcc", result.getDetectorWithMethod().getToolDetectionParticipant().getParser().getLanguageId("c"));
   }
 
   @Test
@@ -147,33 +126,33 @@ public class ParserDetectionTest {
         versionSuffixRegex, false);
     assertNotNull(result);
     // verify that we got a C parser
-    assertEquals("org.eclipse.cdt.core.gcc", result.getDetectorWithMethod().getDetector().getParser().getLanguageId("c"));
+    assertEquals("org.eclipse.cdt.core.gcc", result.getDetectorWithMethod().getToolDetectionParticipant().getParser().getLanguageId("c"));
 
     result = ParserDetection.determineDetector("/usr/bin/cc-4.1.exe -C blah.c", versionSuffixRegex, true);
     assertNotNull(result);
     // verify that we got a C parser
-    assertEquals("org.eclipse.cdt.core.gcc", result.getDetectorWithMethod().getDetector().getParser().getLanguageId("c"));
+    assertEquals("org.eclipse.cdt.core.gcc", result.getDetectorWithMethod().getToolDetectionParticipant().getParser().getLanguageId("c"));
 
     result = ParserDetection.determineDetector("/usr/bin/c++-4.1 -C blah.c",
         versionSuffixRegex, false);
     assertNotNull(result);
     // verify that we got a C++ parser
-    assertEquals("org.eclipse.cdt.core.g++", result.getDetectorWithMethod().getDetector().getParser().getLanguageId("c"));
+    assertEquals("org.eclipse.cdt.core.g++", result.getDetectorWithMethod().getToolDetectionParticipant().getParser().getLanguageId("c"));
 
     result = ParserDetection.determineDetector("/usr/bin/c++-4.1.exe -C blah.c", versionSuffixRegex, true);
     assertNotNull(result);
     // verify that we got a C++ parser
-    assertEquals("org.eclipse.cdt.core.g++", result.getDetectorWithMethod().getDetector().getParser().getLanguageId("c"));
+    assertEquals("org.eclipse.cdt.core.g++", result.getDetectorWithMethod().getToolDetectionParticipant().getParser().getLanguageId("c"));
 
     // clang for issue #43
     result = ParserDetection.determineDetector("/usr/local/bin/clang++40 -C blah.c", versionSuffixRegex, false);
     assertNotNull(result);
-    assertEquals("org.eclipse.cdt.core.g++", result.getDetectorWithMethod().getDetector().getParser().getLanguageId("c"));
+    assertEquals("org.eclipse.cdt.core.g++", result.getDetectorWithMethod().getToolDetectionParticipant().getParser().getLanguageId("c"));
     result = ParserDetection.determineDetector("/usr/local/bin/clang++40 -C blah.c", "40", false);
 //    result = ParserDetection.determineDetector("/usr/local/bin/clang++40 -I/home/me/workspace/first/test/../utility -I/home/me/workspace/first/test/../include -I/home/me/workspace/first/test -g -std=c++1y -stdlib=libc++ -include-pch /home/me/workspace/first/build/Debug/test/catch.hpp.pch -include-pch /home/me/workspace/first/build/Debug/test/pch.hpp.pch -o CMakeFiles/first_test.test.dir/__/utility/fun.cpp.o -c /home/me/workspace/first/utility/fun.cpp",
 //        "40", false);
     assertNotNull(result);
-    assertEquals("org.eclipse.cdt.core.g++", result.getDetectorWithMethod().getDetector().getParser().getLanguageId("c"));
+    assertEquals("org.eclipse.cdt.core.g++", result.getDetectorWithMethod().getToolDetectionParticipant().getParser().getLanguageId("c"));
 
     result = ParserDetection.determineDetector(
         "/apps/tools/cent_os72/binlinks/g++-7.1 " + "-I/apps/tools/cent_os72/thirdparty/boost/boost_1_64_0/include "
@@ -182,7 +161,7 @@ public class ParserDetectionTest {
         versionSuffixRegex, true);
     assertNotNull(result);
     // verify that we got a C++ parser
-    assertEquals("org.eclipse.cdt.core.g++", result.getDetectorWithMethod().getDetector().getParser().getLanguageId("cpp"));
+    assertEquals("org.eclipse.cdt.core.g++", result.getDetectorWithMethod().getToolDetectionParticipant().getParser().getLanguageId("cpp"));
   }
 
   @Test

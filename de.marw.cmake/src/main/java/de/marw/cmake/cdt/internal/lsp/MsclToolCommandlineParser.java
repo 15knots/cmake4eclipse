@@ -13,15 +13,15 @@ package de.marw.cmake.cdt.internal.lsp;
 
 import org.eclipse.core.runtime.IPath;
 
-import de.marw.cmake.cdt.language.settings.providers.Arglets.IncludePathGeneric;
-import de.marw.cmake.cdt.language.settings.providers.Arglets.MacroDefineGeneric;
-import de.marw.cmake.cdt.language.settings.providers.Arglets.MacroUndefineGeneric;
-import de.marw.cmake.cdt.language.settings.providers.Arglets.NameOptionMatcher;
-import de.marw.cmake.cdt.language.settings.providers.Arglets.NameValueOptionMatcher;
-import de.marw.cmake.cdt.language.settings.providers.DefaultToolCommandlineParser;
-import de.marw.cmake.cdt.language.settings.providers.IArglet;
-import de.marw.cmake.cdt.language.settings.providers.IToolCommandlineParser;
-import de.marw.cmake.cdt.language.settings.providers.ResponseFileArglets;
+import de.marw.cmake.cdt.lsp.DefaultToolCommandlineParser;
+import de.marw.cmake.cdt.lsp.IArglet;
+import de.marw.cmake.cdt.lsp.IToolCommandlineParser;
+import de.marw.cmake.cdt.lsp.ResponseFileArglets;
+import de.marw.cmake.cdt.lsp.Arglets.IncludePathGeneric;
+import de.marw.cmake.cdt.lsp.Arglets.MacroDefineGeneric;
+import de.marw.cmake.cdt.lsp.Arglets.MacroUndefineGeneric;
+import de.marw.cmake.cdt.lsp.Arglets.NameOptionMatcher;
+import de.marw.cmake.cdt.lsp.Arglets.NameValueOptionMatcher;
 
 /**
  * An {@link IToolCommandlineParser} for the microsoft C and C++ compiler (cl).
@@ -70,7 +70,7 @@ class MsclToolCommandlineParser extends DefaultToolCommandlineParser {
         new NameOptionMatcher("[-/]I" + REGEX_INCLUDEPATH_UNQUOTED_DIR, 1), };
 
     /*-
-     * @see de.marw.cmake.cdt.language.settings.providers.IArglet#processArgs(java.lang.String)
+     * @see de.marw.cmake.cdt.lsp.IArglet#processArgs(java.lang.String)
      */
     @Override
     public int processArgument(IParseContext parseContext, IPath cwd, String argsLine) {
@@ -96,7 +96,7 @@ class MsclToolCommandlineParser extends DefaultToolCommandlineParser {
             2), };
 
     /*-
-     * @see de.marw.cmake.cdt.language.settings.providers.IArglet#processArgs(java.lang.String)
+     * @see de.marw.cmake.cdt.lsp.IArglet#processArgs(java.lang.String)
      */
     @Override
     public int processArgument(IParseContext parseContext, IPath cwd, String argsLine) {
@@ -114,7 +114,7 @@ class MsclToolCommandlineParser extends DefaultToolCommandlineParser {
         "[-/]U" + REGEX_MACRO_NAME_SKIP_LEADING_WS, 1);
 
     /*-
-     * @see de.marw.cmake.cdt.language.settings.providers.IArglet#processArgument(java.util.List, java.lang.String)
+     * @see de.marw.cmake.cdt.lsp.IArglet#processArgument(java.util.List, java.lang.String)
      */
     @Override
     public int processArgument(IParseContext parseContext, IPath cwd, String argsLine) {

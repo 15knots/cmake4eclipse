@@ -18,8 +18,8 @@ import org.eclipse.cdt.core.settings.model.ICLanguageSettingEntry;
 import org.eclipse.core.runtime.Platform;
 
 import de.marw.cmake.cdt.internal.CMakePlugin;
-import de.marw.cmake.cdt.language.settings.providers.IArglet;
-import de.marw.cmake.cdt.language.settings.providers.IToolCommandlineParser;
+import de.marw.cmake.cdt.lsp.IArglet;
+import de.marw.cmake.cdt.lsp.IToolCommandlineParser;
 
 /**
  * Default implementation of IParseContext.

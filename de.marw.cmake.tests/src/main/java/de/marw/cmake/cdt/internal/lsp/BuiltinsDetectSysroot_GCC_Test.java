@@ -18,8 +18,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import de.marw.cmake.cdt.internal.lsp.ParseContext;
-import de.marw.cmake.cdt.language.settings.providers.Arglets;
-import de.marw.cmake.cdt.language.settings.providers.Arglets.Sysroot_GCC;
+import de.marw.cmake.cdt.lsp.Arglets;
+import de.marw.cmake.cdt.lsp.Arglets.Sysroot_GCC;
 
 /**
  * @author Martin Weber

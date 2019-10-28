@@ -15,24 +15,25 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 
 import de.marw.cmake.cdt.internal.CMakePlugin;
-import de.marw.cmake.cdt.internal.lsp.builtins.ArmccBuiltinDetectionBehavior;
 import de.marw.cmake.cdt.internal.lsp.builtins.GccBuiltinDetectionBehavior;
 import de.marw.cmake.cdt.internal.lsp.builtins.MaybeGccBuiltinDetectionBehavior;
 import de.marw.cmake.cdt.internal.lsp.builtins.NvccBuiltinDetectionBehavior;
-import de.marw.cmake.cdt.language.settings.providers.Arglets;
-import de.marw.cmake.cdt.language.settings.providers.DefaultToolCommandlineParser;
-import de.marw.cmake.cdt.language.settings.providers.DefaultToolDetectionParticipant;
-import de.marw.cmake.cdt.language.settings.providers.IArglet;
-import de.marw.cmake.cdt.language.settings.providers.IToolCommandlineParser;
-import de.marw.cmake.cdt.language.settings.providers.IToolDetectionParticipant;
-import de.marw.cmake.cdt.language.settings.providers.ResponseFileArglets;
-import de.marw.cmake.cdt.language.settings.providers.builtins.IBuiltinsDetectionBehavior;
+import de.marw.cmake.cdt.lsp.Arglets;
+import de.marw.cmake.cdt.lsp.DefaultToolCommandlineParser;
+import de.marw.cmake.cdt.lsp.DefaultToolDetectionParticipant;
+import de.marw.cmake.cdt.lsp.IArglet;
+import de.marw.cmake.cdt.lsp.IToolCommandlineParser;
+import de.marw.cmake.cdt.lsp.IToolDetectionParticipant;
+import de.marw.cmake.cdt.lsp.ResponseFileArglets;
+import de.marw.cmake.cdt.lsp.builtins.IBuiltinsDetectionBehavior;
 
 /**
  * Utility classes and methods to detect a parser for a compiler given on a
@@ -41,17 +42,17 @@ import de.marw.cmake.cdt.language.settings.providers.builtins.IBuiltinsDetection
  * @author Martin Weber
  *
  */
-class ParserDetection {
+public class ParserDetection {
   private static final ILog log = CMakePlugin.getDefault().getLog();
-  private static final boolean DEBUG_PARSER_DETECTION = Boolean
-      .parseBoolean(Platform.getDebugOption(CMakePlugin.PLUGIN_ID + "/CECC/parser"));
+  private static final boolean DEBUG_PARTCIPANT_DETECTION = Boolean
+      .parseBoolean(Platform.getDebugOption(CMakePlugin.PLUGIN_ID + "/CECC/participant"));
 
   /**
    * tool detectors and their tool option parsers for each tool of interest that
    * takes part in the current build. The Matcher detects whether a command line
    * is an invocation of the tool.
    */
-  private static final List<DefaultToolDetectionParticipant> parserDetectors = new ArrayList<>(22);
+  private static final List<IToolDetectionParticipant> parserDetectors = new ArrayList<>(22);
 
   static {
     /** Names of known tools along with their command line argument parsers */
@@ -107,25 +108,6 @@ class ParserDetection {
       final IToolCommandlineParser cl = new MsclToolCommandlineParser();
       parserDetectors.add(new DefaultToolDetectionParticipant("cl", true, "exe", cl));
     }
-    // Intel C compilers ============================================
-    {
-      // for the record: builtin detection: -EP -dM for macros, -H for include FILES. NOTE: Windows: /QdM.
-      final IToolCommandlineParser icc = new DefaultToolCommandlineParser("org.eclipse.cdt.core.gcc",
-          new ResponseFileArglets.At(), null, gcc_args);
-      final IToolCommandlineParser icpc = new DefaultToolCommandlineParser("org.eclipse.cdt.core.g++",
-          new ResponseFileArglets.At(), null, gcc_args);
-      // Linux & OS X, EDG
-      parserDetectors.add(new DefaultToolDetectionParticipant("icc", icc));
-      // OS X, clang
-      parserDetectors.add(new DefaultToolDetectionParticipant("icl", icc));
-      // Intel C++ compiler
-      // Linux & OS X, EDG
-      parserDetectors.add(new DefaultToolDetectionParticipant("icpc", icpc));
-      // OS X, clang
-      parserDetectors.add(new DefaultToolDetectionParticipant("icl\\+\\+", icpc));
-      // Windows C + C++, EDG
-      parserDetectors.add(new DefaultToolDetectionParticipant("icl", true, "exe", icc));
-    }
 
     // CUDA: nvcc compilers (POSIX compatible) =================================
     {
@@ -139,22 +121,18 @@ class ParserDetection {
       parserDetectors.add(new DefaultToolDetectionParticipant("nvcc", true, "exe", nvcc));
     }
 
-    // ARM.com armclang compiler ====
-    {
-      final IArglet[] armclang_args = { new Arglets.IncludePath_C_POSIX(),
-          new Arglets.MacroDefine_C_POSIX(), new Arglets.MacroUndefine_C_POSIX(), };
-      final IToolCommandlineParser armclang = new DefaultToolCommandlineParser(null, new ResponseFileArglets.At(),
-          null, armclang_args);
-      parserDetectors.add(new DefaultToolDetectionParticipant("armclang", true, "exe", armclang));
-    }
-    // ARM.com armcc compiler ====
-    {
-      final IArglet[] armcc_args = { new Arglets.IncludePath_C_POSIX(),
-          new Arglets.MacroDefine_C_POSIX(), new Arglets.MacroUndefine_C_POSIX(),
-          new Arglets.SystemIncludePath_armcc() };
-      final IToolCommandlineParser armcc = new DefaultToolCommandlineParser(null, null,
-          new ArmccBuiltinDetectionBehavior(), armcc_args);
-      parserDetectors.add(new DefaultToolDetectionParticipant("armcc", true, "exe", armcc));
+    // compilers from extension points
+    IConfigurationElement[] elements = Platform.getExtensionRegistry()
+        .getConfigurationElementsFor("de.marw.cmake.lspDetectionParticipant");
+    for (IConfigurationElement e : elements) {
+      try {
+        Object obj = e.createExecutableExtension("class");
+        if (obj instanceof IToolDetectionParticipant) {
+          parserDetectors.add((IToolDetectionParticipant) obj);
+        }
+      } catch (CoreException ex) {
+        log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, e.getNamespaceIdentifier(), ex));
+      }
     }
   }
 
@@ -171,7 +149,7 @@ class ParserDetection {
    *          the regular expression to match a version suffix in the compiler
    *          name or {@code null} to not try to detect the compiler with a
    *          version suffix
-   * @param tryWindowsDectors
+   * @param tryWindowsDetectors
    *          whether to also try the detectors for ms windows OS
    *
    * @return {@code null} if none of the detectors matches the tool name in the
@@ -180,15 +158,15 @@ class ParserDetection {
    *         string (without the portion that matched) is returned.
    */
   public static ParserDetectionResult determineDetector(String line, String versionSuffixRegex,
-      boolean tryWindowsDectors) {
+      boolean tryWindowsDetectors) {
     ParserDetectionResult result;
-    if (DEBUG_PARSER_DETECTION) {
+    if (DEBUG_PARTCIPANT_DETECTION) {
       System.out.printf("> Command-line '%s'%n", line);
       System.out.printf("> Looking up detector for command '%s ...'%n", line.substring(0, Math.min(40, line.length())));
     }
     // try default detectors
     result = determineDetector(line, parserDetectors, versionSuffixRegex, false);
-    if (result == null && tryWindowsDectors) {
+    if (result == null && tryWindowsDetectors) {
       // try with backslash as file separator on windows
       result = determineDetector(line, parserDetectors, versionSuffixRegex, true);
       if (result == null) {
@@ -202,9 +180,9 @@ class ParserDetection {
       }
     }
     if (result != null) {
-      if (DEBUG_PARSER_DETECTION)
+      if (DEBUG_PARTCIPANT_DETECTION)
         System.out.printf("< Found detector for command '%s': %s (%s)%n", result.getCommandLine().getCommand(),
-            result.getDetectorWithMethod().getDetector().getParser().getClass().getSimpleName(),
+            result.getDetectorWithMethod().getToolDetectionParticipant().getParser().getClass().getSimpleName(),
             result.getDetectorWithMethod().getHow());
     }
     return result;
@@ -228,12 +206,12 @@ class ParserDetection {
    *         Otherwise, if the tool name matches, a {@code ParserDetectionResult} holding the de-compose command-line is
    *         returned.
    */
-  private static ParserDetectionResult determineDetector(String commandLine, List<DefaultToolDetectionParticipant> detectors,
+  private static ParserDetectionResult determineDetector(String commandLine, List<IToolDetectionParticipant> detectors,
       String versionSuffixRegex, boolean matchBackslash) {
     DefaultToolDetectionParticipant.MatchResult cmdline;
     // try basenames
     for (IToolDetectionParticipant pd : detectors) {
-      if (DEBUG_PARSER_DETECTION)
+      if (DEBUG_PARTCIPANT_DETECTION)
         System.out.printf("  Trying detector %s (%s)%n", pd.getParser().getClass().getSimpleName(),
             DetectorWithMethod.DetectionMethod.BASENAME);
       if ((cmdline = pd.basenameMatches(commandLine, matchBackslash)) != null) {
@@ -244,7 +222,7 @@ class ParserDetection {
     if (versionSuffixRegex != null) {
       // try with version pattern
       for (IToolDetectionParticipant pd : detectors) {
-        if (DEBUG_PARSER_DETECTION)
+        if (DEBUG_PARTCIPANT_DETECTION)
           System.out.printf("  Trying detector %s (%s)%n", pd.getParser().getClass().getSimpleName(), DetectorWithMethod.DetectionMethod.WITH_VERSION);
         if ((cmdline = pd.basenameWithVersionMatches(commandLine, matchBackslash, versionSuffixRegex)) != null) {
           return new ParserDetectionResult(new DetectorWithMethod(pd, DetectorWithMethod.DetectionMethod.WITH_VERSION, matchBackslash),
@@ -254,7 +232,7 @@ class ParserDetection {
     }
     // try with extension
     for (IToolDetectionParticipant pd : detectors) {
-      if (DEBUG_PARSER_DETECTION)
+      if (DEBUG_PARTCIPANT_DETECTION)
         System.out.printf("  Trying detector %s (%s)%n", pd.getParser().getClass().getSimpleName(),
             DetectorWithMethod.DetectionMethod.WITH_EXTENSION);
       if ((cmdline = pd.basenameWithExtensionMatches(commandLine, matchBackslash)) != null) {
@@ -265,7 +243,7 @@ class ParserDetection {
     if (versionSuffixRegex != null) {
       // try with extension and version
       for (IToolDetectionParticipant pd : detectors) {
-        if (DEBUG_PARSER_DETECTION)
+        if (DEBUG_PARTCIPANT_DETECTION)
           System.out.printf("  Trying detector %s (%s)%n", pd.getParser().getClass().getSimpleName() + " ("
               + DetectorWithMethod.DetectionMethod.WITH_VERSION_EXTENSION);
         if ((cmdline = pd.basenameWithVersionAndExtensionMatches(commandLine, matchBackslash,
@@ -313,8 +291,8 @@ class ParserDetection {
     return commandLine;
   }
 
-  // has package scope for unittest purposes
-  static class DetectorWithMethod {
+  // has public scope for unittest purposes
+  public static class DetectorWithMethod {
     enum DetectionMethod {
       BASENAME, WITH_VERSION, WITH_EXTENSION, WITH_VERSION_EXTENSION;
     }
@@ -353,7 +331,7 @@ class ParserDetection {
      *
      * @return the detector, never {@code null}
      */
-    public IToolDetectionParticipant getDetector() {
+    public IToolDetectionParticipant getToolDetectionParticipant() {
       return detector;
     }
 
@@ -375,8 +353,8 @@ class ParserDetection {
 
   }
 
-  // has package scope for unittest purposes
-  static class ParserDetectionResult {
+  // has public scope for unittest purposes
+  public static class ParserDetectionResult {
 
     private final DetectorWithMethod detectorWMethod;
     private final DefaultToolDetectionParticipant.MatchResult commandLine;
