@@ -60,11 +60,11 @@
          <attribute name="class" type="string" use="required">
             <annotation>
                <documentation>
-                  The fully qualified name of a class that implements &lt;code&gt;de.marw.cmake.cdt.language.settings.providers.IToolDetectionParticipant&lt;/code&gt;, The implementation must provide a public no-argument constructor.&lt;br/&gt;
-You may want to consider sub-classing &lt;code&gt;de.marw.cmake.cdt.language.settings.providers.DefaultToolDetectionParticipant&lt;/code&gt; for convenience instead of directly implementing the interface.
+                  The fully qualified name of a class that implements &lt;code&gt;de.marw.cmake.cdt.lsp.IToolDetectionParticipant&lt;/code&gt;, The implementation must provide a public no-argument constructor.&lt;br/&gt;
+You may want to consider sub-classing &lt;code&gt;de.marw.cmake.cdt.lsp.DefaultToolDetectionParticipant&lt;/code&gt; for convenience instead of directly implementing the interface.
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn=":de.marw.cmake.cdt.language.settings.providers.IToolDetectionParticipant"/>
+                  <meta.attribute kind="java" basedOn=":de.marw.cmake.cdt.lsp.IToolDetectionParticipant"/>
                </appinfo>
             </annotation>
          </attribute>
@@ -92,18 +92,18 @@ You may want to consider sub-classing &lt;code&gt;de.marw.cmake.cdt.language.set
          <meta.section type="examples"/>
       </appinfo>
       <documentation>
-         Following is an example of a tool detection participant: 
-&lt;p&gt;
+         Following is an example of a tool detection participant.
+&lt;p&gt;This participant detects the preprocessor macros and include directories for the C compiler made by
+the Foobar company:
 &lt;pre&gt;
- &lt;extension point=&quot;de.marw.cmake.cdt.lsp.DetectionParticipant&quot;&gt;
-    &lt;tool class=&quot;com.foobar.ToolDetectionParticipant&quot; displayName=&quot;Foobar C&quot;&gt;
-    &lt;/tool&gt;
- &lt;/extension&gt;
+&lt;extension point=&quot;de.marw.cmake.lspDetectionParticipant&quot;&gt;
+    &lt;tool class=&quot;com.foobar.ToolDetectionParticipant&quot; displayName=&quot;Foobar C&quot; /&gt;
+&lt;/extension&gt;
 &lt;/pre&gt;
 &lt;/p&gt;
 &lt;p&gt;
-The easiest way to implement a tool detection participant would be to sub-class &lt;code&gt;de.marw.cmake.cdt.language.settings.providers.DefaultToolDetectionParticipant&lt;/code&gt;. 
-To configure your class, pass an instance of &lt;code&gt;de.marw.cmake.cdt.language.settings.providers.DefaultToolCommandlineParser&lt;/code&gt; in its super-constructor.&lt;br/&gt;
+The easiest way to implement a tool detection participant would be to sub-class &lt;code&gt;de.marw.cmake.cdt.lsp.DefaultToolDetectionParticipant&lt;/code&gt;. 
+To configure your class, pass an instance of &lt;code&gt;de.marw.cmake.cdt.lsp.DefaultToolCommandlineParser&lt;/code&gt; in its super-constructor.&lt;br/&gt;
 Some predifined parsers for tool arguments can be found in the classes &lt;code&gt;Arglets&lt;/code&gt; and &lt;code&gt;ResponseFileArglets&lt;/code&gt;.
 &lt;/p&gt;
       </documentation>
@@ -115,7 +115,8 @@ Some predifined parsers for tool arguments can be found in the classes &lt;code&
          <meta.section type="implementation"/>
       </appinfo>
       <documentation>
-         [Enter information about supplied implementation of this extension point.]
+         The plugin de.marw.cmake.cdt.lsp.intel provides inplementations for various compiler made by Intel Corp.&lt;/br&gt;
+See, for example &lt;code&gt;de/marw/cmake/cdt/lsp/intel/IccToolDetectionParticipant.java&lt;/code&gt;.
       </documentation>
    </annotation>
 

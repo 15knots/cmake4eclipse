@@ -9,21 +9,21 @@
  *      Martin Weber - Initial implementation
  *******************************************************************************/
 
-package de.marw.cmake.cdt.internal.lsp.builtins;
+package de.marw.cmake.cdt.lsp.arm;
 
 import java.util.Arrays;
 import java.util.List;
 
-import de.marw.cmake.cdt.language.settings.providers.builtins.IBuiltinsDetectionBehavior;
-import de.marw.cmake.cdt.language.settings.providers.builtins.IBuiltinsOutputProcessor;
+import de.marw.cmake.cdt.lsp.builtins.GccOutputProcessor;
+import de.marw.cmake.cdt.lsp.builtins.IBuiltinsDetectionBehavior;
+import de.marw.cmake.cdt.lsp.builtins.IBuiltinsOutputProcessor;
 
 /**
  * The {link IBuiltinsDetectionBehavior} for the ARM C or C++ version 5 compiler.
  *
  * @author Martin Weber
  */
-// TODO move to separate plugin
-public class ArmccBuiltinDetectionBehavior implements IBuiltinsDetectionBehavior {
+class ArmccBuiltinDetectionBehavior implements IBuiltinsDetectionBehavior {
   // --list_macros for macros
   private final List<String> enablingArgs = Arrays.asList("--list_macros");
 

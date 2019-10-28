@@ -1,12 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
+   <category-def name="cmake" label="CMake">
+      <description>CMake</description>
+   </category-def>
    <feature id="de.marw.cdt.cmake">
       <category name="cmake"/>
    </feature>
    <feature id="de.marw.cdt.cmake.source">
       <category name="cmake"/>
    </feature>
-   <category-def name="cmake" label="CMake">
-      <description>CMake</description>
+
+   <category-def name="extras" label="cmake4eclipse extras">
+      <category name="cmake"/>
+      <description>Additional compilers support for the CDT Indexer (preprocessor macro &amp; include path providers).</description>
    </category-def>
+   <bundle id="de.marw.cmake.cdt.lsp.arm">
+      <category name="extras"/>
+   </bundle>
+   <bundle id="de.marw.cmake.cdt.lsp.intel">
+      <category name="extras"/>
+   </bundle>
 </site>

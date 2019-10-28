@@ -42,6 +42,9 @@
     <module>../de.marw.cmake</module>
     <module>../de.marw.cmake.tests</module>
     <module>../de.marw.cdt.cmake.core</module>
+    <module>../de.marw.cmake.cdt.lsp.arm</module>
+    <module>../de.marw.cmake.cdt.lsp.arm.tests</module>
+    <module>../de.marw.cmake.cdt.lsp.intel</module>
     <module>../de.marw.cdt.cmake-feature</module>
     <module>../releng/de.marw.cdt.cmake-repo</module>
   </modules>

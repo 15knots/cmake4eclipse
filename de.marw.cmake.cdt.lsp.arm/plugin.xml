@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension point="de.marw.cmake.lspDetectionParticipant">
+      <tool class="de.marw.cmake.cdt.lsp.arm.ArmccToolDetectionParticipant"
+            displayName="ARM.com armcc, C &amp; C++"/>
+      <tool class="de.marw.cmake.cdt.lsp.arm.ArmClangToolDetectionParticipant"
+            displayName="ARM.com armclang, C &amp; C++"/>
+   </extension>
+</plugin>

@@ -1,10 +1,12 @@
 # Debugging options for the de.marw.cmake plugin.
 
 # Turn on debugging for the CMAKE_EXPORT_COMPILE_COMMANDS command-line parser detection
-de.marw.cmake/CECC/parser=false
+de.marw.cmake/CECC/participant=false
 # Turn on debugging for the command-line argument parser detection
 de.marw.cmake/CECC/args=false
 # Turn on debugging for detected language setting entries
 de.marw.cmake/CECC/entries=false
 # Turn on debugging for language setting entries passed to the indexer
 de.marw.cmake/CECC/indexer-entries=false
+# Turn on debugging for detected built-ins language setting entries
+de.marw.cmake/CECC/builtins/entries=false
