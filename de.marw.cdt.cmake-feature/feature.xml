@@ -5,10 +5,8 @@
       version="1.17.0.qualifier"
       provider-name="Martin Weber">
 
-   <description url="https://github.com/15knots/cmake4eclipse">
-      Integrates the CMake cross-platform buildscript generator into
-the C/C++ Development Toolkit (CDT).
-Requires CDT 8.7 or newer.
+   <description>
+      %description
    </description>
 
    <copyright>
