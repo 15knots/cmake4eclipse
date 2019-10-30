@@ -75,6 +75,23 @@ public class ParserDetectionTest {
     assertEquals("C", "org.eclipse.cdt.core.gcc", result.getDetectorWithMethod().getToolDetectionParticipant().getParser().getLanguageId("c"));
   }
 
+  @Test
+  public void testDetermineParserForCommandline_cross_withVersion() {
+    final String versionSuffixRegex = "-?\\d+(\\.\\d+)*";
+
+    ParserDetection.ParserDetectionResult result = ParserDetection.determineDetector("/usr/bin/arm-none-eabi-gcc-9.2.0 -C blah.c", versionSuffixRegex,
+        true);
+    assertNotNull(result);
+    // verify that we got a C parser
+    assertEquals("C", "org.eclipse.cdt.core.gcc", result.getDetectorWithMethod().getToolDetectionParticipant().getParser().getLanguageId("c"));
+
+    result = ParserDetection.determineDetector("/usr/bin/arm-none-eabi-gcc-9.2.0.exe -C blah.c", versionSuffixRegex,
+        true);
+    assertNotNull(result);
+    // verify that we got a C parser
+    assertEquals("C", "org.eclipse.cdt.core.gcc", result.getDetectorWithMethod().getToolDetectionParticipant().getParser().getLanguageId("c"));
+  }
+
   /**
    * <a href="https://wiki.osdev.org/Target_Triplet"/>
    */
@@ -87,6 +104,26 @@ public class ParserDetectionTest {
     assertEquals("C++", "org.eclipse.cdt.core.g++", result.getDetectorWithMethod().getToolDetectionParticipant().getParser().getLanguageId("c"));
 
     result = ParserDetection.determineDetector("/usr/bin/arm-none-eabi-g++.exe -C blah.c", null,
+        true);
+    assertNotNull(result);
+    // verify that we got a C++ parser
+    assertEquals("C++", "org.eclipse.cdt.core.g++", result.getDetectorWithMethod().getToolDetectionParticipant().getParser().getLanguageId("c"));
+  }
+
+  /**
+   * <a href="https://wiki.osdev.org/Target_Triplet"/>
+   */
+  @Test
+  public void testDetermineParserForCommandline_crossplusplus_withVersion() {
+    final String versionSuffixRegex = "-?\\d+(\\.\\d+)*";
+
+    ParserDetection.ParserDetectionResult result = ParserDetection.determineDetector("/usr/bin/arm-none-eabi-g++-9.2.0 -C blah.c", versionSuffixRegex,
+        true);
+    assertNotNull(result);
+    // verify that we got a C++ parser
+    assertEquals("C++", "org.eclipse.cdt.core.g++", result.getDetectorWithMethod().getToolDetectionParticipant().getParser().getLanguageId("c"));
+
+    result = ParserDetection.determineDetector("/usr/bin/arm-none-eabi-g++-9.2.0.exe -C blah.c", versionSuffixRegex,
         true);
     assertNotNull(result);
     // verify that we got a C++ parser
