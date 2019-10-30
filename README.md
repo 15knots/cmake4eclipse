@@ -55,10 +55,12 @@ jar:https://dl.bintray.com/15knots/p2-zip/cmake4eclipse-1.12.1.zip!/ (note the l
 This project uses Apache maven as its build system.
 To build from a command-line, run `mvn -f ./parent/pom.xml package` in the root directory of the project source files.
 
-There is a run configuration for eclipse to invoke maven `build cmake4eclipse` plus a launch configuration to debug the plugin: `cmake4eclipse`.
+There is also a run configuration for eclipse to invoke the maven build: `build cmake4eclipse`.
+
+To debug the plugin from Eclispe, first set the Plug-in Development Target platform of your workbench to `cdt/8.7-eclipse/4.5.2`, then run the Eclipse Application launch configuration named `cmake4eclipse`.
 
 ---
-# Release Notes
+# Release Notes 
 ## 1.17.0 (2019-09-30)
 ### Changes
 - CMAKE_EXPORT_COMPILE_COMMANDS Parser: Allow compiler paths in quotes.
