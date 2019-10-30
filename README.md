@@ -6,7 +6,7 @@
 
 
 ## Abstract
-This Eclipse plugin automatically generates build-scripts for the Eclipse CDT managed build system from CMake scripts.
+This Eclipse plug-in automatically generates build-scripts for the Eclipse CDT managed build system from CMake scripts.
 Its <a id="pc">*Primary claim*</a> is: Co-workers should be able to just **check out the source and build** the project. 
 
 ## Design goals
@@ -45,7 +45,7 @@ https://raw.githubusercontent.com/15knots/cmake4eclipse/master/releng/comp-updat
 
 ### p2 Repositories
 Tool integrators will find each release at [bintray](https://bintray.com/15knots/p2-zip/cmake4eclipse#files).
-Each release is provided as a standalone zipped p2 repository and can be consumed in a PDE target platform. To add one
+Each release is provided as a stand-alone zipped p2 repository and can be consumed in a PDE target platform. To add one
 of these repositories to your target platform, add a **Software Site** and enter a URL for the location as
 jar:https://dl.bintray.com/15knots/p2-zip/cmake4eclipse-1.12.1.zip!/ (note the leading `jar:` and the trailing
 `!/`).
@@ -57,10 +57,20 @@ To build from a command-line, run `mvn -f ./parent/pom.xml package` in the root 
 
 There is also a run configuration for eclipse to invoke the maven build: `build cmake4eclipse`.
 
-To debug the plugin from Eclispe, first set the Plug-in Development Target platform of your workbench to `cdt/8.7-eclipse/4.5.2`, then run the Eclipse Application launch configuration named `cmake4eclipse`.
+To debug the plug-in from Eclispe, first set the Plug-in Development Target platform of your workbench to `cdt/8.7-eclipse/4.5.2`, then run the Eclipse Application launch configuration named `cmake4eclipse`.
 
 ---
-# Release Notes 
+# Release Notes
+## 2.0.0 (upcoming)
+### Changes
+- Added an extension point `lspDetectionParticipant`, allowing 3rd-party compiler vendors to integrate a compiler 
+  for improved syntax highlighting in the CDT's C/C++ editors by simply providing an Eclipse plug-in. The 
+  CMAKE_EXPORT_COMPILE_COMMANDS Parsers of this plug.in will pick-up the `lspDetectionParticipant` extensions to detect
+  preprocessor macros and include directories.
+- Syntax highlighting support for ARM.com and Intel compilers are no longer supported out-of-the box. Support is now
+  handled through separate plug-ins that provide implementations of the `lspDetectionParticipant` extension point.  
+  End users will have to install these separate plug-ins to get support for the compilers.
+
 ## 1.17.0 (2019-09-30)
 ### Changes
 - CMAKE_EXPORT_COMPILE_COMMANDS Parser: Allow compiler paths in quotes.
