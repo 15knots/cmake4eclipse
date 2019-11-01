@@ -44,6 +44,8 @@
     <module>../de.marw.cdt.cmake.core</module>
     <module>../de.marw.cmake.cdt.lsp.arm</module>
     <module>../de.marw.cmake.cdt.lsp.arm.tests</module>
+    <module>../de.marw.cmake.cdt.lsp.hpenonstop</module>
+    <module>../de.marw.cmake.cdt.lsp.hpenonstop.tests</module>
     <module>../de.marw.cmake.cdt.lsp.intel</module>
     <module>../de.marw.cdt.cmake-feature</module>
     <module>../releng/de.marw.cdt.cmake-repo</module>

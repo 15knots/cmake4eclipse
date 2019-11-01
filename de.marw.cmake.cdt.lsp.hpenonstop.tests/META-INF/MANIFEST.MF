@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Tests for de.marw.cmake.lsp.hpenonstop
+Bundle-SymbolicName: de.marw.cmake.cdt.lsp.hpenonstop.tests
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: Martin Weber
+Fragment-Host: de.marw.cmake.cdt.lsp.hpenonstop
+Import-Package: org.junit
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
