@@ -9,4 +9,10 @@
       <tool class="de.marw.cmake.cdt.lsp.hpenonstop.HpeC11ToolDetectionParticipant"
             displayName="HPE NonStop c11 C &amp; C++"/>
    </extension>
+   <extension
+         point="org.eclipse.help.contentExtension">
+      <contentExtension
+            file="help_content_extension.xml">
+      </contentExtension>
+   </extension>
 </plugin>
