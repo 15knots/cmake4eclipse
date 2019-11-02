@@ -12,8 +12,8 @@
       </topic>
     </topic>
   </topic>
-  <topic href="doc/html/languageSettingsProviders.html" label="Syntax Highlighting Support">
-    <topic href="doc/html/builtins-detection.html" label="Compiler Built-ins Detection">
+  <topic href="doc/html/languageSettingsProviders.xhtml" label="Syntax Highlighting Support">
+    <topic href="doc/html/builtins-detection.xhtml" label="Compiler Built-ins Detection">
     </topic>
   </topic>
   <anchor id="cmake4eclipse_TasksInsertAnchor" />
