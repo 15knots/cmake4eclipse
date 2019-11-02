@@ -7,4 +7,10 @@
       <tool class="de.marw.cmake.cdt.lsp.arm.ArmClangToolDetectionParticipant"
             displayName="ARM.com armclang, C &amp; C++"/>
    </extension>
+   <extension
+         point="org.eclipse.help.contentExtension">
+      <contentExtension
+            file="help_content_extension.xml">
+      </contentExtension>
+   </extension>
 </plugin>

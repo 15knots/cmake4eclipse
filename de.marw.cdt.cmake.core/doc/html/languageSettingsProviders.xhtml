@@ -1,9 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 <head>
-<meta charset="UTF-8"/>
 <title>Available Language Settings Providers</title>
-<style>
+<style type="text/css">
 table, th, td {
 	border: 1px solid black;
 }
@@ -22,7 +22,7 @@ th, td {
 	</P>
 	<p>The Cmake4eclipse plugin provides two <a href="PLUGINS_ROOT/org.eclipse.cdt.doc.user/concepts/cdt_c_scanner_discovery.htm">Language Settings Providers</a>:</p>
 
-	<h3>CMAKE_EXPORT_COMPILE_COMMANDS Parser</h3>
+	<h2>CMAKE_EXPORT_COMPILE_COMMANDS Parser</h2>
 	<p>This provider instructs CMake to generate a file that contains all the compiler command-lines
 	which will be executed when a project is build.<br/>
 	The provider will parse that file and feed any preprocessor include path, macro definition or 
@@ -30,7 +30,7 @@ th, td {
 	Parsing is done rarely, since the internal cache is invalidated only when the
 	file`s time-stamp is newer, so it should be reasonably fast.
 	</p>
-	<p>The following table lists the compiler executables supported by the CMAKE_EXPORT_COMPILE_COMMANDS Parser.
+	<p>The following table lists the compiler executables supported by the CMAKE_EXPORT_COMPILE_COMMANDS Parser.</p>
 	<table id="overview_table" style="border-collapse:collapse">
 	<thead>
 	<tr>
@@ -144,28 +144,9 @@ th, td {
 	<td>No</td>
 	<td>cl.exe</td>
 	</tr>
-      <tr>
-        <td>armclang</td>
-        <td>ARM</td>
-	<td>C/C++</td>
-	<td>Yes</td>
-	<td>Yes</td>
-	<td>No</td>
-	<td>armclang, armclang.exe</td>
-      </tr>
-      <tr>
-        <td>armcc</td>
-        <td>ARM</td>
-	<td>C/C++</td>
-	<td>Yes</td>
-	<td>Yes</td>
-	<td>Yes</td>
-	<td>armcc, armcc.exe</td>
-      </tr>
     </tbody>
 	</table>
-	</p>
-	<p>Remarks:
+	<p>Remarks:</p>
 	<ul style="list-style-type:none">
 	<li id="fw-help-gcc-cross">".+-gcc" This representes a Java regular expression that also matches
 	a <a href="https://wiki.osdev.org/Target_Triplet#Structure">target triplet</a>, thus allowing to work with cross-compilers
@@ -174,14 +155,16 @@ th, td {
 	a <a href="https://wiki.osdev.org/Target_Triplet#Structure">target triplet</a>, thus allowing to work with cross-compilers
 	named like e.g. <code>arm-none-eabi-g++</code>.</li>
 	</ul>
-	</p>
+	<h3>Compilers supported through separate plug-ins</h3>
+	<!-- extra compilers go here -->
+	<anchor id="extra_lsp_detection_participant_list"/>
 
-	<h3>CMAKE_EXPORT_COMPILE_COMMANDS Compiler Built-ins</h3>
+	<h2>CMAKE_EXPORT_COMPILE_COMMANDS Compiler Built-ins</h2>
 	<p>This provider works similar to <q>CMAKE_EXPORT_COMPILE_COMMANDS Parser</q>, but invokes 
 	the compiler with arguments to get the include paths and preprocessor macros 
 	<strong>built-in to the compiler</strong>.<br/>
 	Note that this works only for compilers that supporting it.
-	See <a href="builtins-detection.html">built-ins detection</a> for supported compilers.
+	See <a href="builtins-detection.xhtml">built-ins detection</a> for supported compilers.
 	</p>
 </body>
 </html>
