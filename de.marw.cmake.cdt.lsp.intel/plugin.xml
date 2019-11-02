@@ -13,4 +13,10 @@
       <tool class="de.marw.cmake.cdt.lsp.intel.IcpcToolDetectionParticipant"
             displayName="Intel icpc, C++, Linux &amp; OS X, EDG"/>
    </extension>
+   <extension
+         point="org.eclipse.help.contentExtension">
+      <contentExtension
+            file="help_content_extension.xml">
+      </contentExtension>
+   </extension>
 </plugin>
