@@ -281,7 +281,7 @@ public class CompilerBuiltinsDetector {
     ILanguage ld = LanguageManager.getInstance().getLanguage(languageId);
     if (ld != null) {
       String consoleId = CONSOLE_ID + '.' + languageId;
-      console = CCorePlugin.getDefault().getConsole(CONSOLE_ID,consoleId,null, null);
+      console = CCorePlugin.getDefault().getConsole(CONSOLE_ID, consoleId, null, null);
       final IProject project = cfgDescription.getProjectDescription().getProject();
       console.start(project);
       try {

@@ -20,13 +20,13 @@ import de.marw.cdt.cmake.core.ui.AbstractConsole;
  *
  * @author Martin Weber
  */
-class DetectorConsole extends AbstractConsole {
+public class DetectorConsole extends AbstractConsole {
 
   private static final String CONSOLE_CONTEXT_MENU_ID = "BuiltinDetectorConsole"; //$NON-NLS-1$
 
   @Override
   protected IBuildConsoleManager getConsoleManager() {
-    return CUIPlugin.getDefault().getConsoleManager("Detection Console", CONSOLE_CONTEXT_MENU_ID);
+    return CUIPlugin.getDefault().getConsoleManager("Compiler Built-ins Detection Console", CONSOLE_CONTEXT_MENU_ID);
   }
 
 }
