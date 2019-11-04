@@ -43,3 +43,4 @@ Export-Package: de.marw.cmake.cdt.lsp;uses:="org.eclipse.core.runtime,de.marw.cm
  de.marw.cmake.cdt.lsp.builtins;uses:="org.eclipse.cdt.core.settings.model"
 Require-Bundle: org.eclipse.ui.workbench;bundle-version="3.8.0",
  org.eclipse.ui.trace
+Automatic-Module-Name: de.marw.cmake

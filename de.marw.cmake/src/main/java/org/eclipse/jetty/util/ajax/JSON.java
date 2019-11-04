@@ -960,6 +960,7 @@ public class JSON
     }
 
     /* ------------------------------------------------------------ */
+    @SuppressWarnings("null")
     protected Object parseArray(Source source)
     {
         if (source.next() != '[')

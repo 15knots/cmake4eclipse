@@ -45,3 +45,4 @@ Export-Package: de.marw.cdt.cmake.core.cmakecache,
  de.marw.cdt.cmake.core.settings,
  de.marw.cdt.cmake.core.ui
 Require-Bundle: org.eclipse.ui
+Automatic-Module-Name: de.marw.cdt.cmake.core

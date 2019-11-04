@@ -11,3 +11,4 @@ Bundle-ActivationPolicy: lazy
 Require-Bundle: org.eclipse.core.runtime;bundle-version="3.11.1",
  org.eclipse.help
 Import-Package: de.marw.cmake.cdt.lsp
+Automatic-Module-Name: de.marw.cmake.cdt.lsp.intel

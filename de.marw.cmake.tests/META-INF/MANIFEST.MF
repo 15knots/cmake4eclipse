@@ -7,3 +7,4 @@ Bundle-Vendor: Martin Weber
 Fragment-Host: de.marw.cmake
 Import-Package: org.junit
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Automatic-Module-Name: de.marw.cmake.tests
