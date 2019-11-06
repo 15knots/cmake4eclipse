@@ -39,6 +39,7 @@
                     <repositoryName>CMake 4 Eclipse</repositoryName>
                     <!-- rename zipped p2 repository -->
                     <finalName>cmake4eclipse-${project.version}</finalName>
+                    <keepNonXzIndexFiles>false</keepNonXzIndexFiles>
                 </configuration>
             </plugin>
         </plugins>
