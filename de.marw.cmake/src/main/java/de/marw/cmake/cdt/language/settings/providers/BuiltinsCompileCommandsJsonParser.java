@@ -8,7 +8,7 @@
  * Contributors:
  *      Martin Weber - Initial implementation
  *******************************************************************************/
-package de.marw.cmake.cdt.internal.lsp;
+package de.marw.cmake.cdt.language.settings.providers;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -52,6 +52,13 @@ import de.marw.cmake.cdt.internal.lsp.builtins.CompilerBuiltinsDetector;
  * workbench startup.
  *
  * @author Martin Weber
+ */
+/*
+ * This class exists here only for backward compatibility with pre 2.0.0 versions of this plugin.<br> Most classes have
+ * been refactored to package {@code de.marw.cmake.cdt.internal.lsp} in 2.0.0. Unfortunately, CDT stores not just the
+ * provider ID but also the class name in the workbench settings, which makes loading of this provider fail if a user
+ * had set non-default settings of this provider in his workbench.<br> The file where the settings are stored is {@code
+ * ${workspace}/.metadata/.plugins/org.eclipse.cdt.core/language.settings.xml}.
  */
 public class BuiltinsCompileCommandsJsonParser extends LanguageSettingsSerializableProvider
     implements ILanguageSettingsEditableProvider, ICListenerAgent, ICBuildOutputParser, Cloneable {

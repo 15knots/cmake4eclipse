@@ -15,8 +15,8 @@ import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
 
-import de.marw.cmake.cdt.internal.lsp.CompileCommandsJsonParser;
 import de.marw.cmake.cdt.internal.lsp.ParserDetection;
+import de.marw.cmake.cdt.language.settings.providers.CompileCommandsJsonParser;
 
 /**
  * @author weber

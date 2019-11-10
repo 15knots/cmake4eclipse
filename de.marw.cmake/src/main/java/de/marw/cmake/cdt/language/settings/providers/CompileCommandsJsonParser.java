@@ -8,7 +8,7 @@
  * Contributors:
  *      Martin Weber - Initial implementation
  *******************************************************************************/
-package de.marw.cmake.cdt.internal.lsp;
+package de.marw.cmake.cdt.language.settings.providers;
 
 import java.io.File;
 import java.io.FileReader;
@@ -62,6 +62,8 @@ import org.eclipse.swt.widgets.Display;
 import org.w3c.dom.Element;
 
 import de.marw.cmake.cdt.internal.CMakePlugin;
+import de.marw.cmake.cdt.internal.lsp.ParserDetection;
+import de.marw.cmake.cdt.internal.lsp.StringUtil;
 import de.marw.cmake.cdt.internal.lsp.ParserDetection.DetectorWithMethod;
 import de.marw.cmake.cdt.internal.lsp.ParserDetection.ParserDetectionResult;
 import de.marw.cmake.cdt.internal.lsp.builtins.CompilerBuiltinsDetector;
@@ -79,6 +81,13 @@ import de.marw.cmake.cdt.lsp.builtins.IBuiltinsDetectionBehavior;
  * workbench startup.
  *
  * @author Martin Weber
+ */
+/*
+ * This class exists here only for backward compatibility with pre 2.0.0 versions of this plugin.<br> Most classes have
+ * been refactored to package {@code de.marw.cmake.cdt.internal.lsp} in 2.0.0. Unfortunately, CDT stores not just the
+ * provider ID but also the class name in the workbench settings, which makes loading of this provider fail if a user
+ * had set non-default settings of this provider in his workbench.<br> The file where the settings are stored is {@code
+ * ${workspace}/.metadata/.plugins/org.eclipse.cdt.core/language.settings.xml}.
  */
 public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvider
     implements ILanguageSettingsEditableProvider, ICListenerAgent, ICBuildOutputParser, Cloneable {
@@ -250,7 +259,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
                 createMarker(jsonFileRc, msg);
               }
             }
-
+//languageScope.addAll(c)
             // re-index to reflect new paths and macros in editor views
             // serializeLanguageSettings(currentCfgDescription);
             if (!initializingWorkbench) {
@@ -282,6 +291,11 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
     return false;
   }
 
+  public List<String> getLanguageScope() {
+    if (languageScope==null)
+            return null;
+    return Collections.unmodifiableList(languageScope);
+}
   /**
    * Processes an entry from a {@code compile_commands.json} file and stores a {@link ICLanguageSettingEntry} for the
    * file given the specified map.
@@ -706,6 +720,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
         entries.stream().sorted((o1, o2) -> o1.getName().compareTo(o2.getName()))
             .forEach(e -> System.out.printf("  %s%n", e));
       }
+//      setLanguageScope(languageScope); TODO
       /*
        * compile_commands.json holds entries per-file only and does not contain per-project or per-folder entries. So we
        * map the latter as project entries (=> null) to make the UI show the include directories we detected.

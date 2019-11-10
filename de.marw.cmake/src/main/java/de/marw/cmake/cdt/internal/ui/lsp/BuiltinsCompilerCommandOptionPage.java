@@ -21,7 +21,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 
-import de.marw.cmake.cdt.internal.lsp.BuiltinsCompileCommandsJsonParser;
+import de.marw.cmake.cdt.language.settings.providers.BuiltinsCompileCommandsJsonParser;
 
 public class BuiltinsCompilerCommandOptionPage extends AbstractLanguageSettingProviderOptionPage {
   private Button b_withConsole;

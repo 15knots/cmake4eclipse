@@ -293,7 +293,7 @@ public class ParserDetection {
 
   // has public scope for unittest purposes
   public static class DetectorWithMethod {
-    enum DetectionMethod {
+    public enum DetectionMethod {
       BASENAME, WITH_VERSION, WITH_EXTENSION, WITH_VERSION_EXTENSION;
     }
 

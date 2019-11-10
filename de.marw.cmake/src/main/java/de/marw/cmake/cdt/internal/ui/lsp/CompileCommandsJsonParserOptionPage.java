@@ -31,7 +31,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
-import de.marw.cmake.cdt.internal.lsp.CompileCommandsJsonParser;
+import de.marw.cmake.cdt.language.settings.providers.CompileCommandsJsonParser;
 
 /**
  * Option page for CompileCommandsJsonParse
