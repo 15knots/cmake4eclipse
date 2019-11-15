@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-
    <extension
          point="org.eclipse.cdt.managedbuilder.core.buildDefinitions">
       <managedBuildRevision
@@ -36,48 +35,14 @@
                parallelBuildOn="true"
                parallelizationNumber="unlimited">
          </builder>
-         <!--
-      <toolChain
-            archList="all"
-            configurationMacroSupplier="de.marw.cdt.cmake.core.internal.CmakeOsMacroSupplier"
-            id="de.marw.cdt.cmake.core.toolChain"
-            name="CMake portable"
-            osList="all">
          <targetPlatform
                archList="all"
-               id="de.marw.cdt.cmake.core.targetPlatform"
-               name="Portable Platform"
+               binaryParser="org.eclipse.cdt.core.GNU_ELF;org.eclipse.cdt.core.ELF;org.eclipse.cdt.core.MachO64;org.eclipse.cdt.core.PE;org.eclipse.cdt.core.Cygwin_PE"
+               id="de.marw.cdt.cmake.core.targetPlatform.any"
+               name="Any Platform"
                osList="all">
          </targetPlatform>
-         <builder
-               arguments="${cmake_build_cmd_earg}"
-               buildRunner="de.marw.cdt.cmake.core.internal.CmakeBuildRunner"
-               command="${cmake_build_cmd}"
-               id="de.marw.cdt.cmake.core.genscriptbuilder"
-               ignoreErrCmd="${cmake_ignore_err_option}"
-               name="CMake Builder (portable)"
-               reservedMacroNameSupplier="de.marw.cdt.cmake.core.internal.CmakeOsMacroSupplier"
-               superClass="de.marw.cdt.cmake.core.genmakebuilder">
-         </builder>
-         <supportedProperties>
-            <property
-                  id="org.eclipse.cdt.build.core.buildArtefactType">
-               <value
-                     id="org.eclipse.cdt.build.core.buildArtefactType.exe">
-               </value>
-               <value
-                     id="org.eclipse.cdt.build.core.buildArtefactType.staticLib">
-               </value>
-               <value
-                     id="org.eclipse.cdt.build.core.buildArtefactType.sharedLib">
-               </value>
-               <value
-                     id="de.marw.cdt.cmake.core.buildArtefactType.CMAKE"></value>
-            </property>
-         </supportedProperties>
-      </toolChain>
-      -->
-   </extension>
+ </extension>
    <extension
          id="BuildscriptGenerationError"
          name="Buildscript Generation Problem"
@@ -180,13 +145,6 @@
       </super>
 	<super type="org.eclipse.core.resources.textmarker">
 	</super>
-   </extension>
- <extension
-         point="org.eclipse.cdt.managedbuilder.core.buildProperties">
-    <propertyValue
-            property="org.eclipse.cdt.build.core.buildArtefactType"
-            id="de.marw.cdt.cmake.core.buildArtefactType.CMAKE"
-            name="defined by CMakeLists.txt"/>
    </extension>
  <extension point="org.eclipse.help.toc">
     <toc file="doc/toc.xml" primary="true"/>

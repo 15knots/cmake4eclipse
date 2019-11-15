@@ -3,6 +3,122 @@
 <plugin>
    <extension-point id="lspDetectionParticipant" name="Detection Participant" schema="schema/participant.exsd"/>
 
+   <extension
+         point="org.eclipse.cdt.managedbuilder.core.buildDefinitions">
+      <managedBuildRevision
+            fileVersion="4.0.0">
+      </managedBuildRevision>
+         <tool
+               command="&lt;unused&gt;"
+               commandLinePattern="&lt;unused&gt;"
+               customBuildStep="true"
+               icon="icons/CMakeLogo.gif"
+               id="de.marw.cmake.cdt.lsp.tool.dummy"
+               name="CMake driven Languages Proxy">
+                     <inputType
+                           id="de.marw.cmake.cdt.lsp.inputType.c"
+                           superClass="cdt.managedbuild.tool.gnu.c.compiler.input">
+                     </inputType>
+                     <inputType
+                           id="de.marw.cmake.cdt.lsp.inputType.cpp"
+                           superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input">
+                     </inputType>
+                     <option
+                           id="de.marw.cmake.option.dummy"
+                           isAbstract="false"
+                           resourceFilter="project"
+                           valueType="includePath">
+                     </option>
+         </tool>
+         <toolChain
+               id="de.marw.cmake.cdt.lsp.toolchain.cmake"
+               languageSettingsProviders="de.marw.cmake.cdt.language.settings.providers.CompileCommandsJsonParser;de.marw.cmake.cdt.language.settings.providers.BuiltinsCompileCommandsJsonParser"
+               name="CMake driven">
+            <builder
+                  id="de.marw.cmake.cdt.lsp.builder.portable"
+                  superClass="de.marw.cdt.cmake.core.genscriptbuilder">
+            </builder>
+            <supportedProperties>
+               <property
+                     id="org.eclipse.cdt.build.core.buildType">
+                  <value
+                        id="org.eclipse.cdt.build.core.buildType.debug"></value>
+                  <value
+                        id="org.eclipse.cdt.build.core.buildType.release">
+                  </value>
+                  <value
+                        id="de.marw.cmake.cdt.lsp.buildType.cmake">
+                  </value>
+               </property>
+               <property
+                     id="org.eclipse.cdt.build.core.buildArtefactType">
+                  <value id="org.eclipse.cdt.build.core.buildArtefactType.exe"/>
+    	        <value id="org.eclipse.cdt.build.core.buildArtefactType.sharedLib"/>
+    	        <value id="org.eclipse.cdt.build.core.buildArtefactType.staticLib"/>
+                  <value id="de.marw.cmake.cdt.lsp.buildArtefactType.cmake"/>
+               </property>
+<!-- 
+-->
+            </supportedProperties>
+            <targetPlatform
+                  id="de.marw.cmake.cdt.lsp.targetPlatform.cmake"
+                  superClass="de.marw.cdt.cmake.core.targetPlatform.any">
+            </targetPlatform>
+            <tool
+                  id="de.marw.cmake.cdt.lsp.toolchain.tool.dummy"
+                  superClass="de.marw.cmake.cdt.lsp.tool.dummy">
+            </tool>
+         </toolChain>
+         <configuration
+               id="de.marw.cmake.cdt.lsp.config.base"
+               languageSettingsProviders="${Toolchain};-org.eclipse.cdt.ui.UserLanguageSettingsProvider;-org.eclipse.cdt.core.ReferencedProjectsLanguageSettingsProvider;-org.eclipse.cdt.managedbuilder.core.MBSLanguageSettingsProvider;-org.eclipse.cdt.managedbuilder.core.GCCBuildCommandParser">
+         </configuration>
+         <projectType
+               buildArtefactType="de.marw.cmake.cdt.lsp.buildArtefactType.cmake"
+               id="de.marw.cmake.cdt.lsp.projectType">
+            <configuration
+                  description="Uses CMAKE_BUILD_TYPE symbol specifed on  Cmake4eclipse/Symbols tab"
+                  id="de.marw.cmake.cdt.lsp.config.cmake"
+                  name="Default"
+                  parent="de.marw.cmake.cdt.lsp.config.base">
+               <toolChain
+                     id="de.marw.cmake.cdt.lsp.config.cmake.toolChain"
+                     superClass="de.marw.cmake.cdt.lsp.toolchain.cmake">
+               </toolChain>
+            </configuration>
+            <configuration
+                  buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug"
+                  id="de.marw.cmake.cdt.lsp.config.debug"
+                  name="Debug"
+                  parent="de.marw.cmake.cdt.lsp.config.base">
+               <toolChain
+                     id="de.marw.cmake.cdt.lsp.config.debug.toolChain"
+                     superClass="de.marw.cmake.cdt.lsp.toolchain.cmake">
+               </toolChain>
+            </configuration>
+            <configuration
+                  buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release"
+                  id="de.marw.cmake.cdt.lsp.config.release"
+                  name="Release"
+                  parent="de.marw.cmake.cdt.lsp.config.base">
+               <toolChain
+                     id="de.marw.cmake.cdt.lsp.config.release.toolChain"
+                     superClass="de.marw.cmake.cdt.lsp.toolchain.cmake">
+               </toolChain>
+            </configuration>
+         </projectType>
+ </extension>
+ <extension
+         point="org.eclipse.cdt.managedbuilder.core.buildProperties">
+    <propertyValue
+            property="org.eclipse.cdt.build.core.buildType"
+            id="de.marw.cmake.cdt.lsp.buildType.cmake"
+            name="CMake Defaults"/>
+    <propertyValue
+            property="org.eclipse.cdt.build.core.buildArtefactType"
+            id="de.marw.cmake.cdt.lsp.buildArtefactType.cmake"
+            name="CMake driven"/>
+   </extension>
  <extension
        point="org.eclipse.cdt.core.LanguageSettingsProvider">
     <provider

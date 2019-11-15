@@ -89,7 +89,13 @@ public class CmakeBuildRunner extends ExternalBuildRunner {
      * wrap the passed-in builder into one that gets its build command from the
      * Cmake-generator. First do a sanity check.
      */
-    if (builder.getBaseId().equals("de.marw.cdt.cmake.core.genscriptbuilder")) {
+    IBuilder supa = builder;
+    do {
+      if (supa.getBaseId().equals("de.marw.cdt.cmake.core.genscriptbuilder")) {
+        break;
+      }
+    } while ((supa = supa.getSuperClass()) != null);
+    if (supa != null) {
       project.deleteMarkers(MARKER_ID, false, IResource.DEPTH_INFINITE);
 
       final ICConfigurationDescription cfgd = ManagedBuildManager
