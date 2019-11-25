@@ -10,10 +10,12 @@
  *******************************************************************************/
 package de.marw.cmake.cdt.language.settings.providers;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
@@ -42,6 +44,7 @@ import org.eclipse.swt.widgets.Display;
 import org.w3c.dom.Element;
 
 import de.marw.cmake.cdt.internal.CMakePlugin;
+import de.marw.cmake.cdt.internal.lsp.ParserDetection;
 import de.marw.cmake.cdt.internal.lsp.builtins.CompilerBuiltinsDetector;
 
 /**
@@ -70,6 +73,16 @@ public class BuiltinsCompileCommandsJsonParser extends LanguageSettingsSerializa
   private static final String ATTR_WITH_CONSOLE = "console";
 
   private ICConfigurationDescription currentCfgDescription;
+
+  @Override
+  public void configureProvider(String id, String name, List<String> languages, List<ICLanguageSettingEntry> entries,
+      Map<String, String> properties) {
+    ArrayList<String> scope = new ArrayList<>();
+    scope.add("org.eclipse.cdt.core.gcc");
+    scope.add("org.eclipse.cdt.core.g++");
+    scope.addAll(ParserDetection.getCustomLanguages());
+    super.configureProvider(id, name, scope, entries, properties);
+  }
 
   /**
    * Detects the compiler built-in include paths and symbols. Uses {@link CompileCommandsJsonParser} for parsing of the

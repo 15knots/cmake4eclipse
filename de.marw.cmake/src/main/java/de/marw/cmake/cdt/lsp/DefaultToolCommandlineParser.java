@@ -11,6 +11,7 @@
 package de.marw.cmake.cdt.lsp;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 import org.eclipse.core.runtime.IPath;
@@ -93,6 +94,16 @@ public class DefaultToolCommandlineParser implements IToolCommandlineParser {
       return languageID;
     }
     return determineLanguageId(sourceFileExtension);
+  }
+
+  /**
+   * Default implementation return {@code null}.
+   *
+   * @return always {@code null}
+   */
+  @Override
+  public List<String> getCustomLanguageIds() {
+    return null;
   }
 
   /**

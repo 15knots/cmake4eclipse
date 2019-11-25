@@ -14,6 +14,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -25,7 +27,6 @@ import org.eclipse.core.runtime.Status;
 import de.marw.cmake.cdt.internal.CMakePlugin;
 import de.marw.cmake.cdt.internal.lsp.builtins.GccBuiltinDetectionBehavior;
 import de.marw.cmake.cdt.internal.lsp.builtins.MaybeGccBuiltinDetectionBehavior;
-import de.marw.cmake.cdt.internal.lsp.builtins.NvccBuiltinDetectionBehavior;
 import de.marw.cmake.cdt.lsp.Arglets;
 import de.marw.cmake.cdt.lsp.DefaultToolCommandlineParser;
 import de.marw.cmake.cdt.lsp.DefaultToolDetectionParticipant;
@@ -111,14 +112,7 @@ public class ParserDetection {
 
     // CUDA: nvcc compilers (POSIX compatible) =================================
     {
-      final IArglet[] nvcc_args = { new Arglets.IncludePath_C_POSIX(),
-          new Arglets.MacroDefine_C_POSIX(), new Arglets.MacroUndefine_C_POSIX(),
-          new Arglets.SystemIncludePath_nvcc(), new Arglets.SystemIncludePath_C(),
-          new Arglets.LangStd_nvcc()};
-
-      final IToolCommandlineParser nvcc = new DefaultToolCommandlineParser("com.nvidia.cuda.toolchain.language.cuda.cu",
-          new ResponseFileArglets.At(), new NvccBuiltinDetectionBehavior(), nvcc_args);
-      parserDetectors.add(new DefaultToolDetectionParticipant("nvcc", true, "exe", nvcc));
+      parserDetectors.add(new NvccToolDetectionParticipant());
     }
 
     // compilers from extension points
@@ -138,6 +132,17 @@ public class ParserDetection {
 
   /** Just static methods */
   private ParserDetection() {
+  }
+
+  /**
+   * Gets the custom language IDs of each of the IToolDetectionParticipants.
+   *
+   * @see IToolCommandlineParser#getCustomLanguageIds()
+   */
+  public static List<String> getCustomLanguages() {
+    // TODO Auto-generated method stub
+    return parserDetectors.stream().map(d -> d.getParser().getCustomLanguageIds()).filter(Objects::nonNull).
+        flatMap(l -> l.stream()) .collect(Collectors.toList());
   }
 
   /**
@@ -165,17 +170,17 @@ public class ParserDetection {
       System.out.printf("> Looking up detector for command '%s ...'%n", line.substring(0, Math.min(40, line.length())));
     }
     // try default detectors
-    result = determineDetector(line, parserDetectors, versionSuffixRegex, false);
+    result = determineDetector0(line, versionSuffixRegex, false);
     if (result == null && tryWindowsDetectors) {
       // try with backslash as file separator on windows
-      result = determineDetector(line, parserDetectors, versionSuffixRegex, true);
+      result = determineDetector0(line, versionSuffixRegex, true);
       if (result == null) {
         // try workaround for windows short file names
         final String shortPathExpanded = expandShortFileName(line);
-        result = determineDetector(shortPathExpanded, parserDetectors, versionSuffixRegex, false);
+        result = determineDetector0(shortPathExpanded, versionSuffixRegex, false);
         if (result == null) {
           // try with backslash as file separator on windows
-          result = determineDetector(shortPathExpanded, parserDetectors, versionSuffixRegex, true);
+          result = determineDetector0(shortPathExpanded, versionSuffixRegex, true);
         }
       }
     }
@@ -194,8 +199,6 @@ public class ParserDetection {
    *
    * @param commandLine
    *          the command line to process
-   * @param detectors
-   *          the detectors to try
    * @param versionSuffixRegex
    *          the regular expression to match a version suffix in the compiler name or {@code null} to not try to detect
    *          the compiler with a version suffix
@@ -206,11 +209,11 @@ public class ParserDetection {
    *         Otherwise, if the tool name matches, a {@code ParserDetectionResult} holding the de-compose command-line is
    *         returned.
    */
-  private static ParserDetectionResult determineDetector(String commandLine, List<IToolDetectionParticipant> detectors,
-      String versionSuffixRegex, boolean matchBackslash) {
+  private static ParserDetectionResult determineDetector0(String commandLine, String versionSuffixRegex,
+      boolean matchBackslash) {
     DefaultToolDetectionParticipant.MatchResult cmdline;
     // try basenames
-    for (IToolDetectionParticipant pd : detectors) {
+    for (IToolDetectionParticipant pd : parserDetectors) {
       if (DEBUG_PARTCIPANT_DETECTION)
         System.out.printf("  Trying detector %s (%s)%n", pd.getParser().getClass().getSimpleName(),
             DetectorWithMethod.DetectionMethod.BASENAME);
@@ -221,7 +224,7 @@ public class ParserDetection {
     }
     if (versionSuffixRegex != null) {
       // try with version pattern
-      for (IToolDetectionParticipant pd : detectors) {
+      for (IToolDetectionParticipant pd : parserDetectors) {
         if (DEBUG_PARTCIPANT_DETECTION)
           System.out.printf("  Trying detector %s (%s)%n", pd.getParser().getClass().getSimpleName(), DetectorWithMethod.DetectionMethod.WITH_VERSION);
         if ((cmdline = pd.basenameWithVersionMatches(commandLine, matchBackslash, versionSuffixRegex)) != null) {
@@ -231,7 +234,7 @@ public class ParserDetection {
       }
     }
     // try with extension
-    for (IToolDetectionParticipant pd : detectors) {
+    for (IToolDetectionParticipant pd : parserDetectors) {
       if (DEBUG_PARTCIPANT_DETECTION)
         System.out.printf("  Trying detector %s (%s)%n", pd.getParser().getClass().getSimpleName(),
             DetectorWithMethod.DetectionMethod.WITH_EXTENSION);
@@ -242,7 +245,7 @@ public class ParserDetection {
     }
     if (versionSuffixRegex != null) {
       // try with extension and version
-      for (IToolDetectionParticipant pd : detectors) {
+      for (IToolDetectionParticipant pd : parserDetectors) {
         if (DEBUG_PARTCIPANT_DETECTION)
           System.out.printf("  Trying detector %s (%s)%n", pd.getParser().getClass().getSimpleName() + " ("
               + DetectorWithMethod.DetectionMethod.WITH_VERSION_EXTENSION);

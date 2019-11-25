@@ -54,6 +54,15 @@ public interface IToolCommandlineParser {
   public String getLanguageId(String sourceFileExtension);
 
   /**
+   * Gets the custom language IDs that the tool compiles. Some CDT based IDEs use language IDs of their own, for example
+   * "com.nvidia.cuda.toolchain.language.cuda.cu" for CUDA. A custom language ID is an ID other than CDT's default IDs
+   * for the C language ("org.eclipse.cdt.core.gcc") and the C++ ("org.eclipse.cdt.core.g++") language,
+   *
+   * @return the custom language IDs or {@code null} if the tool does not compile for languages other than C and C++
+   */
+  public List<String> getCustomLanguageIds();
+
+  /**
    * Gets the {@code IBuiltinsDetectionBehavior} which specifies how built-in compiler macros and include path detection
    * is handled for a specific compiler.
    *

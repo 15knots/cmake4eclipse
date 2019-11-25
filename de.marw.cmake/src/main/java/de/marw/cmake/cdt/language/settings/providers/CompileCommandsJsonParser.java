@@ -63,14 +63,14 @@ import org.w3c.dom.Element;
 
 import de.marw.cmake.cdt.internal.CMakePlugin;
 import de.marw.cmake.cdt.internal.lsp.ParserDetection;
-import de.marw.cmake.cdt.internal.lsp.StringUtil;
 import de.marw.cmake.cdt.internal.lsp.ParserDetection.DetectorWithMethod;
 import de.marw.cmake.cdt.internal.lsp.ParserDetection.ParserDetectionResult;
+import de.marw.cmake.cdt.internal.lsp.StringUtil;
 import de.marw.cmake.cdt.internal.lsp.builtins.CompilerBuiltinsDetector;
 import de.marw.cmake.cdt.lsp.DefaultToolDetectionParticipant;
 import de.marw.cmake.cdt.lsp.IToolCommandlineParser;
-import de.marw.cmake.cdt.lsp.IToolDetectionParticipant;
 import de.marw.cmake.cdt.lsp.IToolCommandlineParser.IResult;
+import de.marw.cmake.cdt.lsp.IToolDetectionParticipant;
 import de.marw.cmake.cdt.lsp.builtins.IBuiltinsDetectionBehavior;
 
 /**
@@ -126,6 +126,16 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
   private DetectorWithMethod lastDetector;
 
   public CompileCommandsJsonParser() {
+  }
+
+  @Override
+  public void configureProvider(String id, String name, List<String> languages, List<ICLanguageSettingEntry> entries,
+      Map<String, String> properties) {
+    ArrayList<String> scope = new ArrayList<>();
+    scope.add("org.eclipse.cdt.core.gcc");
+    scope.add("org.eclipse.cdt.core.g++");
+    scope.addAll(ParserDetection.getCustomLanguages());
+    super.configureProvider(id, name, scope, entries, properties);
   }
 
   /**
@@ -291,11 +301,6 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
     return false;
   }
 
-  public List<String> getLanguageScope() {
-    if (languageScope==null)
-            return null;
-    return Collections.unmodifiableList(languageScope);
-}
   /**
    * Processes an entry from a {@code compile_commands.json} file and stores a {@link ICLanguageSettingEntry} for the
    * file given the specified map.
