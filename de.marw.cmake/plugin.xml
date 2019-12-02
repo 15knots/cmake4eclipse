@@ -84,22 +84,22 @@
                buildArtefactType="de.marw.cmake.cdt.lsp.buildArtefactType.cmake"
                id="de.marw.cmake.cdt.lsp.projectType">
             <configuration
-                  description="Default coming from cmake"
-                  id="de.marw.cmake.cdt.lsp.config.cmake"
-                  name="Default"
-                  parent="de.marw.cmake.cdt.lsp.config.base">
-               <toolChain
-                     id="de.marw.cmake.cdt.lsp.config.cmake.toolChain"
-                     superClass="de.marw.cmake.cdt.lsp.toolchain.cmake.project">
-               </toolChain>
-            </configuration>
-            <configuration
                   buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug"
                   id="de.marw.cmake.cdt.lsp.config.debug"
                   name="Debug"
                   parent="de.marw.cmake.cdt.lsp.config.base">
                <toolChain
                      id="de.marw.cmake.cdt.lsp.config.debug.toolChain"
+                     superClass="de.marw.cmake.cdt.lsp.toolchain.cmake.project">
+               </toolChain>
+            </configuration>
+            <configuration
+                  description="Default coming from cmake"
+                  id="de.marw.cmake.cdt.lsp.config.cmake"
+                  name="Default"
+                  parent="de.marw.cmake.cdt.lsp.config.base">
+               <toolChain
+                     id="de.marw.cmake.cdt.lsp.config.cmake.toolChain"
                      superClass="de.marw.cmake.cdt.lsp.toolchain.cmake.project">
                </toolChain>
             </configuration>
