@@ -57,8 +57,6 @@
     	        <value id="org.eclipse.cdt.build.core.buildArtefactType.staticLib"/>
                   <value id="de.marw.cmake.cdt.lsp.buildArtefactType.cmake"/>
                </property>
-<!-- 
--->
             </supportedProperties>
             <targetPlatform
                   id="de.marw.cmake.cdt.lsp.targetPlatform.cmake"
@@ -73,17 +71,26 @@
                id="de.marw.cmake.cdt.lsp.config.base"
                languageSettingsProviders="${Toolchain};-org.eclipse.cdt.ui.UserLanguageSettingsProvider;-org.eclipse.cdt.core.ReferencedProjectsLanguageSettingsProvider;-org.eclipse.cdt.managedbuilder.core.MBSLanguageSettingsProvider;-org.eclipse.cdt.managedbuilder.core.GCCBuildCommandParser">
          </configuration>
+         <toolChain
+               id="de.marw.cmake.cdt.lsp.toolchain.cmake.project"
+               superClass="de.marw.cmake.cdt.lsp.toolchain.cmake">
+            <supportedProperties>
+            <!-- intentionally empty to remove property id="org.eclipse.cdt.build.core.buildArtefactType"
+            	from inherited properties again
+            -->
+            </supportedProperties>
+         </toolChain>
          <projectType
                buildArtefactType="de.marw.cmake.cdt.lsp.buildArtefactType.cmake"
                id="de.marw.cmake.cdt.lsp.projectType">
             <configuration
-                  description="Uses CMAKE_BUILD_TYPE symbol specifed on  Cmake4eclipse/Symbols tab"
+                  description="Default coming from cmake"
                   id="de.marw.cmake.cdt.lsp.config.cmake"
                   name="Default"
                   parent="de.marw.cmake.cdt.lsp.config.base">
                <toolChain
                      id="de.marw.cmake.cdt.lsp.config.cmake.toolChain"
-                     superClass="de.marw.cmake.cdt.lsp.toolchain.cmake">
+                     superClass="de.marw.cmake.cdt.lsp.toolchain.cmake.project">
                </toolChain>
             </configuration>
             <configuration
@@ -93,7 +100,7 @@
                   parent="de.marw.cmake.cdt.lsp.config.base">
                <toolChain
                      id="de.marw.cmake.cdt.lsp.config.debug.toolChain"
-                     superClass="de.marw.cmake.cdt.lsp.toolchain.cmake">
+                     superClass="de.marw.cmake.cdt.lsp.toolchain.cmake.project">
                </toolChain>
             </configuration>
             <configuration
@@ -103,7 +110,7 @@
                   parent="de.marw.cmake.cdt.lsp.config.base">
                <toolChain
                      id="de.marw.cmake.cdt.lsp.config.release.toolChain"
-                     superClass="de.marw.cmake.cdt.lsp.toolchain.cmake">
+                     superClass="de.marw.cmake.cdt.lsp.toolchain.cmake.project">
                </toolChain>
             </configuration>
          </projectType>
