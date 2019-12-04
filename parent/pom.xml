@@ -4,7 +4,7 @@
 
   <groupId>de.marw.cdt.cmake</groupId>
   <artifactId>cmake-parent</artifactId>
-  <version>1.0.5</version>
+  <version>1.1.0</version>
   <packaging>pom</packaging>
 
   <url>https://github.com/15knots/cmake4eclipse</url>
@@ -32,10 +32,6 @@
       </roles>
     </developer>
   </developers>
-
-  <prerequisites>
-    <maven>3.0</maven>
-  </prerequisites>
 
   <modules>
     <module>../releng/de.marw.cdt.cmake-target</module>
@@ -99,6 +95,7 @@
 
       <plugin>
         <artifactId>maven-enforcer-plugin</artifactId>
+        <inherited>false</inherited>
       </plugin>
     </plugins>
 
@@ -300,21 +297,16 @@
               <phase>validate</phase>
               <goals>
                 <goal>display-info</goal>
-              </goals>
-            </execution>
-            <execution>
-              <id>enforce-maven</id>
-              <goals>
-                <goal>display-info</goal>
                 <goal>enforce</goal>
               </goals>
               <configuration>
-                <rules>
+                <rules> 
                   <requireMavenVersion>
                     <version>3.3.9</version>
                   </requireMavenVersion>
                   <requireJavaVersion>
-                    <version>1.8.0</version>
+                    <!-- our project README states we require 1.8 or newer at runtime -->
+                    <version>[1.8,1.9)</version>
                   </requireJavaVersion>
                 </rules>
               </configuration>
