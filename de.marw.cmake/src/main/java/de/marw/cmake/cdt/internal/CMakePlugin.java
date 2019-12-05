@@ -20,7 +20,7 @@ import org.osgi.framework.BundleContext;
  */
 public class CMakePlugin extends AbstractUIPlugin {
 
-  public static final String PLUGIN_ID = "de.marw.cmake"; //$NON-NLS-1$
+  public static final String PLUGIN_ID = "de.marw.cmake.cdt"; //$NON-NLS-1$
 
   //The shared instance.
   private static CMakePlugin plugin;

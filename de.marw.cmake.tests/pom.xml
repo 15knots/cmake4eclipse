@@ -9,7 +9,7 @@
     <relativePath>../parent/pom.xml</relativePath>
   </parent>
 
-  <artifactId>de.marw.cmake.tests</artifactId>
+  <artifactId>de.marw.cmake.cdt.tests</artifactId>
   <!-- always use .qualifier in manifest, we do not plan to publish this plugin
     to a maven repo. (The repository version is a different thing) -->
   <version>1.0.0-SNAPSHOT</version>
