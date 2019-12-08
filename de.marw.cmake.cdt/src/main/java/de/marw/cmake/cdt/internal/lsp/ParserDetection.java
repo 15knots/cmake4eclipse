@@ -117,7 +117,7 @@ public class ParserDetection {
 
     // compilers from extension points
     IConfigurationElement[] elements = Platform.getExtensionRegistry()
-        .getConfigurationElementsFor("de.marw.cmake.lspDetectionParticipant");
+        .getConfigurationElementsFor("de.marw.cmake.cdt.lspDetectionParticipant");
     for (IConfigurationElement e : elements) {
       try {
         Object obj = e.createExecutableExtension("class");
