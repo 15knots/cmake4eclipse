@@ -57,12 +57,14 @@ To build from a command-line, run `mvn -f ./parent/pom.xml package` in the root 
 
 There is also a run configuration for eclipse to invoke the maven build: `build cmake4eclipse`.
 
-To debug the plug-in from Eclispe, first set the Plug-in Development Target platform of your workbench to `cdt/8.7-eclipse/4.5.2`, then run the Eclipse Application launch configuration named `cmake4eclipse`.
+To debug the plug-in from Eclipse, first set the Plug-in Development Target platform of your workbench to `cdt/8.7-eclipse/4.5.2`, then run the Eclipse Application launch configuration named `cmake4eclipse`.
 
 ---
 # Release Notes
 ## 2.0.0 (upcoming)
 ### Changes
+- Added a tool-chain `CMake driven` that will configure the proper builder when selected to make project configuration easier.
+- Added a project type `CMake driven` to the CDT `New C Project` and `New C+ Project` wizard to ease in project creation.  
 - Added an extension point `lspDetectionParticipant`, allowing 3rd-party compiler vendors to integrate a compiler 
   for improved syntax highlighting in the CDT's C/C++ editors by simply providing an Eclipse plug-in. The 
   CMAKE_EXPORT_COMPILE_COMMANDS Parsers of this plug.in will pick-up the `lspDetectionParticipant` extensions to detect
@@ -70,6 +72,7 @@ To debug the plug-in from Eclispe, first set the Plug-in Development Target plat
 - Syntax highlighting support for ARM.com and Intel compilers are no longer supported out-of-the box. Support is now
   handled through separate plug-ins that provide implementations of the `lspDetectionParticipant` extension point.  
   End users will have to install these separate plug-ins to get support for the compilers.
+- Closed #119: Support for HPE non-stop compilers. Note this has not been tested yet.
 
 ## 1.17.0 (2019-09-30)
 ### Changes
