@@ -10,13 +10,13 @@
 	(selectable in the <a href="PLUGINS_ROOT/org.eclipse.cdt.doc.user/reference/cdt_u_prop_build_toolchain.htm">
 	Tool Chain Editor tab</a>):</p>
 
-	<h3 id="portable">CMake Builder (portable)</h3>
+	<h3 id="portable">CMake Builder</h3>
 	  <p>This builder allows you to customize the build tool to be used on the
     <a href="t_cmake_options_general.html">OS-specific property</a> tabs
     and makes CMake generate the build scripts for the tool of your choice.
   </p>
 	<p>The builder retrieves the name of the actual build tool from the cache file written
-	by cmake during build-script-generation. It has some benefits compared to the <code>CMake Builder (GNU Make)</code>:
+	by cmake during build-script-generation. It has some benefits compared to the <code>CMake Builder (deprecated)</code>:
 	<ul>
   <li>It allows you to build with tools other than <code>make</code>, 
   for example <code>ninja</code>, <code>nmake</code> and others.</li>
@@ -29,11 +29,13 @@ under Linux, and build with <code>MSYS make</code> under windows; without the ne
 This is the recommended builder.
 </p>
 
-<h3 id="make">CMake Builder (GNU Make)</h3>
+<h3 id="make">CMake Builder (deprecated)</h3>
   <p>
     This builder is nearly identical to the <i>Gnu Make Builder</i> that comes with CDT.
     It requires that cmake is configured to generate <i>makefiles</i> and will invoke the <code>make</code> tool
-    found in the system's executable search path ($PATH) to build the project.
+    found in the system's executable search path ($PATH) to build the project.<br>
+    It is kept only for backward compatibility with projects set up with cmake4eclipse prior to version 2.0.0
+    and cannot be selected in the UI any longer.
   </p>
 </body>
 </html>

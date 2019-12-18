@@ -6,6 +6,7 @@
       <managedBuildRevision
             fileVersion="4.0.0">
       </managedBuildRevision>
+      <!-- only kept for backward compatibility with projects set up with cmake4eclipse < 2.0.0 -->
       <builder
             autoBuildTarget="all"
             buildRunner="org.eclipse.cdt.managedbuilder.core.ExternalBuildRunner"
@@ -16,7 +17,8 @@
             id="de.marw.cdt.cmake.core.genmakebuilder"
             ignoreErrCmd="-k"
             incrementalBuildTarget="all"
-            name="CMake Builder (GNU Make)"
+            isSystem="true"
+            name="CMake Builder (deprecated)"
             parallelBuildCmd="-j*"
             parallelBuildOn="true"
             parallelizationNumber="unlimited">
@@ -30,7 +32,7 @@
                id="de.marw.cdt.cmake.core.genscriptbuilder"
                ignoreErrCmd="$&lt;cmake4eclipse_dyn&gt;"
                incrementalBuildTarget="all"
-               name="CMake Builder (portable)"
+               name="CMake Builder"
                parallelBuildCmd="$&lt;cmake4eclipse_dyn&gt;"
                parallelBuildOn="true"
                parallelizationNumber="unlimited">
