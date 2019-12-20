@@ -64,7 +64,8 @@ To debug the plug-in from Eclipse, first set the Plug-in Development Target plat
 ## 2.0.0 (upcoming)
 ### Changes
 - Added a tool-chain `CMake driven` that will configure the proper builder when selected to make project configuration easier.
-- Added a project type `CMake driven` to the CDT `New C Project` and `New C+ Project` wizard to ease in project creation.  
+- Added a project type `CMake driven` to the CDT `New C Project` and `New C+ Project` wizard to ease in project creation.
+- Deprecated `CMake Builder (GNU Make)`. Existing projects will still use that builder but it cannot be selected in the UI any longer.
 - Added an extension point `lspDetectionParticipant`, allowing 3rd-party compiler vendors to integrate a compiler 
   for improved syntax highlighting in the CDT's C/C++ editors by simply providing an Eclipse plug-in. The 
   CMAKE_EXPORT_COMPILE_COMMANDS Parsers of this plug.in will pick-up the `lspDetectionParticipant` extensions to detect
