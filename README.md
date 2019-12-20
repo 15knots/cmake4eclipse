@@ -61,7 +61,7 @@ To debug the plug-in from Eclipse, first set the Plug-in Development Target plat
 
 ---
 # Release Notes
-## 2.0.0 (upcoming)
+## 2.0.0 (2019-12-20)
 ### Changes
 - Added a tool-chain `CMake driven` that will configure the proper builder when selected to make project configuration easier.
 - Added a project type `CMake driven` to the CDT `New C Project` and `New C+ Project` wizard to ease in project creation.
