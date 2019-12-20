@@ -14,8 +14,10 @@
     to use <code>cmake</code> as the generator for the buildscripts instead of the
     makefile generator built-in to CDT.
   </p>
-  
-  <p>As a first start, you may want to try out one of the 
+  <p>Do not try to manually generate an Eclipse project using <kbd>cmake -G Eclipse CDT4 - Unix Makefiles</kbd>
+  and import it, as that will make cmake4eclipse unavailable in your project!
+  </p>
+  <p>As a first start, you may want to try one of the 
   <a href="https://github.com/15knots/cmake4eclipse-sample-projects">example projects</a>.
   </p>
   
@@ -23,48 +25,49 @@
   To set up your own project with existing source code, please follow these steps:
   <ol>
 <li>Check out your source code.</li>
-<li>Open menu <kbd><a href="PLUGINS_ROOT/org.eclipse.cdt.doc.user/tasks/cdt_t_proj_new_with_template.htm">File&#10146; New&#10146; Project...&#10146; C/C++</a></kbd>
-and select one of the <kbd>C project</kbd> or <kbd>C++ project</kbd> wizards. Do <strong>not</strong> choose the
+<li>Open menu <kbd><a href="PLUGINS_ROOT/org.eclipse.cdt.doc.user/tasks/cdt_t_proj_new_with_template.htm">File &#10146; New &#10146; Project... &#10146; C/C++</a></kbd>
+and select one of the <kbd>C Project</kbd> or <kbd>C++ Project</kbd> wizards. Do <strong>not</strong> choose the
 <kbd>C/C++ project</kbd> wizard, as that will take you down the road of CDT`s new project type which does not recognize
  cmake4eclipse.
 </li>
-<li>Make sure the project location points to root directory of your checked out files.</li>
+<li>Make sure the project location points to the root directory of your checked out files.</li>
 <li>For the <a href="PLUGINS_ROOT/org.eclipse.cdt.doc.user/tasks/cdt_t_proj_platf.htm">project type</a>,
-select anything below <kbd>Executable</kbd>, <kbd>Shared Library</kbd> or 
-<kbd>Static Library</kbd>, it does not matter since the settings actually come from your <em>CMakeLists.txt</em> files.<br/>
-<strong>Do not select <kbd>Makefile project</kbd> here!</strong>
+ expand the <kbd>CMake driven</kbd> node, select <kbd>Empty Project</kbd> and the <kbd>CMake driven</kbd>
+ toolchain.
 </li>
-<li>Finish project creation.</li>
-<li>Open the <a class="command-link" href='javascript:executeCommand("org.eclipse.ui.project.properties")'>
-   <img src="PLUGINS_ROOT/org.eclipse.help/command_link.png"/><b>Project Properties</b></a>
-   dialog.
+<li>Click the <kbd>Next</kbd> button to enter the project configurations wizard step.</li>
+<li>Check the configurations you want to build for. The available configurations map cmake`s 
+<em>CMAKE_BUILD_TYPE</em> variable as following:
+<ul>
+<li><em>Debug</em> sets <em>CMAKE_BUILD_TYPE=Debug</em>.</li>
+<li><em>Release</em> sets <em>CMAKE_BUILD_TYPE=Release</em>.</li>
+<li><em>Default</em> does not set <em>CMAKE_BUILD_TYPE</em> at all, allowing you to use cmake`s default value.</li>
+</ul>
+Please note that if you specify a value for <em>CMAKE_BUILD_TYPE</em> on the <a href="t_cmake_symbols_general.html">
+Symbols tab</a> that value will override the value from the configuration.
 </li>
-<li>Select the <kbd>C/C++ Build</kbd> node and the <kbd><a href="PLUGINS_ROOT/org.eclipse.cdt.doc.user/tasks/cdt_t_proj_build_set.htm">Builder Settings</a></kbd> tab. 
-   Make sure
-   <ol>
-   <li>that <kbd>External Builder</kbd> is set as the builder type,</li>
-   <li>that <kbd>Use default build command</kbd> is checked. (Although you may use different settings here at your own risk.)</li>
-   <li>that <kbd>Generate Makefiles automatically</kbd> is checked.</li>
-   </ol>
+<li>If your top level <em>CMakeLists.txt</em> does not reside in the project`s root directory , click the
+<kbd>Advanced settings...</kbd> button and 
+<ol>
+<li>select the <kbd>C/C++ General&#10146; Path and Symbols</kbd> node,</li>
+<li>then the <kbd><a href="PLUGINS_ROOT/org.eclipse.cdt.doc.user/reference/cdt_u_prop_general_pns_src.htm">Source Location</a></kbd> tab
 </li>
-<li>Select the <kbd><a href="PLUGINS_ROOT/org.eclipse.cdt.doc.user/reference/cdt_u_prop_build_toolchain.htm">Tool Chain Editor</a></kbd>
- node and set <kbd>CMake Builder (portable)</kbd> as the current builder.
- See <a href="builders.html">Builders</a> for details on the available builders.</li>
-<li>If your top level <em>CMakeLists.txt</em> does not reside in the root directory
-of your checked out files, select the <kbd>C/C++ General&#10146; Path and Symbols</kbd> node
- and the <kbd><a href="PLUGINS/org.eclipse.cdt.doc.user/reference/cdt_u_prop_general_pns_src.htm">Source Location</a></kbd> tab.
- Then adjust the source folder to point to the directory containing your top level <em>CMakeLists.txt</em>
- file. This will tell the CDT indexer to scan the header files in your project.<br/>
- <strong>Pro Tip</strong>: Add a CMakeLists.txt file in the root directory of your checked out files, if
- you miss the <code>Binaries</code> or <code>Archives</code> folder in the <a href="PLUGINS_ROOT/org.eclipse.cdt.doc.user/reference/cdt_u_project_explorer_view.htm">Project Explorer View</a>. 
-</li>
-<li>Build the project. This will first invoke cmake to generate the build scripts and then pass control to CDT to run the generated scripts. 
-You will find the full build output in the <kbd>CDT Global Build Console</kbd> of the <kbd>Console View</kbd>.
-</li>
+<li>and adjust the source folder to point to the directory containing your top level <em>CMakeLists.txt</em>
+ file.</li>
 </ol>
-  </p>
-  <p>Do not try to manually generate an Eclipse project using <kbd>cmake -G Eclipse CDT4 - Unix Makefiles</kbd>
-  and import it, as that will make cmake4eclipse unavailable in your project!
+ <strong>Pro Tip</strong>: If you miss the <code>Binaries</code> or <code>Archives</code> folder in the
+ <a href="PLUGINS_ROOT/org.eclipse.cdt.doc.user/reference/cdt_u_project_explorer_view.htm">Project Explorer View</a>
+ , add a CMakeLists.txt file in the root directory of your checked out files.
+</li>
+<li>Finish project creation.
+</li>
+<li>Build the project. This will first invoke <kbd>cmake</kbd> to generate the build scripts and then pass control to CDT to run the generated scripts.<br/> 
+To examine the full build log, open Eclipse`s <kbd>Console View</kbd> set it to display the
+<kbd>CDT Global Build Console</kbd>. There is also a <kbd>CMake Console</kbd> which will display the
+output of the most recent cmake invocation only.
+</li>
+
+</ol>
   </p>
 </body>
 </html>
