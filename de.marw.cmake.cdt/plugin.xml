@@ -149,7 +149,7 @@
        id="CompilerBuiltinsDetectorMarker"
        name="Compiler Builtins Detector Problem"
        point="org.eclipse.core.resources.markers">
-    <super type="de.marw.cmake.CompileCommandsJsonParserMarker"/>
+    <super type="de.marw.cmake.cdt.CompileCommandsJsonParserMarker"/>
  </extension>
  <extension
        point="org.eclipse.cdt.ui.LanguageSettingsProviderAssociation">
