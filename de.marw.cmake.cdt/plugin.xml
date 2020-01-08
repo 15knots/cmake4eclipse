@@ -174,10 +174,10 @@
  <extension
        point="org.eclipse.ui.trace.traceComponents">
     <component
-          id="de.marw.cmake.trace"
+          id="de.marw.cmake.cdt.trace"
           label="Cmake4eclipse CDT indexer support">
        <bundle
-             name="de.marw.cmake">
+             name="de.marw.cmake.cdt">
        </bundle>
     </component>
  </extension>
