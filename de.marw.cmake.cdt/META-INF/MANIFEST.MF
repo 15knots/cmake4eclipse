@@ -4,7 +4,7 @@ Bundle-Name: %bundleName
 Bundle-Description: cmake4eclipse support for CDT Indexer (preprocessor macro & include path providers)
 Bundle-Copyright: 2013 Martin Weber
 Bundle-SymbolicName: de.marw.cmake.cdt;singleton:=true
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 1.0.1.qualifier
 Bundle-Vendor: Martin Weber
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
@@ -41,6 +41,5 @@ Import-Package: de.marw.cdt.cmake.core.cmakecache,
 Bundle-Activator: de.marw.cmake.cdt.internal.CMakePlugin
 Export-Package: de.marw.cmake.cdt.lsp;uses:="org.eclipse.core.runtime,de.marw.cmake.cdt.lsp.builtins,org.eclipse.cdt.core.settings.model",
  de.marw.cmake.cdt.lsp.builtins;uses:="org.eclipse.cdt.core.settings.model"
-Require-Bundle: org.eclipse.ui.workbench;bundle-version="3.8.0",
- org.eclipse.ui.trace
+Require-Bundle: org.eclipse.ui.workbench;bundle-version="3.8.0"
 Automatic-Module-Name: de.marw.cmake.cdt

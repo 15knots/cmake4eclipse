@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?pde version="3.8"?><target name="cdt/8.7-eclipse/4.5.2" sequenceNumber="25">
+<?pde version="3.8"?>
+<target name="cdt/8.7-eclipse/4.5.2" sequenceNumber="25">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.pde.api.tools.ee.feature.feature.group" version="1.0.1.v20140424-1723"/>
-<unit id="org.eclipse.sdk.ide" version="4.5.2.M20160212-1500"/>
 <repository location="http://download.eclipse.org/eclipse/updates/4.5/"/>
+	<unit id="org.eclipse.rcp.feature.group" version="4.5.2.v20160212-1500"/>
+	<unit id="org.eclipse.rcp.source.feature.group" version="4.5.2.v20160212-1500"/>
+	<unit id="org.eclipse.platform.feature.group" version="4.5.2.v20160212-1500"/>
+	<unit id="org.eclipse.platform.source.feature.group" version="4.5.2.v20160212-1500"/>
 </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.cdt.sdk.feature.group" version="0.0.0"/>
