@@ -178,7 +178,7 @@ public class DefaultToolCommandlineParser implements IToolCommandlineParser {
         // parse with first parser that can handle the first argument on the
         // command-line
         if (DEBUG)
-          System.out.printf(">> Looking up parser for argument '%s ...'%n",
+          System.out.printf(">> PARSING next argument in '%s ...'%n",
               args.substring(0, Math.min(50, args.length())));
         for (IArglet tap : argumentParsers) {
           if (DEBUG)
@@ -186,7 +186,7 @@ public class DefaultToolCommandlineParser implements IToolCommandlineParser {
           consumed = tap.processArgument(result, cwd, args);
           if (consumed > 0) {
             if (DEBUG)
-              System.out.printf("<< PARSED ARGUMENT '%s'%n", args.substring(0, consumed));
+              System.out.printf("<< PARSED argument '%s'%n", args.substring(0, consumed));
             args = args.substring(consumed);
             argParsed = true;
             break;
@@ -209,7 +209,7 @@ public class DefaultToolCommandlineParser implements IToolCommandlineParser {
           // tried all parsers, argument is still not parsed,
           // skip argument
           if (DEBUG)
-            System.out.printf("<< IGNORING ARGUMENT, no parser found for it: '%s ...'%n",
+            System.out.printf("<< IGNORING next argument in '%s ...' (no matching parser found)%n",
                 args.substring(0, Math.min(50, args.length())));
           consumed = skipArgument(args);
           if (consumed > 0) {

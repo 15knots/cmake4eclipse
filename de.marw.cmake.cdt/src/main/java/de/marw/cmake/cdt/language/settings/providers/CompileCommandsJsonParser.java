@@ -705,6 +705,12 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
 
     /** one CompilerBuiltinsDetector for each source file language */
     private Map<String,CompilerBuiltinsDetector> builtinDetectors;
+    /** the owning project, for reporting purpose only */
+    private IProject project;
+
+    TimestampedLanguageSettingsStorage(IProject project) {
+      this.project = project;
+    }
 
     /**
      * Adds the specified language settings entries for this storages.
@@ -721,7 +727,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
       if (entries.size() == 0)
         return;
       if (DEBUG) {
-        System.out.printf("ADDING %d entries for language %s, resource %s, ...%n", entries.size(), languageId, rc);
+        System.out.printf("ADDING %d entries for language %s, resource %s, ...%n", entries.size(), languageId, rc!=null?rc: project);
         entries.stream().sorted((o1, o2) -> o1.getName().compareTo(o2.getName()))
             .forEach(e -> System.out.printf("  %s%n", e));
       }
@@ -773,7 +779,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
     }
 
     public TimestampedLanguageSettingsStorage clone() {
-      TimestampedLanguageSettingsStorage cloned = new TimestampedLanguageSettingsStorage();
+      TimestampedLanguageSettingsStorage cloned = new TimestampedLanguageSettingsStorage(this.project);
       cloned.lastModified = this.lastModified;
       cloned.fStorage.putAll(super.fStorage);
       return cloned;
@@ -826,7 +832,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
     private TimestampedLanguageSettingsStorage getSettingsStoreForConfig(ICConfigurationDescription cfgDescription) {
       TimestampedLanguageSettingsStorage store = storages.get(cfgDescription.getId());
       if (store == null) {
-        store = new TimestampedLanguageSettingsStorage();
+        store = new TimestampedLanguageSettingsStorage(cfgDescription.getProjectDescription().getProject());
         storages.put(cfgDescription.getId(), store);
       }
       return store;
