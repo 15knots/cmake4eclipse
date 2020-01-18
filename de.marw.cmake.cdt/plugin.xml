@@ -168,7 +168,7 @@
          point="org.eclipse.cdt.core.CBuildConsole">
       <CBuildConsole
             class="de.marw.cmake.cdt.internal.lsp.builtins.DetectorConsole"
-            id="de.marw.cmake.detectorConsole">
+            id="de.marw.cmake.cdt.detectorConsole">
       </CBuildConsole>
  </extension>
  <extension
