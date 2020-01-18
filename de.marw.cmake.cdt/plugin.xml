@@ -171,14 +171,18 @@
             id="de.marw.cmake.cdt.detectorConsole">
       </CBuildConsole>
  </extension>
+ <!-- Uncommented, gives an error (unkown extension point) in the IDE
+ 	with eclipse prior to 4.10 (2018-12)
  <extension
        point="org.eclipse.ui.trace.traceComponents">
     <component
           id="de.marw.cmake.cdt.trace"
           label="Cmake4eclipse CDT indexer support">
        <bundle
+             consumed="true"
              name="de.marw.cmake.cdt">
        </bundle>
     </component>
  </extension>
+ -->
 </plugin>
