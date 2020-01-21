@@ -1,4 +1,9 @@
 # Cmake4eclipse Change Log
+## 2.0.1 (2020-01-21)
+### Changes
+- Fix 127: Installation impossible due to dependency on bundle org.eclipse.ui.trace.
+- Fix: Make builtins.DetectorConsole visible again (regression).
+
 ## 2.0.0 (2019-12-20)
 ### Changes
 - Added a tool-chain `CMake driven` that will configure the proper builder when selected to make project configuration easier.
