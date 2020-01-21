@@ -47,8 +47,11 @@ https://raw.githubusercontent.com/15knots/cmake4eclipse/master/releng/comp-updat
 Tool integrators will find each release at [bintray](https://bintray.com/15knots/p2-zip/cmake4eclipse#files).
 Each release is provided as a stand-alone zipped p2 repository and can be consumed in a PDE target platform. To add one
 of these repositories to your target platform, add a **Software Site** and enter a URL for the location as
-jar:https://dl.bintray.com/15knots/p2-zip/cmake4eclipse-1.12.1.zip!/ (note the leading `jar:` and the trailing
+jar:https://dl.bintray.com/15knots/p2-zip/cmake4eclipse-2.0.1.zip!/ (note the leading `jar:` and the trailing
 `!/`).
+If you work at a company that wants to ship cmake4eclipse with your product, please consider to mirror the zip file internally
+and reference the company-internal location in your target definition. This will help to reduce the traffic on bintray and
+make your product builds immune to downtimes on bintray.
 
 
 ## Debug and Build
