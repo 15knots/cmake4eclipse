@@ -49,10 +49,10 @@ Each release is provided as a stand-alone zipped p2 repository and can be consum
 of these repositories to your target platform, add a **Software Site** and enter a URL for the location as
 jar:https://dl.bintray.com/15knots/p2-zip/cmake4eclipse-2.0.1.zip!/ (note the leading `jar:` and the trailing
 `!/`).
+
 If you work at a company that wants to ship cmake4eclipse with your product, please consider to mirror the zip file internally
 and reference the company-internal location in your target definition. This will help to reduce the traffic on bintray and
 make your product builds immune to downtimes on bintray.
-
 
 ## Debug and Build
 This project uses Apache maven as its build system.
@@ -61,3 +61,20 @@ To build from a command-line, run `mvn -f ./parent/pom.xml package` in the root 
 There is also a run configuration for eclipse to invoke the maven build: `build cmake4eclipse`.
 
 To debug the plug-in from Eclipse, first set the Plug-in Development Target platform of your workbench to `cdt/8.7-eclipse/4.5.2`, then run the Eclipse Application launch configuration named `cmake4eclipse`.
+
+## References
+### Projects that recommend to use this plugin to develop it using Eclipse.
+- CbmRoot https://redmine.cbm.gsi.de/projects/cbmroot/wiki/DevCbmEclipse#Install-CMake-related-Eclipse-plugins
+- GnuCash https://wiki.gnucash.org/wiki/Eclipse#Suggested_Plugins
+- HTGS https://pages.nist.gov/HTGS/doxygen/tutorial0.html
+- Kendryte https://forum.kendryte.com/topic/35/build-kendryte-using-eclipse
+- Merlin http://www.accelerators.manchester.ac.uk/merlin/Quickstart/Eclipse.html
+- Minres/SystemC-Quickstart https://github.com/Minres/SystemC-Quickstart
+- Mixxx https://www.mixxx.org/wiki/doku.php/eclipse#step-by-step_setup
+- Navit https://wiki.navit-project.org/index.php/Eclipse#Project_Setup
+
+### IDEs with cmake4eclipse
+Nsight Eclipse https://devblogs.nvidia.com/drivepx-application-development-using-nsight-eclipse-edition/#https://github.com/Minres/SystemC-Quickstart
+
+### Books
+Advanced C++ https://books.google.de/books?id=YVG7DwAAQBAJ&pg=PA9&lpg=PA9&dq=cmake4eclipse&source=bl&ots=qgHjAfjlcA&sig=ACfU3U21IppdYpImjXxBfWD69-2NYeHB4w&hl=de&sa=X&ved=2ahUKEwimtrONqJjnAhVKK1AKHVIEC2k4ChDoATAIegQIChAB#v=onepage&q=cmake4eclipse&f=false
