@@ -203,7 +203,7 @@ public class ParserDetectionTest {
 
   @Test
   public void testDetermineParserForCommandline_quoted() {
-    String more = " -DFoo=bar -C blah.c";
+    String more = " -DFoo=bar \"quoted\" 'quoted' -C blah.c";
 
     String name = "/us r/bi n/cc";
     ParserDetection.ParserDetectionResult result = ParserDetection.determineDetector(
@@ -228,5 +228,30 @@ public class ParserDetectionTest {
         "\"" + name +"\"" +more, null, true);
     assertNotNull(result);
     assertEquals(name, result.getCommandLine().getCommand());
-}
+  }
+
+  /** Tests whether tool detection regex is too greedy, */
+  @Test
+  public void testDetermineParserForCommandline_greedyness() {
+    String more = " -DFoo=bar -I /opt/mingw53_32/mkspecs/win32-c++ -C blah.c";
+
+    String name = "/usr/bin/c++";
+    ParserDetection.ParserDetectionResult result = ParserDetection.determineDetector(name + more, null, false);
+    assertNotNull(result);
+    assertEquals(name, result.getCommandLine().getCommand());
+
+    result = ParserDetection.determineDetector("\"" + name + "\"" + more, null, false);
+    assertNotNull(result);
+    assertEquals(name, result.getCommandLine().getCommand());
+
+    // with filename extension
+    name += ".exe";
+    result = ParserDetection.determineDetector(name + more, null, true);
+    assertNotNull(result);
+    assertEquals(name, result.getCommandLine().getCommand());
+
+    result = ParserDetection.determineDetector("\"" + name + "\"" + more, null, true);
+    assertNotNull(result);
+    assertEquals(name, result.getCommandLine().getCommand());
+  }
 }

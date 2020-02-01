@@ -86,7 +86,7 @@ public class ParserDetection {
       parserDetectors.add(new DefaultToolDetectionParticipant("gcc", true, "exe", gcc));
       parserDetectors.add(new DefaultToolDetectionParticipant("clang", true, "exe", gcc));
       // cross compilers, e.g. arm-none-eabi-gcc ====
-      parserDetectors.add(new DefaultToolDetectionParticipant(".+-gcc", true, "exe", gcc));
+      parserDetectors.add(new DefaultToolDetectionParticipant("\\S+?-gcc", true, "exe", gcc));
     }
     // GNU C++ compatible compilers ====
     {
@@ -95,13 +95,13 @@ public class ParserDetection {
       parserDetectors.add(new DefaultToolDetectionParticipant("g\\+\\+", true, "exe", gxx));
       parserDetectors.add(new DefaultToolDetectionParticipant("clang\\+\\+", true, "exe", gxx));
       // cross compilers, e.g. arm-none-eabi-g++ ====
-      parserDetectors.add(new DefaultToolDetectionParticipant(".+-g\\+\\+", true, "exe", gxx));
+      parserDetectors.add(new DefaultToolDetectionParticipant("\\S+?-g\\+\\+", true, "exe", gxx));
     }
     {
       // cross compilers, e.g. arm-none-eabi-c++ ====
       final IToolCommandlineParser cxx = new DefaultToolCommandlineParser("org.eclipse.cdt.core.g++",
           new ResponseFileArglets.At(), btbGccMaybee, gcc_args);
-      parserDetectors.add(new DefaultToolDetectionParticipant(".+-c\\+\\+", true, "exe", cxx));
+      parserDetectors.add(new DefaultToolDetectionParticipant("\\S+?-c\\+\\+", true, "exe", cxx));
     }
 
     // ms C + C++ compiler ==========================================
@@ -140,7 +140,6 @@ public class ParserDetection {
    * @see IToolCommandlineParser#getCustomLanguageIds()
    */
   public static List<String> getCustomLanguages() {
-    // TODO Auto-generated method stub
     return parserDetectors.stream().map(d -> d.getParser().getCustomLanguageIds()).filter(Objects::nonNull).
         flatMap(l -> l.stream()) .collect(Collectors.toList());
   }
