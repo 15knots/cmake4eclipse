@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Tests for de.marw.cmake.lsp.nvidia
+Bundle-SymbolicName: de.marw.cmake.cdt.lsp.nvidia.tests
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: Martin Weber
+Fragment-Host: de.marw.cmake.cdt.lsp.nvidia;bundle-version="1.0.0.qualifier"
+Import-Package: org.eclipse.cdt.core.settings.model,
+ org.junit
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Automatic-Module-Name: de.marw.cmake.cdt.lsp.nvidia.tests

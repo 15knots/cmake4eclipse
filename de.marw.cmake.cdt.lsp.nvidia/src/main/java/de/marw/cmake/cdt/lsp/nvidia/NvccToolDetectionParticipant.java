@@ -9,12 +9,11 @@
  *      Martin Weber - Initial implementation
  *******************************************************************************/
 
-package de.marw.cmake.cdt.internal.lsp;
+package de.marw.cmake.cdt.lsp.nvidia;
 
 import java.util.Collections;
 import java.util.List;
 
-import de.marw.cmake.cdt.internal.lsp.builtins.NvccBuiltinDetectionBehavior;
 import de.marw.cmake.cdt.lsp.Arglets;
 import de.marw.cmake.cdt.lsp.DefaultToolCommandlineParser;
 import de.marw.cmake.cdt.lsp.DefaultToolDetectionParticipant;
@@ -26,7 +25,7 @@ import de.marw.cmake.cdt.lsp.ResponseFileArglets;
  *
  * @author Martin Weber
  */
-class NvccToolDetectionParticipant extends DefaultToolDetectionParticipant {
+public class NvccToolDetectionParticipant extends DefaultToolDetectionParticipant {
   static final String COM_NVIDIA_CUDA_LANGUAGE_ID = "com.nvidia.cuda.toolchain.language.cuda.cu";
 
   public NvccToolDetectionParticipant() {
@@ -36,8 +35,8 @@ class NvccToolDetectionParticipant extends DefaultToolDetectionParticipant {
   private static class ToolCommandlineParser extends DefaultToolCommandlineParser {
 
     private static final IArglet[] arglets = { new Arglets.IncludePath_C_POSIX(), new Arglets.MacroDefine_C_POSIX(),
-        new Arglets.MacroUndefine_C_POSIX(), new Arglets.SystemIncludePath_nvcc(), new Arglets.SystemIncludePath_C(),
-        new Arglets.LangStd_nvcc() };
+        new Arglets.MacroUndefine_C_POSIX(), new NvccSystemIncludePathArglet(), new Arglets.SystemIncludePath_C(),
+        new NvccLangStdArglet() };
 
     private ToolCommandlineParser() {
       super(COM_NVIDIA_CUDA_LANGUAGE_ID, new ResponseFileArglets.At(), new NvccBuiltinDetectionBehavior(), arglets);

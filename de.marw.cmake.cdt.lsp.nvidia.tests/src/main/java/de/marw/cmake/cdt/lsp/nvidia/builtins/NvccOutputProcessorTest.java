@@ -9,7 +9,7 @@
  *      Martin Weber - Initial implementation
  *******************************************************************************/
 
-package de.marw.cmake.cdt.internal.lsp.builtins;
+package de.marw.cmake.cdt.lsp.nvidia.builtins;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

@@ -9,7 +9,7 @@
  *      Martin Weber - Initial implementation
  *******************************************************************************/
 
-package de.marw.cmake.cdt.internal.lsp.builtins;
+package de.marw.cmake.cdt.lsp.nvidia;
 
 import java.util.Arrays;
 import java.util.List;
@@ -23,7 +23,7 @@ import de.marw.cmake.cdt.lsp.builtins.IBuiltinsOutputProcessor;
  *
  * @author Martin Weber
  */
-public class NvccBuiltinDetectionBehavior implements IBuiltinsDetectionBehavior {
+class NvccBuiltinDetectionBehavior implements IBuiltinsDetectionBehavior {
   // -E -Xcompiler -P -Xcompiler -dM for macros, -Xcompiler -v for include paths
   private final List<String> enablingArgs = Arrays.asList("-E", "-Xcompiler", "-P", "-Xcompiler", "-dM", "-Xcompiler",
       "-v");

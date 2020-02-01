@@ -319,31 +319,6 @@ public class Arglets {
 
   ////////////////////////////////////////////////////////////////////
   /**
-   * A tool argument parser capable to parse a nvcc-compiler system include path
-   * argument: {@code -system=dir}.<br>
-   * Note that nvcc seems to treat {@code -system=dir} differently from GCC
-   * which`s manpage says:
-   * <q>If dir begins with "=", then the "=" will be replaced by the sysroot
-   * prefix; see --sysroot and -isysroot.</q>
-   */
-  public static class SystemIncludePath_nvcc extends IncludePathGeneric implements IArglet {
-    static final NameOptionMatcher[] optionMatchers = {
-        /* quoted directory */
-        new NameOptionMatcher("-isystem=" + "([\"'])(.+?)\\1", 2),
-        /* unquoted directory */
-        new NameOptionMatcher("-isystem=" + "([^\\s]+)", 1), };
-
-    /*-
-     * @see de.marw.cmake.cdt.lsp.IArglet#processArgs(java.lang.String)
-     */
-    @Override
-    public int processArgument(IParseContext parseContext, IPath cwd, String argsLine) {
-      return processArgument(parseContext, cwd, argsLine, optionMatchers);
-    }
-  }
-
-  ////////////////////////////////////////////////////////////////////
-  /**
    * A tool argument parser capable to parse a armcc-compiler system include path
    * argument: {@code -Jdir}.
    */
@@ -374,7 +349,7 @@ public class Arglets {
   /**
    * A tool argument parser capable to parse arguments from the command-line that affect built-in detection.
    */
-  private static abstract class BuiltinDetctionArgsGeneric {
+  public static abstract class BuiltinDetctionArgsGeneric {
     /**
      * @see de.marw.cmake.cdt.lsp.IArglet#processArgument(IParseContext, IPath, String)
      */
@@ -423,22 +398,6 @@ public class Arglets {
   public static class LangStd_GCC extends BuiltinDetctionArgsGeneric implements IArglet {
     private static final Matcher[] optionMatchers = { Pattern.compile("-std=\\S+").matcher(""),
         Pattern.compile("-ansi").matcher(""), };
-
-    /*-
-     * @see de.marw.cmake.cdt.lsp.IArglet#processArgs(java.lang.String)
-     */
-    @Override
-    public int processArgument(IParseContext parseContext, IPath cwd, String argsLine) {
-      return processArgument(parseContext, argsLine, optionMatchers);
-    }
-  }
-
-  /**
-   * A tool argument parser capable to parse a nvcc option to specify the language standard {@code --std=xxx}.
-   */
-  public static class LangStd_nvcc extends BuiltinDetctionArgsGeneric implements IArglet {
-    private static final Matcher[] optionMatchers = { Pattern.compile("--std \\S+").matcher(""),
-        Pattern.compile("-std \\S+").matcher(""), };
 
     /*-
      * @see de.marw.cmake.cdt.lsp.IArglet#processArgs(java.lang.String)
