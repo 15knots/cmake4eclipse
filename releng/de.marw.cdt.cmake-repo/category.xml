@@ -14,25 +14,55 @@
       <category name="cmake"/>
       <description>Additional compilers support for the CDT Indexer (preprocessor macro &amp; include path providers).</description>
    </category-def>
-   <category-def name="extras.source" label="cmake4eclipse Extras Developer Resources">
-      <category name="cmake"/>
-   </category-def>
    <bundle id="de.marw.cmake.cdt.lsp.arm">
       <category name="extras"/>
-   </bundle>
-   <bundle id="de.marw.cmake.cdt.lsp.arm.source">
-      <category name="extras.source"/>
    </bundle>
    <bundle id="de.marw.cmake.cdt.lsp.hpenonstop">
       <category name="extras"/>
    </bundle>
-   <bundle id="de.marw.cmake.cdt.lsp.hpenonstop.source">
-      <category name="extras.source"/>
-   </bundle>
    <bundle id="de.marw.cmake.cdt.lsp.intel">
       <category name="extras"/>
    </bundle>
+   <bundle id="de.marw.cmake.cdt.lsp.microsoft">
+      <category name="extras"/>
+   </bundle>
+   <bundle id="de.marw.cmake.cdt.lsp.nvidia">
+      <category name="extras"/>
+   </bundle>
+
+   <category-def name="extras.source" label="cmake4eclipse Extras Developer Resources">
+      <category name="cmake"/>
+   </category-def>
+   <bundle id="de.marw.cmake.cdt.lsp.arm.source">
+      <category name="extras.source"/>
+   </bundle>
+   <bundle id="de.marw.cmake.cdt.lsp.arm.tests.source">
+      <category name="extras.source"/>
+   </bundle>
+
+   <bundle id="de.marw.cmake.cdt.lsp.hpenonstop.source">
+      <category name="extras.source"/>
+   </bundle>
+   <bundle id="de.marw.cmake.cdt.lsp.hpenonstop.tests.source">
+      <category name="extras.source"/>
+   </bundle>
+
    <bundle id="de.marw.cmake.cdt.lsp.intel.source">
       <category name="extras.source"/>
    </bundle>
+
+   <bundle id="de.marw.cmake.cdt.lsp.microsoft.source">
+      <category name="extras.source"/>
+   </bundle>
+   <bundle id="de.marw.cmake.cdt.lsp.microsoft.tests.source">
+      <category name="extras.source"/>
+   </bundle>
+
+   <bundle id="de.marw.cmake.cdt.lsp.nvidia.source">
+      <category name="extras.source"/>
+   </bundle>
+   <bundle id="de.marw.cmake.cdt.lsp.nvidia.tests.source">
+      <category name="extras.source"/>
+   </bundle>
+
 </site>

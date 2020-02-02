@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %bundleName
-Bundle-Copyright: 2019 Martin Weber
+Bundle-Copyright: 2020 Martin Weber
 Bundle-SymbolicName: de.marw.cmake.cdt.lsp.microsoft;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Vendor: Martin Weber
