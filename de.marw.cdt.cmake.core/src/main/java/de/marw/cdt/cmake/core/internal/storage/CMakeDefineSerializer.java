@@ -20,7 +20,7 @@ import de.marw.cdt.cmake.core.settings.CmakeVariableType;
  *
  * @author Martin Weber
  */
-public class CmakeDefineSerializer implements StorageSerializer<CmakeDefine> {
+public class CMakeDefineSerializer implements StorageSerializer<CmakeDefine> {
   /**  */
   private static final String ELEM_DEFINE = "def";
   /**  */

@@ -16,8 +16,8 @@ import java.util.List;
 import org.eclipse.cdt.core.settings.model.ICStorageElement;
 
 import de.marw.cdt.cmake.core.internal.Activator;
-import de.marw.cdt.cmake.core.internal.storage.CmakeDefineSerializer;
-import de.marw.cdt.cmake.core.internal.storage.CmakeUndefineSerializer;
+import de.marw.cdt.cmake.core.internal.storage.CMakeDefineSerializer;
+import de.marw.cdt.cmake.core.internal.storage.CMakeUndefineSerializer;
 import de.marw.cdt.cmake.core.internal.storage.Util;
 
 /**
@@ -115,10 +115,10 @@ public class CMakePreferences {
         buildDirectory= parent.getAttribute(ATTR_BUILD_DIR);
       } else if (ELEM_DEFINES.equals(child.getName())) {
         // defines...
-        Util.deserializeCollection(defines, new CmakeDefineSerializer(), child);
+        Util.deserializeCollection(defines, new CMakeDefineSerializer(), child);
       } else if (ELEM_UNDEFINES.equals(child.getName())) {
         // undefines...
-        Util.deserializeCollection(undefines, new CmakeUndefineSerializer(),
+        Util.deserializeCollection(undefines, new CMakeUndefineSerializer(),
             child);
       }
     }
@@ -187,11 +187,11 @@ public class CMakePreferences {
     }
 
     // defines...
-    Util.serializeCollection(ELEM_DEFINES, parent, new CmakeDefineSerializer(),
+    Util.serializeCollection(ELEM_DEFINES, parent, new CMakeDefineSerializer(),
         defines);
     // undefines...
     Util.serializeCollection(ELEM_UNDEFINES, parent,
-        new CmakeUndefineSerializer(), undefines);
+        new CMakeUndefineSerializer(), undefines);
   }
 
   /**

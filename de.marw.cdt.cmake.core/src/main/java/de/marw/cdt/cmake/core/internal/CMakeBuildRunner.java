@@ -68,7 +68,7 @@ import de.marw.cdt.cmake.core.cmakecache.SimpleCMakeCacheEntry;
  *
  * @author Martin Weber
  */
-public class CmakeBuildRunner extends ExternalBuildRunner {
+public class CMakeBuildRunner extends ExternalBuildRunner {
   /** build runner error marker ID */
   private static final String MARKER_ID = Activator.PLUGIN_ID + ".BuildRunnerError";
 

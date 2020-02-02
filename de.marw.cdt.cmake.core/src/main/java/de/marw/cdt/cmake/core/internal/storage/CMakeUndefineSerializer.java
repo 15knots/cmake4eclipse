@@ -19,7 +19,7 @@ import de.marw.cdt.cmake.core.settings.CmakeUnDefine;
  *
  * @author Martin Weber
  */
-public class CmakeUndefineSerializer implements
+public class CMakeUndefineSerializer implements
     StorageSerializer<CmakeUnDefine> {
   /**  */
   private static final String ELEM_UNDEFINE = "undef";

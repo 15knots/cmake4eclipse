@@ -16,8 +16,8 @@ import java.util.List;
 import org.eclipse.cdt.core.settings.model.ICStorageElement;
 import org.eclipse.core.runtime.Platform;
 
-import de.marw.cdt.cmake.core.internal.storage.CmakeDefineSerializer;
-import de.marw.cdt.cmake.core.internal.storage.CmakeUndefineSerializer;
+import de.marw.cdt.cmake.core.internal.storage.CMakeDefineSerializer;
+import de.marw.cdt.cmake.core.internal.storage.CMakeUndefineSerializer;
 import de.marw.cdt.cmake.core.internal.storage.Util;
 
 /**
@@ -240,10 +240,10 @@ public abstract class AbstractOsPreferences {
     for (ICStorageElement child : children) {
       if (CMakePreferences.ELEM_DEFINES.equals(child.getName())) {
         // defines...
-        Util.deserializeCollection(defines, new CmakeDefineSerializer(), child);
+        Util.deserializeCollection(defines, new CMakeDefineSerializer(), child);
       } else if (CMakePreferences.ELEM_UNDEFINES.equals(child.getName())) {
         // undefines...
-        Util.deserializeCollection(undefines, new CmakeUndefineSerializer(),
+        Util.deserializeCollection(undefines, new CMakeUndefineSerializer(),
             child);
       }
     }
@@ -281,10 +281,10 @@ public abstract class AbstractOsPreferences {
     }
     // defines...
     Util.serializeCollection(CMakePreferences.ELEM_DEFINES, parent,
-        new CmakeDefineSerializer(), defines);
+        new CMakeDefineSerializer(), defines);
     // undefines...
     Util.serializeCollection(CMakePreferences.ELEM_UNDEFINES, parent,
-        new CmakeUndefineSerializer(), undefines);
+        new CMakeUndefineSerializer(), undefines);
   }
 
   /**

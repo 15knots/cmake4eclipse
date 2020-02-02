@@ -25,7 +25,7 @@
       </builder>
          <builder
                autoBuildTarget="all"
-               buildRunner="de.marw.cdt.cmake.core.internal.CmakeBuildRunner"
+               buildRunner="de.marw.cdt.cmake.core.internal.CMakeBuildRunner"
                buildfileGenerator="de.marw.cdt.cmake.core.internal.BuildscriptGenerator"
                cleanBuildTarget="clean"
                command="CMAKE_BUILD_TOOL"
