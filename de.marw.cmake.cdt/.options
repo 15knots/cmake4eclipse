@@ -1,12 +1,12 @@
 # Debugging options for the de.marw.cmake.cdt plugin.
 
-# Turn on debugging for the CMAKE_EXPORT_COMPILE_COMMANDS command-line parser detection
+# Trace CMAKE_EXPORT_COMPILE_COMMANDS Parser tool detection participant lookup
 de.marw.cmake.cdt/CECC/participant=false
-# Turn on debugging for the command-line argument parser detection
-de.marw.cmake.cdt/CECC/args=false
-# Turn on debugging for detected language setting entries
+# Trace CMAKE_EXPORT_COMPILE_COMMANDS Parser command-line argument parser lookup
+de.marw.cmake.cdt/CECC/arglets=false
+# Trace detected language setting entries
 de.marw.cmake.cdt/CECC/entries=false
-# Turn on debugging for language setting entries passed to the indexer
+# Trace language setting entries as passed to the indexer
 de.marw.cmake.cdt/CECC/indexer-entries=false
-# Turn on debugging for detected built-ins language setting entries
+# Trace CMAKE_EXPORT_COMPILE_COMMANDS Compiler Built-ins detected language setting entries
 de.marw.cmake.cdt/CECC/builtins/entries=false
