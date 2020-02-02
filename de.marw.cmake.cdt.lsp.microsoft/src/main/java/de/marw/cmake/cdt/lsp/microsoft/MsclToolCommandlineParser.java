@@ -9,7 +9,7 @@
  *      Martin Weber - Initial implementation
  *******************************************************************************/
 
-package de.marw.cmake.cdt.internal.lsp;
+package de.marw.cmake.cdt.lsp.microsoft;
 
 import org.eclipse.core.runtime.IPath;
 

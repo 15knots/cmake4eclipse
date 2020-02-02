@@ -108,12 +108,6 @@ public class ParserDetection {
       parserDetectors.add(new DefaultToolDetectionParticipant("\\S+?-c\\+\\+", true, "exe", cxx));
     }
 
-    // ms C + C++ compiler ==========================================
-    {
-      final IToolCommandlineParser cl = new MsclToolCommandlineParser();
-      parserDetectors.add(new DefaultToolDetectionParticipant("cl", true, "exe", cl));
-    }
-
     // compilers from extension points
     loadExtentionsSorted(parserDetectors::add);
   }

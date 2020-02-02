@@ -45,6 +45,8 @@
     <module>../de.marw.cmake.cdt.lsp.intel</module>
     <module>../de.marw.cmake.cdt.lsp.nvidia</module>
     <module>../de.marw.cmake.cdt.lsp.nvidia.tests</module>
+    <module>../de.marw.cmake.cdt.lsp.microsoft</module>
+    <module>../de.marw.cmake.cdt.lsp.microsoft.tests</module>
     <module>../de.marw.cdt.cmake-feature</module>
     <module>../releng/de.marw.cdt.cmake-repo</module>
   </modules>
