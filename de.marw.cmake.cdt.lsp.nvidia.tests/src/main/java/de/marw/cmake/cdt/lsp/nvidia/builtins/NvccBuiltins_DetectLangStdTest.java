@@ -12,7 +12,6 @@ package de.marw.cmake.cdt.lsp.nvidia.builtins;
 
 import static org.junit.Assert.assertEquals;
 
-import org.eclipse.cdt.core.settings.model.ICLanguageSettingEntry;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.junit.Before;
