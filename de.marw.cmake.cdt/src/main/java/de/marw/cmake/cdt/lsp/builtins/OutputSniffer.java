@@ -9,21 +9,22 @@
  *      Martin Weber - Initial implementation
  *******************************************************************************/
 
-package de.marw.cmake.cdt.internal.lsp.builtins;
+package de.marw.cmake.cdt.lsp.builtins;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Objects;
 
-import de.marw.cmake.cdt.lsp.builtins.IBuiltinsOutputProcessor;
 import de.marw.cmake.cdt.lsp.builtins.IBuiltinsOutputProcessor.IProcessingContext;
 
 /**
  * An OutputStream that passes each line written to it to a IBuiltinsOutputProcessor.
  *
  * @author Martin Weber
+ *
+ * @implNote this is visible for testing only
  */
-class OutputSniffer extends OutputStream {
+public class OutputSniffer extends OutputStream {
 
   private static final String SEP = System.lineSeparator();
   private final StringBuilder buffer;

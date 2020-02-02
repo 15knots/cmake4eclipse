@@ -47,6 +47,7 @@ import org.eclipse.core.runtime.Status;
 import de.marw.cmake.cdt.internal.CMakePlugin;
 import de.marw.cmake.cdt.lsp.builtins.IBuiltinsDetectionBehavior;
 import de.marw.cmake.cdt.lsp.builtins.IBuiltinsOutputProcessor;
+import de.marw.cmake.cdt.lsp.builtins.OutputSniffer;
 
 /**
  * Detects preprocessor macros and include paths that are built-in to a compiler.

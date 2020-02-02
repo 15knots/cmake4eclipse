@@ -23,6 +23,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import de.marw.cmake.cdt.lsp.builtins.GccOutputProcessor;
+import de.marw.cmake.cdt.lsp.builtins.OutputSniffer;
 
 /**
  * @author Martin Weber
