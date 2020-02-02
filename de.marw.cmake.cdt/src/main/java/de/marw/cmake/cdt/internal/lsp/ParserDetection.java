@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017-2019 Martin Weber.
+ * Copyright (c) 2017-2020 Martin Weber.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,8 +13,12 @@ package de.marw.cmake.cdt.internal.lsp;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.CoreException;
@@ -110,24 +114,37 @@ public class ParserDetection {
       parserDetectors.add(new DefaultToolDetectionParticipant("cl", true, "exe", cl));
     }
 
-    // CUDA: nvcc compilers (POSIX compatible) =================================
-    {
-      parserDetectors.add(new NvccToolDetectionParticipant());
-    }
-
     // compilers from extension points
+    loadExtentionsSorted(parserDetectors::add);
+  }
+
+  /**
+   * @param consumer
+   *          consumes the newly loaded IToolDetectionParticipant objects
+   */
+  private static void loadExtentionsSorted(Consumer<? super IToolDetectionParticipant> consumer) {
     IConfigurationElement[] elements = Platform.getExtensionRegistry()
         .getConfigurationElementsFor("de.marw.cmake.cdt.lspDetectionParticipant");
+    Map<IToolDetectionParticipant, Integer> sortMap = new HashMap<>();
     for (IConfigurationElement e : elements) {
       try {
         Object obj = e.createExecutableExtension("class");
+        String attr = e.getAttribute("order");
+        Integer order = Integer.valueOf(Integer.MAX_VALUE);
+        try {
+          order = Integer.parseUnsignedInt(Optional.ofNullable(attr).orElse("100000"));
+          order = Integer.max(10000, order);
+        } catch (NumberFormatException takeMax) {
+        }
         if (obj instanceof IToolDetectionParticipant) {
-          parserDetectors.add((IToolDetectionParticipant) obj);
+          sortMap.put((IToolDetectionParticipant) obj, order);
         }
       } catch (CoreException ex) {
         log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, e.getNamespaceIdentifier(), ex));
       }
     }
+    // sort by order and add to list
+    sortMap.entrySet().stream().sorted(Map.Entry.comparingByValue()).map(Map.Entry::getKey).forEach(consumer);
   }
 
   /** Just static methods */
@@ -214,8 +231,7 @@ public class ParserDetection {
     // try basenames
     for (IToolDetectionParticipant pd : parserDetectors) {
       if (DEBUG_PARTCIPANT_DETECTION)
-        System.out.printf("  Trying detector %s (%s)%n", pd.getParser().getClass().getSimpleName(),
-            DetectorWithMethod.DetectionMethod.BASENAME);
+        System.out.printf("  Trying participant %s (%s)%n", pd, DetectorWithMethod.DetectionMethod.BASENAME);
       if ((cmdline = pd.basenameMatches(commandLine, matchBackslash)) != null) {
         return new ParserDetectionResult(new DetectorWithMethod(pd, DetectorWithMethod.DetectionMethod.BASENAME, matchBackslash),
             cmdline);
@@ -225,7 +241,7 @@ public class ParserDetection {
       // try with version pattern
       for (IToolDetectionParticipant pd : parserDetectors) {
         if (DEBUG_PARTCIPANT_DETECTION)
-          System.out.printf("  Trying detector %s (%s)%n", pd.getParser().getClass().getSimpleName(), DetectorWithMethod.DetectionMethod.WITH_VERSION);
+          System.out.printf("  Trying participant %s (%s)%n", pd, DetectorWithMethod.DetectionMethod.WITH_VERSION);
         if ((cmdline = pd.basenameWithVersionMatches(commandLine, matchBackslash, versionSuffixRegex)) != null) {
           return new ParserDetectionResult(new DetectorWithMethod(pd, DetectorWithMethod.DetectionMethod.WITH_VERSION, matchBackslash),
               cmdline);
@@ -235,8 +251,7 @@ public class ParserDetection {
     // try with extension
     for (IToolDetectionParticipant pd : parserDetectors) {
       if (DEBUG_PARTCIPANT_DETECTION)
-        System.out.printf("  Trying detector %s (%s)%n", pd.getParser().getClass().getSimpleName(),
-            DetectorWithMethod.DetectionMethod.WITH_EXTENSION);
+        System.out.printf("  Trying participant %s (%s)%n", pd, DetectorWithMethod.DetectionMethod.WITH_EXTENSION);
       if ((cmdline = pd.basenameWithExtensionMatches(commandLine, matchBackslash)) != null) {
         return new ParserDetectionResult(new DetectorWithMethod(pd, DetectorWithMethod.DetectionMethod.WITH_EXTENSION, matchBackslash),
             cmdline);
@@ -246,8 +261,8 @@ public class ParserDetection {
       // try with extension and version
       for (IToolDetectionParticipant pd : parserDetectors) {
         if (DEBUG_PARTCIPANT_DETECTION)
-          System.out.printf("  Trying detector %s (%s)%n", pd.getParser().getClass().getSimpleName() + " ("
-              + DetectorWithMethod.DetectionMethod.WITH_VERSION_EXTENSION);
+          System.out.printf("  Trying participant %s (%s)%n", pd,
+              DetectorWithMethod.DetectionMethod.WITH_VERSION_EXTENSION);
         if ((cmdline = pd.basenameWithVersionAndExtensionMatches(commandLine, matchBackslash,
             versionSuffixRegex)) != null) {
           return new ParserDetectionResult(

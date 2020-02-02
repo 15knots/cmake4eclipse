@@ -75,6 +75,13 @@ You may want to consider sub-classing &lt;code&gt;de.marw.cmake.cdt.lsp.DefaultT
                </documentation>
             </annotation>
          </attribute>
+         <attribute name="order" type="string" use="default" value="100000">
+            <annotation>
+               <documentation>
+                  The order in which the participant takes place in the tool detection chain, specified as an positive integer value. Values below 10000 are reserved for internal purposes and will not be honored.
+               </documentation>
+            </annotation>
+         </attribute>
       </complexType>
    </element>
 
@@ -101,6 +108,26 @@ the Foobar company:
 &lt;/extension&gt;
 &lt;/pre&gt;
 &lt;/p&gt;
+&lt;p&gt;
+To provide online help that lists the supported compilers anlong with and the recognized arguments,
+the extension point &lt;code&gt;org.eclipse.help.contentExtension&lt;/code&gt; can be used.&lt;br/&gt;
+Plugin &lt;i&gt;de.marw.cdt.cmake.core&lt;/i&gt; provides predefined help-anchors that allow to integrate the online help:
+&lt;ol&gt;
+&lt;li&gt;&lt;i&gt;extra_lsp_detection_participant_list&lt;/i&gt; for the CMAKE_EXPORT_COMPILE_COMMANDS Parser,&lt;/li&gt; 
+&lt;li&gt;&lt;i&gt;extra_lsp_detection_participant_builtins_list&lt;/i&gt; and 
+&lt;i&gt;extra_lsp_detection_participant_builtins_enhanced_list&lt;/i&gt; for the CMAKE_EXPORT_COMPILE_COMMANDS Compiler Built-ins Parser.&lt;/li&gt;
+&lt;/ol&gt;
+Example file &lt;code&gt;help_content_extension.xml&lt;/code&gt;:
+&lt;pre&gt;
+&lt;contentExtension&gt;
+  &lt;contribution content=&quot;doc/compiler.xhtml#lsp&quot;
+    path=&quot;/de.marw.cdt.cmake.core/doc/html/languageSettingsProviders.xhtml#extra_lsp_detection_participant_list&quot;/&gt;
+  &lt;contribution content=&quot;doc/compiler.xhtml#builtins&quot;
+    path=&quot;/de.marw.cdt.cmake.core/doc/html/builtins-detection.xhtml#extra_lsp_detection_participant_builtins_list&quot;/&gt;
+&lt;/contentExtension&gt;
+&lt;/pre&gt;
+&lt;/p&gt;
+
 &lt;p&gt;
 The easiest way to implement a tool detection participant would be to sub-class &lt;code&gt;de.marw.cmake.cdt.lsp.DefaultToolDetectionParticipant&lt;/code&gt;. 
 To configure your class, pass an instance of &lt;code&gt;de.marw.cmake.cdt.lsp.DefaultToolCommandlineParser&lt;/code&gt; in its super-constructor.&lt;br/&gt;
