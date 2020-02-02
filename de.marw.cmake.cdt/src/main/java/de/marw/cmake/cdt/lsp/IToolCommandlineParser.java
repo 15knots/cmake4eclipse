@@ -89,6 +89,6 @@ public interface IToolCommandlineParser {
      * Gets the compiler arguments from the command-line that affect built-in detection. For the GNU compilers, these
      * are options like {@code --sysroot} and options that specify the language's standard ({@code -std=c++17}.
      */
-    List<String> getBuiltinDetctionArgs();
+    List<String> getBuiltinDetectionArgs();
   } // IResult
 }

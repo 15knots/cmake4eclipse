@@ -50,7 +50,7 @@ public class ParseContext implements IArglet.IParseContext, IToolCommandlinePars
   }
 
   @Override
-  public List<String> getBuiltinDetctionArgs() {
+  public List<String> getBuiltinDetectionArgs() {
     return args;
   }
 

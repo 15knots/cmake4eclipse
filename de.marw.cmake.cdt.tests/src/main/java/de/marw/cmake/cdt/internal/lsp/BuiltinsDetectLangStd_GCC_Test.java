@@ -52,29 +52,29 @@ public class BuiltinsDetectLangStd_GCC_Test {
 
     context = new ParseContext();
     testee.processArgument(context, cwd, arg + more);
-    assertEquals("#entries", 1, context.getBuiltinDetctionArgs().size());
-    parsed = context.getBuiltinDetctionArgs().get(0);
+    assertEquals("#entries", 1, context.getBuiltinDetectionArgs().size());
+    parsed = context.getBuiltinDetectionArgs().get(0);
     assertEquals("name", arg, parsed);
     // -std=c11
     context = new ParseContext();
     arg = "-std=c11";
     testee.processArgument(context, cwd, arg + " " + arg + more);
-    assertEquals("#entries", 1, context.getBuiltinDetctionArgs().size());
-    parsed = context.getBuiltinDetctionArgs().get(0);
+    assertEquals("#entries", 1, context.getBuiltinDetectionArgs().size());
+    parsed = context.getBuiltinDetectionArgs().get(0);
     assertEquals("name", arg, parsed);
     // -std=c1x
     context = new ParseContext();
     arg = "-std=c1x";
     testee.processArgument(context, cwd, arg + " " + arg + more);
-    assertEquals("#entries", 1, context.getBuiltinDetctionArgs().size());
-    parsed = context.getBuiltinDetctionArgs().get(0);
+    assertEquals("#entries", 1, context.getBuiltinDetectionArgs().size());
+    parsed = context.getBuiltinDetectionArgs().get(0);
     assertEquals("name", arg, parsed);
     // -std=iso9899:1999
     context = new ParseContext();
     arg = "-std=iso9899:1999";
     testee.processArgument(context, cwd, arg + " " + arg + more);
-    assertEquals("#entries", 1, context.getBuiltinDetctionArgs().size());
-    parsed = context.getBuiltinDetctionArgs().get(0);
+    assertEquals("#entries", 1, context.getBuiltinDetectionArgs().size());
+    parsed = context.getBuiltinDetectionArgs().get(0);
     assertEquals("name", arg, parsed);
   }
 
@@ -94,8 +94,8 @@ public class BuiltinsDetectLangStd_GCC_Test {
 
     context = new ParseContext();
     testee.processArgument(context, cwd, arg + more);
-    assertEquals("#entries", 1, context.getBuiltinDetctionArgs().size());
-    parsed = context.getBuiltinDetctionArgs().get(0);
+    assertEquals("#entries", 1, context.getBuiltinDetectionArgs().size());
+    parsed = context.getBuiltinDetectionArgs().get(0);
     assertEquals("name", arg, parsed);
   }
 }

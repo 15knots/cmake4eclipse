@@ -345,7 +345,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
                 String languageId = parser.getLanguageId(files[0].getFileExtension());
                 if (languageId != null) {
                   storage.addBuiltinsDetector(currentCfgDescription, languageId, builtinDetection,
-                      pdr.getCommandLine().getCommand(), result.getBuiltinDetctionArgs());
+                      pdr.getCommandLine().getCommand(), result.getBuiltinDetectionArgs());
                 }
               }
             } else {
