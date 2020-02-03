@@ -12,7 +12,7 @@ cache:
   - $HOME/.m2
 
 script:
-  - mvn -Pretail -f ./parent/pom.xml verify
+  - mvn -Prelease -f ./parent/pom.xml verify
 
 after_success:
   # Skip deployment on Pull Request
