@@ -26,13 +26,20 @@ import de.marw.cmake.cdt.lsp.ParticipantTestUtil;
 public class ToolDetectionParticipantTest {
   @Test
   public void testDetermineToolDetectionParticipant_c89() {
-    IToolDetectionParticipant result = ParticipantTestUtil.determineToolDetectionParticipant("/usr/bin/c89 -C blah.c", null,
-        true);
+    IToolDetectionParticipant result = ParticipantTestUtil.determineToolDetectionParticipant("/usr/bin/c89 -C blah.c",
+        null, true);
     assertNotNull(result);
     assertEquals(HpeC89ToolDetectionParticipant.class, result.getClass());
 
-    result = ParticipantTestUtil.determineToolDetectionParticipant("/usr/bin/c89.exe -C blah.c", null,
-        true);
+    result = ParticipantTestUtil.determineToolDetectionParticipant("c89 -C blah.c", null, true);
+    assertNotNull(result);
+    assertEquals(HpeC89ToolDetectionParticipant.class, result.getClass());
+
+    result = ParticipantTestUtil.determineToolDetectionParticipant("/usr/bin/c89.exe -C blah.c", null, true);
+    assertNotNull(result);
+    assertEquals(HpeC89ToolDetectionParticipant.class, result.getClass());
+
+    result = ParticipantTestUtil.determineToolDetectionParticipant("c89.exe -C blah.c", null, true);
     assertNotNull(result);
     assertEquals(HpeC89ToolDetectionParticipant.class, result.getClass());
   }
@@ -43,20 +50,34 @@ public class ToolDetectionParticipantTest {
     for (String quote : quotes) {
       String args = String.format(Locale.ROOT, "%1$s/usr/bin/c89%1$s -I /foo/c89 -C blah.c", quote);
       IToolDetectionParticipant result = ParticipantTestUtil.determineToolDetectionParticipant(args, null, true);
-      assertNotNull("Command in quotes=" + quote, result);
+      assertNotNull("Command in quotes= " + quote, result);
+      assertEquals(HpeC89ToolDetectionParticipant.class, result.getClass());
+    }
+
+    for (String quote : quotes) {
+      String args = String.format(Locale.ROOT, "%1$sc89%1$s -I /foo/c89 -C blah.c", quote);
+      IToolDetectionParticipant result = ParticipantTestUtil.determineToolDetectionParticipant(args, null, true);
+      assertNotNull("Command in quotes= " + quote, result);
       assertEquals(HpeC89ToolDetectionParticipant.class, result.getClass());
     }
   }
 
   @Test
   public void testDetermineToolDetectionParticipant_c99() {
-    IToolDetectionParticipant result = ParticipantTestUtil.determineToolDetectionParticipant("/usr/bin/c99 -C blah.c", null,
-        true);
+    IToolDetectionParticipant result = ParticipantTestUtil.determineToolDetectionParticipant("/usr/bin/c99 -C blah.c",
+        null, true);
     assertNotNull(result);
     assertEquals(HpeC99ToolDetectionParticipant.class, result.getClass());
 
-    result = ParticipantTestUtil.determineToolDetectionParticipant("/usr/bin/c99.exe -C blah.c", null,
-        true);
+    result = ParticipantTestUtil.determineToolDetectionParticipant("c99 -C blah.c", null, true);
+    assertNotNull(result);
+    assertEquals(HpeC99ToolDetectionParticipant.class, result.getClass());
+
+    result = ParticipantTestUtil.determineToolDetectionParticipant("/usr/bin/c99.exe -C blah.c", null, true);
+    assertNotNull(result);
+    assertEquals(HpeC99ToolDetectionParticipant.class, result.getClass());
+
+    result = ParticipantTestUtil.determineToolDetectionParticipant("c99.exe -C blah.c", null, true);
     assertNotNull(result);
     assertEquals(HpeC99ToolDetectionParticipant.class, result.getClass());
   }
@@ -67,20 +88,34 @@ public class ToolDetectionParticipantTest {
     for (String quote : quotes) {
       String args = String.format(Locale.ROOT, "%1$s/usr/bin/c99%1$s -I /foo/c99 -C blah.c", quote);
       IToolDetectionParticipant result = ParticipantTestUtil.determineToolDetectionParticipant(args, null, true);
-      assertNotNull("Command in quotes=" + quote, result);
+      assertNotNull("Command in quotes= " + quote, result);
+      assertEquals(HpeC99ToolDetectionParticipant.class, result.getClass());
+    }
+
+    for (String quote : quotes) {
+      String args = String.format(Locale.ROOT, "%1$sc99%1$s -I /foo/c99 -C blah.c", quote);
+      IToolDetectionParticipant result = ParticipantTestUtil.determineToolDetectionParticipant(args, null, true);
+      assertNotNull("Command in quotes= " + quote, result);
       assertEquals(HpeC99ToolDetectionParticipant.class, result.getClass());
     }
   }
 
   @Test
   public void testDetermineToolDetectionParticipant_c11() {
-    IToolDetectionParticipant result = ParticipantTestUtil.determineToolDetectionParticipant("/usr/bin/c11 -C blah.c", null,
-        true);
+    IToolDetectionParticipant result = ParticipantTestUtil.determineToolDetectionParticipant("/usr/bin/c11 -C blah.c",
+        null, true);
     assertNotNull(result);
     assertEquals(HpeC11ToolDetectionParticipant.class, result.getClass());
 
-    result = ParticipantTestUtil.determineToolDetectionParticipant("/usr/bin/c11.exe -C blah.c", null,
-        true);
+    result = ParticipantTestUtil.determineToolDetectionParticipant("c11 -C blah.c", null, true);
+    assertNotNull(result);
+    assertEquals(HpeC11ToolDetectionParticipant.class, result.getClass());
+
+    result = ParticipantTestUtil.determineToolDetectionParticipant("/usr/bin/c11.exe -C blah.c", null, true);
+    assertNotNull(result);
+    assertEquals(HpeC11ToolDetectionParticipant.class, result.getClass());
+
+    result = ParticipantTestUtil.determineToolDetectionParticipant("c11.exe -C blah.c", null, true);
     assertNotNull(result);
     assertEquals(HpeC11ToolDetectionParticipant.class, result.getClass());
   }
@@ -91,7 +126,14 @@ public class ToolDetectionParticipantTest {
     for (String quote : quotes) {
       String args = String.format(Locale.ROOT, "%1$s/usr/bin/c11%1$s -I /foo/c11 -C blah.c", quote);
       IToolDetectionParticipant result = ParticipantTestUtil.determineToolDetectionParticipant(args, null, true);
-      assertNotNull("Command in quotes=" + quote, result);
+      assertNotNull("Command in quotes= " + quote, result);
+      assertEquals(HpeC11ToolDetectionParticipant.class, result.getClass());
+    }
+
+    for (String quote : quotes) {
+      String args = String.format(Locale.ROOT, "%1$sc11%1$s -I /foo/c11 -C blah.c", quote);
+      IToolDetectionParticipant result = ParticipantTestUtil.determineToolDetectionParticipant(args, null, true);
+      assertNotNull("Command in quotes= " + quote, result);
       assertEquals(HpeC11ToolDetectionParticipant.class, result.getClass());
     }
   }

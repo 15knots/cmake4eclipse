@@ -31,8 +31,16 @@ public class ToolDetectionParticipantTest {
     assertNotNull(result);
     assertEquals(ArmccToolDetectionParticipant.class, result.getClass());
 
+    result = ParticipantTestUtil.determineToolDetectionParticipant("armcc -I /foo/cc -C blah.c", null, true);
+    assertNotNull(result);
+    assertEquals(ArmccToolDetectionParticipant.class, result.getClass());
+
     result = ParticipantTestUtil.determineToolDetectionParticipant("/usr/bin/armcc.exe  -I /foo/cc -C blah.c", null,
         true);
+    assertNotNull(result);
+    assertEquals(ArmccToolDetectionParticipant.class, result.getClass());
+
+    result = ParticipantTestUtil.determineToolDetectionParticipant("armcc.exe  -I /foo/cc -C blah.c", null, true);
     assertNotNull(result);
     assertEquals(ArmccToolDetectionParticipant.class, result.getClass());
   }
@@ -43,7 +51,14 @@ public class ToolDetectionParticipantTest {
     for (String quote : quotes) {
       String args = String.format(Locale.ROOT, "%1$s/usr/bin/armcc%1$s -I /foo/cc -C blah.c", quote);
       IToolDetectionParticipant result = ParticipantTestUtil.determineToolDetectionParticipant(args, null, true);
-      assertNotNull("Command in quotes=" + quote, result);
+      assertNotNull("Command in quotes= " + quote, result);
+      assertEquals(ArmccToolDetectionParticipant.class, result.getClass());
+    }
+
+    for (String quote : quotes) {
+      String args = String.format(Locale.ROOT, "%1$sarmcc%1$s -I /foo/cc -C blah.c", quote);
+      IToolDetectionParticipant result = ParticipantTestUtil.determineToolDetectionParticipant(args, null, true);
+      assertNotNull("Command in quotes= " + quote, result);
       assertEquals(ArmccToolDetectionParticipant.class, result.getClass());
     }
   }
@@ -55,8 +70,16 @@ public class ToolDetectionParticipantTest {
     assertNotNull(result);
     assertEquals(ArmClangToolDetectionParticipant.class, result.getClass());
 
+    result = ParticipantTestUtil.determineToolDetectionParticipant("armclang  -I /foo/clang -C blah.c", null, true);
+    assertNotNull(result);
+    assertEquals(ArmClangToolDetectionParticipant.class, result.getClass());
+
     result = ParticipantTestUtil.determineToolDetectionParticipant("/usr/bin/armclang.exe -I /foo/clang -C blah.c",
         null, true);
+    assertNotNull(result);
+    assertEquals(ArmClangToolDetectionParticipant.class, result.getClass());
+
+    result = ParticipantTestUtil.determineToolDetectionParticipant("armclang.exe -I /foo/clang -C blah.c", null, true);
     assertNotNull(result);
     assertEquals(ArmClangToolDetectionParticipant.class, result.getClass());
   }
@@ -65,7 +88,7 @@ public class ToolDetectionParticipantTest {
   public void testDetermineToolDetectionParticipant_armclang_quote() {
     String[] quotes = { "\"", "'" };
     for (String quote : quotes) {
-      String args = String.format(Locale.ROOT, "%1$s/usr/bin/armclang%1$s -I /foo/clang -C blah.c", quote);
+      String args = String.format(Locale.ROOT, "%1$sarmclang%1$s -I /foo/clang -C blah.c", quote);
       IToolDetectionParticipant result = ParticipantTestUtil.determineToolDetectionParticipant(args, null, true);
       assertNotNull("Command in quotes= " + quote, result);
       assertEquals(ArmClangToolDetectionParticipant.class, result.getClass());

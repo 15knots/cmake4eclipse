@@ -31,7 +31,15 @@ public class ToolDetectionParticipantTest {
     assertNotNull(result);
     assertEquals(NvccToolDetectionParticipant.class, result.getClass());
 
+    result = ParticipantTestUtil.determineToolDetectionParticipant("nvcc -C blah.c", null, true);
+    assertNotNull(result);
+    assertEquals(NvccToolDetectionParticipant.class, result.getClass());
+
     result = ParticipantTestUtil.determineToolDetectionParticipant("/usr/bin/nvcc.exe -C blah.c", null, true);
+    assertNotNull(result);
+    assertEquals(NvccToolDetectionParticipant.class, result.getClass());
+
+    result = ParticipantTestUtil.determineToolDetectionParticipant("nvcc.exe -C blah.c", null, true);
     assertNotNull(result);
     assertEquals(NvccToolDetectionParticipant.class, result.getClass());
   }
@@ -42,9 +50,8 @@ public class ToolDetectionParticipantTest {
     for (String quote : quotes) {
       String args = String.format(Locale.ROOT, "%1$s/usr/bin/nvcc%1$s -I /foo/nvcc -C blah.c", quote);
       IToolDetectionParticipant result = ParticipantTestUtil.determineToolDetectionParticipant(args, null, true);
-      assertNotNull("Command in quotes=" + quote, result);
+      assertNotNull("Command in quotes= " + quote, result);
       assertEquals(NvccToolDetectionParticipant.class, result.getClass());
     }
   }
-
 }

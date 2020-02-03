@@ -13,10 +13,10 @@ package de.marw.cmake.cdt.internal.lsp;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import java.util.Locale;
+
 import org.junit.Ignore;
 import org.junit.Test;
-
-import de.marw.cmake.cdt.internal.lsp.ParserDetection;
 
 /**
  * @author Martin Weber
@@ -29,7 +29,7 @@ public class ParserDetectionTest {
    * .
    */
   @Test
-  public void testDetermineParserForCommandline_clang() {
+  public void testForCommandline_clang() {
     ParserDetection.ParserDetectionResult result = ParserDetection.determineDetector("/usr/bin/clang -C blah.c", null,
         true);
     assertNotNull(result);
@@ -38,7 +38,7 @@ public class ParserDetectionTest {
   }
 
   @Test
-  public void testDetermineParserForCommandline_clangplusplus() {
+  public void testForCommandline_clangplusplus() {
     ParserDetection.ParserDetectionResult result = ParserDetection.determineDetector("/usr/bin/clang++ -C blah.c", null,
         true);
     assertNotNull(result);
@@ -47,7 +47,7 @@ public class ParserDetectionTest {
   }
 
   @Test
-  public void testDetermineParserForCommandline_clangplusplus_basename() {
+  public void testForCommandline_clangplusplus_basename() {
     ParserDetection.ParserDetectionResult result = ParserDetection.determineDetector("clang++ -C blah.c", null, false);
     assertNotNull(result);
     // verify that we got a C++ parser
@@ -61,7 +61,7 @@ public class ParserDetectionTest {
    * <a href="https://wiki.osdev.org/Target_Triplet"/>
    */
   @Test
-  public void testDetermineParserForCommandline_cross() {
+  public void testForCommandline_cross() {
     ParserDetection.ParserDetectionResult result = ParserDetection.determineDetector("/usr/bin/arm-none-eabi-gcc -C blah.c", null,
         true);
     assertNotNull(result);
@@ -76,7 +76,7 @@ public class ParserDetectionTest {
   }
 
   @Test
-  public void testDetermineParserForCommandline_cross_withVersion() {
+  public void testForCommandline_cross_withVersion() {
     final String versionSuffixRegex = "-?\\d+(\\.\\d+)*";
 
     ParserDetection.ParserDetectionResult result = ParserDetection.determineDetector("/usr/bin/arm-none-eabi-gcc-9.2.0 -C blah.c", versionSuffixRegex,
@@ -96,7 +96,7 @@ public class ParserDetectionTest {
    * <a href="https://wiki.osdev.org/Target_Triplet"/>
    */
   @Test
-  public void testDetermineParserForCommandline_crossplusplus() {
+  public void testForCommandline_crossplusplus() {
     ParserDetection.ParserDetectionResult result = ParserDetection.determineDetector("/usr/bin/arm-none-eabi-g++ -C blah.c", null,
         true);
     assertNotNull(result);
@@ -114,7 +114,7 @@ public class ParserDetectionTest {
    * <a href="https://wiki.osdev.org/Target_Triplet"/>
    */
   @Test
-  public void testDetermineParserForCommandline_crossplusplus_withVersion() {
+  public void testForCommandline_crossplusplus_withVersion() {
     final String versionSuffixRegex = "-?\\d+(\\.\\d+)*";
 
     ParserDetection.ParserDetectionResult result = ParserDetection.determineDetector("/usr/bin/arm-none-eabi-g++-9.2.0 -C blah.c", versionSuffixRegex,
@@ -134,7 +134,7 @@ public class ParserDetectionTest {
    * <a href="https://wiki.osdev.org/Target_Triplet"/>
    */
   @Test
-  public void testDetermineParserForCommandline_crossplusplus_basename() {
+  public void testForCommandline_crossplusplus_basename() {
     ParserDetection.ParserDetectionResult result = ParserDetection.determineDetector("arm-none-eabi-g++ -C blah.c", null, false);
     assertNotNull(result);
     // verify that we got a C++ parser
@@ -147,7 +147,7 @@ public class ParserDetectionTest {
 
   @Test
   @Ignore("Requires NFTS to run")
-  public void testDetermineParserForCommandline_MsdosShortNames() {
+  public void testForCommandline_MsdosShortNames() {
     ParserDetection.ParserDetectionResult result = ParserDetection
         .determineDetector("C:\\PROGRA2\\Atmel\\AVR8-G1\\bin\\AVR-G_~1.EXE -C blah.c", null, true);
     assertNotNull(result);
@@ -156,7 +156,7 @@ public class ParserDetectionTest {
   }
 
   @Test
-  public void testDetermineParserForCommandline_withVersion() {
+  public void testForCommandline_withVersion() {
     final String versionSuffixRegex = "-?\\d+(\\.\\d+)*";
 
     ParserDetection.ParserDetectionResult result = ParserDetection.determineDetector("/usr/bin/cc-4.1 -C blah.c",
@@ -202,37 +202,49 @@ public class ParserDetectionTest {
   }
 
   @Test
-  public void testDetermineParserForCommandline_quoted() {
+  public void testForCommandline_quoted() {
     String more = " -DFoo=bar \"quoted\" 'quoted' -C blah.c";
+    String[] quotes = { "\"", "'" };
 
     String name = "/us r/bi n/cc";
-    ParserDetection.ParserDetectionResult result = ParserDetection.determineDetector(
-        "\"" + name +"\"" +more, null, false);
-    assertNotNull(result);
-    assertEquals(name, result.getCommandLine().getCommand());
 
-    name = "C;/us r/bi n/cc";
-    result = ParserDetection.determineDetector(
-        "\"" + name +"\"" +more, null, false);
-    assertNotNull(result);
-    assertEquals(name, result.getCommandLine().getCommand());
+    for (String quote : quotes) {
+      String args = String.format(Locale.ROOT, "%1$s%2$s%1$s %3$s", quote, name, more);
+      ParserDetection.ParserDetectionResult result = ParserDetection.determineDetector(args, null, false);
+      assertNotNull("Command in quotes= " + quote, result);
+      assertEquals(name, result.getCommandLine().getCommand());
+    }
+    // NOTE: detecting just 'cc' in quotes does not work, but no on of a sane mind would have compilers with spaces in
+    // the name
 
-    name = "C;\\us r\\bi n\\cc";
-    result = ParserDetection.determineDetector(
-        "\"" + name +"\"" +more, null, true);
-    assertNotNull(result);
-    assertEquals(name, result.getCommandLine().getCommand());
+    name += ".exe";
+    for (String quote : quotes) {
+      String args = String.format(Locale.ROOT, "%1$s%2$s%1$s %3$s", quote, name, more);
+      ParserDetection.ParserDetectionResult result = ParserDetection.determineDetector(args, null, false);
+      assertNotNull("Command in quotes= " + quote, result);
+      assertEquals(name, result.getCommandLine().getCommand());
+    }
 
-    name = "C;\\us r\\bi n\\cc.exe";
-    result = ParserDetection.determineDetector(
-        "\"" + name +"\"" +more, null, true);
-    assertNotNull(result);
-    assertEquals(name, result.getCommandLine().getCommand());
+    name = "C:\\us r\\bi n\\cc";
+    for (String quote : quotes) {
+      String args = String.format(Locale.ROOT, "%1$s%2$s%1$s %3$s", quote, name, more);
+      ParserDetection.ParserDetectionResult result = ParserDetection.determineDetector(args, null, false);
+      assertNotNull("Command in quotes= " + quote, result);
+      assertEquals(name, result.getCommandLine().getCommand());
+    }
+
+    name += ".exe";
+    for (String quote : quotes) {
+      String args = String.format(Locale.ROOT, "%1$s%2$s%1$s %3$s", quote, name, more);
+      ParserDetection.ParserDetectionResult result = ParserDetection.determineDetector(args, null, false);
+      assertNotNull("Command in quotes= " + quote, result);
+      assertEquals(name, result.getCommandLine().getCommand());
+    }
   }
 
   /** Tests whether tool detection regex is too greedy, */
   @Test
-  public void testDetermineParserForCommandline_greedyness() {
+  public void testForCommandline_greedyness() {
     String more = " -DFoo=bar -I /opt/mingw53_32/mkspecs/win32-c++ -C blah.c";
 
     String name = "/usr/bin/c++";

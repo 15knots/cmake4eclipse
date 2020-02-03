@@ -26,13 +26,20 @@ import de.marw.cmake.cdt.lsp.ParticipantTestUtil;
 public class ToolDetectionParticipantTest {
   @Test
   public void testDetermineToolDetectionParticipant() {
-    IToolDetectionParticipant result = ParticipantTestUtil.determineToolDetectionParticipant("/usr/bin/cl -C blah.c", null,
-        true);
+    IToolDetectionParticipant result = ParticipantTestUtil.determineToolDetectionParticipant("/usr/bin/cl -C blah.c",
+        null, true);
     assertNotNull(result);
     assertEquals(MsclToolDetectionParticipant.class, result.getClass());
 
-    result = ParticipantTestUtil.determineToolDetectionParticipant("/usr/bin/cl.exe -C blah.c", null,
-        true);
+    result = ParticipantTestUtil.determineToolDetectionParticipant("cl -C blah.c", null, true);
+    assertNotNull(result);
+    assertEquals(MsclToolDetectionParticipant.class, result.getClass());
+
+    result = ParticipantTestUtil.determineToolDetectionParticipant("/usr/bin/cl.exe -C blah.c", null, true);
+    assertNotNull(result);
+    assertEquals(MsclToolDetectionParticipant.class, result.getClass());
+
+    result = ParticipantTestUtil.determineToolDetectionParticipant("cl.exe -C blah.c", null, true);
     assertNotNull(result);
     assertEquals(MsclToolDetectionParticipant.class, result.getClass());
   }
@@ -42,6 +49,13 @@ public class ToolDetectionParticipantTest {
     String[] quotes = { "\"", "'" };
     for (String quote : quotes) {
       String args = String.format(Locale.ROOT, "%1$s/usr/bin/cl%1$s -I /foo/cl -C blah.c", quote);
+      IToolDetectionParticipant result = ParticipantTestUtil.determineToolDetectionParticipant(args, null, true);
+      assertNotNull("Command in quotes=" + quote, result);
+      assertEquals(MsclToolDetectionParticipant.class, result.getClass());
+    }
+
+    for (String quote : quotes) {
+      String args = String.format(Locale.ROOT, "%1$scl%1$s -I /foo/cl -C blah.c", quote);
       IToolDetectionParticipant result = ParticipantTestUtil.determineToolDetectionParticipant(args, null, true);
       assertNotNull("Command in quotes=" + quote, result);
       assertEquals(MsclToolDetectionParticipant.class, result.getClass());
