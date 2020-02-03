@@ -1,4 +1,12 @@
 # Cmake4eclipse Change Log
+
+## 2.1.0 (2020-02-04)
+### Changes
+- Syntax highlighting support for NVidia and Microsoft compilers are no longer supported out-of-the box. Support is now
+  handled through separate plug-ins. End users will have to install these separate plug-ins to get support for the compilers.
+- Closed #128: GNU C++ CMAKE_EXPORT_COMPILE_COMMANDS Compiler Built-ins empty.
+- Additional unit tests for compiler detection participants.
+
 ## 2.0.1 (2020-01-21)
 ### Changes
 - Fix 127: Installation impossible due to dependency on bundle org.eclipse.ui.trace.
