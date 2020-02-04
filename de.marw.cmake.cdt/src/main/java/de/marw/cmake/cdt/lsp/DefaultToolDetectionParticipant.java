@@ -32,20 +32,20 @@ public class DefaultToolDetectionParticipant implements IToolDetectionParticipan
   protected static final String REGEX_CMD_PATH_SLASH_END = ")\\s";
 
   /** pattern part that matches file-system paths with forward slashes and is in quotes */
-  protected static final String REGEX_CMD_PATH_SLASH_QUOTE = String.format(Locale.ROOT, "\\A([\"'])(?<%s>(?:(?!\\1).)*?%s",
+  protected static final String REGEX_CMD_PATH_SLASH_QUOTE = String.format(Locale.ROOT, "\\A([\"'])(?<%s>((?:(?!\\1).)*?%s)",
       REGEX_GROUP_CMD, "/");
   /** end of pattern part that matches file-system paths with forward slashes and is in quotes */
   protected static final String REGEX_CMD_PATH_SLASH_QUOTE_END = ")\\1\\s";
 
   /** pattern part that matches win32 file-system paths */
   protected static final String REGEX_CMD_PATH_BSLASH = String.format(Locale.ROOT, "\\A(?<%s>(\\S*?%s)?",
-      REGEX_GROUP_CMD, Pattern.quote("\\"));
+      REGEX_GROUP_CMD, "\\\\");
   /** end of pattern part that matches win32 file-system paths */
   protected static final String REGEX_CMD_PATH_BSLASH_END = ")\\s";
 
   /** pattern part that matches file-system paths with back slashes and is in quotes */
-  protected static final String REGEX_CMD_PATH_BSLASH_QUOTE = String.format(Locale.ROOT, "\\A([\"'])(?<%s>(?:(?!\\1).)*?%s",
-      REGEX_GROUP_CMD, Pattern.quote("\\"));
+  protected static final String REGEX_CMD_PATH_BSLASH_QUOTE = String.format(Locale.ROOT, "\\A([\"'])(?<%s>((?:(?!\\1).)*?%s)?",
+      REGEX_GROUP_CMD, "\\\\");
   /** end of pattern part that matches file-system paths with back slashes and is in quotes */
   protected static final String REGEX_CMD_PATH_BSLASH_QUOTE_END = ")\\1\\s";
 

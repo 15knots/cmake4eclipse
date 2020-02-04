@@ -53,13 +53,6 @@ public class ToolDetectionParticipantTest {
       assertNotNull("Command in quotes= " + quote, result);
       assertEquals(HpeC89ToolDetectionParticipant.class, result.getClass());
     }
-
-    for (String quote : quotes) {
-      String args = String.format(Locale.ROOT, "%1$sc89%1$s -I /foo/c89 -C blah.c", quote);
-      IToolDetectionParticipant result = ParticipantTestUtil.determineToolDetectionParticipant(args, null, true);
-      assertNotNull("Command in quotes= " + quote, result);
-      assertEquals(HpeC89ToolDetectionParticipant.class, result.getClass());
-    }
   }
 
   @Test
@@ -91,13 +84,6 @@ public class ToolDetectionParticipantTest {
       assertNotNull("Command in quotes= " + quote, result);
       assertEquals(HpeC99ToolDetectionParticipant.class, result.getClass());
     }
-
-    for (String quote : quotes) {
-      String args = String.format(Locale.ROOT, "%1$sc99%1$s -I /foo/c99 -C blah.c", quote);
-      IToolDetectionParticipant result = ParticipantTestUtil.determineToolDetectionParticipant(args, null, true);
-      assertNotNull("Command in quotes= " + quote, result);
-      assertEquals(HpeC99ToolDetectionParticipant.class, result.getClass());
-    }
   }
 
   @Test
@@ -125,13 +111,6 @@ public class ToolDetectionParticipantTest {
     String[] quotes = { "\"", "'" };
     for (String quote : quotes) {
       String args = String.format(Locale.ROOT, "%1$s/usr/bin/c11%1$s -I /foo/c11 -C blah.c", quote);
-      IToolDetectionParticipant result = ParticipantTestUtil.determineToolDetectionParticipant(args, null, true);
-      assertNotNull("Command in quotes= " + quote, result);
-      assertEquals(HpeC11ToolDetectionParticipant.class, result.getClass());
-    }
-
-    for (String quote : quotes) {
-      String args = String.format(Locale.ROOT, "%1$sc11%1$s -I /foo/c11 -C blah.c", quote);
       IToolDetectionParticipant result = ParticipantTestUtil.determineToolDetectionParticipant(args, null, true);
       assertNotNull("Command in quotes= " + quote, result);
       assertEquals(HpeC11ToolDetectionParticipant.class, result.getClass());

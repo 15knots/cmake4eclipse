@@ -228,7 +228,7 @@ public class ParserDetectionTest {
     name = "C:\\us r\\bi n\\cc";
     for (String quote : quotes) {
       String args = String.format(Locale.ROOT, "%1$s%2$s%1$s %3$s", quote, name, more);
-      ParserDetection.ParserDetectionResult result = ParserDetection.determineDetector(args, null, false);
+      ParserDetection.ParserDetectionResult result = ParserDetection.determineDetector(args, null, true);
       assertNotNull("Command in quotes= " + quote, result);
       assertEquals(name, result.getCommandLine().getCommand());
     }
@@ -236,7 +236,7 @@ public class ParserDetectionTest {
     name += ".exe";
     for (String quote : quotes) {
       String args = String.format(Locale.ROOT, "%1$s%2$s%1$s %3$s", quote, name, more);
-      ParserDetection.ParserDetectionResult result = ParserDetection.determineDetector(args, null, false);
+      ParserDetection.ParserDetectionResult result = ParserDetection.determineDetector(args, null, true);
       assertNotNull("Command in quotes= " + quote, result);
       assertEquals(name, result.getCommandLine().getCommand());
     }

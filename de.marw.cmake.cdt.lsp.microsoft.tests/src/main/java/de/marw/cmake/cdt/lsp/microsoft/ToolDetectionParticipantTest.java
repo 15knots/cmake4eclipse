@@ -53,13 +53,6 @@ public class ToolDetectionParticipantTest {
       assertNotNull("Command in quotes=" + quote, result);
       assertEquals(MsclToolDetectionParticipant.class, result.getClass());
     }
-
-    for (String quote : quotes) {
-      String args = String.format(Locale.ROOT, "%1$scl%1$s -I /foo/cl -C blah.c", quote);
-      IToolDetectionParticipant result = ParticipantTestUtil.determineToolDetectionParticipant(args, null, true);
-      assertNotNull("Command in quotes=" + quote, result);
-      assertEquals(MsclToolDetectionParticipant.class, result.getClass());
-    }
   }
 
 }
