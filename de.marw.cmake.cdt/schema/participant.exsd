@@ -153,8 +153,8 @@ See, for example &lt;code&gt;de/marw/cmake/cdt/lsp/intel/IccToolDetectionPartici
       </appinfo>
       <documentation>
          Copyright (c) 2019 Martin Weber&lt;br&gt;
-All rights reserved. This program and the accompanying materials are made 
-available under the terms of the Eclipse Public License v1.0.
+All rights reserved. Content is provided to you under the terms and conditions of the Eclipse Public License Version 2.0 &quot;EPL&quot;.
+A copy of the EPL is available at http://www.eclipse.org/legal/epl-2.0.
       </documentation>
    </annotation>
 
