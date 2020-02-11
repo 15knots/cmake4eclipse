@@ -35,7 +35,7 @@
       mingw-w64 installation root; either in the workspace scope or the project
       scope:
       <ol type="A">
-        <li>Workbench: Open the <a href="PLUGINS_ROOT/org.eclipse.cdt.doc.user/reference/cdt_u_environment_pref.htm">Window &#10146; Preferences &#10146;
+        <li>Workbench scope: Open the <a href="PLUGINS_ROOT/org.eclipse.cdt.doc.user/reference/cdt_u_environment_pref.htm">Window &#10146; Preferences &#10146;
             C/C++ &#10146; Build &#10146; Environment</a> page.</li>
         <li>Project scope: Open the <a href="PLUGINS_ROOT/org.eclipse.cdt.doc.user/reference/cdt_u_prop_build_environment.htm">Project &#10146; Properties
             &#10146; C/C++ Build &#10146; Environment</a> page.
@@ -47,7 +47,7 @@
     <li>Augment the PATH environment variable that gets passed to cmake:<br>For
       your project, open the <a href="PLUGINS_ROOT/org.eclipse.cdt.doc.user/reference/cdt_u_prop_build_environment.htm">
       Project &#10146; Properties &#10146; C/C++ Build &#10146; Environment</a> page. Add a variable named <code>PATH</code>
-      and set its value to <kbd>${PATH};${MINGW_ROOT}/bin</kbd> (verbatim).
+      and set its value to <kbd>${MINGW_ROOT}/bin;${PATH}</kbd> (verbatim).
     </li>
     <li>Close the dialog and re-build the project.</li>
   </ol>
