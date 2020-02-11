@@ -15,7 +15,7 @@ import java.util.Objects;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Platform;
 
-import de.marw.cmake.cdt.internal.CMakePlugin;
+import de.marw.cmake.cdt.internal.Plugin;
 import de.marw.cmake.cdt.internal.lsp.ParseContext;
 import de.marw.cmake.cdt.internal.lsp.StringUtil;
 import de.marw.cmake.cdt.lsp.builtins.IBuiltinsDetectionBehavior;
@@ -27,7 +27,7 @@ import de.marw.cmake.cdt.lsp.builtins.IBuiltinsDetectionBehavior;
  */
 public class DefaultToolCommandlineParser implements IToolCommandlineParser {
   private static final boolean DEBUG = Boolean
-      .parseBoolean(Platform.getDebugOption(CMakePlugin.PLUGIN_ID + "/CECC/args"));
+      .parseBoolean(Platform.getDebugOption(Plugin.PLUGIN_ID + "/CECC/args"));
 
   private final IArglet[] argumentParsers;
   private final String languageID;

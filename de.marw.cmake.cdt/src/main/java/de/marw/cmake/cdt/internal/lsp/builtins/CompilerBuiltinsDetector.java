@@ -42,7 +42,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 
-import de.marw.cmake.cdt.internal.CMakePlugin;
+import de.marw.cmake.cdt.internal.Plugin;
 import de.marw.cmake.cdt.lsp.builtins.IBuiltinsDetectionBehavior;
 import de.marw.cmake.cdt.lsp.builtins.IBuiltinsOutputProcessor;
 import de.marw.cmake.cdt.lsp.builtins.OutputSniffer;
@@ -54,9 +54,9 @@ import de.marw.cmake.cdt.lsp.builtins.OutputSniffer;
  */
 public class CompilerBuiltinsDetector {
   /** console ID for extension point org.eclipse.cdt.core.CBuildConsole (see plugin.xml) */
-  private static final String CONSOLE_ID = CMakePlugin.PLUGIN_ID + ".detectorConsole";
+  private static final String CONSOLE_ID = Plugin.PLUGIN_ID + ".detectorConsole";
   /** error marker ID */
-  private static final String MARKER_ID = CMakePlugin.PLUGIN_ID + ".CompilerBuiltinsDetectorMarker";
+  private static final String MARKER_ID = Plugin.PLUGIN_ID + ".CompilerBuiltinsDetectorMarker";
 
   private ICConfigurationDescription cfgDescription;
 
@@ -252,7 +252,7 @@ public class CompilerBuiltinsDetector {
           specFile.getParentFile().mkdirs(); // no build ran yet, must create dirs
           specFile.createNewFile();
         } catch (IOException e) {
-          CMakePlugin.getDefault().getLog().log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, "getInputFile()", e));
+          Plugin.getDefault().getLog().log(new Status(IStatus.ERROR, Plugin.PLUGIN_ID, "getInputFile()", e));
         }
       }
 

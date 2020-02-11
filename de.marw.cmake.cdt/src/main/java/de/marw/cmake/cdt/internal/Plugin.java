@@ -16,17 +16,17 @@ import org.osgi.framework.BundleContext;
 /**
  * @author Martin Weber
  */
-public class CMakePlugin extends AbstractUIPlugin {
+public class Plugin extends AbstractUIPlugin {
 
   public static final String PLUGIN_ID = "de.marw.cmake.cdt"; //$NON-NLS-1$
 
   //The shared instance.
-  private static CMakePlugin plugin;
+  private static Plugin plugin;
 
   /**
    * The constructor.
    */
-  public CMakePlugin() {
+  public Plugin() {
   }
 
   /**
@@ -51,7 +51,7 @@ public class CMakePlugin extends AbstractUIPlugin {
   /**
    * Returns the shared instance.
    */
-  public static CMakePlugin getDefault() {
+  public static Plugin getDefault() {
     return plugin;
   }
 
@@ -64,7 +64,7 @@ public class CMakePlugin extends AbstractUIPlugin {
    * @return the resource bundle message
    */
   public static String getResourceString(String key) {
-//		ResourceBundle bundle = CMakePlugin.getDefault().getResourceBundle();
+//		ResourceBundle bundle = Plugin.getDefault().getResourceBundle();
 //		try {
 //			return bundle.getString(key);
 //		} catch (MissingResourceException e) {

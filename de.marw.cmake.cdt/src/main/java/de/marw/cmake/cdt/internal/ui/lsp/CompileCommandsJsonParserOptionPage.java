@@ -49,7 +49,7 @@ public class CompileCommandsJsonParserOptionPage extends AbstractLanguageSetting
       Pattern.compile(text);
     } catch (PatternSyntaxException ex) {
       // BUG in CDT: core exceptions thrown here are not visible to users. CDT-WTF
-      // IStatus status = new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID,
+      // IStatus status = new Status(IStatus.ERROR, Plugin.PLUGIN_ID,
       // IStatus.OK,
       // "invalid suffix pattern in CMAKE_EXPORT_COMPILE_COMMANDS Parser", ex);
       // throw new CoreException(status);

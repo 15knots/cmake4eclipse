@@ -59,7 +59,7 @@ import org.eclipse.jetty.util.ajax.JSON;
 import org.eclipse.swt.widgets.Display;
 import org.w3c.dom.Element;
 
-import de.marw.cmake.cdt.internal.CMakePlugin;
+import de.marw.cmake.cdt.internal.Plugin;
 import de.marw.cmake.cdt.internal.lsp.ParserDetection;
 import de.marw.cmake.cdt.internal.lsp.ParserDetection.DetectorWithMethod;
 import de.marw.cmake.cdt.internal.lsp.ParserDetection.ParserDetectionResult;
@@ -94,7 +94,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
    */
   static final String PROVIDER_ID = "de.marw.cmake.cdt.language.settings.providers.CompileCommandsJsonParser";
 
-  private static final ILog log = CMakePlugin.getDefault().getLog();
+  private static final ILog log = Plugin.getDefault().getLog();
 
   /**
    * default regex string used for version pattern matching.
@@ -109,7 +109,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
 
   private static final String WORKBENCH_WILL_NOT_KNOW_ALL_MSG = "Your workbench will not know all include paths and preprocessor defines.";
 
-  private static final String MARKER_ID = CMakePlugin.PLUGIN_ID + ".CompileCommandsJsonParserMarker";
+  private static final String MARKER_ID = Plugin.PLUGIN_ID + ".CompileCommandsJsonParserMarker";
 
   /**
    * Storage to keep settings entries
@@ -611,7 +611,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
     try {
       tryParseJson(true, false);
     } catch (CoreException ex) {
-      log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, "shutdown()", ex));
+      log.log(new Status(IStatus.ERROR, Plugin.PLUGIN_ID, "shutdown()", ex));
     }
     // release resources for garbage collector
     currentCfgDescription = null;
@@ -647,7 +647,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
       try {
         tryParseJson(true, true);
       } catch (CoreException ex) {
-        log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, "registerListener()", ex));
+        log.log(new Status(IStatus.ERROR, Plugin.PLUGIN_ID, "registerListener()", ex));
       }
     } else {
       // per workspace (to populate on startup)
@@ -676,7 +676,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
               }
             }
           } catch (CoreException ex) {
-            log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, "registerListener()", ex));
+            log.log(new Status(IStatus.ERROR, Plugin.PLUGIN_ID, "registerListener()", ex));
           }
         }
       });
@@ -697,7 +697,7 @@ public class CompileCommandsJsonParser extends LanguageSettingsSerializableProvi
   ////////////////////////////////////////////////////////////////////
   private static class TimestampedLanguageSettingsStorage extends LanguageSettingsStorage {
     private static final boolean DEBUG = Boolean
-        .parseBoolean(Platform.getDebugOption(CMakePlugin.PLUGIN_ID + "/CECC/indexer-entries"));
+        .parseBoolean(Platform.getDebugOption(Plugin.PLUGIN_ID + "/CECC/indexer-entries"));
     /** cached file modification time-stamp of last parse */
     long lastModified = 0;
 

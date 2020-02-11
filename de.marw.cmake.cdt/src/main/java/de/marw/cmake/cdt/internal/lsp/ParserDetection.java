@@ -26,7 +26,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 
-import de.marw.cmake.cdt.internal.CMakePlugin;
+import de.marw.cmake.cdt.internal.Plugin;
 import de.marw.cmake.cdt.internal.lsp.builtins.GccBuiltinDetectionBehavior;
 import de.marw.cmake.cdt.internal.lsp.builtins.MaybeGccBuiltinDetectionBehavior;
 import de.marw.cmake.cdt.lsp.Arglets;
@@ -46,9 +46,9 @@ import de.marw.cmake.cdt.lsp.builtins.IBuiltinsDetectionBehavior;
  *
  */
 public class ParserDetection {
-  private static final ILog log = CMakePlugin.getDefault().getLog();
+  private static final ILog log = Plugin.getDefault().getLog();
   private static final boolean DEBUG_PARTCIPANT_DETECTION = Boolean
-      .parseBoolean(Platform.getDebugOption(CMakePlugin.PLUGIN_ID + "/CECC/participant"));
+      .parseBoolean(Platform.getDebugOption(Plugin.PLUGIN_ID + "/CECC/participant"));
 
   /**
    * tool detectors and their tool option parsers for each tool of interest that
@@ -132,7 +132,7 @@ public class ParserDetection {
           sortMap.put((IToolDetectionParticipant) obj, order);
         }
       } catch (CoreException ex) {
-        log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, e.getNamespaceIdentifier(), ex));
+        log.log(new Status(IStatus.ERROR, Plugin.PLUGIN_ID, e.getNamespaceIdentifier(), ex));
       }
     }
     // sort by order and add to list
@@ -295,7 +295,7 @@ public class ParserDetection {
       commandLine2.insert(0, command);
       return commandLine2.toString();
     } catch (IOException e) {
-      log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, command, e));
+      log.log(new Status(IStatus.ERROR, Plugin.PLUGIN_ID, command, e));
     }
     return commandLine;
   }

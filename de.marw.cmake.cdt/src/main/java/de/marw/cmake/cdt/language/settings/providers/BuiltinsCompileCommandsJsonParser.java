@@ -41,7 +41,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.widgets.Display;
 import org.w3c.dom.Element;
 
-import de.marw.cmake.cdt.internal.CMakePlugin;
+import de.marw.cmake.cdt.internal.Plugin;
 import de.marw.cmake.cdt.internal.lsp.ParserDetection;
 import de.marw.cmake.cdt.internal.lsp.builtins.CompilerBuiltinsDetector;
 
@@ -65,7 +65,7 @@ public class BuiltinsCompileCommandsJsonParser extends LanguageSettingsSerializa
     implements ILanguageSettingsEditableProvider, ICListenerAgent, ICBuildOutputParser, Cloneable {
 
   public static final String PROVIDER_ID = "de.marw.cmake.cdt.language.settings.providers.BuiltinsCompileCommandsJsonParser";
-  private static final ILog log = CMakePlugin.getDefault().getLog();
+  private static final ILog log = Plugin.getDefault().getLog();
 
   /** storage key for with console */
   private static final String ATTR_WITH_CONSOLE = "console";
@@ -167,7 +167,7 @@ public class BuiltinsCompileCommandsJsonParser extends LanguageSettingsSerializa
     try {
       detectBuiltins(false);
     } catch (CoreException ex) {
-      log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, "shutdown()", ex));
+      log.log(new Status(IStatus.ERROR, Plugin.PLUGIN_ID, "shutdown()", ex));
     }
     // release resources for garbage collector
     currentCfgDescription = null;
@@ -195,7 +195,7 @@ public class BuiltinsCompileCommandsJsonParser extends LanguageSettingsSerializa
       try {
         detectBuiltins(true);
       } catch (CoreException ex) {
-        log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, "registerListener()", ex));
+        log.log(new Status(IStatus.ERROR, Plugin.PLUGIN_ID, "registerListener()", ex));
       }
     } else {
       // per workspace (to populate on startup)
@@ -224,7 +224,7 @@ public class BuiltinsCompileCommandsJsonParser extends LanguageSettingsSerializa
               }
             }
           } catch (CoreException ex) {
-            log.log(new Status(IStatus.ERROR, CMakePlugin.PLUGIN_ID, "registerListener()", ex));
+            log.log(new Status(IStatus.ERROR, Plugin.PLUGIN_ID, "registerListener()", ex));
           }
         }
       });

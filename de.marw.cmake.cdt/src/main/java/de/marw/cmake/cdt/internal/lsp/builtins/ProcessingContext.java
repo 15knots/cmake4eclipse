@@ -16,7 +16,7 @@ import java.util.List;
 import org.eclipse.cdt.core.settings.model.ICLanguageSettingEntry;
 import org.eclipse.core.runtime.Platform;
 
-import de.marw.cmake.cdt.internal.CMakePlugin;
+import de.marw.cmake.cdt.internal.Plugin;
 import de.marw.cmake.cdt.lsp.builtins.IBuiltinsOutputProcessor;
 
 /**
@@ -26,7 +26,7 @@ import de.marw.cmake.cdt.lsp.builtins.IBuiltinsOutputProcessor;
  */
 class ProcessingContext implements IBuiltinsOutputProcessor.IProcessingContext, IBuiltinsOutputProcessor.IResult {
   private static final boolean DEBUG = Boolean
-      .parseBoolean(Platform.getDebugOption(CMakePlugin.PLUGIN_ID + "/CECC/builtins/entries"));
+      .parseBoolean(Platform.getDebugOption(Plugin.PLUGIN_ID + "/CECC/builtins/entries"));
 
   private final List<ICLanguageSettingEntry> entries = Collections
       .synchronizedList(new ArrayList<ICLanguageSettingEntry>());
