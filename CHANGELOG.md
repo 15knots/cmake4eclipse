@@ -1,5 +1,11 @@
 # Cmake4eclipse Change Log
 
+## 2.1.1 (2020-03-??)
+### Changes
+- Fix: Missing bundles for ARM, HPE-nonstop and Intel support in the `cmake4eclispe Extras` section in the repository.
+- Raised severity level to WARNING for markers related to indexer support.
+- Changed license to EPL 2.0
+
 ## 2.1.0 (2020-02-04)
 ### Changes
 - Syntax highlighting support for NVidia and Microsoft compilers are no longer supported out-of-the box. Support is now
