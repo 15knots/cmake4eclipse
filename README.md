@@ -74,7 +74,7 @@ To debug the plug-in from Eclipse, first set the Plug-in Development Target plat
 - Navit https://wiki.navit-project.org/index.php/Eclipse#Project_Setup
 
 ### IDEs with cmake4eclipse
-Nsight Eclipse https://devblogs.nvidia.com/drivepx-application-development-using-nsight-eclipse-edition#figcaption_attachment_10114
+Nsight Eclipse https://devblogs.nvidia.com/drivepx-application-development-using-nsight-eclipse-edition#attachment_10114
 
 ### Books
 Advanced C++ https://books.google.de/books?id=YVG7DwAAQBAJ&pg=PA9&lpg=PA9&dq=cmake4eclipse&source=bl&ots=qgHjAfjlcA&sig=ACfU3U21IppdYpImjXxBfWD69-2NYeHB4w&hl=de&sa=X&ved=2ahUKEwimtrONqJjnAhVKK1AKHVIEC2k4ChDoATAIegQIChAB#v=onepage&q=cmake4eclipse&f=false
