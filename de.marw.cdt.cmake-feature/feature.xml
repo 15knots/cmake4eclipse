@@ -293,10 +293,6 @@ version(s), and exceptions or additional permissions here}.&quot;
   You may add additional accurate notices of copyright ownership.
    </license>
 
-   <url>
-      <discovery label="Sample Projects" url="https://github.com/15knots/cmake4eclipse-sample-projects"/>
-   </url>
-
    <plugin
          id="de.marw.cdt.cmake.core"
          download-size="0"
