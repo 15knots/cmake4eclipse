@@ -55,59 +55,61 @@ public class ParserDetection {
    * takes part in the current build. The Matcher detects whether a command line
    * is an invocation of the tool.
    */
-  private static final List<IToolDetectionParticipant> parserDetectors = new ArrayList<>(22);
+  private static List<IToolDetectionParticipant> parserDetectors;
 
-  static {
-    /** Names of known tools along with their command line argument parsers */
-    final IArglet[] gcc_args = { new Arglets.IncludePath_C_POSIX(),
-        new Arglets.MacroDefine_C_POSIX(), new Arglets.MacroUndefine_C_POSIX(),
-        // not defined by POSIX, but does not harm..
-        new Arglets.SystemIncludePath_C(), new Arglets.LangStd_GCC(),
-        new Arglets.Sysroot_GCC() };
+  private static void init() {
+    if (parserDetectors == null) {
+      parserDetectors = new ArrayList<>(22);
+      /** Names of known tools along with their command line argument parsers */
+      final IArglet[] gcc_args = { new Arglets.IncludePath_C_POSIX(), new Arglets.MacroDefine_C_POSIX(),
+          new Arglets.MacroUndefine_C_POSIX(),
+          // not defined by POSIX, but does not harm..
+          new Arglets.SystemIncludePath_C(), new Arglets.LangStd_GCC(), new Arglets.Sysroot_GCC() };
 
-    IBuiltinsDetectionBehavior btbGccMaybee= new MaybeGccBuiltinDetectionBehavior();
-    IBuiltinsDetectionBehavior btbGcc= new GccBuiltinDetectionBehavior();
+      IBuiltinsDetectionBehavior btbGccMaybee = new MaybeGccBuiltinDetectionBehavior();
+      IBuiltinsDetectionBehavior btbGcc = new GccBuiltinDetectionBehavior();
 
-    // POSIX compatible C compilers =================================
-    {
-      final IToolCommandlineParser cc = new DefaultToolCommandlineParser("org.eclipse.cdt.core.gcc",
-          new ResponseFileArglets.At(), btbGccMaybee, gcc_args);
-      parserDetectors.add(new DefaultToolDetectionParticipant("cc", true, "exe", cc));
-    }
-    // POSIX compatible C++ compilers ===============================
-    {
-      final IToolCommandlineParser cxx = new DefaultToolCommandlineParser("org.eclipse.cdt.core.g++",
-          new ResponseFileArglets.At(), btbGccMaybee, gcc_args);
-      parserDetectors.add(new DefaultToolDetectionParticipant("c\\+\\+", true, "exe", cxx));
-    }
+      // POSIX compatible C compilers =================================
+      {
+        final IToolCommandlineParser cc = new DefaultToolCommandlineParser("org.eclipse.cdt.core.gcc",
+            new ResponseFileArglets.At(), btbGccMaybee, gcc_args);
+        parserDetectors.add(new DefaultToolDetectionParticipant("cc", true, "exe", cc));
+      }
+      // POSIX compatible C++ compilers ===============================
+      {
+        final IToolCommandlineParser cxx = new DefaultToolCommandlineParser("org.eclipse.cdt.core.g++",
+            new ResponseFileArglets.At(), btbGccMaybee, gcc_args);
+        parserDetectors.add(new DefaultToolDetectionParticipant("c\\+\\+", true, "exe", cxx));
+      }
 
-    // GNU C compatible compilers ====
-    {
-      final IToolCommandlineParser gcc = new DefaultToolCommandlineParser("org.eclipse.cdt.core.gcc",
-          new ResponseFileArglets.At(), btbGcc, gcc_args);
-      parserDetectors.add(new DefaultToolDetectionParticipant("gcc", true, "exe", gcc));
-      parserDetectors.add(new DefaultToolDetectionParticipant("clang", true, "exe", gcc));
-      // cross compilers, e.g. arm-none-eabi-gcc ====
-      parserDetectors.add(new DefaultToolDetectionParticipant("\\S+?-gcc", true, "exe", gcc));
-    }
-    // GNU C++ compatible compilers ====
-    {
-      final IToolCommandlineParser gxx = new DefaultToolCommandlineParser("org.eclipse.cdt.core.g++",
-          new ResponseFileArglets.At(), btbGcc, gcc_args);
-      parserDetectors.add(new DefaultToolDetectionParticipant("g\\+\\+", true, "exe", gxx));
-      parserDetectors.add(new DefaultToolDetectionParticipant("clang\\+\\+", true, "exe", gxx));
-      // cross compilers, e.g. arm-none-eabi-g++ ====
-      parserDetectors.add(new DefaultToolDetectionParticipant("\\S+?-g\\+\\+", true, "exe", gxx));
-    }
-    {
-      // cross compilers, e.g. arm-none-eabi-c++ ====
-      final IToolCommandlineParser cxx = new DefaultToolCommandlineParser("org.eclipse.cdt.core.g++",
-          new ResponseFileArglets.At(), btbGccMaybee, gcc_args);
-      parserDetectors.add(new DefaultToolDetectionParticipant("\\S+?-c\\+\\+", true, "exe", cxx));
-    }
+      // GNU C compatible compilers ====
+      {
+        final IToolCommandlineParser gcc = new DefaultToolCommandlineParser("org.eclipse.cdt.core.gcc",
+            new ResponseFileArglets.At(), btbGcc, gcc_args);
+        parserDetectors.add(new DefaultToolDetectionParticipant("gcc", true, "exe", gcc));
+        parserDetectors.add(new DefaultToolDetectionParticipant("clang", true, "exe", gcc));
+        // cross compilers, e.g. arm-none-eabi-gcc ====
+        parserDetectors.add(new DefaultToolDetectionParticipant("\\S+?-gcc", true, "exe", gcc));
+      }
+      // GNU C++ compatible compilers ====
+      {
+        final IToolCommandlineParser gxx = new DefaultToolCommandlineParser("org.eclipse.cdt.core.g++",
+            new ResponseFileArglets.At(), btbGcc, gcc_args);
+        parserDetectors.add(new DefaultToolDetectionParticipant("g\\+\\+", true, "exe", gxx));
+        parserDetectors.add(new DefaultToolDetectionParticipant("clang\\+\\+", true, "exe", gxx));
+        // cross compilers, e.g. arm-none-eabi-g++ ====
+        parserDetectors.add(new DefaultToolDetectionParticipant("\\S+?-g\\+\\+", true, "exe", gxx));
+      }
+      {
+        // cross compilers, e.g. arm-none-eabi-c++ ====
+        final IToolCommandlineParser cxx = new DefaultToolCommandlineParser("org.eclipse.cdt.core.g++",
+            new ResponseFileArglets.At(), btbGccMaybee, gcc_args);
+        parserDetectors.add(new DefaultToolDetectionParticipant("\\S+?-c\\+\\+", true, "exe", cxx));
+      }
 
-    // compilers from extension points
-    loadExtentionsSorted(parserDetectors::add);
+      // compilers from extension points
+      loadExtentionsSorted(parserDetectors::add);
+    }
   }
 
   /**
@@ -149,6 +151,7 @@ public class ParserDetection {
    * @see IToolCommandlineParser#getCustomLanguageIds()
    */
   public static List<String> getCustomLanguages() {
+    init();
     return parserDetectors.stream().map(d -> d.getParser().getCustomLanguageIds()).filter(Objects::nonNull).
         flatMap(l -> l.stream()) .collect(Collectors.toList());
   }
@@ -219,6 +222,7 @@ public class ParserDetection {
    */
   private static ParserDetectionResult determineDetector0(String commandLine, String versionSuffixRegex,
       boolean matchBackslash) {
+    init();
     DefaultToolDetectionParticipant.MatchResult cmdline;
     // try basenames
     for (IToolDetectionParticipant pd : parserDetectors) {
