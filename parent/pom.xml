@@ -61,7 +61,7 @@
   </issueManagement>
 
   <properties>
-    <tycho-version>1.6.0</tycho-version>
+    <tycho-version>1.7.0</tycho-version>
     <platform.version>1.0.1</platform.version>
     <java.source>1.8</java.source>
   </properties>
@@ -113,6 +113,7 @@
             <source>${java.source}</source>
             <target>${java.source}</target>
             <encoding>UTF-8</encoding>
+            <useProjectSettings>false</useProjectSettings>
           </configuration>
         </plugin>
 
