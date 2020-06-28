@@ -64,7 +64,8 @@ public class ParserDetection {
       final IArglet[] gcc_args = { new Arglets.IncludePath_C_POSIX(), new Arglets.MacroDefine_C_POSIX(),
           new Arglets.MacroUndefine_C_POSIX(),
           // not defined by POSIX, but does not harm..
-          new Arglets.SystemIncludePath_C(), new Arglets.LangStd_GCC(), new Arglets.Sysroot_GCC() };
+          new Arglets.SystemIncludePath_C(), new Arglets.LangStd_GCC(), new Arglets.Sysroot_GCC(),
+          new Arglets.IncludeFile_GCC(), new Arglets.MacrosFile_GCC() };
 
       IBuiltinsDetectionBehavior btbGccMaybee = new MaybeGccBuiltinDetectionBehavior();
       IBuiltinsDetectionBehavior btbGcc = new GccBuiltinDetectionBehavior();

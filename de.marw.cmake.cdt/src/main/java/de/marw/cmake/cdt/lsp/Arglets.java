@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2015-2019 Martin Weber.
+ * Copyright (c) 2015-2020 Martin Weber.
  *
  * Content is provided to you under the terms and conditions of the Eclipse Public License Version 2.0 "EPL".
  * A copy of the EPL is available at http://www.eclipse.org/legal/epl-2.0.
@@ -214,6 +214,74 @@ public class Arglets {
     }
   }
 
+  /**
+   * A tool argument parser capable to parse a C-compiler include file argument.
+   */
+  public static abstract class IncludeFileGeneric {
+    /**
+     * @param cwd
+     *          the current working directory of the compiler at its invocation
+     * @see de.marw.cmake.cdt.lsp.IArglet#processArgument(IParseContext, IPath, String)
+     */
+    protected final int processArgument(IParseContext parseContext, IPath cwd,
+        String argsLine, NameOptionMatcher[] optionMatchers) {
+      for (NameOptionMatcher oMatcher : optionMatchers) {
+        final Matcher matcher = oMatcher.matcher;
+
+        matcher.reset(argsLine);
+        if (matcher.lookingAt()) {
+          String name = matcher.group(oMatcher.nameGroup);
+          IPath path = Path.fromOSString(name);
+          if (!path.isAbsolute()) {
+            // prepend CWD
+            name = cwd.append(path).toOSString();
+          }
+
+          final ICLanguageSettingEntry entry = CDataUtil.createCIncludeFileEntry(name,
+              ICSettingEntry.READONLY);
+          parseContext.addSettingEntry(entry);
+          final int end = matcher.end();
+          return end;
+        }
+      }
+      return 0;// no input consumed
+    }
+  }
+
+  /**
+   * A tool argument parser capable to parse a C-compiler macros file argument.
+   */
+  public static abstract class MacrosFileGeneric {
+    /**
+     * @param cwd
+     *          the current working directory of the compiler at its invocation
+     * @see de.marw.cmake.cdt.lsp.IArglet#processArgument(IParseContext, IPath, String)
+     */
+    protected final int processArgument(IParseContext parseContext, IPath cwd,
+        String argsLine, NameOptionMatcher[] optionMatchers) {
+      for (NameOptionMatcher oMatcher : optionMatchers) {
+        final Matcher matcher = oMatcher.matcher;
+
+        matcher.reset(argsLine);
+        if (matcher.lookingAt()) {
+          String name = matcher.group(oMatcher.nameGroup);
+          IPath path = Path.fromOSString(name);
+          if (!path.isAbsolute()) {
+            // prepend CWD
+            name = cwd.append(path).toOSString();
+          }
+
+          final ICLanguageSettingEntry entry = CDataUtil.createCMacroFileEntry(name,
+              ICSettingEntry.READONLY);
+          parseContext.addSettingEntry(entry);
+          final int end = matcher.end();
+          return end;
+        }
+      }
+      return 0;// no input consumed
+    }
+  }
+
   ////////////////////////////////////////////////////////////////////
   // POSIX compatible option parsers
   ////////////////////////////////////////////////////////////////////
@@ -360,6 +428,45 @@ public class Arglets {
         }
       }
       return 0;// no input consumed
+    }
+  }
+
+  ////////////////////////////////////////////////////////////////////
+  /**
+   * A tool argument parser capable to parse a GCC include file argument {@code -include <file>}.
+   */
+  public static class IncludeFile_GCC extends IncludeFileGeneric implements IArglet {
+    private static final NameOptionMatcher[] optionMatchers = {
+        /* "-include=" quoted directory */
+        new NameOptionMatcher("-include" + REGEX_INCLUDEPATH_QUOTED_DIR, 2),
+        /* "-include=" unquoted directory */
+        new NameOptionMatcher("-include" + REGEX_INCLUDEPATH_UNQUOTED_DIR, 1), };
+
+    /*-
+     * @see de.marw.cmake.cdt.lsp.IArglet#processArgs(java.lang.String)
+     */
+    @Override
+    public int processArgument(IParseContext parseContext, IPath cwd, String argsLine) {
+      return processArgument(parseContext, cwd, argsLine, optionMatchers);
+    }
+  }
+
+  /**
+   * A tool argument parser capable to parse a GCC macros file argument {@code -imacros <file>}.
+   */
+  public static class MacrosFile_GCC extends MacrosFileGeneric implements IArglet {
+    private static final NameOptionMatcher[] optionMatchers = {
+        /* "-include=" quoted directory */
+        new NameOptionMatcher("-imacros" + REGEX_INCLUDEPATH_QUOTED_DIR, 2),
+        /* "-include=" unquoted directory */
+        new NameOptionMatcher("-imacros" + REGEX_INCLUDEPATH_UNQUOTED_DIR, 1), };
+
+    /*-
+     * @see de.marw.cmake.cdt.lsp.IArglet#processArgs(java.lang.String)
+     */
+    @Override
+    public int processArgument(IParseContext parseContext, IPath cwd, String argsLine) {
+      return processArgument(parseContext, cwd, argsLine, optionMatchers);
     }
   }
 
