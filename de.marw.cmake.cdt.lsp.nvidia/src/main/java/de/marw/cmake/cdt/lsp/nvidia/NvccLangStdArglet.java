@@ -14,13 +14,13 @@ import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.IPath;
 
-import de.marw.cmake.cdt.lsp.Arglets.BuiltinDetctionArgsGeneric;
+import de.marw.cmake.cdt.lsp.Arglets.BuiltinDetectionArgsGeneric;
 import de.marw.cmake.cdt.lsp.IArglet;
 
 /**
  * A tool argument parser capable to parse a nvcc option to specify the language standard {@code --std=xxx}.
  */
-public class NvccLangStdArglet extends BuiltinDetctionArgsGeneric implements IArglet {
+public class NvccLangStdArglet extends BuiltinDetectionArgsGeneric implements IArglet {
   private static final Matcher[] optionMatchers = { Pattern.compile("--std \\S+").matcher(""),
       Pattern.compile("-std \\S+").matcher(""), };
 

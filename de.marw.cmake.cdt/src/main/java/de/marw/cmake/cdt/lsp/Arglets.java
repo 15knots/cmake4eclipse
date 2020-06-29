@@ -415,7 +415,7 @@ public class Arglets {
   /**
    * A tool argument parser capable to parse arguments from the command-line that affect built-in detection.
    */
-  public static abstract class BuiltinDetctionArgsGeneric {
+  public static abstract class BuiltinDetectionArgsGeneric {
     /**
      * @see de.marw.cmake.cdt.lsp.IArglet#processArgument(IParseContext, IPath, String)
      */
@@ -474,7 +474,7 @@ public class Arglets {
   /**
    * A tool argument parser capable to parse a GCC option to specify paths {@code --sysrooot}.
    */
-  public static class Sysroot_GCC extends BuiltinDetctionArgsGeneric implements IArglet {
+  public static class Sysroot_GCC extends BuiltinDetectionArgsGeneric implements IArglet {
     private static final Matcher[] optionMatchers = {
         /* "--sysroot=" quoted directory */
         Pattern.compile("--sysroot=" + REGEX_INCLUDEPATH_QUOTED_DIR).matcher(""),
@@ -500,7 +500,7 @@ public class Arglets {
   /**
    * A tool argument parser capable to parse a GCC option to specify the language standard {@code -std=xxx}.
    */
-  public static class LangStd_GCC extends BuiltinDetctionArgsGeneric implements IArglet {
+  public static class LangStd_GCC extends BuiltinDetectionArgsGeneric implements IArglet {
     private static final Matcher[] optionMatchers = { Pattern.compile("-std=\\S+").matcher(""),
         Pattern.compile("-ansi").matcher(""), };
 
