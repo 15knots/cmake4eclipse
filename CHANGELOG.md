@@ -1,6 +1,6 @@
 # Cmake4eclipse Change Log
 
-## 2.1.1 (2020-07-??)
+## 2.1.2 (2020-07-11)
 ### Changes
 - Closed #138: Recognize GCC/clang -include and -imacros compiler flags.
 
