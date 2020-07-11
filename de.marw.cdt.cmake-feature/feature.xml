@@ -293,6 +293,10 @@ version(s), and exceptions or additional permissions here}.&quot;
   You may add additional accurate notices of copyright ownership.
    </license>
 
+   <url>
+      <discovery label="cmake4eclipse Updates" url="https://raw.githubusercontent.com/15knots/cmake4eclipse/master/releng/comp-update/"/>
+   </url>
+
    <plugin
          id="de.marw.cdt.cmake.core"
          download-size="0"
