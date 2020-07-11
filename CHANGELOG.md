@@ -1,5 +1,9 @@
 # Cmake4eclipse Change Log
 
+## 2.1.1 (2020-07-??)
+### Changes
+- Closed #138: Recognize GCC/clang -include and -imacros compiler flags.
+
 ## 2.1.1 (2020-03-10)
 ### Changes
 - Fix: Missing bundles for ARM, HPE-nonstop and Intel support in the `cmake4eclispe Extras` section in the repository.
