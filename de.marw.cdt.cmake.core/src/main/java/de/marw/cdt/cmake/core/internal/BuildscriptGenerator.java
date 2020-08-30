@@ -656,9 +656,12 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       switch (delta.getKind()) {
       case IResourceDelta.CHANGED:
         IResource resource = delta.getResource();
-        if (resource.getType() == IResource.FILE && resource.getName().equals("CMakeLists.txt")) {
-          hasChanges= true;
-          return false;
+        if (resource.getType() == IResource.FILE) {
+          String name = resource.getName();
+          if (name.equals("CMakeLists.txt") || name.endsWith(".cmake")) {
+            hasChanges= true;
+            return false;
+          }
         }
       }
       return true;
