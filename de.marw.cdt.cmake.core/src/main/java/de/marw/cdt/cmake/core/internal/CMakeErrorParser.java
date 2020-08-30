@@ -362,7 +362,7 @@ public class CMakeErrorParser extends OutputStream {
     @Override
     int getSeverity() {
       return IMarker.SEVERITY_ERROR;
-    };
+    }
   }
 
   private static class MC_DWarning extends MarkerCreator {
@@ -378,7 +378,7 @@ public class CMakeErrorParser extends OutputStream {
     @Override
     int getSeverity() {
       return IMarker.SEVERITY_WARNING;
-    };
+    }
   }
 
   private static class MC_Error extends MarkerCreator {
@@ -394,7 +394,7 @@ public class CMakeErrorParser extends OutputStream {
     @Override
     int getSeverity() {
       return IMarker.SEVERITY_ERROR;
-    };
+    }
   }
 
   private static class MC_ErrorDev extends MarkerCreator {
@@ -410,7 +410,7 @@ public class CMakeErrorParser extends OutputStream {
     @Override
     int getSeverity() {
       return IMarker.SEVERITY_ERROR;
-    };
+    }
   }
 
   private static class MC_IError extends MarkerCreator {
@@ -426,7 +426,7 @@ public class CMakeErrorParser extends OutputStream {
     @Override
     int getSeverity() {
       return IMarker.SEVERITY_ERROR;
-    };
+    }
   }
 
   private static class MC_Warning extends MarkerCreator {
@@ -442,7 +442,7 @@ public class CMakeErrorParser extends OutputStream {
     @Override
     int getSeverity() {
       return IMarker.SEVERITY_WARNING;
-    };
+    }
   }
 
   private static class MC_WarningDev extends MarkerCreator {
@@ -458,7 +458,7 @@ public class CMakeErrorParser extends OutputStream {
     @Override
     int getSeverity() {
       return IMarker.SEVERITY_WARNING;
-    };
+    }
   }
 
 }
