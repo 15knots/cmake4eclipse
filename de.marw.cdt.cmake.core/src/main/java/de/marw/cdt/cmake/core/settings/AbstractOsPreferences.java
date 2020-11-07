@@ -28,11 +28,9 @@ public abstract class AbstractOsPreferences {
   private static final String ATTR_COMMAND = "command";
   private static final String ATTR_USE_DEFAULT_COMMAND = "use-default";
   private static final String ATTR_GENERATOR = "generator";
-  private static final String ATTR_BUILD_COMMAND = "build_command";
 
   private String command;
   private CmakeGenerator generator;
-  private String buildscriptProcessorCmd;
   private boolean useDefaultCommand;
   private List<CmakeDefine> defines = new ArrayList<>(0);
   private List<CmakeUnDefine> undefines = new ArrayList<>(0);
@@ -59,7 +57,6 @@ public abstract class AbstractOsPreferences {
     useDefaultCommand = true;
     setCommand("cmake");
     setGenerator(CmakeGenerator.UnixMakefiles);
-    setBuildscriptProcessorCommand(null);
     defines.clear();
     undefines.clear();
   }
@@ -207,9 +204,6 @@ public abstract class AbstractOsPreferences {
         // fall back to default generator
       }
     }
-    val = parent.getAttribute(ATTR_BUILD_COMMAND);
-//    if (val != null)
-    setBuildscriptProcessorCommand(val);
 
     ICStorageElement[] children = parent.getChildren();
     for (ICStorageElement child : children) {
@@ -249,11 +243,6 @@ public abstract class AbstractOsPreferences {
     parent.setAttribute(ATTR_COMMAND, command);
     // generator
     parent.setAttribute(ATTR_GENERATOR, generator.name());
-    if (buildscriptProcessorCmd != null) {
-      parent.setAttribute(ATTR_BUILD_COMMAND, buildscriptProcessorCmd);
-    } else {
-      parent.removeAttribute(ATTR_BUILD_COMMAND);
-    }
     // defines...
     Util.serializeCollection(CMakePreferences.ELEM_DEFINES, parent,
         new CMakeDefineSerializer(), defines);
