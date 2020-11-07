@@ -133,29 +133,6 @@ public abstract class AbstractOsPreferences {
   }
 
   /**
-   * Gets the buildscript processor name.
-   *
-   * @return the buildscript processor or {@code null} if the build command
-   *         matching the chosen generator should be used.
-   */
-  public String getBuildscriptProcessorCommand() {
-    return buildscriptProcessorCmd;
-  }
-
-  /**
-   * Sets the buildscript processor name.
-   *
-   * @param buildscriptProcessorCommand
-   *        the buildscript processor. If {@code null} or an empty string, the
-   *        build command matching the chosen generator should be used.
-   */
-  public void setBuildscriptProcessorCommand(String buildscriptProcessorCommand) {
-    if ("".equals(buildscriptProcessorCommand))
-      buildscriptProcessorCommand = null;
-    this.buildscriptProcessorCmd = buildscriptProcessorCommand;
-  }
-
-  /**
    * Gets the list of cmake variable to define on the cmake command-line.
    *
    * @return a mutable list, never {@code null}

@@ -498,7 +498,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
   }
 
   /**
-   * Appends arguments common to all OS preferences. The first argument in the
+   * Appends arguments specific to the given OS preferences. The first argument in the
    * list will be replaced by the cmake command from the specified preferences,
    * if given.
    *
