@@ -1,5 +1,10 @@
 # Cmake4eclipse Change Log
 
+## 2.1.3 (2020-11-17)
+### Changes
+- Take changes to *.cmake files into account when deteriming whether to re-run cmake.
+- Closed #145: Add support for clang `--target` option. (Thanks to Ghaith Hachem).
+
 ## 2.1.2 (2020-07-11)
 ### Changes
 - Closed #138: Recognize GCC/clang -include and -imacros compiler flags.
