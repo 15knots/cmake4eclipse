@@ -45,12 +45,6 @@ public class Arglets {
   private static final String REGEX_INCLUDEPATH_UNQUOTED_DIR = "\\s*([^\\s]+)";
   
   /**
-   * matches a target triple definition
-   */
-  private static final String REGEX_TARGET_DEFNITION = "\\w+(-\\w+)*";
-
-
-  /**
    * nothing to instantiate
    */
   private Arglets() {
@@ -504,12 +498,12 @@ public class Arglets {
   
 	////////////////////////////////////////////////////////////////////
 	/**
-	 * A tool argument parser capable to parse a Clang option to specify the compilation target {@code --sysrooot}.
+	 * A tool argument parser capable to parse a Clang option to specify the compilation target {@code --target}.
 	 */
 	public static class Target_Clang extends BuiltinDetectionArgsGeneric implements IArglet {
 		private static final Matcher[] optionMatchers = {
 				/* "--target=" triple */
-				Pattern.compile("--target=" + REGEX_TARGET_DEFNITION).matcher("")};
+				Pattern.compile("--target=\\w+(-\\w+)*").matcher("")};
 
 		/*-
 		* @see de.marw.cmake.cdt.lsp.IArglet#processArgs(java.lang.String)
