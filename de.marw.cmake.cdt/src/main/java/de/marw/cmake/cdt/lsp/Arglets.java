@@ -43,7 +43,7 @@ public class Arglets {
    * matches an include path with unquoted directory. Name in matcher group 1
    */
   private static final String REGEX_INCLUDEPATH_UNQUOTED_DIR = "\\s*([^\\s]+)";
-
+  
   /**
    * nothing to instantiate
    */
@@ -495,6 +495,24 @@ public class Arglets {
       return processArgument(parseContext, argsLine, optionMatchers);
     }
   }
+  
+	////////////////////////////////////////////////////////////////////
+	/**
+	 * A tool argument parser capable to parse a Clang option to specify the compilation target {@code --target}.
+	 */
+	public static class Target_Clang extends BuiltinDetectionArgsGeneric implements IArglet {
+		private static final Matcher[] optionMatchers = {
+				/* "--target=" triple */
+				Pattern.compile("--target=\\w+(-\\w+)*").matcher("")};
+
+		/*-
+		* @see de.marw.cmake.cdt.lsp.IArglet#processArgs(java.lang.String)
+		*/
+		@Override
+		public int processArgument(IParseContext parseContext, IPath cwd, String argsLine) {
+			return processArgument(parseContext, argsLine, optionMatchers);
+		}
+	}
 
   ////////////////////////////////////////////////////////////////////
   /**
