@@ -118,21 +118,21 @@ public class BuiltinsCompileCommandsJsonParser extends LanguageSettingsSerializa
       }
       if (detectors != null) {
         // run each detector and gather the entries per language
-        HashMap<String, Set<ICLanguageSettingEntry>> langMap = new HashMap<>(2, 1.0f);
+        HashMap<String, List<ICLanguageSettingEntry>> langMap = new HashMap<>(2, 1.0f);
         for (CompilerBuiltinsDetector detector : detectors) {
           final String languageId = detector.getLanguageId();
           // entries per language
           List<ICLanguageSettingEntry> entries = detector.run(isWithConsole());
           // use a Set here to avoid duplicates by name and kind ..
-          Set<ICLanguageSettingEntry> allEntries = langMap.get(languageId);
+          List<ICLanguageSettingEntry> allEntries = langMap.get(languageId);
           if (allEntries == null) {
-            allEntries = new HashSet<>();
+            allEntries = new ArrayList<>();
             langMap.put(languageId, allEntries);
           }
           allEntries.addAll(entries);
         }
         // store the entries per language
-        for (Entry<String, Set<ICLanguageSettingEntry>> entry : langMap.entrySet()) {
+        for (Entry<String, List<ICLanguageSettingEntry>> entry : langMap.entrySet()) {
           super.setSettingEntries(currentCfgDescription, null, entry.getKey(),
               Arrays.asList(entry.getValue().toArray(new ICLanguageSettingEntry[entry.getValue().size()])));
         }
