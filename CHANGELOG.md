@@ -1,8 +1,12 @@
 # Cmake4eclipse Change Log
 
+## 2.1.4 (2021-03-30)
+### Changes
+-Closed #147: Retain order of compiler-built-in include directories.
+
 ## 2.1.3 (2020-11-17)
 ### Changes
-- Take changes to *.cmake files into account when deteriming whether to re-run cmake.
+- Take changes to *.cmake files into account when determining whether to re-run cmake.
 - Closed #145: Add support for clang `--target` option. (Thanks to Ghaith Hachem).
 
 ## 2.1.2 (2020-07-11)
