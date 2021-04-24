@@ -24,7 +24,7 @@
 <unit id="org.hamcrest.text.source" version="1.1.0.v20090501071000"/>
 <unit id="org.junit" version="4.10.0.v4_10_0_v20120426-0900"/>
 <unit id="org.junit.source" version="4.10.0.v4_10_0_v20120426-0900"/>
-<repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20130118183705/repository/"/>
+<repository location="http://archive.eclipse.org/tools/orbit/downloads/drops/R20130118183705/repository/"/>
 </location>
 </locations>
 <targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
