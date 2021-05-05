@@ -1,0 +1,51 @@
+name: Cloudsmith Push Repository
+on:
+  workflow_dispatch:
+#  release:
+#    types: [created]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up JDK
+      uses: actions/setup-java@v2
+      with:
+        java-version: '8'
+        distribution: 'adopt'
+        settings-path: ${{ github.workspace }}
+
+    - name: Build
+      run: mvn -P release -B --file parent/pom.xml package
+
+    - name: Determine artifact to upload
+      id: TheZIP
+#      uses: actions/github-script@v4
+#       with:
+#         result-encoding: string
+#         script: |
+#           const globber = await glob.create('releng/*-repo/target/cmake4eclipse-[0-9]*.[0-9]*.[0-9]*.zip')
+#           return await globber.glob()
+# NOTE: glob gives us absolute paths which is not understtod by cloudsmith-io/action
+      run: 'echo "::set-output name=result::$(find releng/*-repo/target/ -type f -name cmake4eclipse-\*.zip)"'
+
+    - name: Artifact to upload
+      run: echo "${{steps.TheZIP.outputs.result}}"
+  
+    - name: Upload
+      id: push
+      uses: cloudsmith-io/action@master
+      with:
+        api-key: ${{ secrets.CLOUDSMITH_AUTH }}
+        command: 'push'
+        format: 'raw'
+        # If true, the uploaded package will overwrite any others with the same attributes.
+        republish: false   # optional, default is false
+        owner: '15knots'            # Your Cloudsmith account name or org name (namespace) 
+        repo: 'p2-zip'          # Your Cloudsmith Repository name (slug)
+        file: '${{steps.TheZIP.outputs.result}}'        # Name of file
+        no-wait-for-sync: true                          # Skip the waiting for package synchronisation (i.e. upload only)
+#        name: 'NAME'                # Name for Raw package

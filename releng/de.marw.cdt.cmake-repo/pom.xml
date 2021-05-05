@@ -17,14 +17,12 @@
     <build>
         <plugins>
             <plugin><!-- don't pollute repositories with useless stuff -->
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-install-plugin</artifactId>
                 <configuration>
                     <skip>true</skip>
                 </configuration>
             </plugin>
-            <plugin><!-- don't pollute repositories with useless stuff -->
-                <groupId>org.apache.maven.plugins</groupId>
+            <plugin>
                 <artifactId>maven-deploy-plugin</artifactId>
                 <configuration>
                     <skip>true</skip>
