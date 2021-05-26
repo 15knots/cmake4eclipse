@@ -44,15 +44,15 @@ This composite update site is for use in a Eclipse workbench and contains the la
 https://raw.githubusercontent.com/15knots/cmake4eclipse/master/releng/comp-update/.
 
 ### p2 Repositories
-Tool integrators will find each release at [bintray](https://bintray.com/15knots/p2-zip/cmake4eclipse#files).
+Tool integrators will find each release at [cloudsmith](https://cloudsmith.io/~15knots/repos/p2-zip/packages/).
 Each release is provided as a stand-alone zipped p2 repository and can be consumed in a PDE target platform. To add one
 of these repositories to your target platform, add a **Software Site** and enter a URL for the location as
-jar:https://dl.bintray.com/15knots/p2-zip/cmake4eclipse-2.0.1.zip!/ (note the leading `jar:` and the trailing
-`!/`).
+jar:https://dl.cloudsmith.io/public/15knots/p2-zip/raw/files/cmake4eclipse-2.1.3.zip!/ 
+(note the leading `jar:` and the trailing `!/`).
 
 If you work at a company that wants to ship cmake4eclipse with your product, please consider to mirror the zip file internally
-and reference the company-internal location in your target definition. This will help to reduce the traffic on bintray and
-make your product builds immune to downtimes on bintray.
+and reference the company-internal location in your target definition. This will help to reduce the traffic on cloudsmith and
+make your product builds immune to downtimes on cloudsmith.
 
 ## Debug and Build
 This project uses Apache maven as its build system.
