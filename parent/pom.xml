@@ -35,7 +35,7 @@
     <module>../releng/de.marw.cdt.cmake-target</module>
     <module>../de.marw.cmake.cdt</module>
     <module>../de.marw.cmake.cdt.tests</module>
-    <module>../de.marw.cdt.cmake.core</module>
+    <module>../de.marw.cmake.cdt.mbs</module>
     <module>../de.marw.cmake.cdt.mbs.ui</module>
     <module>../de.marw.cmake.cdt.lsp.arm</module>
     <module>../de.marw.cmake.cdt.lsp.arm.tests</module>

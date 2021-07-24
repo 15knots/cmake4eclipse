@@ -298,14 +298,14 @@ version(s), and exceptions or additional permissions here}.&quot;
    </url>
 
    <plugin
-         id="de.marw.cdt.cmake.core"
+         id="de.marw.cmake.cdt"
          download-size="0"
          install-size="0"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
-         id="de.marw.cmake.cdt"
+         id="de.marw.cmake.cdt.mbs"
          download-size="0"
          install-size="0"
          version="0.0.0"
