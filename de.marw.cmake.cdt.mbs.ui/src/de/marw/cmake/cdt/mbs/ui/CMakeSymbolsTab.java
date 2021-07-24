@@ -6,7 +6,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *******************************************************************************/
-package de.marw.cdt.cmake.core.ui;
+package de.marw.cmake.cdt.mbs.ui;
 
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
 import org.eclipse.cdt.core.settings.model.ICResourceDescription;
@@ -18,7 +18,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 
-import de.marw.cdt.cmake.core.internal.Activator;
 import de.marw.cdt.cmake.core.settings.CMakePreferences;
 import de.marw.cdt.cmake.core.settings.ConfigurationManager;
 
@@ -49,6 +48,7 @@ public class CMakeSymbolsTab extends QuirklessAbstractCPropertyTab {
     return page.isForProject();
   }
 
+  @Override
   public boolean canSupportMultiCfg() {
     return false;
   }

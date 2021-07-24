@@ -6,7 +6,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *******************************************************************************/
-package de.marw.cdt.cmake.core.ui;
+package de.marw.cmake.cdt.mbs.ui;
 
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
 import org.eclipse.cdt.ui.newui.AbstractCPropertyTab;
@@ -30,7 +30,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import de.marw.cdt.cmake.core.internal.Activator;
 import de.marw.cdt.cmake.core.settings.CmakeDefine;
 import de.marw.cdt.cmake.core.settings.CmakeVariableType;
 
@@ -142,6 +141,7 @@ public class AddCmakeDefineDialog extends Dialog {
     variableName = new Text(comp, SWT.BORDER);
     // disable OK button if variable name is empty..
     variableName.addModifyListener(new ModifyListener() {
+      @Override
       public void modifyText(ModifyEvent e) {
         final boolean enable = ((Text) e.widget).getText().trim().length() > 0;
         final Button button = getButton(IDialogConstants.OK_ID);
@@ -229,6 +229,7 @@ public class AddCmakeDefineDialog extends Dialog {
 
     // to control sensitivity of buttons...
     typeSelector.addModifyListener(new ModifyListener() {
+      @Override
       public void modifyText(ModifyEvent e) {
         int sel = ((Combo) e.widget).getSelectionIndex();
         adjustBrowseButtons(indexToType(sel));
@@ -241,6 +242,7 @@ public class AddCmakeDefineDialog extends Dialog {
   /**
    * Overridden to set the sensitivity of the dialog's OK-button.
    */
+  @Override
   protected Control createContents(Composite parent) {
     final Control control = super.createContents(parent);
     updateDisplay();

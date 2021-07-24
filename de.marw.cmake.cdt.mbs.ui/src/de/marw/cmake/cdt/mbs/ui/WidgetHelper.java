@@ -6,7 +6,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *******************************************************************************/
-package de.marw.cdt.cmake.core.ui;
+package de.marw.cmake.cdt.mbs.ui;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;

@@ -6,7 +6,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *******************************************************************************/
-package de.marw.cdt.cmake.core.ui;
+package de.marw.cmake.cdt.mbs.ui;
 
 import java.util.BitSet;
 
@@ -38,7 +38,6 @@ import org.eclipse.ui.dialogs.FilteredItemsSelectionDialog;
 import org.eclipse.ui.dialogs.FilteredResourcesSelectionDialog;
 import org.eclipse.ui.dialogs.NewFolderDialog;
 
-import de.marw.cdt.cmake.core.internal.Activator;
 import de.marw.cdt.cmake.core.settings.CMakePreferences;
 import de.marw.cdt.cmake.core.settings.ConfigurationManager;
 
@@ -547,6 +546,7 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
       }
   }
 
+  @Override
   protected void performOK() {
     // make sure the displayed values get saved
     saveToModel();

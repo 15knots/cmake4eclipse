@@ -6,7 +6,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *******************************************************************************/
-package de.marw.cdt.cmake.core.ui;
+package de.marw.cmake.cdt.mbs.ui;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -23,7 +23,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import de.marw.cdt.cmake.core.internal.Activator;
 import de.marw.cdt.cmake.core.settings.CmakeUnDefine;
 
 /**
@@ -111,6 +110,7 @@ public class AddCmakeUndefineDialog extends Dialog {
     variableName = new Text(comp, SWT.BORDER);
     // disable OK button if variable name is empty..
     variableName.addModifyListener(new ModifyListener() {
+      @Override
       public void modifyText(ModifyEvent e) {
         final boolean enable = ((Text) e.widget).getText().trim().length() > 0;
         final Button button = getButton(IDialogConstants.OK_ID);
@@ -125,6 +125,7 @@ public class AddCmakeUndefineDialog extends Dialog {
   /**
    * Overridden to set the sensitivity of the dialog's OK-button.
    */
+  @Override
   protected Control createContents(Composite parent) {
     final Control control = super.createContents(parent);
     updateDisplay();

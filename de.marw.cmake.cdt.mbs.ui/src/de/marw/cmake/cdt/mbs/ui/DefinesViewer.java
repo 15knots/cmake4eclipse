@@ -6,7 +6,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *******************************************************************************/
-package de.marw.cdt.cmake.core.ui;
+package de.marw.cmake.cdt.mbs.ui;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -320,12 +320,6 @@ import de.marw.cdt.cmake.core.settings.CmakeDefine;
 
   private static class CmakeVariableLabelProvider extends BaseLabelProvider
       implements ITableLabelProvider {
-
-//    // LabelProvider
-//    @Override
-//    public String getText(Object element) {
-//      return getColumnText(element, 0);
-//    }
 
     // interface ITableLabelProvider
     @Override
