@@ -111,7 +111,7 @@ the Foobar company:
 &lt;p&gt;
 To provide online help that lists the supported compilers anlong with and the recognized arguments,
 the extension point &lt;code&gt;org.eclipse.help.contentExtension&lt;/code&gt; can be used.&lt;br/&gt;
-Plugin &lt;i&gt;de.marw.cdt.cmake.core&lt;/i&gt; provides predefined help-anchors that allow to integrate the online help:
+Plugin &lt;i&gt;de.marw.cmake4eclipse.mbs&lt;/i&gt; provides predefined help-anchors that allow to integrate the online help:
 &lt;ol&gt;
 &lt;li&gt;&lt;i&gt;extra_lsp_detection_participant_list&lt;/i&gt; for the CMAKE_EXPORT_COMPILE_COMMANDS Parser,&lt;/li&gt; 
 &lt;li&gt;&lt;i&gt;extra_lsp_detection_participant_builtins_list&lt;/i&gt; and 
@@ -121,9 +121,9 @@ Example file &lt;code&gt;help_content_extension.xml&lt;/code&gt;:
 &lt;pre&gt;
 &lt;contentExtension&gt;
   &lt;contribution content=&quot;doc/compiler.xhtml#lsp&quot;
-    path=&quot;/de.marw.cdt.cmake.core/doc/html/languageSettingsProviders.xhtml#extra_lsp_detection_participant_list&quot;/&gt;
+    path=&quot;/de.marw.cmake4eclipse.mbs/doc/html/languageSettingsProviders.xhtml#extra_lsp_detection_participant_list&quot;/&gt;
   &lt;contribution content=&quot;doc/compiler.xhtml#builtins&quot;
-    path=&quot;/de.marw.cdt.cmake.core/doc/html/builtins-detection.xhtml#extra_lsp_detection_participant_builtins_list&quot;/&gt;
+    path=&quot;/de.marw.cmake4eclipse.mbs/doc/html/builtins-detection.xhtml#extra_lsp_detection_participant_builtins_list&quot;/&gt;
 &lt;/contentExtension&gt;
 &lt;/pre&gt;
 &lt;/p&gt;

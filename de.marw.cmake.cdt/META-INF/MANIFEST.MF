@@ -9,7 +9,7 @@ Bundle-Vendor: Martin Weber
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
-Import-Package: de.marw.cdt.cmake.core.ui,
+Import-Package: de.marw.cmake4eclipse.mbs.console,
  org.eclipse.cdt.build.core.scannerconfig,
  org.eclipse.cdt.core,
  org.eclipse.cdt.core.envvar,

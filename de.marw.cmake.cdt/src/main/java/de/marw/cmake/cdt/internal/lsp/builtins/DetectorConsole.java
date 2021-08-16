@@ -11,7 +11,7 @@ package de.marw.cmake.cdt.internal.lsp.builtins;
 import org.eclipse.cdt.ui.CUIPlugin;
 import org.eclipse.cdt.ui.IBuildConsoleManager;
 
-import de.marw.cdt.cmake.core.ui.AbstractConsole;
+import de.marw.cmake4eclipse.mbs.console.AbstractConsole;
 
 /**
  * A console for cmake invocations.

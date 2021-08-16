@@ -36,7 +36,7 @@
                name="CMake driven">
             <builder
                   id="de.marw.cmake.cdt.lsp.builder.portable"
-                  superClass="de.marw.cdt.cmake.core.genscriptbuilder">
+                  superClass="de.marw.cmake4eclipse.mbs.genscriptbuilder">
             </builder>
             <supportedProperties>
                <property
@@ -60,7 +60,7 @@
             </supportedProperties>
             <targetPlatform
                   id="de.marw.cmake.cdt.lsp.targetPlatform.cmake"
-                  superClass="de.marw.cdt.cmake.core.targetPlatform.any">
+                  superClass="de.marw.cmake4eclipse.mbs.targetPlatform.any">
             </targetPlatform>
             <tool
                   id="de.marw.cmake.cdt.lsp.toolchain.tool.dummy"

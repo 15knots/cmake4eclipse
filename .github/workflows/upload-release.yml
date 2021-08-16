@@ -29,8 +29,8 @@ jobs:
 #         script: |
 #           const globber = await glob.create('releng/*-repo/target/cmake4eclipse-[0-9]*.[0-9]*.[0-9]*.zip')
 #           return await globber.glob()
-# NOTE: glob gives us absolute paths which is not understtod by cloudsmith-io/action
-      run: 'echo "::set-output name=result::$(find releng/*-repo/target/ -type f -name cmake4eclipse-\*.zip)"'
+# NOTE: glob gives us absolute paths which is not understood by cloudsmith-io/action
+      run: 'echo "::set-output name=result::$(find releng/repo/target/ -type f -name cmake4eclipse-\*.zip)"'
 
     - name: Artifact to upload
       run: echo "${{steps.TheZIP.outputs.result}}"

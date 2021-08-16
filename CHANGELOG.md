@@ -1,8 +1,12 @@
 # Cmake4eclipse Change Log
 
+## 2.2.0 (202X-YY-ZZ)
+### Changes
+- Pending #157: CDT indexer support.
+
 ## 2.1.4 (2021-03-30)
 ### Changes
--Closed #147: Retain order of compiler-built-in include directories.
+- Closed #147: Retain order of compiler-built-in include directories.
 
 ## 2.1.3 (2020-11-17)
 ### Changes
