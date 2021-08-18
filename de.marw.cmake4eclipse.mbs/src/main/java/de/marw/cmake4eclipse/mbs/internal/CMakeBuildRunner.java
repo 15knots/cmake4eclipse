@@ -16,7 +16,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.WeakHashMap;
 
 import org.eclipse.cdt.core.ICommandLauncher;
 import org.eclipse.cdt.core.IMarkerGenerator;
@@ -47,12 +46,13 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.Status;
 import org.osgi.framework.Version;
 
 import de.marw.cmake4eclipse.mbs.cmakecache.CMakeCacheFileParser;
-import de.marw.cmake4eclipse.mbs.cmakecache.SimpleCMakeCacheEntry;
 import de.marw.cmake4eclipse.mbs.cmakecache.CMakeCacheFileParser.EntryFilter;
+import de.marw.cmake4eclipse.mbs.cmakecache.SimpleCMakeCacheEntry;
 import de.marw.cmake4eclipse.mbs.settings.AbstractOsPreferences;
 import de.marw.cmake4eclipse.mbs.settings.CMakePreferences;
 import de.marw.cmake4eclipse.mbs.settings.CmakeGenerator;
@@ -70,9 +70,8 @@ public class CMakeBuildRunner extends ExternalBuildRunner {
   /** build runner error marker ID */
   private static final String MARKER_ID = Activator.PLUGIN_ID + ".BuildRunnerError";
 
-  /** caches CMakeCacheFileInfo by ICConfigurationDescription.ID */
-  private WeakHashMap<String, CMakeCacheFileInfo> map = new WeakHashMap<>(
-      2);
+  /** caches CMakeCacheFileInfo */
+  private static final QualifiedName cacheFileInfo = new QualifiedName(Activator.PLUGIN_ID, "cmakeCacheFileInfo");
 
   /*-
    * @see org.eclipse.cdt.managedbuilder.core.ExternalBuildRunner#invokeBuild(int, org.eclipse.core.resources.IProject, org.eclipse.cdt.managedbuilder.core.IConfiguration, org.eclipse.cdt.managedbuilder.core.IBuilder, org.eclipse.cdt.core.resources.IConsole, org.eclipse.cdt.core.IMarkerGenerator, org.eclipse.core.resources.IncrementalProjectBuilder, org.eclipse.core.runtime.IProgressMonitor)
@@ -152,10 +151,9 @@ public class CMakeBuildRunner extends ExternalBuildRunner {
    */
    private String getCommandFromCMakeCache(ICConfigurationDescription cfgd,
        boolean forceParsing, IProject project, IMarkerGenerator markerGenerator) throws CoreException {
-     CMakeCacheFileInfo fi = map.get(cfgd.getId());
+     CMakeCacheFileInfo fi = (CMakeCacheFileInfo) cfgd.getSessionProperty(cacheFileInfo);
      if (fi == null) {
        fi = new CMakeCacheFileInfo();
-       map.put(cfgd.getId(), fi);
      }
 
     // If getBuilderCWD() returns a workspace relative path, it gets garbled by CDT.
@@ -171,10 +169,8 @@ public class CMakeBuildRunner extends ExternalBuildRunner {
 
     if (file != null && file.isFile()) {
       final long lastModified = file.lastModified();
-      if (forceParsing || fi.cachedCmakeBuildTool == null || fi.cmCacheFileLastModified == 0
-          || lastModified > fi.cmCacheFileLastModified) {
-        // internally cached value is outdated, must parse CMakeCache.txt
-        fi.cmCacheFileLastModified = lastModified;
+      if (forceParsing || fi.cachedCmakeBuildTool == null || lastModified > fi.cmCacheFileLastModified) {
+        // internally cached value is out of date, must parse CMakeCache.txt
         fi.cachedCmakeBuildTool = null; // invalidate cache
 
         // parse CMakeCache.txt...
@@ -192,7 +188,9 @@ public class CMakeBuildRunner extends ExternalBuildRunner {
           final Iterator<SimpleCMakeCacheEntry> iter = entries.iterator();
           if (iter.hasNext()) {
             // got a CMAKE_BUILD_TOOL entry, update internally cached value
+            fi.cmCacheFileLastModified = lastModified;
             fi.cachedCmakeBuildTool = iter.next().getValue();
+            cfgd.setSessionProperty(cacheFileInfo, fi);
           } else {
               // actually this should not happen, since cmake will abort if it cannot determine
               // the build tool,.. but the variable name might change in future
