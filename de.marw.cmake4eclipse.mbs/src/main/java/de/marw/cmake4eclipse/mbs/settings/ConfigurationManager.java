@@ -90,9 +90,7 @@ public final class ConfigurationManager {
     CMakePreferences pref = map.get(cfgd.getId());
     if (pref == null) {
       pref = new CMakePreferences();
-      ICStorageElement storage = cfgd.getStorage(
-          CMakePreferences.CFG_STORAGE_ID, false);
-      pref.loadFromStorage(storage);
+      pref.load(cfgd);
       map.put(cfgd.getId(), pref);
     }
     return pref;

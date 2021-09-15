@@ -11,7 +11,9 @@ package de.marw.cmake4eclipse.mbs.settings;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
 import org.eclipse.cdt.core.settings.model.ICStorageElement;
+import org.eclipse.core.runtime.CoreException;
 
 import de.marw.cmake4eclipse.mbs.internal.Activator;
 import de.marw.cmake4eclipse.mbs.internal.storage.CMakeDefineSerializer;
@@ -85,18 +87,18 @@ public class CMakePreferences {
   }
 
   /**
-   * Initializes the configuration information from the storage element
-   * specified in the argument.
+   * Initializes this object for the specified configuration.
    *
-   * @param parent
-   *        A storage element containing the configuration information. If
-   *        {@code null}, nothing is loaded from storage.
+   * @param cfgd the configuration to load the preferences for. If {@code null}, nothing is loaded and <code>null</code>
+   *             is returned.
    */
-  public void loadFromStorage(ICStorageElement parent) {
-    if (parent == null)
+  void load(ICConfigurationDescription cfgd) throws CoreException {
+    if (cfgd == null)
       return;
+    ICStorageElement storage = cfgd.getStorage(CMakePreferences.CFG_STORAGE_ID, true);
+    buildDirectory= storage.getAttribute(ATTR_BUILD_DIR);
 
-    final ICStorageElement[] children = parent.getChildren();
+    final ICStorageElement[] children = storage.getChildren();
     for (ICStorageElement child : children) {
       if (ELEM_OPTIONS.equals(child.getName())) {
         clearCache= Boolean.parseBoolean(child.getAttribute(ATTR_CLEAR_CACHE));
@@ -110,7 +112,6 @@ public class CMakePreferences {
             .getAttribute(ATTR_WARN_UNITIALIZED));
         warnUnused = Boolean.parseBoolean(child.getAttribute(ATTR_WARN_UNUSED));
         cacheFile = child.getAttribute(ATTR_CACHE_FILE);
-        buildDirectory= parent.getAttribute(ATTR_BUILD_DIR);
       } else if (ELEM_DEFINES.equals(child.getName())) {
         // defines...
         Util.deserializeCollection(defines, new CMakeDefineSerializer(), child);
@@ -120,8 +121,8 @@ public class CMakePreferences {
             child);
       }
     }
-    linuxPreferences.loadFromStorage(parent);
-    windowsPreferences.loadFromStorage(parent);
+    linuxPreferences.loadFromStorage(storage);
+    windowsPreferences.loadFromStorage(storage);
   }
 
   /**
@@ -366,13 +367,13 @@ public class CMakePreferences {
     this.buildDirectory = buildDirectory;
   }
 
-  /** Gets whether t clear the cmake-cache before build.
+  /** Gets whether to clear the cmake-cache before build.
    */
   public boolean isClearCache() {
     return clearCache;
   }
 
-  /** Sets whether t clear the cmake-cache before build.
+  /** Sets whether to clear the cmake-cache before build.
    */
   public void setClearCache(boolean clearCache) {
     this.clearCache= clearCache;

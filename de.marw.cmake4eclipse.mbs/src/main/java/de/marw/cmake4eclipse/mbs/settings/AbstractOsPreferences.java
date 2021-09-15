@@ -175,7 +175,7 @@ public abstract class AbstractOsPreferences {
    *        A storage element containing the configuration information. If
    *        {@code null}, nothing is loaded from storage.
    */
-  public void loadFromStorage(ICStorageElement parent) {
+  /* package */ void loadFromStorage(ICStorageElement parent) {
     if (parent == null)
       return;
     // loop to merge multiple children of the same name
