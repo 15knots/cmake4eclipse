@@ -23,8 +23,6 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 
-import de.marw.cmake4eclipse.mbs.cmakecache.CMakeCacheFileParser;
-import de.marw.cmake4eclipse.mbs.cmakecache.SimpleCMakeCacheEntry;
 import de.marw.cmake4eclipse.mbs.cmakecache.CMakeCacheFileParser.EntryFilter;
 
 /**

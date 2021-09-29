@@ -4,13 +4,12 @@ Bundle-Name: %bundleName
 Bundle-Description: cmake4eclipse support for CDT Indexer (preprocessor macro & include path providers)
 Bundle-Copyright: 2013 Martin Weber
 Bundle-SymbolicName: de.marw.cmake.cdt;singleton:=true
-Bundle-Version: 1.2.1.qualifier
+Bundle-Version: 1.3.0.qualifier
 Bundle-Vendor: Martin Weber
 Bundle-Localization: plugin
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-ActivationPolicy: lazy
-Import-Package: de.marw.cmake4eclipse.mbs.console,
- org.eclipse.cdt.build.core.scannerconfig,
+Import-Package: org.eclipse.cdt.build.core.scannerconfig,
  org.eclipse.cdt.core,
  org.eclipse.cdt.core.envvar,
  org.eclipse.cdt.core.index,
@@ -39,5 +38,6 @@ Import-Package: de.marw.cmake4eclipse.mbs.console,
 Bundle-Activator: de.marw.cmake.cdt.internal.Plugin
 Export-Package: de.marw.cmake.cdt.lsp;uses:="org.eclipse.core.runtime,de.marw.cmake.cdt.lsp.builtins,org.eclipse.cdt.core.settings.model",
  de.marw.cmake.cdt.lsp.builtins;uses:="org.eclipse.cdt.core.settings.model"
-Require-Bundle: org.eclipse.ui.workbench;bundle-version="3.8.0"
+Require-Bundle: org.eclipse.cdt.managedbuilder.core,
+ de.marw.cmake4eclipse.mbs;bundle-version="1.0.0"
 Automatic-Module-Name: de.marw.cmake.cdt

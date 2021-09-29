@@ -14,8 +14,6 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import de.marw.cmake4eclipse.mbs.settings.CmakeGenerator;
-
 /**
  * @author weber
  *
