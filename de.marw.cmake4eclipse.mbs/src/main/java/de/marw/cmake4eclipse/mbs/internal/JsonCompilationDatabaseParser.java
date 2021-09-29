@@ -51,19 +51,18 @@ import org.eclipse.core.filesystem.URIUtil;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.ICoreRunnable;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
-import org.eclipse.core.runtime.jobs.Job;
 
 /**
  * A ILanguageSettingsProvider that parses the file 'compile_commands.json' produced by cmake and other tools.<br>
@@ -269,26 +268,33 @@ public class JsonCompilationDatabaseParser extends LanguageSettingsSerializableP
   }
 
   /**
-   * Overridden to misuse this to populate the {@link #getSettingEntries setting entries} on startup.<br>
+   * Overridden to misuse this to populate the {@link #getSettingEntries setting entries} on startup. This is either
+   * called when a project is loaded or when a user adds the CMake Compilation DB provider on the providers tab in the
+   * UI.<br>
    * {@inheritDoc}
    */
   @Override
   public void registerListener(ICConfigurationDescription cfgDescription) {
     if (cfgDescription != null) {
-      // per-project or when the user just added this provider on the provider tab
-      try {
-        parseAndSetEntries(cfgDescription, new NullProgressMonitor());
-      } catch (CoreException ex) {
-        log.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "registerListener()", ex)); //$NON-NLS-1$
+      // called as per-project provider
+      if (cfgDescription.isActive()) {
+        final IProject project = cfgDescription.getProjectDescription().getProject();
+        WorkspaceJob job = new WorkspaceJob("Parsing compilation database of project " + project.getName()) {
+          @Override
+          public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
+            parseAndSetEntries(cfgDescription, new NullProgressMonitor());
+            return Status.OK_STATUS;
+          }
+        };
+        job.setRule(project);
+        job.schedule();
       }
     } else {
-      // per workspace (to populate on startup)
+      // called as workspace (shared) provider
       List<ICConfigurationDescription> configs = new ArrayList<>();
       CCorePlugin ccp = CCorePlugin.getDefault();
-      IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
-      IProject[] projects = workspaceRoot.getProjects();
       // parse JSON file for any opened project that has a ScannerConfigNature...
-      for (IProject project : projects) {
+      for (IProject project : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
         try {
           if (project.isOpen() && project.hasNature(ScannerConfigNature.NATURE_ID)) {
             ICProjectDescription projectDescription = ccp.getProjectDescription(project, false);
@@ -313,12 +319,24 @@ public class JsonCompilationDatabaseParser extends LanguageSettingsSerializableP
       }
 
       if (!configs.isEmpty()) {
-        Job job = Job.create("Parsing compilation databases", (ICoreRunnable) monitor -> {
-          SubMonitor subMonitor = SubMonitor.convert(monitor, configs.size());
-          for (ICConfigurationDescription cfg : configs) {
-            parseAndSetEntries(cfg, subMonitor.split(1));
+        WorkspaceJob job = new WorkspaceJob("Parsing compilation databases") {
+          @Override
+          public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
+            MultiStatus status = new MultiStatus(Activator.PLUGIN_ID, IStatus.OK,
+                "Problem parsing compilation databases", null);
+            SubMonitor subMonitor = SubMonitor.convert(monitor, configs.size());
+            for (ICConfigurationDescription cfg : configs) {
+              try {
+                parseAndSetEntries(cfg, subMonitor.split(1));
+              } catch (CoreException e) {
+                IStatus s = new Status(IStatus.ERROR, Activator.PLUGIN_ID, IStatus.ERROR,
+                    "Error in project " + cfg.getProjectDescription().getProject().getName(), e);
+                status.merge(s);
+              }
+            }
+            return status;
           }
-        });
+        };
         job.schedule();
       }
     }
