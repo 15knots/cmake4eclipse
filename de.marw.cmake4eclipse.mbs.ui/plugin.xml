@@ -72,6 +72,16 @@
             weight="80">
       </tab>
    </extension>
+ <extension
+       point="org.eclipse.cdt.ui.LanguageSettingsProviderAssociation">
+    <class-association
+          class="de.marw.cmake4eclipse.mbs.internal.JsonCompilationDatabaseParser"
+          icon="icons/CMakeLogo.gif"
+          page="de.marw.cmake4eclipse.mbs.ui.JsonCompilationDatabaseParserPage"
+          ui-clear-entries="false"
+          ui-edit-entries="false">
+    </class-association>
+ </extension>
  <extension point="org.eclipse.help.toc">
     <toc file="doc/toc.xml" primary="true"/>
     <toc file="doc/topics_Tasks.xml"/>

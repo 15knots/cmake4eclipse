@@ -9,34 +9,20 @@
             fileVersion="4.0.0">
       </managedBuildRevision>
          <tool
+               id="de.marw.cmake.cdt.lsp.tool.dummy"
+               name="CMake driven Languages Proxy (deprecated)"
                command="&lt;unused&gt;"
                commandLinePattern="&lt;unused&gt;"
-               customBuildStep="true"
-               icon="icons/CMakeLogo.gif"
-               id="de.marw.cmake.cdt.lsp.tool.dummy"
-               name="CMake driven Languages Proxy">
-                     <inputType
-                           id="de.marw.cmake.cdt.lsp.inputType.c"
-                           superClass="cdt.managedbuild.tool.gnu.c.compiler.input">
-                     </inputType>
-                     <inputType
-                           id="de.marw.cmake.cdt.lsp.inputType.cpp"
-                           superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input">
-                     </inputType>
-                     <option
-                           id="de.marw.cmake.option.dummy"
-                           isAbstract="false"
-                           resourceFilter="project"
-                           valueType="includePath">
-                     </option>
+               customBuildStep="true">
          </tool>
          <toolChain
                id="de.marw.cmake.cdt.lsp.toolchain.cmake"
-               languageSettingsProviders="de.marw.cmake.cdt.language.settings.providers.CompileCommandsJsonParser;de.marw.cmake.cdt.language.settings.providers.BuiltinsCompileCommandsJsonParser"
-               name="CMake driven">
+               languageSettingsProviders="cmake4eclipse.lsp.CompileCommandsJsonParser"
+               name="CMake driven (deprecated)">
             <builder
                   id="de.marw.cmake.cdt.lsp.builder.portable"
-                  superClass="de.marw.cmake4eclipse.mbs.genscriptbuilder">
+                  name="CMake Builder (deprecated)"
+                  superClass="cmake4eclipse.mbs.genscriptbuilder">
             </builder>
             <supportedProperties>
                <property
@@ -60,7 +46,7 @@
             </supportedProperties>
             <targetPlatform
                   id="de.marw.cmake.cdt.lsp.targetPlatform.cmake"
-                  superClass="de.marw.cmake4eclipse.mbs.targetPlatform.any">
+                  superClass="cmake4eclipse.mbs.targetPlatform.any">
             </targetPlatform>
             <tool
                   id="de.marw.cmake.cdt.lsp.toolchain.tool.dummy"
@@ -71,49 +57,13 @@
                id="de.marw.cmake.cdt.lsp.config.base"
                languageSettingsProviders="${Toolchain};-org.eclipse.cdt.ui.UserLanguageSettingsProvider;-org.eclipse.cdt.core.ReferencedProjectsLanguageSettingsProvider;-org.eclipse.cdt.managedbuilder.core.MBSLanguageSettingsProvider;-org.eclipse.cdt.managedbuilder.core.GCCBuildCommandParser">
          </configuration>
-         <toolChain
-               id="de.marw.cmake.cdt.lsp.toolchain.cmake.project"
-               superClass="de.marw.cmake.cdt.lsp.toolchain.cmake">
-            <supportedProperties>
-            <!-- intentionally empty to remove property id="org.eclipse.cdt.build.core.buildArtefactType"
-            	from inherited properties again
-            -->
-            </supportedProperties>
-         </toolChain>
+<!--
          <projectType
                buildArtefactType="de.marw.cmake.cdt.lsp.buildArtefactType.cmake"
-               id="de.marw.cmake.cdt.lsp.projectType">
-            <configuration
-                  buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug"
-                  id="de.marw.cmake.cdt.lsp.config.debug"
-                  name="Debug"
-                  parent="de.marw.cmake.cdt.lsp.config.base">
-               <toolChain
-                     id="de.marw.cmake.cdt.lsp.config.debug.toolChain"
-                     superClass="de.marw.cmake.cdt.lsp.toolchain.cmake.project">
-               </toolChain>
-            </configuration>
-            <configuration
-                  description="Default coming from cmake"
-                  id="de.marw.cmake.cdt.lsp.config.cmake"
-                  name="Default"
-                  parent="de.marw.cmake.cdt.lsp.config.base">
-               <toolChain
-                     id="de.marw.cmake.cdt.lsp.config.cmake.toolChain"
-                     superClass="de.marw.cmake.cdt.lsp.toolchain.cmake.project">
-               </toolChain>
-            </configuration>
-            <configuration
-                  buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release"
-                  id="de.marw.cmake.cdt.lsp.config.release"
-                  name="Release"
-                  parent="de.marw.cmake.cdt.lsp.config.base">
-               <toolChain
-                     id="de.marw.cmake.cdt.lsp.config.release.toolChain"
-                     superClass="de.marw.cmake.cdt.lsp.toolchain.cmake.project">
-               </toolChain>
-            </configuration>
+               id="de.marw.cmake.cdt.lsp.projectType"
+               superClass="cmake4eclipse.mbs.projectType">
          </projectType>
+-->
  </extension>
  <extension
          point="org.eclipse.cdt.managedbuilder.core.buildProperties">
@@ -131,12 +81,14 @@
     <provider
           class="de.marw.cmake.cdt.language.settings.providers.CompileCommandsJsonParser"
           id="de.marw.cmake.cdt.language.settings.providers.CompileCommandsJsonParser"
-          name="CMAKE_EXPORT_COMPILE_COMMANDS Parser">
+          name="CMAKE_EXPORT_COMPILE_COMMANDS Parser (deprecated)"
+          prefer-non-shared="true">
     </provider>
     <provider
           class="de.marw.cmake.cdt.language.settings.providers.BuiltinsCompileCommandsJsonParser"
           id="de.marw.cmake.cdt.language.settings.providers.BuiltinsCompileCommandsJsonParser"
-          name="CMAKE_EXPORT_COMPILE_COMMANDS Compiler Built-ins">
+          name="CMAKE_EXPORT_COMPILE_COMMANDS Compiler Built-ins (deprecated)"
+          prefer-non-shared="true">
     </provider>
  </extension>
  <extension
@@ -155,12 +107,10 @@
        point="org.eclipse.cdt.ui.LanguageSettingsProviderAssociation">
     <class-association
           class="de.marw.cmake.cdt.language.settings.providers.CompileCommandsJsonParser"
-          icon="icons/CMakeLogo.gif"
           page="de.marw.cmake.cdt.internal.ui.lsp.CompileCommandsJsonParserOptionPage">
     </class-association>
     <class-association
           class="de.marw.cmake.cdt.language.settings.providers.BuiltinsCompileCommandsJsonParser"
-          icon="icons/CMakeLogo.gif"
           page="de.marw.cmake.cdt.internal.ui.lsp.BuiltinsCompilerCommandOptionPage">
     </class-association>
  </extension>

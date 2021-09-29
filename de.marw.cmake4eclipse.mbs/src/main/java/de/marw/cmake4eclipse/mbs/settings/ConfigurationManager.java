@@ -11,7 +11,6 @@ package de.marw.cmake4eclipse.mbs.settings;
 import java.util.WeakHashMap;
 
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
-import org.eclipse.cdt.core.settings.model.ICStorageElement;
 import org.eclipse.core.runtime.CoreException;
 
 /**

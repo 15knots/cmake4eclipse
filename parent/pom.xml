@@ -60,7 +60,7 @@
   </issueManagement>
 
   <properties>
-    <tycho-version>1.7.0</tycho-version>
+    <tycho-version>2.4.0</tycho-version>
     <platform.version>1.0.1</platform.version>
     <java.source>1.8</java.source>
   </properties>
@@ -279,11 +279,6 @@
               <environment>
                 <os>macosx</os>
                 <ws>cocoa</ws>
-                <arch>x86</arch>
-              </environment>
-              <environment>
-                <os>macosx</os>
-                <ws>cocoa</ws>
                 <arch>x86_64</arch>
               </environment>
               <environment>
@@ -317,8 +312,8 @@
                     <version>3.3.9</version>
                   </requireMavenVersion>
                   <requireJavaVersion>
-                    <!-- our project README states we require 1.8 or newer at runtime -->
-                    <version>[1.8,1.9)</version>
+                    <!-- our project README states we require 11 or newer at runtime -->
+                    <version>[11,)</version>
                   </requireJavaVersion>
                 </rules>
               </configuration>

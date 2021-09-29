@@ -29,9 +29,9 @@ Screenshots can be found at the <a href="https://marketplace.eclipse.org/content
 The plugin is licensed under the <a href="http://www.eclipse.org/legal/epl-v10.html">Eclipse Public License Version 1.0 ("EPL")</a>.
 
 ## System Requirements
-CDT v 8.7 or newer and Eclipse v 4.5 (Mars) or newer
+CDT v 10.4 or newer and Eclipse v 2021-09 or newer
 
-Java 8 or newer
+Java 11 or newer
 
 ## Installation
 The easiest way is to drag this: <a href="http://marketplace.eclipse.org/marketplace-client-intro?mpc_install=2318334" class="drag" title="Drag to your running Eclipse workbench to install cmake4eclipse">
@@ -47,7 +47,7 @@ https://raw.githubusercontent.com/15knots/cmake4eclipse/master/releng/comp-updat
 Tool integrators will find each release at [cloudsmith](https://cloudsmith.io/~15knots/repos/p2-zip/packages/).
 Each release is provided as a stand-alone zipped p2 repository and can be consumed in a PDE target platform. To add one
 of these repositories to your target platform, add a **Software Site** and enter a URL for the location as
-jar:https://dl.cloudsmith.io/public/15knots/p2-zip/raw/files/cmake4eclipse-2.1.3.zip!/ 
+jar:https://dl.cloudsmith.io/public/15knots/p2-zip/raw/files/cmake4eclipse-3.0.0.zip!/ 
 (note the leading `jar:` and the trailing `!/`).
 
 If you work at a company that wants to ship cmake4eclipse with your product, please consider to mirror the zip file internally

@@ -88,7 +88,7 @@ public class CMakeBuildRunner extends ExternalBuildRunner {
      */
     IBuilder supa = builder;
     do {
-      if (supa.getBaseId().equals("de.marw.cmake4eclipse.mbs.genscriptbuilder")) {
+      if (supa.getBaseId().equals("cmake4eclipse.mbs.genscriptbuilder")) {
         break;
       }
     } while ((supa = supa.getSuperClass()) != null);
@@ -734,11 +734,6 @@ public class CMakeBuildRunner extends ExternalBuildRunner {
     }
 
     @Override
-    public boolean isVariableCaseSensitive() {
-      return this.delegate.isVariableCaseSensitive();
-    }
-
-    @Override
     public String[] getReservedMacroNames() {
       return this.delegate.getReservedMacroNames();
     }
@@ -818,5 +813,24 @@ public class CMakeBuildRunner extends ExternalBuildRunner {
       return this.delegate.getBuildRunner();
     }
 
+    @Override
+    public boolean isDefaultBuildCmdOnly() {
+      return this.delegate.isDefaultBuildCmdOnly();
+    }
+
+    @Override
+    public boolean isDefaultBuildArgsOnly() {
+      return this.delegate.isDefaultBuildArgsOnly();
+    }
+
+    @Override
+    public void setUseDefaultBuildCmdOnly(boolean on) throws CoreException {
+      this.delegate.setUseDefaultBuildCmdOnly(on);
+    }
+
+    @Override
+    public void setUseDefaultBuildArgsOnly(boolean on) throws CoreException {
+      this.delegate.setUseDefaultBuildArgsOnly(on);
+    }
   }
 }

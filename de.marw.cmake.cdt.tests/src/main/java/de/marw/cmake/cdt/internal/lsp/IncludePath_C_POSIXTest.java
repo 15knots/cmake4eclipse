@@ -17,7 +17,6 @@ import org.eclipse.core.runtime.Path;
 import org.junit.Before;
 import org.junit.Test;
 
-import de.marw.cmake.cdt.internal.lsp.ParseContext;
 import de.marw.cmake.cdt.lsp.Arglets.IncludePath_C_POSIX;
 import de.marw.cmake.cdt.lsp.IArglet.IParseContext;
 
