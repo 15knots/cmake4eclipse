@@ -27,3 +27,7 @@ Bundle-Activator: de.marw.cmake4eclipse.mbs.ui.Activator
 Require-Bundle: org.eclipse.cdt.managedbuilder.gnu.ui,
  org.eclipse.cdt.ui,
  org.eclipse.ui
+Require-Bundle: org.eclipse.cdt.ui,
+ org.eclipse.ui
+Require-Bundle: org.eclipse.cdt.ui,
+ org.eclipse.ui
