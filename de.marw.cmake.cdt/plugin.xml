@@ -33,6 +33,7 @@
          <toolChain
                id="de.marw.cmake.cdt.lsp.toolchain.cmake"
                languageSettingsProviders="de.marw.cmake.cdt.language.settings.providers.CompileCommandsJsonParser;de.marw.cmake.cdt.language.settings.providers.BuiltinsCompileCommandsJsonParser"
+               configurationEnvironmentSupplier="de.marw.cmake.cdt.ashling.util.EnvironmentVariableSupplier"
                name="CMake driven">
             <builder
                   id="de.marw.cmake.cdt.lsp.builder.portable"

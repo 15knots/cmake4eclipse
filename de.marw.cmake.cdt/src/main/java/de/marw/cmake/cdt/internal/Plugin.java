@@ -10,6 +10,8 @@ package de.marw.cmake.cdt.internal;
 
 import java.text.MessageFormat;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -85,5 +87,39 @@ public class Plugin extends AbstractUIPlugin {
    */
   public static String getFormattedString(String key, String[] args) {
     return MessageFormat.format(getResourceString(key), (Object[]) args);
+  }
+  
+  /**
+   * Logs the specified status with this plug-in's log.
+   * 
+   * @param status status to log
+   */
+  public static void log(IStatus status) {
+      getDefault().getLog().log(status);
+  }
+  
+  /**
+   * Logs an internal error with the specified message.
+   * 
+   * @param message the error message to log
+   */
+  public static void logErrorMessage(String message) {
+      // this message is intentionally not internationalized, as an exception may
+      // be due to the resource bundle itself
+      log(newErrorStatus(IStatus.ERROR, "Internal message logged from Debug UI: " + message, null)); //$NON-NLS-1$   
+  }
+  
+  /**
+   * Returns a new error status for this plug-in with the given message
+   * 
+   * @param message the message to be included in the status
+   * @param error code
+   * @param exception the exception to be included in the status or <code>null</code> if none
+   * @return a new error status
+   * 
+   * @since 2.0
+   */
+  public static IStatus newErrorStatus(int code, String message, Throwable exception) {
+      return new Status(IStatus.ERROR, Plugin.PLUGIN_ID, code, message, exception);
   }
 }
