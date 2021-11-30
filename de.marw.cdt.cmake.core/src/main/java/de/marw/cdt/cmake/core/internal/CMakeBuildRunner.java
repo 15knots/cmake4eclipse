@@ -736,11 +736,6 @@ public class CMakeBuildRunner extends ExternalBuildRunner {
     }
 
     @Override
-    public boolean isVariableCaseSensitive() {
-      return this.delegate.isVariableCaseSensitive();
-    }
-
-    @Override
     public String[] getReservedMacroNames() {
       return this.delegate.getReservedMacroNames();
     }
@@ -819,6 +814,22 @@ public class CMakeBuildRunner extends ExternalBuildRunner {
     public AbstractBuildRunner getBuildRunner() throws CoreException {
       return this.delegate.getBuildRunner();
     }
+
+	@Override
+	public boolean isDefaultBuildCmdOnly() {
+		return false;
+	}
+
+	@Override
+	public boolean isDefaultBuildArgsOnly() {
+		return false;
+	}
+
+	@Override
+	public void setUseDefaultBuildCmdOnly(boolean on) throws CoreException {}
+
+	@Override
+	public void setUseDefaultBuildArgsOnly(boolean on) throws CoreException {}
 
   }
 }
