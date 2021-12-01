@@ -1,5 +1,6 @@
 package de.marw.cmake.cdt.ashling.util;
 
+
 import org.eclipse.cdt.managedbuilder.core.IConfiguration;
 import org.eclipse.cdt.managedbuilder.core.ManagedBuildManager;
 import org.eclipse.cdt.managedbuilder.envvar.IBuildEnvironmentVariable;
@@ -40,19 +41,17 @@ public class EnvironmentVariableSupplier implements IConfigurationEnvironmentVar
 		private static String name = "PATH"; //$NON-NLS-1$
 		private String path;
 
-		private PathEnvironmentVariable(String path) {
-			this.path = path;
+		private PathEnvironmentVariable(String[] paths) {
+			this.path = String.join(getDelimiter(), paths);
 		}
 
 		public static PathEnvironmentVariable create(IConfiguration configuration) {
-
 			PersistentPreferences fpPersistentPreferences=new PersistentPreferences(fPluginID);
-			String path ="";
 			String buildToolPath=fpPersistentPreferences.getBuildToolPath();
 			String cmakePath=fpPersistentPreferences.getCMakePath();
 			String toolchainPath=fpPersistentPreferences.getToolchainPath();
-			path=resolveMacros(cmakePath, configuration)+";"+resolveMacros(toolchainPath, configuration)+";"+resolveMacros(buildToolPath, configuration);
-			return new PathEnvironmentVariable(path);
+			String[] paths = {resolveMacros(cmakePath, configuration), resolveMacros(toolchainPath, configuration), resolveMacros(buildToolPath, configuration)};
+			return new PathEnvironmentVariable(paths);
 		}
 
 		private static String resolveMacros(String str, IConfiguration configuration) {
@@ -86,7 +85,7 @@ public class EnvironmentVariableSupplier implements IConfigurationEnvironmentVar
 
 		@Override
 		public int getOperation() {
-			return IBuildEnvironmentVariable.ENVVAR_PREPEND;
+			return IBuildEnvironmentVariable.ENVVAR_REMOVE;
 		}
 
 		@Override
