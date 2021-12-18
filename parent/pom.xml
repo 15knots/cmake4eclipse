@@ -62,7 +62,7 @@
   <properties>
     <tycho-version>2.4.0</tycho-version>
     <platform.version>1.0.1</platform.version>
-    <java.source>1.8</java.source>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
   <dependencyManagement>
@@ -109,9 +109,6 @@
           <artifactId>tycho-compiler-plugin</artifactId>
           <version>${tycho-version}</version>
           <configuration>
-            <source>${java.source}</source>
-            <target>${java.source}</target>
-            <encoding>UTF-8</encoding>
             <useProjectSettings>false</useProjectSettings>
           </configuration>
         </plugin>
@@ -119,11 +116,6 @@
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
           <version>3.3</version>
-          <configuration>
-            <source>${java.source}</source>
-            <target>${java.source}</target>
-            <encoding>UTF-8</encoding>
-          </configuration>
         </plugin>
 
         <plugin>
@@ -183,7 +175,7 @@
         </plugin>
         <plugin>
           <groupId>org.eclipse.tycho.extras</groupId>
-          <artifactId>tycho-source-feature-plugin</artifactId>
+          <artifactId>tycho-feature-source-plugin</artifactId>
           <version>${tycho-version}</version>
         </plugin>
         <plugin>
@@ -320,15 +312,6 @@
       <build>
         <pluginManagement>
           <plugins>
-            <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-compiler-plugin</artifactId>
-              <configuration>
-                <!-- lines,source required for readable stack traces -->
-                <debuglevel>lines,source</debuglevel>
-                <optimize>true</optimize>
-              </configuration>
-            </plugin>
             <plugin>
               <groupId>org.eclipse.tycho</groupId>
               <artifactId>tycho-compiler-plugin</artifactId>

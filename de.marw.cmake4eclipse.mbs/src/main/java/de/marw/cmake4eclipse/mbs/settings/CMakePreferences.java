@@ -10,6 +10,7 @@ package de.marw.cmake4eclipse.mbs.settings;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
 import org.eclipse.cdt.core.settings.model.ICStorageElement;
@@ -47,6 +48,8 @@ public class CMakePreferences {
   private static final String ELEM_OPTIONS = "options";
   private static final String ATTR_CACHE_FILE = "cacheEntriesFile";
   private static final String ATTR_BUILD_DIR = "buildDir";
+  /** the 'dirty' time stamp (in milliseconds) */
+  private static final String ATTR_DIRTY_TS = "dirtyTs";
 
   private boolean warnNoDev, debugTryCompile, debugOutput, trace,
       warnUnitialized, warnUnused;
@@ -60,6 +63,7 @@ public class CMakePreferences {
 
   private WindowsPreferences windowsPreferences = new WindowsPreferences();
   private boolean clearCache;
+  private long dirty_ts;
 
   /**
    * Creates a new object, initialized with all default values.
@@ -68,10 +72,17 @@ public class CMakePreferences {
     reset();
   }
 
+  /** Gets the 'dirty' time stamp (in milliseconds).
+   */
+  public long getDirtyTs() {
+    return dirty_ts;
+  }
+
   /**
    * Sets each value to its default.
    */
   public void reset() {
+    dirty_ts= System.currentTimeMillis();
     warnNoDev = false;
     debugTryCompile = false;
     debugOutput = false;
@@ -97,6 +108,7 @@ public class CMakePreferences {
       return;
     ICStorageElement storage = cfgd.getStorage(CMakePreferences.CFG_STORAGE_ID, true);
     buildDirectory= storage.getAttribute(ATTR_BUILD_DIR);
+    dirty_ts= Long.parseLong( Objects.requireNonNullElse( storage.getAttribute(ATTR_DIRTY_TS), "0"));
 
     final ICStorageElement[] children = storage.getChildren();
     for (ICStorageElement child : children) {
@@ -137,6 +149,7 @@ public class CMakePreferences {
       pOpts = parent.createChild(ELEM_OPTIONS);
     }
 
+    // continue to load/save deprecated properties to allow users to migrate back to older versions of cmake4eclipse
     if (clearCache) {
       pOpts.setAttribute(ATTR_CLEAR_CACHE, String.valueOf(clearCache));
     } else {
@@ -184,6 +197,7 @@ public class CMakePreferences {
     } else {
       parent.removeAttribute(ATTR_CACHE_FILE);
     }
+    parent.setAttribute(ATTR_DIRTY_TS, String.valueOf(dirty_ts));
 
     // defines...
     Util.serializeCollection(ELEM_DEFINES, parent, new CMakeDefineSerializer(),
@@ -195,84 +209,120 @@ public class CMakePreferences {
 
   /**
    * {@code -Wno-dev}
+   *
+   * @deprecated no longer used
    */
+  @Deprecated
   public boolean isWarnNoDev() {
     return warnNoDev;
   }
 
   /**
    * {@code -Wno-dev}
+   *
+   * @deprecated no longer used
    */
+  @Deprecated
   public void setWarnNoDev(boolean warnNoDev) {
     this.warnNoDev = warnNoDev;
   }
 
   /**
    * {@code --debug-trycompile}
+   *
+   * @deprecated no longer used
    */
+  @Deprecated
   public boolean isDebugTryCompile() {
     return debugTryCompile;
   }
 
   /**
    * {@code --debug-trycompile}
+   *
+   * @deprecated no longer used
    */
+  @Deprecated
   public void setDebugTryCompile(boolean debugTryCompile) {
     this.debugTryCompile = debugTryCompile;
   }
 
   /**
    * {@code --debug-output}
+   *
+   * @deprecated no longer used
    */
+  @Deprecated
   public boolean isDebugOutput() {
     return debugOutput;
   }
 
   /**
    * {@code --debug-output}
+   *
+   * @deprecated no longer used
    */
+  @Deprecated
   public void setDebugOutput(boolean debugOutput) {
     this.debugOutput = debugOutput;
   }
 
   /**
    * {@code --trace}
+   *
+   * @deprecated no longer used
    */
+  @Deprecated
   public boolean isTrace() {
     return trace;
   }
 
   /**
    * {@code --trace}
+   *
+   * @deprecated no longer used
    */
+  @Deprecated
   public void setTrace(boolean trace) {
     this.trace = trace;
   }
 
   /**
    * {@code --warn-uninitialized}
+   *
+   * @deprecated no longer used
    */
+  @Deprecated
   public boolean isWarnUnitialized() {
     return warnUnitialized;
   }
 
   /**
    * {@code --warn-uninitialized}
+   *
+   * @deprecated no longer used
    */
+  @Deprecated
   public void setWarnUnitialized(boolean warnUnitialized) {
     this.warnUnitialized = warnUnitialized;
   }
 
   /**
    * {@code --warn-unused-vars}
+   *
+   * @deprecated no longer used
    */
+  @Deprecated
   public boolean isWarnUnused() {
     return warnUnused;
   }
 
   /**
    * {@code --warn-unused-vars}
+   *
+   * @deprecated no longer used
    */
+  @Deprecated
   public void setWarnUnused(boolean warnUnused) {
     this.warnUnused = warnUnused;
   }
@@ -290,6 +340,9 @@ public class CMakePreferences {
    * Replaces the list of cmake variables to define with the specified list.
    */
   public void setDefines(List<CmakeDefine> newDefines) {
+    if(!defines.equals(newDefines)) {
+      dirty_ts= System.currentTimeMillis();
+    }
     defines.clear();
     for (CmakeDefine def : newDefines) {
       defines.add(def.clone());
@@ -309,6 +362,9 @@ public class CMakePreferences {
    * Replaces the list of cmake variables to undefine with the specified list.
    */
   public void setUndefines(List<CmakeUnDefine> newDefines) {
+    if(!undefines.equals(newDefines)) {
+      dirty_ts= System.currentTimeMillis();
+    }
     undefines.clear();
     for (CmakeUnDefine def : newDefines) {
       undefines.add(def.clone());
@@ -343,6 +399,9 @@ public class CMakePreferences {
    *          pre-populated.
    */
   public void setCacheFile(String cacheFile) {
+    if(! Objects.equals(cacheFile, this.cacheFile)) {
+      dirty_ts= System.currentTimeMillis();
+    }
     this.cacheFile= cacheFile;
   }
 
@@ -367,14 +426,21 @@ public class CMakePreferences {
     this.buildDirectory = buildDirectory;
   }
 
-  /** Gets whether to clear the cmake-cache before build.
+  /**
+   * Gets whether to clear the cmake-cache before build.
+   *
+   * @deprecated no longer used
    */
+  @Deprecated
   public boolean isClearCache() {
     return clearCache;
   }
 
   /** Sets whether to clear the cmake-cache before build.
+   *
+   * @deprecated no longer used
    */
+  @Deprecated
   public void setClearCache(boolean clearCache) {
     this.clearCache= clearCache;
   }

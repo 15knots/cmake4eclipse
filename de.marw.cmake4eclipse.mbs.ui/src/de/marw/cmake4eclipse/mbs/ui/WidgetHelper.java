@@ -20,7 +20,7 @@ import org.eclipse.swt.widgets.Group;
  *
  * @author Martin Weber
  */
-/* package */class WidgetHelper {
+public class WidgetHelper {
 
   private WidgetHelper() {
     // nothing to instantiate
@@ -35,12 +35,12 @@ import org.eclipse.swt.widgets.Group;
    * @param enabled
    *        whether the button should be initially enabled
    */
-  static Button createButton(Composite parent, String text, boolean enabled) {
+  public static Button createButton(Composite parent, String text, boolean enabled) {
     Button button = new Button(parent, SWT.PUSH);
     button.setText(text);
     if (!enabled)
       button.setEnabled(false);
-    GridData gd = new GridData(SWT.CENTER, SWT.CENTER, false, false);
+    GridData gd = new GridData(SWT.FILL, SWT.CENTER, false, false);
     //    gd.minimumWidth = width;
     button.setLayoutData(gd);
     return button;
@@ -60,7 +60,7 @@ import org.eclipse.swt.widgets.Group;
    * @param text
    *        text to display on the checkbox
    */
-  static Button createCheckbox(Composite parent, int horizontalAlignment,
+  public static Button createCheckbox(Composite parent, int horizontalAlignment,
       int horizontalSpan, String text) {
     Button b = new Button(parent, SWT.CHECK);
     b.setText(text);
@@ -86,7 +86,7 @@ import org.eclipse.swt.widgets.Group;
    * @param numColumns
    *        the number of columns in the grid inside the group
    */
-  static Group createGroup(Composite parent, int horizontalAlignment,
+  public static Group createGroup(Composite parent, int horizontalAlignment,
       int horizontalSpan, String text, int numColumns) {
     Group gr = new Group(parent, SWT.NONE);
     gr.setLayout(new GridLayout(numColumns, false));

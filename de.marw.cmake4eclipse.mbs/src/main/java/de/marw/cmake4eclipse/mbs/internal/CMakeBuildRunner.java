@@ -48,15 +48,14 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.osgi.framework.Version;
 
 import de.marw.cmake4eclipse.mbs.cmakecache.CMakeCacheFileParser;
 import de.marw.cmake4eclipse.mbs.cmakecache.CMakeCacheFileParser.EntryFilter;
 import de.marw.cmake4eclipse.mbs.cmakecache.SimpleCMakeCacheEntry;
-import de.marw.cmake4eclipse.mbs.settings.AbstractOsPreferences;
-import de.marw.cmake4eclipse.mbs.settings.CMakePreferences;
+import de.marw.cmake4eclipse.mbs.preferences.PreferenceAccess;
 import de.marw.cmake4eclipse.mbs.settings.CmakeGenerator;
-import de.marw.cmake4eclipse.mbs.settings.ConfigurationManager;
 
 /**
  * An ExternalBuildRunner that injects the build tool command to use and some of
@@ -88,7 +87,7 @@ public class CMakeBuildRunner extends ExternalBuildRunner {
      */
     IBuilder supa = builder;
     do {
-      if (supa.getBaseId().equals("cmake4eclipse.mbs.genscriptbuilder")) {
+      if (supa.getBaseId().equals("cmake4eclipse.mbs.builder")) {
         break;
       }
     } while ((supa = supa.getSuperClass()) != null);
@@ -102,55 +101,46 @@ public class CMakeBuildRunner extends ExternalBuildRunner {
       if (kind == IncrementalProjectBuilder.CLEAN_BUILD) {
         // avoid calling 'rm -rf' if it is a clean build and the build dir was
         // deleted
-        final IPath location = ResourcesPlugin.getWorkspace().getRoot().getFile(builderCWD).getLocation();
-        if (location == null || !location.toFile().exists()) {
+        if (!builderCWD.toFile().exists()) {
           return true; // is clean
         }
       }
 
-      final CMakePreferences prefs = ConfigurationManager.getInstance()
-          .getOrLoad(cfgd);
-      final AbstractOsPreferences osPrefs = AbstractOsPreferences
-          .extractOsPreferences(prefs);
-
-      // try to get CMAKE_BUILD_TOOL entry from CMakeCache.txt...
-      final CmakeGenerator generator = osPrefs.getGenerator();
-      String buildscriptProcessorCmd = getCommandFromCMakeCache(cfgd,
-          generator != osPrefs.getGeneratedWith(), project, markerGenerator);
+      String buildscriptProcessorCmd = getCommandFromCMakeCache(cfgd, project, markerGenerator);
       if (buildscriptProcessorCmd == null) {
         // actually this should not happen, since cmake will abort if it cannot determine
         // the build tool,.. but the variable name might change in future
         return false;
       }
-      builder = new CmakeBuildToolInjectorBuilder(builder,
-          buildscriptProcessorCmd, generator);
+      // try to get CMAKE_MAKE_PROGRAM entry from CMakeCache.txt...
+      IEclipsePreferences prefs = PreferenceAccess.getPreferences();
+      final CmakeGenerator generator = BuildToolKitUtil.getEffectiveCMakeGenerator(prefs,
+          BuildToolKitUtil.getOverwritingToolkit(prefs));
+      builder = new CmakeBuildToolInjectorBuilder(builder, buildscriptProcessorCmd, generator);
     }
     return super.invokeBuild(kind, project, configuration, builder, console,
         markerGenerator, projectBuilder, monitor);
   }
 
   /**
-   * Gets the {@code "CMAKE_BUILD_TOOL"} value from the parsed content of the
+   * Gets the {@code "CMAKE_MAKE_PROGRAM"} value from the parsed content of the
    * CMake cache file (CMakeCache.txt) corresponding to the specified
    * configuration. If the cache for the parsed content is invalid, tries to
    * parse the CMakeCache.txt file first and then caches the parsed content.
    *
    * @param cfgd
    *          configuration
-   * @param forceParsing
-   *          {@code true} to force parsing of the cmake cache file without
-   *          checking its time-stamp, otherwise {@code false}.
-   * @param markerGenerator
-   *          used to create error markers
    * @param project
    *          the current project, used to create error markers
+   * @param markerGenerator
+   *          used to create error markers
    * @return a value for the {@code "cmake_build_cmd"} macro or {@code null}, if
    *         none could be determined
    * @throws CoreException
    *           if an IOExceptions occurs when reading the cmake cache file
    */
    private String getCommandFromCMakeCache(ICConfigurationDescription cfgd,
-       boolean forceParsing, IProject project, IMarkerGenerator markerGenerator) throws CoreException {
+       IProject project, IMarkerGenerator markerGenerator) throws CoreException {
      CMakeCacheFileInfo fi = (CMakeCacheFileInfo) cfgd.getSessionProperty(cacheFileInfo);
      if (fi == null) {
        fi = new CMakeCacheFileInfo();
@@ -169,7 +159,7 @@ public class CMakeBuildRunner extends ExternalBuildRunner {
 
     if (file != null && file.isFile()) {
       final long lastModified = file.lastModified();
-      if (forceParsing || fi.cachedCmakeBuildTool == null || lastModified > fi.cmCacheFileLastModified) {
+      if (fi.cachedCmakeBuildTool == null || lastModified > fi.cmCacheFileLastModified) {
         // internally cached value is out of date, must parse CMakeCache.txt
         fi.cachedCmakeBuildTool = null; // invalidate cache
 
@@ -265,14 +255,13 @@ public class CMakeBuildRunner extends ExternalBuildRunner {
 
     @Override
     public IPath getBuildCommand() {
-      return new Path(this.delegate.getBuildCommand().toString()
-          .replace("CMAKE_BUILD_TOOL", cmakeBuildTool));
+      return new Path(cmakeBuildTool);
     }
 
     @Override
     public String getBuildArguments() {
       String arg0 = delegate.getBuildArguments(); // macros are expanded
-      // remove placeholders required by CDT (specified in plugin.xml)
+      // remove placeholders required by CDT to enable the parallelism- and stop-on-error-UI (specified in plugin.xml)
       String args = arg0.replace("$<cmake4eclipse_dyn>", "");
       // Handle ignore errors option...
       if (!delegate.isStopOnError()) {

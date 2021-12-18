@@ -13,6 +13,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Predicate;
 
 import org.eclipse.cdt.core.CCorePlugin;
 import org.eclipse.cdt.core.ConsoleOutputStream;
@@ -50,9 +52,14 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 
-import de.marw.cmake4eclipse.mbs.settings.AbstractOsPreferences;
+import com.google.gson.JsonSyntaxException;
+
+import de.marw.cmake4eclipse.mbs.preferences.BuildToolKitDefinition;
+import de.marw.cmake4eclipse.mbs.preferences.PreferenceAccess;
 import de.marw.cmake4eclipse.mbs.settings.CMakePreferences;
 import de.marw.cmake4eclipse.mbs.settings.CmakeDefine;
 import de.marw.cmake4eclipse.mbs.settings.CmakeGenerator;
@@ -69,7 +76,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
   private static final ILog log = Activator.getDefault().getLog();
 
   /** CBuildConsole element id */
-  private static final String CMAKE_CONSOLE_ID = "de.marw.cmake4eclipse.mbs.cmakeConsole";
+  private static final String CMAKE_CONSOLE_ID = "cmake4eclipse.mbs.cmakeConsole";
   /** buildscript generation error marker ID */
   private static final String MARKER_ID = Activator.PLUGIN_ID + ".BuildscriptGenerationError";
 
@@ -222,9 +229,6 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       }
     }
 
-    // load project properties..
-    final CMakePreferences prefs = ConfigurationManager.getInstance().getOrLoad(cfgDes);
-
     // See if the user has cancelled the build
     checkCancel();
 
@@ -233,16 +237,20 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     final IFolder buildFolder = getBuildFolder();
     final File buildDir = buildFolder.getLocation().toFile();
     final File cacheFile = new File(buildDir, "CMakeCache.txt");
-    if ((isGeneratorChanged(prefs) || prefs.isClearCache()) && cacheFile.exists()) {
-      // The user changed the generator, remove cache file to avoid cmake's complaints..
+    IEclipsePreferences prefs = PreferenceAccess.getPreferences();
+    boolean cacheFileExists = cacheFile.exists();
+    if ((prefs.getLong(PreferenceAccess.DIRTY_TS, 0L) > cacheFile.lastModified()
+        || ConfigurationManager.getInstance().getOrLoad(cfgDes).getDirtyTs() > cacheFile.lastModified())
+        || prefs.getBoolean(PreferenceAccess.CMAKE_FORCE_RUN, false)
+        && cacheFileExists) {
+      // The generator might have changed, remove cache file to avoid cmake's complaints..
       cacheFile.delete();
 //      System.out.println("DEL "+cacheFile);
       // tell the workspace about file removal
       buildFolder.getFile("CMakeCache.txt").refreshLocal(IResource.DEPTH_ZERO, monitor);
       mustGenerate= true;
     }
-    final File makefile = new File(buildDir, getMakefileName());
-    if (!mustGenerate && (!cacheFile.exists() || !makefile.exists())) {
+    if (!mustGenerate && (!cacheFileExists || !new File(buildDir, getMakefileName()).exists())) {
       mustGenerate= true;
     }
 
@@ -343,58 +351,101 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
    * @throws CoreException
    */
   private MultiStatus invokeCMake(IContainer srcFolder, IFolder buildFolder, IConsole console) throws CoreException {
+    IEclipsePreferences prefs = PreferenceAccess.getPreferences();
+    try {
+      Optional<BuildToolKitDefinition> overwritingBtk = BuildToolKitUtil.getOverwritingToolkit(prefs);
 
-    String errMsg;
-    final List<String> argList = buildCommandline(srcFolder.getLocation());
-    // extract cmake command
-    final String cmd = argList.remove(0);
-    // Set the environment
-    IEnvironmentVariable[] variables = ManagedBuildManager.getEnvironmentVariableProvider().getVariables(config, true);
-    String[] envp = null;
-    ArrayList<String> envList = new ArrayList<>();
-    if (variables != null) {
-      for (int i = 0; i < variables.length; i++) {
-        envList.add(variables[i].getName() + "=" + variables[i].getValue()); //$NON-NLS-1$
-      }
-      envp = envList.toArray(new String[envList.size()]);
-    }
-    // run cmake..
-    final ICommandLauncher launcher = builder.getCommandLauncher();
-    launcher.setProject(project); // 9.4++ versions of CDT require this for docker
-    launcher.showCommand(true);
-    final Process proc =
-        launcher.execute(new Path(cmd), argList.toArray(new String[argList.size()]), envp, buildFolder.getLocation(), monitor);
-    if (proc != null) {
-      try {
-        // Close the input of the process since we will never write to it
-        proc.getOutputStream().close();
-      } catch (IOException e) {
-      }
-      CMakeErrorParser.deleteErrorMarkers(project);
-      // NOTE: we need 2 of this, since the output streams are not synchronized, causing loss of
-      // the internal processor state
-      CMakeErrorParser epo = new CMakeErrorParser(srcFolder, console.getOutputStream());
-      CMakeErrorParser epe = new CMakeErrorParser(srcFolder, console.getErrorStream());
-      int state = launcher.waitAndRead(epo, epe, monitor);
-      if (state == ICommandLauncher.COMMAND_CANCELED) {
-        throw new OperationCanceledException(launcher.getErrorMessage());
-      }
+      // Set the environment
+      ArrayList<String> envList = buildEnvironment(console, overwritingBtk);
 
-      // check cmake exit status
-      final int exitValue = proc.exitValue();
-      if (exitValue == 0) {
-        // success
-        return new MultiStatus(Activator.PLUGIN_ID, IStatus.OK, null, null);
+      final List<String> argList = buildCommandline(srcFolder.getLocation(), overwritingBtk);
+      // extract cmake command
+      final String cmd = argList.remove(0);
+      // run cmake..
+      final ICommandLauncher launcher = builder.getCommandLauncher();
+      launcher.setProject(project); // 9.4++ versions of CDT require this for docker
+      launcher.showCommand(true);
+      final Process proc = launcher.execute(new Path(cmd), argList.toArray(new String[argList.size()]),
+          envList.toArray(new String[envList.size()]), buildFolder.getLocation(), monitor);
+      if (proc != null) {
+        try {
+          // Close the input of the process since we will never write to it
+          proc.getOutputStream().close();
+        } catch (IOException e) {
+        }
+        CMakeErrorParser.deleteErrorMarkers(project);
+        // NOTE: we need 2 of this, since the output streams are not synchronized, causing loss of
+        // the internal processor state
+        CMakeErrorParser epo = new CMakeErrorParser(srcFolder, console.getOutputStream());
+        CMakeErrorParser epe = new CMakeErrorParser(srcFolder, console.getErrorStream());
+        int state = launcher.waitAndRead(epo, epe, monitor);
+        if (state == ICommandLauncher.COMMAND_CANCELED) {
+          throw new OperationCanceledException(launcher.getErrorMessage());
+        }
+
+        // check cmake exit status
+        final int exitValue = proc.exitValue();
+        if (exitValue == 0) {
+          // success
+          return new MultiStatus(Activator.PLUGIN_ID, IStatus.OK, null, null);
+        } else {
+          // cmake had errors...
+          String msg = String.format("%1$s exited with status %2$d. See CDT global build console for details.", cmd,
+              exitValue);
+          return new MultiStatus(Activator.PLUGIN_ID, IStatus.ERROR, msg, null);
+        }
       } else {
-        // cmake had errors...
-        errMsg = String.format("%1$s exited with status %2$d. See CDT global build console for details.", cmd, exitValue);
-        return new MultiStatus(Activator.PLUGIN_ID, IStatus.ERROR, errMsg, null);
+        // process start failed
+        String msg = launcher.getErrorMessage();
+        return new MultiStatus(Activator.PLUGIN_ID, IStatus.ERROR, msg, null);
+      }
+    } catch (JsonSyntaxException ex) {
+      // workbench preferences file format error
+      log.error("Error loading workbench preferences", ex);
+      return new MultiStatus(Activator.PLUGIN_ID, IStatus.ERROR, "Error loading workbench preferences", ex);
+    }
+  }
+
+  /**
+   * Build the environment to invoke cmake with.
+   */
+  private ArrayList<String> buildEnvironment(IConsole console, Optional<BuildToolKitDefinition> overwritingBtk)
+      throws CdtVariableException, CoreException {
+    ArrayList<String> envList = new ArrayList<>();
+
+    IEnvironmentVariable[] variables = ManagedBuildManager.getEnvironmentVariableProvider().getVariables(config, true);
+    if (overwritingBtk.isEmpty()) {
+      for (IEnvironmentVariable var : variables) {
+        envList.add(var.getName() + "=" + var.getValue()); //$NON-NLS-1$
       }
     } else {
-      // process start failed
-      errMsg = launcher.getErrorMessage();
-      return new MultiStatus(Activator.PLUGIN_ID, IStatus.ERROR, errMsg, null);
+      // PATH is overwritten...
+      Predicate<String> mustReplacePATH = n -> false;
+      if (Platform.OS_WIN32.equals(Platform.getOS())) {
+        // check for windows which has case-insensitive envvar names, e.g. 'pAth'
+        mustReplacePATH = n -> "PATH".equalsIgnoreCase(n);
+      } else {
+        mustReplacePATH = n -> "PATH".equals(n);
+      }
+      for (IEnvironmentVariable var : variables) {
+        final String name = var.getName();
+        String value = var.getValue();
+        if (mustReplacePATH.test(name)) {
+          // replace the value of $PATH with the value specified in the overwriting build tool kit
+          value = CCorePlugin.getDefault().getCdtVariableManager().resolveValue(overwritingBtk.get().getPath(), "",
+              var.getDelimiter(), null);
+          try {
+            final ConsoleOutputStream cis = console.getInfoStream();
+            String msg = String.format("  Build tool kit '%s': $%s='%s'\n", overwritingBtk.get().getName(), name,
+                value);
+            cis.write(msg.getBytes());
+          } catch (IOException ignore) {
+          }
+        }
+        envList.add(name + "=" + value); //$NON-NLS-1$
+      }
     }
+    return envList;
   }
 
   /**
@@ -403,129 +454,92 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
    *
    * @throws CoreException
    */
-  private List<String> buildCommandline(IPath srcDir) throws CoreException {
+  private List<String> buildCommandline(IPath srcDir, Optional<BuildToolKitDefinition> overwritingBtk)
+      throws CoreException {
     // load project properties..
     final ICConfigurationDescription cfgd = ManagedBuildManager.getDescriptionForConfiguration(config);
 
-    boolean needExportComileCommands = true;
     boolean needVerboseBuild = false;
     {
-      final List<ILanguageSettingsProvider> lsps =
-          ((ILanguageSettingsProvidersKeeper) cfgd).getLanguageSettingProviders();
-      for (ILanguageSettingsProvider lsp : lsps) {
-        if (!needVerboseBuild && "org.eclipse.cdt.managedbuilder.core.GCCBuildCommandParser".equals(lsp.getId())) {
-          needVerboseBuild = true;
-          continue;
-        }
-      }
+      final List<ILanguageSettingsProvider> lsps = ((ILanguageSettingsProvidersKeeper) cfgd)
+          .getLanguageSettingProviders();
+      // GCCBuildCommandParser wants to see gcc command lines
+      needVerboseBuild = lsps.stream().map(lsp -> lsp.getId())
+          .filter(id -> "org.eclipse.cdt.managedbuilder.core.GCCBuildCommandParser".equals(id)).findFirst().isPresent();
     }
 
-    final CMakePreferences prefs = ConfigurationManager.getInstance().getOrLoad(cfgd);
-
     List<String> args = new ArrayList<>();
-
     /* add our defaults first */
     {
-      // default for all OSes
-      args.add("cmake");
+      args.add(0, "cmake");
+      if (overwritingBtk.isPresent() && overwritingBtk.get().isExternalCmake()) {
+        args.set(0, overwritingBtk.get().getExternalCmakeFile());
+      }
       // set argument for debug or release build..
       IBuildObjectProperties buildProperties = config.getBuildProperties();
       IBuildProperty property = buildProperties.getProperty(ManagedBuildManager.BUILD_TYPE_PROPERTY_ID);
       if (property != null) {
         IBuildPropertyValue value = property.getValue();
         if (ManagedBuildManager.BUILD_TYPE_PROPERTY_DEBUG.equals(value.getId())) {
-          args.add("-DCMAKE_BUILD_TYPE:STRING=Debug");
+          args.add("-DCMAKE_BUILD_TYPE=Debug");
         } else if (ManagedBuildManager.BUILD_TYPE_PROPERTY_RELEASE.equals(value.getId())) {
-          args.add("-DCMAKE_BUILD_TYPE:STRING=Release");
+          args.add("-DCMAKE_BUILD_TYPE=Release");
         }
       }
       // colored output during build is useless for build console (seems to affect progress report only)
 //      args.add("-DCMAKE_COLOR_MAKEFILE:BOOL=OFF");
       if (needVerboseBuild) {
-        // echo commands to the console during the make to give output parsers a chance
-        args.add("-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON");
+        // echo commands to the console during the build to give output parsers a chance
+        args.add("-DCMAKE_VERBOSE_MAKEFILE=ON");
         // speed up build output parsing by disabling progress report msgs
-        args.add("-DCMAKE_RULE_MESSAGES:BOOL=OFF");
-      }
-      // tell cmake to write compile commands to a JSON file
-      if (needExportComileCommands) {
-        args.add("-DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=ON");
+        args.add("-DCMAKE_RULE_MESSAGES=OFF");
       }
     }
 
-    /* add general settings */
-    if (prefs.isWarnNoDev())
-      args.add("-Wno-dev");
-    if (prefs.isDebugTryCompile())
-      args.add("--debug-trycompile");
-    if (prefs.isDebugOutput())
-      args.add("--debug-output");
-    if (prefs.isTrace())
-      args.add("--trace");
-    if (prefs.isWarnUnitialized())
-      args.add("--warn-unitialized");
-    if (prefs.isWarnUnused())
-      args.add("--warn-unused");
-    if (prefs.getCacheFile() != null) {
-      args.add("-C");
-      args.add(prefs.getCacheFile());
+    /* add workbench preferences */
+    {
+      IEclipsePreferences wPrefs = PreferenceAccess.getPreferences();
+      CmakeGenerator generator = BuildToolKitUtil.getEffectiveCMakeGenerator(wPrefs, overwritingBtk);
+      args.add("-G");
+      args.add(generator.getCmakeName());
+      /* add general settings */
+      if (wPrefs.getBoolean(PreferenceAccess.CMAKE_WARN_NO_DEV, false))
+        args.add("-Wno-dev");
+      if (wPrefs.getBoolean(PreferenceAccess.CMAKE_DBG_TRY_COMPILE, false))
+        args.add("--debug-trycompile");
+      if (wPrefs.getBoolean(PreferenceAccess.CMAKE_DBG, false))
+        args.add("--debug-output");
+      if (wPrefs.getBoolean(PreferenceAccess.CMAKE_TRACE, false))
+        args.add("--trace");
+      if (wPrefs.getBoolean(PreferenceAccess.CMAKE_WARN_UNINITIALIZED, false))
+        args.add("--warn-unitialized");
+      if (wPrefs.getBoolean(PreferenceAccess.CMAKE_WARN_UNUSED, false))
+        args.add("--warn-unused");
+      if (!needVerboseBuild && wPrefs.getBoolean(PreferenceAccess.VERBOSE_BUILD, false)) {
+        args.add("-DCMAKE_VERBOSE_MAKEFILE=ON");
+      }
+
+      String json = wPrefs.get(PreferenceAccess.CMAKE_CACHE_ENTRIES, "[]");
+      List<CmakeDefine> entries = PreferenceAccess.toListFromJson(CmakeDefine.class, json);
+      appendDefines(args, entries, null);
+    }
+    /* project settings... */
+    {
+      final CMakePreferences prefs = ConfigurationManager.getInstance().getOrLoad(cfgd);
+      if (prefs.getCacheFile() != null) {
+        args.add("-C");
+        args.add(prefs.getCacheFile());
+      }
+
+      appendDefines(args, prefs.getDefines(), cfgd);
+      appendUndefines(args, prefs.getUndefines());
     }
 
-    appendDefines(args, prefs.getDefines());
-    appendUndefines(args, prefs.getUndefines());
-
-    /* add settings for the operating system we are running under */
-    final AbstractOsPreferences osPrefs = AbstractOsPreferences.extractOsPreferences(prefs);
-    appendAbstractOsPreferences(args, osPrefs);
-    // TODO (does not belong here) remember last generator
-    osPrefs.setGeneratedWith(osPrefs.getGenerator());
-
+    // tell cmake to write compile commands to a JSON file
+    args.add("-DCMAKE_EXPORT_COMPILE_COMMANDS=ON");
     // tell cmake where its script is located..
     args.add(srcDir.toOSString());
-
     return args;
-  }
-
-  /**
-   * Gets whether the user changed the generator setting in the preferences.
-   *
-   * @return {@code true} if the user changed the generator setting in the
-   *         preferences, otherwise {@code false}
-   */
-  private boolean isGeneratorChanged(CMakePreferences prefs) {
-    AbstractOsPreferences osPrefs = AbstractOsPreferences.extractOsPreferences(prefs);
-    return osPrefs.getGenerator() != osPrefs.getGeneratedWith();
-  }
-
-  /**
-   * Appends arguments specific to the given OS preferences. The first argument in the
-   * list will be replaced by the cmake command from the specified preferences,
-   * if given.
-   *
-   * @param args
-   *        the list to append cmake-arguments to.
-   * @param prefs
-   *        the generic OS preferences to convert and append.
-   * @throws CoreException
-   *         if unable to resolve the value of one or more variables
-   */
-  private void appendAbstractOsPreferences(List<String> args, final AbstractOsPreferences prefs)
-      throws CoreException {
-    // replace cmake command, if given
-    if (!prefs.getUseDefaultCommand()){
-      ICdtVariableManager varManager = CCorePlugin.getDefault().getCdtVariableManager();
-      String cmd = varManager.resolveValue(prefs.getCommand(), "<undefined variable here, but CDT does not allow"
-          + " to pass it unexpanded; thus its name is lost>"
-          , null,
-          ManagedBuildManager.getDescriptionForConfiguration(config));
-      args.set(0, cmd);
-    }
-    args.add("-G");
-    final CmakeGenerator generator = prefs.getGenerator();
-    args.add(generator.getCmakeName());
-
-    appendDefines(args, prefs.getDefines());
-    appendUndefines(args, prefs.getUndefines());
   }
 
   /**
@@ -543,23 +557,22 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
   }
 
   /**
-   * Appends arguments for the specified cmake defines. Performs substitutions
-   * on variables found in a value of each define.
+   * Appends arguments for the specified cmake defines. Performs substitutions on variables found in a value of each
+   * define.
    *
-   * @param args
-   *        the list to append cmake-arguments to.
-   * @param defines
-   *        the cmake defines to convert and append.
-   * @throws CoreException
-   *         if unable to resolve the value of one or more variables
+   * @param args    the list to append cmake-arguments to
+   * @param defines the cmake defines to convert and append
+   * @param cfgd    the project configuration to use for variable resolution or null to resolve variables from the
+   *                workbench
+   * @throws CoreException if unable to resolve the value of one or more variables
    */
-  private void appendDefines(List<String> args, final List<CmakeDefine> defines) throws CoreException {
+  private void appendDefines(List<String> args, final List<CmakeDefine> defines, ICConfigurationDescription cfgd)
+      throws CoreException {
     final ICdtVariableManager mngr = CCorePlugin.getDefault().getCdtVariableManager();
-    final ICConfigurationDescription cfgd = ManagedBuildManager.getDescriptionForConfiguration(config);
     for (CmakeDefine def : defines) {
       final StringBuilder sb = new StringBuilder("-D");
       sb.append(def.getName());
-      sb.append(':').append(def.getType().getCmakeArg());
+//      sb.append(':').append(def.getType().getCmakeArg());
       sb.append('=');
       String expanded = mngr.resolveValue(def.getValue(), "", "", cfgd);
       sb.append(expanded);
@@ -572,19 +585,16 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
    */
   @Override
   public String getMakefileName() {
-    // load project properties..
-    final ICConfigurationDescription cfgd = ManagedBuildManager.getDescriptionForConfiguration(config);
-    CMakePreferences prefs;
+    IEclipsePreferences prefs = PreferenceAccess.getPreferences();
     try {
-      prefs = ConfigurationManager.getInstance().getOrLoad(cfgd);
-    } catch (CoreException ex) {
-      // Auto-generated catch block
-      ex.printStackTrace();
-      return "Makefile"; // default
+      CmakeGenerator generator = BuildToolKitUtil.getEffectiveCMakeGenerator(prefs,
+          BuildToolKitUtil.getOverwritingToolkit(prefs));
+      return generator.getMakefileName();
+    } catch (JsonSyntaxException ex) {
+      // file format error
+      log.error("Error loading workbench preferences", ex);
     }
-    AbstractOsPreferences osPrefs = AbstractOsPreferences.extractOsPreferences(prefs);
-    // file generated by cmake
-    return osPrefs.getGenerator().getMakefileName();
+    return "makefile";
   }
 
   /*-
@@ -652,7 +662,12 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
   private static class CMakeListsVisitor implements IResourceDeltaVisitor {
     private boolean hasChanges = false;
 
+    @Override
     public boolean visit(IResourceDelta delta) {
+      if (hasChanges) {
+        return false; // changes were detected already
+      }
+
       switch (delta.getKind()) {
       case IResourceDelta.CHANGED:
         IResource resource = delta.getResource();

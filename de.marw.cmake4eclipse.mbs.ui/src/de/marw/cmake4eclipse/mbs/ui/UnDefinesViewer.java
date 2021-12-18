@@ -25,12 +25,12 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -42,6 +42,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 
 import de.marw.cmake4eclipse.mbs.settings.CmakeUnDefine;
+import de.marw.cmake4eclipse.mbs.ui.preferences.ViewerComparatorSortHandler;
 
 /**
  * Displays a table for the Cmake undefines. The created table will be displayed
@@ -56,16 +57,12 @@ import de.marw.cmake4eclipse.mbs.settings.CmakeUnDefine;
   private static final int[] tableColumnWidths = { 120 };
 
   private TableViewer tableViewer;
-  private MyViewerComparator comparator;
 
   /**
    * @param parent
    */
   public UnDefinesViewer(Composite parent) {
     createEditor(parent);
-    // Set the sorter for the table
-    comparator = new MyViewerComparator();
-    tableViewer.setComparator(comparator);
   }
 
   /**
@@ -92,11 +89,15 @@ import de.marw.cmake4eclipse.mbs.settings.CmakeUnDefine;
     return (List<CmakeUnDefine>) tableViewer.getInput();
   }
 
-  private TableViewer createViewer(Composite parent) {
+  private static TableViewer createViewer(Composite parent) {
     TableViewer viewer = new TableViewer(parent, SWT.BORDER | SWT.H_SCROLL
         | SWT.V_SCROLL | SWT.MULTI | SWT.FULL_SELECTION);
 
-    createColumns(parent, viewer);
+    // Set the sorter for the table
+    ViewerComparatorSortHandler comparator = new ViewerComparatorSortHandler(viewer);
+    viewer.setComparator(comparator);
+
+    createColumns(viewer, comparator);
 
     final Table table = viewer.getTable();
     table.setHeaderVisible(true);
@@ -121,22 +122,20 @@ import de.marw.cmake4eclipse.mbs.settings.CmakeUnDefine;
 
   /**
    * Creates the columns for the table.
-   *
-   * @param parent
    * @param viewer
    */
-  private void createColumns(final Composite parent, final TableViewer viewer) {
+  private static void createColumns(final TableViewer viewer, SelectionListener sortSelection) {
     for (int i = 0; i < tableColumnNames.length; i++) {
       createTableViewerColumn(viewer, tableColumnNames[i],
-          tableColumnWidths[i], i);
+          tableColumnWidths[i], i, sortSelection);
     }
   }
 
   /**
    * Creates a table viewer column for the table.
    */
-  private TableViewerColumn createTableViewerColumn(final TableViewer viewer,
-      String title, int colWidth, final int colNumber) {
+  private static TableViewerColumn createTableViewerColumn(final TableViewer viewer,
+      String title, int colWidth, final int colNumber, SelectionListener sortSelection) {
     final TableViewerColumn viewerColumn = new TableViewerColumn(viewer,
         SWT.NONE);
     final TableColumn column = viewerColumn.getColumn();
@@ -144,27 +143,10 @@ import de.marw.cmake4eclipse.mbs.settings.CmakeUnDefine;
     column.setWidth(colWidth);
     column.setResizable(true);
     column.setMoveable(true);
-    column.addSelectionListener(createSelectionAdapter(column, colNumber));
+    if (sortSelection != null) {
+      column.addSelectionListener(sortSelection);
+    }
     return viewerColumn;
-  }
-
-  /**
-   * Creates a selection adapter that changes the sorting order and sorting
-   * column of the table.
-   */
-  private SelectionAdapter createSelectionAdapter(final TableColumn column,
-      final int index) {
-    SelectionAdapter selectionAdapter = new SelectionAdapter() {
-      @Override
-      public void widgetSelected(SelectionEvent e) {
-        comparator.setSortColumn(index);
-        int dir = comparator.getSortDirection();
-        tableViewer.getTable().setSortDirection(dir);
-        tableViewer.getTable().setSortColumn(column);
-        tableViewer.refresh();
-      }
-    };
-    return selectionAdapter;
   }
 
   /**
@@ -333,41 +315,4 @@ import de.marw.cmake4eclipse.mbs.settings.CmakeUnDefine;
       return ((CmakeUnDefine) element).getName();
     }
   } // CmakeVariableLabelProvider
-
-  private static class MyViewerComparator extends ViewerComparator {
-    private int sortColumn;
-    private boolean ascending;
-
-    public MyViewerComparator() {
-      this.sortColumn = 0;
-      ascending = true;
-    }
-
-    public int getSortDirection() {
-      return ascending ? SWT.UP : SWT.DOWN;
-    }
-
-    public void setSortColumn(int column) {
-      if (column == this.sortColumn) {
-        // Same column as last sort; toggle the direction
-        ascending ^= true;
-      } else {
-        // New column; do an ascending sort
-        this.sortColumn = column;
-        ascending = true;
-      }
-    }
-
-    @Override
-    public int compare(Viewer viewer, Object e1, Object e2) {
-      CmakeUnDefine v1 = (CmakeUnDefine) e1;
-      CmakeUnDefine v2 = (CmakeUnDefine) e2;
-      int rc = v1.getName().compareTo(v2.getName());
-      // If descending order, flip the direction
-      if (!ascending) {
-        rc = -rc;
-      }
-      return rc;
-    }
-  } // MyViewerComparator
 }

@@ -16,8 +16,6 @@ package de.marw.cmake4eclipse.mbs.settings;
  */
 public class WindowsPreferences extends AbstractOsPreferences {
 
-  private static final String ELEM_OS = "win32";
-
   /** Overridden to set a sensible generator. */
   public void reset() {
     super.reset();
@@ -28,6 +26,6 @@ public class WindowsPreferences extends AbstractOsPreferences {
    * @return the String "win32".
    */
   protected String getStorageElementName() {
-    return ELEM_OS;
+    return "win32";
   }
 }

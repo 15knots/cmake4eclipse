@@ -9,6 +9,7 @@
 package de.marw.cmake4eclipse.mbs.ui;
 
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
+import org.eclipse.cdt.core.settings.model.ICMultiConfigDescription;
 import org.eclipse.cdt.core.settings.model.ICResourceDescription;
 import org.eclipse.cdt.core.settings.model.ICStorageElement;
 import org.eclipse.core.runtime.CoreException;
@@ -27,8 +28,6 @@ import de.marw.cmake4eclipse.mbs.settings.ConfigurationManager;
  * @author Martin Weber
  */
 public class CMakeSymbolsTab extends QuirklessAbstractCPropertyTab {
-
-  /**  */
   private static final ILog log = Activator.getDefault().getLog();
 
   /**
@@ -102,21 +101,22 @@ public class CMakeSymbolsTab extends QuirklessAbstractCPropertyTab {
 
     ICConfigurationDescription srcCfg = src.getConfiguration();
     ICConfigurationDescription dstCfg = dst.getConfiguration();
-    final ConfigurationManager configMgr = ConfigurationManager.getInstance();
-
-    try {
-      CMakePreferences srcPrefs = configMgr.getOrLoad(srcCfg);
-      CMakePreferences dstPrefs = configMgr.getOrCreate(dstCfg);
-      if (srcPrefs != dstPrefs) {
-        dstPrefs.setDefines(srcPrefs.getDefines());
-        dstPrefs.setUndefines(srcPrefs.getUndefines());
+    if(!(srcCfg instanceof ICMultiConfigDescription)) {
+      try {
+        final ConfigurationManager configMgr = ConfigurationManager.getInstance();
+        CMakePreferences srcPrefs = configMgr.getOrLoad(srcCfg);
+        CMakePreferences dstPrefs = configMgr.getOrCreate(dstCfg);
+        if (srcPrefs != dstPrefs) {
+          dstPrefs.setDefines(srcPrefs.getDefines());
+          dstPrefs.setUndefines(srcPrefs.getUndefines());
+        }
+        // To have same behavior as CDT >= 9.4 has: Apply DOES PERSIST settings:
+        // this also solves the problem with different configuration that have been modified and ApplyEd
+        // but would otherwise not be persisted on performOK()
+        persist(dst);
+      } catch (CoreException ex) {
+        log.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, null, ex));
       }
-      // To have same behavior as CDT >= 9.4 has: Apply DOES PERSIST settings:
-      // this also solves the problem with different configuration that have been modified and ApplyEd
-      // but would otherwise not be persisted on performOK()
-      persist(dst);
-    } catch (CoreException ex) {
-      log.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, null, ex));
     }
   }
 

@@ -16,7 +16,8 @@
 
     <build>
         <plugins>
-            <plugin><!-- don't pollute repositories with useless stuff -->
+            <plugin>
+                <!-- don't pollute repositories with useless stuff -->
                 <artifactId>maven-install-plugin</artifactId>
                 <configuration>
                     <skip>true</skip>
