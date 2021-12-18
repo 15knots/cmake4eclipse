@@ -1,45 +1,87 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.8"?>
-<target name="cdt/8.7-eclipse/4.5.2" sequenceNumber="25">
+<target name="cdt/10.5-eclipse/4.22" sequenceNumber="25">
 <locations>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.pde.api.tools.ee.feature.feature.group" version="0.0.0"/>
-    <repository location="https://download.eclipse.org/releases/2021-09/202109151000/"/>
+    <repository location="https://download.eclipse.org/releases/2021-12/202112081000"/>
 	<unit id="org.eclipse.rcp.feature.group" version="0.0.0"/>
 	<unit id="org.eclipse.rcp.source.feature.group" version="0.0.0"/>
 	<unit id="org.eclipse.platform.feature.group" version="0.0.0"/>
 	<unit id="org.eclipse.platform.source.feature.group" version="0.0.0"/>
 </location>
   <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
-      <repository location="https://download.eclipse.org/tools/cdt/releases/10.4/cdt-10.4.1"/>
-      <unit id="org.eclipse.cdt.sdk.feature.group" version="10.4.1.202109150103"/>
-      <unit id="org.eclipse.cdt.feature.group" version="10.4.1.202109150103"/>
-      <unit id="org.eclipse.cdt.jsoncdb.arm" version="1.0.0.202107271925"/>
-      <unit id="org.eclipse.cdt.jsoncdb.arm.source" version="1.0.0.202107271925"/>
-      <unit id="org.eclipse.cdt.jsoncdb.hpenonstop" version="1.0.0.202107271925"/>
-      <unit id="org.eclipse.cdt.jsoncdb.hpenonstop.source" version="1.0.0.202107271925"/>
-      <unit id="org.eclipse.cdt.jsoncdb.intel" version="1.0.0.202107271925"/>
-      <unit id="org.eclipse.cdt.jsoncdb.intel.source" version="1.0.0.202107271925"/>
-      <unit id="org.eclipse.cdt.jsoncdb.microsoft" version="1.0.0.202107271925"/>
-      <unit id="org.eclipse.cdt.jsoncdb.microsoft.source" version="1.0.0.202107271925"/>
-      <unit id="org.eclipse.cdt.jsoncdb.nvidia" version="1.0.0.202107271925"/>
-      <unit id="org.eclipse.cdt.jsoncdb.nvidia.source" version="1.0.0.202107271925"/>
+      <repository location="https://download.eclipse.org/tools/cdt/releases/10.5"/>
+      <unit id="org.eclipse.cdt.sdk.feature.group" version="0.0.0"/>
+      <unit id="org.eclipse.cdt.feature.group" version="0.0.0"/>
+      <unit id="org.eclipse.cdt.jsoncdb.arm" version="0.0.0"/>
+      <unit id="org.eclipse.cdt.jsoncdb.arm.source" version="0.0.0"/>
+      <unit id="org.eclipse.cdt.jsoncdb.hpenonstop" version="0.0.0"/>
+      <unit id="org.eclipse.cdt.jsoncdb.hpenonstop.source" version="0.0.0"/>
+      <unit id="org.eclipse.cdt.jsoncdb.intel" version="0.0.0"/>
+      <unit id="org.eclipse.cdt.jsoncdb.intel.source" version="0.0.0"/>
+      <unit id="org.eclipse.cdt.jsoncdb.microsoft" version="0.0.0"/>
+      <unit id="org.eclipse.cdt.jsoncdb.microsoft.source" version="0.0.0"/>
+      <unit id="org.eclipse.cdt.jsoncdb.nvidia" version="0.0.0"/>
+      <unit id="org.eclipse.cdt.jsoncdb.nvidia.source" version="0.0.0"/>
+      <unit id="org.eclipse.cdt.cmake.feature.group" version="0.0.0"/>
+      <unit id="org.eclipse.cdt.cmake.source.feature.group" version="0.0.0"/>
   </location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
-<unit id="org.hamcrest" version="1.1.0.v20090501071000"/>
-<unit id="org.hamcrest.core" version="1.3.0.v20180420-1519"/>
-<unit id="org.hamcrest.core.source" version="1.3.0.v20180420-1519"/>
-<unit id="org.hamcrest.generator" version="1.3.0.v201305210900"/>
-<unit id="org.hamcrest.generator.source" version="1.3.0.v201305210900"/>
-<unit id="org.hamcrest.integration" version="1.3.0.v201305210900"/>
-<unit id="org.hamcrest.integration.source" version="1.3.0.v201305210900"/>
-<unit id="org.hamcrest.library" version="1.3.0.v20180524-2246"/>
-<unit id="org.hamcrest.library.source" version="1.3.0.v20180524-2246"/>
-<unit id="org.hamcrest.text" version="1.1.0.v20090501071000"/>
-<unit id="org.hamcrest.text.source" version="1.1.0.v20090501071000"/>
-<unit id="org.junit" version="4.13.0.v20200204-1500"/>
-<unit id="org.junit.source" version="4.13.0.v20200204-1500"/>
-<repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20200831200620/repository/"/>
+<repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20210825222808/repository/"/>
+    <unit id="org.hamcrest" version="1.1.0.v20090501071000"/>
+    <unit id="org.hamcrest" version="2.2.0.v20210711-0821"/>
+    <unit id="org.hamcrest.core" version="1.1.0.v20090501071000"/>
+    <unit id="org.hamcrest.core" version="1.3.0.v20180420-1519"/>
+    <unit id="org.hamcrest.core.source" version="1.1.0.v20090501071000"/>
+    <unit id="org.hamcrest.core.source" version="1.3.0.v20180420-1519"/>
+    <unit id="org.hamcrest.generator" version="1.1.0.v20090501071000"/>
+    <unit id="org.hamcrest.generator" version="1.3.0.v201305210900"/>
+    <unit id="org.hamcrest.generator.source" version="1.1.0.v20090501071000"/>
+    <unit id="org.hamcrest.generator.source" version="1.3.0.v201305210900"/>
+    <unit id="org.hamcrest.integration" version="1.1.0.v201303031500"/>
+    <unit id="org.hamcrest.integration" version="1.3.0.v201305210900"/>
+    <unit id="org.hamcrest.integration.source" version="1.1.0.v201303031500"/>
+    <unit id="org.hamcrest.integration.source" version="1.3.0.v201305210900"/>
+    <unit id="org.hamcrest.library" version="1.1.0.v20090501071000"/>
+    <unit id="org.hamcrest.library" version="1.3.0.v20180524-2246"/>
+    <unit id="org.hamcrest.library.source" version="1.1.0.v20090501071000"/>
+    <unit id="org.hamcrest.library.source" version="1.3.0.v20180524-2246"/>
+    <unit id="org.hamcrest.source" version="2.2.0.v20210711-0821"/>
+    <unit id="org.hamcrest.text" version="1.1.0.v20090501071000"/>
+    <unit id="org.hamcrest.text.source" version="1.1.0.v20090501071000"/>
+    <unit id="org.junit" version="4.12.0.v201504281640"/>
+    <unit id="org.junit" version="4.13.0.v20200204-1500"/>
+    <unit id="org.junit.jupiter.api" version="5.7.1.v20210222-1948"/>
+    <unit id="org.junit.jupiter.api.source" version="5.7.1.v20210222-1948"/>
+    <unit id="org.junit.jupiter.engine" version="5.7.1.v20210222-1948"/>
+    <unit id="org.junit.jupiter.engine.source" version="5.7.1.v20210222-1948"/>
+    <unit id="org.junit.jupiter.migrationsupport" version="5.7.1.v20210222-1948"/>
+    <unit id="org.junit.jupiter.migrationsupport.source" version="5.7.1.v20210222-1948"/>
+    <unit id="org.junit.jupiter.params" version="5.7.1.v20210222-1948"/>
+    <unit id="org.junit.jupiter.params.source" version="5.7.1.v20210222-1948"/>
+    <unit id="org.junit.platform.commons" version="1.7.1.v20210222-1948"/>
+    <unit id="org.junit.platform.commons.source" version="1.7.1.v20210222-1948"/>
+    <unit id="org.junit.platform.engine" version="1.7.1.v20210222-1948"/>
+    <unit id="org.junit.platform.engine.source" version="1.7.1.v20210222-1948"/>
+    <unit id="org.junit.platform.launcher" version="1.7.1.v20210222-1948"/>
+    <unit id="org.junit.platform.launcher.source" version="1.7.1.v20210222-1948"/>
+    <unit id="org.junit.platform.runner" version="1.7.1.v20210222-1948"/>
+    <unit id="org.junit.platform.runner.source" version="1.7.1.v20210222-1948"/>
+    <unit id="org.junit.platform.suite.api" version="1.7.1.v20210222-1948"/>
+    <unit id="org.junit.platform.suite.api.source" version="1.7.1.v20210222-1948"/>
+    <unit id="org.junit.source" version="4.12.0.v201504281640"/>
+    <unit id="org.junit.source" version="4.13.0.v20200204-1500"/>
+    <unit id="org.junit.vintage.engine" version="5.7.1.v20210222-1948"/>
+    <unit id="org.junit.vintage.engine.source" version="5.7.1.v20210222-1948"/>
+    <unit id="org.mockito" version="1.8.4.v201303031500"/>
+    <unit id="org.mockito" version="1.9.5.v201605172210"/>
+    <unit id="org.mockito" version="2.13.0.v20200310-1642"/>
+    <unit id="org.mockito" version="2.23.0.v20200310-1642"/>
+    <unit id="org.mockito.source" version="1.8.4.v201303031500"/>
+    <unit id="org.mockito.source" version="1.9.5.v201605172210"/>
+    <unit id="org.mockito.source" version="2.13.0.v20200310-1642"/>
+    <unit id="org.mockito.source" version="2.23.0.v20200310-1642"/>
 </location>
 </locations>
 <targetJRE path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-11"/>

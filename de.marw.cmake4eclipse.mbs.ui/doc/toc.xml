@@ -1,12 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <toc label="Cmake4eclipse User Guide" topic="doc/html/home.html">
-   <topic href="doc/html/getting_started.html" label="Getting Started">
-   </topic>
-   <topic label="Tasks">
-      <link toc="doc/topics_Tasks.xml"/>
-   </topic>
-   <topic href="doc/html/t_MinGW_setup.html" label="Tips for MinGW on Windows">
-   </topic>
-   <topic href="doc/html/notices.html" label="Legal">
-   </topic>
+  <topic label="Tasks">
+    <topic label="Configuring your Workbench">
+      <topic label="How and When cmake is run">
+         <topic href="doc/html/wb_general_tab.html" label="General Tab">
+         </topic>
+         <topic href="doc/html/wb_cache_entries.html" label="CMake Cache Entries Tab">
+         </topic>
+      </topic>
+      <topic href="doc/html/wb_toolkits.html" label="Which tools will perform the build">
+      </topic>
+    </topic>
+    <topic href="doc/html/create_project.html" label="Creating a Project">
+    </topic>
+    <topic label="Configuring an Eclipse C-project or C++-project" href="doc/html/configure_project.html">
+      <topic href="doc/html/builders.html" label="Project Builders">
+      </topic>
+      <topic href="doc/html/t_cmake_symbols_general.html" label="CMake cache entries">
+      </topic>
+      <topic href="doc/html/languageSettingsProviders.xhtml" label="Syntax Highlighting Support">
+      </topic>
+    </topic>
+    <anchor id="cmake4eclipse_TasksInsertAnchor" />
+  </topic>
+  <topic href="doc/html/t_MinGW_setup.html" label="Tips for MinGW on Windows">
+  </topic>
+  <topic label="Concepts">
+     <topic href="doc/html/co_toolkit.html" label="Build Toolkit">
+     </topic>
+  </topic>
+  <topic href="doc/html/notices.html" label="Legal">
+  </topic>
 </toc>

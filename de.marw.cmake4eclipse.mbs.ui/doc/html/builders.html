@@ -9,26 +9,16 @@
 	<p>The Cmake4eclipse plugin provides the following <strong>Project Builders</strong>
 	(selectable in the <a href="PLUGINS_ROOT/org.eclipse.cdt.doc.user/reference/cdt_u_prop_build_toolchain.htm">
 	Tool Chain Editor tab</a>):</p>
-
 	<h3 id="portable">CMake Builder</h3>
-	  <p>This builder allows you to customize the build tool to be used on the
-    <a href="t_cmake_options_general.html">OS-specific property</a> tabs
-    and makes CMake generate the build scripts for the tool of your choice.
+	  <p>This builder allows you to customize the build output location 
+    and makes CMake generate the build scripts. 
   </p>
 	<p>The builder retrieves the name of the actual build tool from the cache file written
-	by cmake during build-script-generation. It has some benefits compared to the <code>CMake Builder (deprecated)</code>:
-	<ul>
-  <li>It allows you to build with tools other than <code>make</code>, 
-  for example <code>ninja</code>, <code>nmake</code> and others.</li>
-  <li>You are not forced to put the build tool into $PATH on your machine, since cmake does a fairly good job to
-   detect the <strong>absolute</strong> file system path of the build tool.</li>
-<li>It makes your Eclipse project being a cross-platform project: You can configure it to build using <code>make</code>
-under Linux, and build with <code>MSYS make</code> under windows; without the need to change platform-specifc
- project settings after checkout.</li>
-</ul>
+	by cmake during build-script-generation.
+</p>
+<p>
 This is the recommended builder.
 </p>
-
 <h3 id="make">CMake Builder (deprecated)</h3>
   <p>
     This builder is nearly identical to the <i>Gnu Make Builder</i> that comes with CDT.

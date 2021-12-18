@@ -34,7 +34,7 @@ import de.marw.cmake4eclipse.mbs.settings.CmakeDefine;
 import de.marw.cmake4eclipse.mbs.settings.CmakeVariableType;
 
 /**
- * The dialog used to create or edit a cmake define.
+ * The dialog used to create or edit a CMake Cache Entry.
  *
  * @author Martin Weber
  */
@@ -87,7 +87,7 @@ public class AddCmakeDefineDialog extends Dialog {
   }
 
   /**
-   * Gets the edited or newly created cmake define.
+   * Gets the edited or newly created CMake Cache Entry.
    *
    * @return the modified or new CmakeDefine or {@code null} if this dialog has
    *         been cancelled.
@@ -100,9 +100,9 @@ public class AddCmakeDefineDialog extends Dialog {
   protected void configureShell(Shell shell) {
     super.configureShell(shell);
     if (editedVar != null)
-      shell.setText("Edit existing CMake Define");
+      shell.setText("Edit existing CMake Cache Entry");
     else
-      shell.setText("Add new CMake Define");
+      shell.setText("Add new CMake Cache Entry");
   }
 
   /**
@@ -211,21 +211,17 @@ public class AddCmakeDefineDialog extends Dialog {
     });
 
     btnBrowseVars = new Button(buttonBar, SWT.PUSH);
-    btnBrowseVars.setText("Variables...");
+    btnBrowseVars.setText("Insert Variable...");
     btnBrowseVars.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false,
         false, 1, 1));
-    if (cfgd == null) {
-      btnBrowseVars.setEnabled(false);
-    } else {
-      btnBrowseVars.addSelectionListener(new SelectionAdapter() {
-        @Override
-        public void widgetSelected(SelectionEvent e) {
-          String text = AbstractCPropertyTab.getVariableDialog(getShell(), cfgd);
-          if (text != null)
-            variableValue.insert(text);
-        }
-      });
-    }
+    btnBrowseVars.addSelectionListener(new SelectionAdapter() {
+      @Override
+      public void widgetSelected(SelectionEvent e) {
+        String text = AbstractCPropertyTab.getVariableDialog(getShell(), cfgd);
+        if (text != null)
+          variableValue.insert(text);
+      }
+    });
 
     // to control sensitivity of buttons...
     typeSelector.addModifyListener(new ModifyListener() {

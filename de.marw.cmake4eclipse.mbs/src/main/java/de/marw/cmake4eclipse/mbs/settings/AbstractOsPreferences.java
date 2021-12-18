@@ -19,11 +19,13 @@ import de.marw.cmake4eclipse.mbs.internal.storage.CMakeUndefineSerializer;
 import de.marw.cmake4eclipse.mbs.internal.storage.Util;
 
 /**
- * Preferences that override/augment the generic properties when running under a
- * specific OS.
+ * Preferences that override/augment the generic properties when running under a specific OS.
  *
  * @author Martin Weber
+ *
+ * @deprecated kept only to not break persistence of eclipse projects created with versions of this plugin prior to 3.0
  */
+@Deprecated
 public abstract class AbstractOsPreferences {
   private static final String ATTR_COMMAND = "command";
   private static final String ATTR_USE_DEFAULT_COMMAND = "use-default";

@@ -17,8 +17,6 @@ package de.marw.cmake4eclipse.mbs.settings;
  */
 public class LinuxPreferences extends AbstractOsPreferences {
 
-  private static final String ELEM_OS = "linux";
-
   /**
    * Creates a new object, initialized with all default values.
    */
@@ -29,6 +27,6 @@ public class LinuxPreferences extends AbstractOsPreferences {
    * @return the String "linux".
    */
   protected String getStorageElementName() {
-    return ELEM_OS;
+    return "linux";
   }
 }
