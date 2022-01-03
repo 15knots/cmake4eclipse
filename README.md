@@ -15,23 +15,20 @@ Its <a id="pc">*Primary claim*</a> is: Co-workers should be able to just **check
 1. Take the CMakeLists.txt as the source of truth.
    - Auto-detect the actual build tool to invoke: make, ninja, nmake, MinGW make, MSYS make, ...
    - Easy project configuration regarding code completion, symbol-declaration lookup and macro-value tool-tips in the source editor.
-     - Feed include paths and pre-processor symbols from cmake to the CDT-Indexer (CMAKE_EXPORT_COMPILE_COMMANDS Parser).
-     - Retrieve compiler-built-in pre-processor symbols and include paths by interrogating the actual compiler and feed these to the CDT-Indexer (CMAKE_EXPORT_COMPILE_COMMANDS Compiler Built-ins). Well, at least as the compiler supports that (GNU C and `nvcc` CUDA compilers do so).
-## Screenshots
-Screenshots can be found at the <a href="https://marketplace.eclipse.org/content/cmake4eclipse#group-screenshots" title="Screenshots">Eclipse Marketplace</a>.
+     - Feed include paths and pre-processor symbols from cmake to the CDT-Indexer (CMake Compilation DB).
+     - Retrieve compiler-built-in pre-processor symbols and include paths by interrogating the actual compiler and feed these to the CDT-Indexer (CMake Compilation DB). Well, at least as the compiler supports that (GNU C and `nvcc` CUDA compilers do so).
 
 ## Quick start
- 1. If you do not have any existing code, check out the [Sample Projects](https://github.com/15knots/cmake4eclipse-sample-projects), chose one and fill in your code.
- 1. If you have an existing C/C++ project code, inside Eclipse, goto `Help:Help Contents`, then read the `Cmake4eclipse User Guide:Getting Started` node to adjust your project settings.
+ 1. If you do not have any existing code, check out the [Sample Projects](https://github.com/15knots/cmake4eclipse-sample-projects), choose one and fill in your code.
+ 1. If you have an existing C/C++ project code, inside Eclipse, goto `Help:Help Contents`, then read the `Cmake4eclipse User Guide:Tasks` nodes.
  
 ---
 ## License
-The plugin is licensed under the <a href="http://www.eclipse.org/legal/epl-v10.html">Eclipse Public License Version 1.0 ("EPL")</a>.
+The plugin is licensed under the <a href="https://www.eclipse.org/legal/epl-2.0/">Eclipse Public License Version 2.0 ("EPL-2.0")</a>.
 
 ## System Requirements
-CDT v 10.4 or newer and Eclipse v 2021-09 or newer
-
-Java 11 or newer
+- CDT v 10.5 or newer and Eclipse v 2021-12 or newer.
+- Java 11 or newer.
 
 ## Installation
 The easiest way is to drag this: <a href="http://marketplace.eclipse.org/marketplace-client-intro?mpc_install=2318334" class="drag" title="Drag to your running Eclipse workbench to install cmake4eclipse">
