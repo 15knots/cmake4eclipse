@@ -28,7 +28,6 @@
         <setEntry value="com.ibm.icu@default:default"/>
         <setEntry value="com.sun.jna.platform@default:default"/>
         <setEntry value="com.sun.jna@default:default"/>
-        <setEntry value="com.sun.xml.bind*2.2.0.v20201118-1845@default:default"/>
         <setEntry value="com.sun.xml.bind*2.3.3.v20201118-1818@default:default"/>
         <setEntry value="jakarta.servlet-api@default:default"/>
         <setEntry value="jakarta.xml.bind@default:default"/>
@@ -199,6 +198,7 @@
         <setEntry value="org.w3c.dom.svg@default:default"/>
     </setAttribute>
     <setAttribute key="selected_workspace_bundles">
+        <setEntry value="de.marw.cmake.cdt@default:default"/>
         <setEntry value="de.marw.cmake4eclipse.mbs.ui@default:default"/>
         <setEntry value="de.marw.cmake4eclipse.mbs@default:default"/>
     </setAttribute>

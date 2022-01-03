@@ -1,8 +1,15 @@
 # Cmake4eclipse Change Log
 
-## 2.2.0 (202X-YY-ZZ)
+## 3.0.0 (2022-YY-ZZ)
 ### Changes
-- Pending #157: CDT indexer support.
+- Closed #157: For CDT indexer support, switch to the compilation database parser coming with CDT.
+- Closed #158: Move machine specific settings from project to workbench preferences.
+Compatibility Note: Eclipse projects creating with earlier version of cmake4eclipse should continue to work but
+users are strongly recommended to switch project properties to use the new `CMake driven` tool chain.
+
+#### System Requirements
+- CDT v 10.5 or newer and Eclipse v 2021-12 or newer
+- Java 11 or newer
 
 ## 2.1.4 (2021-03-30)
 ### Changes
@@ -19,7 +26,7 @@
 
 ## 2.1.1 (2020-03-10)
 ### Changes
-- Fix: Missing bundles for ARM, HPE-nonstop and Intel support in the `cmake4eclispe Extras` section in the repository.
+- Fix: Missing bundles for ARM, HPE-nonstop and Intel support in the `cmake4eclipse Extras` section in the repository.
 - Raised severity level to WARNING for markers related to indexer support.
 - Changed license to EPL 2.0
 
