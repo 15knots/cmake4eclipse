@@ -31,4 +31,6 @@ Bundle-ActivationPolicy: lazy
 Bundle-Activator: de.marw.cmake4eclipse.mbs.ui.Activator
 Require-Bundle: org.eclipse.cdt.managedbuilder.gnu.ui,
  org.eclipse.cdt.ui,
- org.eclipse.ui
+ org.eclipse.ui,
+ org.eclipse.cdt.jsoncdb.core.doc;bundle-version="1.0.0",
+ org.eclipse.cdt.jsoncdb.core.ui;bundle-version="1.0.100"

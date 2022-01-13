@@ -63,6 +63,7 @@
         <setEntry value="org.eclipse.cdt.core@default:default"/>
         <setEntry value="org.eclipse.cdt.debug.core@default:default"/>
         <setEntry value="org.eclipse.cdt.debug.ui@default:default"/>
+        <setEntry value="org.eclipse.cdt.jsoncdb.core.doc@default:default"/>
         <setEntry value="org.eclipse.cdt.jsoncdb.core.ui@default:default"/>
         <setEntry value="org.eclipse.cdt.jsoncdb.core@default:default"/>
         <setEntry value="org.eclipse.cdt.launch@default:default"/>
