@@ -1,6 +1,6 @@
 # Cmake4eclipse Change Log
 
-## 3.0.0 (2022-YY-ZZ)
+## 3.0.0 (2022-01-17)
 ### Changes
 - Closed #157: For CDT indexer support, switch to the compilation database parser coming with CDT.
 - Closed #158: Move machine specific settings from project to workbench preferences.
