@@ -23,8 +23,6 @@
     </topic>
     <anchor id="cmake4eclipse_TasksInsertAnchor" />
   </topic>
-  <topic href="doc/html/t_MinGW_setup.html" label="Tips for MinGW on Windows">
-  </topic>
   <topic label="Concepts">
      <topic href="doc/html/co_toolkit.html" label="Build Toolkit">
      </topic>
