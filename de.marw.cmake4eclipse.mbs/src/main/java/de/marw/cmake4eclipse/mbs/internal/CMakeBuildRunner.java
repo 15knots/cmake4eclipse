@@ -177,7 +177,7 @@ public class CMakeBuildRunner extends ExternalBuildRunner {
           new CMakeCacheFileParser().parse(is, filter, entries, null);
           final Iterator<SimpleCMakeCacheEntry> iter = entries.iterator();
           if (iter.hasNext()) {
-            // got a CMAKE_BUILD_TOOL entry, update internally cached value
+            // got a CMAKE_MAKE_PROGRAM entry, update internally cached value
             fi.cmCacheFileLastModified = lastModified;
             fi.cachedCmakeBuildTool = iter.next().getValue();
             cfgd.setSessionProperty(cacheFileInfo, fi);
