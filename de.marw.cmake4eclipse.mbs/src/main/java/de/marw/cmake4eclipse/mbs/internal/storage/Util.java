@@ -51,6 +51,9 @@ public class Util {
         return;
       }
     } else {
+      if (source.isEmpty()) {
+        return;
+      }
       pColl = parent.createChild(targetCollectionStorageName);
     }
     // to avoid duplicates, since we do not track additions/removals to lists..
