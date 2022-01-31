@@ -1,5 +1,9 @@
 # Cmake4eclipse Change Log
 
+## 3.0.1 (2022-01-31)
+### Changes
+- Closed #164: NPE in BuildToolKitUtil.getEffectiveCMakeGenerator() when workspace preferences for cmake4eclipse has never been saved.
+
 ## 3.0.0 (2022-01-17)
 ### Changes
 - Closed #157: For CDT indexer support, switch to the compilation database parser coming with CDT.
