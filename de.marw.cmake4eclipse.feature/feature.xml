@@ -2,7 +2,7 @@
 <feature
       id="de.marw.cmake4eclipse.feature"
       label="cmake4eclipse"
-      version="3.0.0.qualifier"
+      version="3.0.1.qualifier"
       provider-name="Martin Weber">
 
    <description>
