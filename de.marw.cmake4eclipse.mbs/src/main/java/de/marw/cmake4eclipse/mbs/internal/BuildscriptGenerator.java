@@ -148,7 +148,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     ICdtVariableManager mngr = CCorePlugin.getDefault().getCdtVariableManager();
     try {
       String buildPathString = buildP.toString();
-      buildPathString = mngr.resolveValue(buildPathString, "", "",
+      buildPathString = mngr.resolveValue(buildPathString, "", null,
           ManagedBuildManager.getDescriptionForConfiguration(config));
       buildP= new Path(buildPathString);
     } catch (CdtVariableException e) {

@@ -15,8 +15,12 @@ import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 
+import org.eclipse.cdt.core.CCorePlugin;
 import org.eclipse.cdt.core.ICommandLauncher;
 import org.eclipse.cdt.core.IMarkerGenerator;
 import org.eclipse.cdt.core.ProblemMarkerInfo;
@@ -46,14 +50,18 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.osgi.framework.Version;
 
+import com.google.gson.JsonSyntaxException;
+
 import de.marw.cmake4eclipse.mbs.cmakecache.CMakeCacheFileParser;
 import de.marw.cmake4eclipse.mbs.cmakecache.CMakeCacheFileParser.EntryFilter;
 import de.marw.cmake4eclipse.mbs.cmakecache.SimpleCMakeCacheEntry;
+import de.marw.cmake4eclipse.mbs.preferences.BuildToolKitDefinition;
 import de.marw.cmake4eclipse.mbs.preferences.PreferenceAccess;
 import de.marw.cmake4eclipse.mbs.settings.CmakeGenerator;
 
@@ -71,6 +79,48 @@ public class CMakeBuildRunner extends ExternalBuildRunner {
 
   /** caches CMakeCacheFileInfo */
   private static final QualifiedName cacheFileInfo = new QualifiedName(Activator.PLUGIN_ID, "cmakeCacheFileInfo");
+
+  @Override
+  protected Map<String, String> getEnvironment(IBuilder builder) throws CoreException {
+    Map<String, String> environment = super.getEnvironment(builder);
+    IEclipsePreferences prefs = PreferenceAccess.getPreferences();
+    try {
+      Optional<BuildToolKitDefinition> overwritingBtk = BuildToolKitUtil.getOverwritingToolkit(prefs);
+
+      if (!overwritingBtk.isEmpty()) {
+        // PATH is overwritten...
+        Predicate<String> isPATH = n -> false;
+        if (Platform.OS_WIN32.equals(Platform.getOS())) {
+          // check for windows which has case-insensitive envvar names, e.g. 'pAth'
+          isPATH = n -> "PATH".equalsIgnoreCase(n);
+        } else {
+          isPATH = n -> "PATH".equals(n);
+        }
+
+        String newPath = null;
+        for (Iterator<Entry<String, String>> iter = environment.entrySet().iterator(); iter.hasNext();) {
+          Entry<String, String> entry = iter.next();
+          String key = entry.getKey();
+          if (isPATH.test(key)) {
+            // replace the value of $PATH with the value specified in the overwriting build tool kit
+            newPath = CCorePlugin.getDefault().getCdtVariableManager().resolveValue(overwritingBtk.get().getPath(), "",
+                null, null);
+            iter.remove(); // will be added later again as 'PATH'
+            break;
+          }
+        }
+        if (newPath != null) {
+          // replace $PATH
+          environment.put("PATH", newPath);
+        }
+      }
+    } catch (JsonSyntaxException ex) {
+      // workbench preferences file format error
+      throw new CoreException(Status.error("Error loading workbench preferences", ex));
+    }
+
+    return environment;
+  }
 
   /*-
    * @see org.eclipse.cdt.managedbuilder.core.ExternalBuildRunner#invokeBuild(int, org.eclipse.core.resources.IProject, org.eclipse.cdt.managedbuilder.core.IConfiguration, org.eclipse.cdt.managedbuilder.core.IBuilder, org.eclipse.cdt.core.resources.IConsole, org.eclipse.cdt.core.IMarkerGenerator, org.eclipse.core.resources.IncrementalProjectBuilder, org.eclipse.core.runtime.IProgressMonitor)
@@ -128,23 +178,18 @@ public class CMakeBuildRunner extends ExternalBuildRunner {
    * configuration. If the cache for the parsed content is invalid, tries to
    * parse the CMakeCache.txt file first and then caches the parsed content.
    *
-   * @param cfgd
-   *          configuration
-   * @param project
-   *          the current project, used to create error markers
-   * @param markerGenerator
-   *          used to create error markers
-   * @return a value for the {@code "cmake_build_cmd"} macro or {@code null}, if
-   *         none could be determined
-   * @throws CoreException
-   *           if an IOExceptions occurs when reading the cmake cache file
+   * @param cfgd            configuration
+   * @param project         the current project, used to create error markers
+   * @param markerGenerator used to create error markers
+   * @return a value for the {@code "cmake_build_cmd"} macro or {@code null}, if none could be determined
+   * @throws CoreException if an IOExceptions occurs when reading the cmake cache file
    */
-   private String getCommandFromCMakeCache(ICConfigurationDescription cfgd,
-       IProject project, IMarkerGenerator markerGenerator) throws CoreException {
-     CMakeCacheFileInfo fi = (CMakeCacheFileInfo) cfgd.getSessionProperty(cacheFileInfo);
-     if (fi == null) {
-       fi = new CMakeCacheFileInfo();
-     }
+  private String getCommandFromCMakeCache(ICConfigurationDescription cfgd, IProject project,
+      IMarkerGenerator markerGenerator) throws CoreException {
+    CMakeCacheFileInfo fi = (CMakeCacheFileInfo) cfgd.getSessionProperty(cacheFileInfo);
+    if (fi == null) {
+      fi = new CMakeCacheFileInfo();
+    }
 
     // If getBuilderCWD() returns a workspace relative path, it gets garbled by CDT.
     // If garbled, make sure de.marw.cmake4eclipse.mbs.internal.BuildscriptGenerator.getBuildWorkingDir()
@@ -152,7 +197,7 @@ public class CMakeBuildRunner extends ExternalBuildRunner {
     final IPath builderCWD = cfgd.getBuildSetting().getBuilderCWD();
 
     IPath location = ResourcesPlugin.getWorkspace().getRoot().getFolder(builderCWD).getLocation();
-    File file= null;
+    File file = null;
     if (location != null) {
       file = location.append("CMakeCache.txt").toFile();
     }
@@ -182,14 +227,14 @@ public class CMakeBuildRunner extends ExternalBuildRunner {
             fi.cachedCmakeBuildTool = iter.next().getValue();
             cfgd.setSessionProperty(cacheFileInfo, fi);
           } else {
-              // actually this should not happen, since cmake will abort if it cannot determine
-              // the build tool,.. but the variable name might change in future
-              final ProblemMarkerInfo pmi = new ProblemMarkerInfo(
-                  ResourcesPlugin.getWorkspace().getRoot().getFolder(builderCWD), 0,
-                  "No CMAKE_MAKE_PROGRAM entry in file CMakeCache.txt, unable to build project",
-                  IMarkerGenerator.SEVERITY_ERROR_BUILD, null);
-              pmi.setType(MARKER_ID);
-              markerGenerator.addMarker(pmi);
+            // actually this should not happen, since cmake will abort if it cannot determine
+            // the build tool,.. but the variable name might change in future
+            final ProblemMarkerInfo pmi = new ProblemMarkerInfo(
+                ResourcesPlugin.getWorkspace().getRoot().getFolder(builderCWD), 0,
+                "No CMAKE_MAKE_PROGRAM entry in file CMakeCache.txt, unable to build project",
+                IMarkerGenerator.SEVERITY_ERROR_BUILD, null);
+            pmi.setType(MARKER_ID);
+            markerGenerator.addMarker(pmi);
           }
         } catch (IOException ex) {
           throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID,
@@ -213,22 +258,21 @@ public class CMakeBuildRunner extends ExternalBuildRunner {
     return fi.cachedCmakeBuildTool;
   }
 
-   ////////////////////////////////////////////////////////////////////
-   // inner classes
-   ////////////////////////////////////////////////////////////////////
-   /**
-    * Info about cached CMAKE_BUILD_TOOL entry parsed from from CMakeCache.txt
-    *
-    * @author Martin Weber
-    */
-   private static class CMakeCacheFileInfo {
-     /**
-      * cached CMAKE_BUILD_TOOL entry from CMakeCache.txt or {@code null} if
-      * CMakeCache.txt could not be parsed
-      */
-     private String cachedCmakeBuildTool;
-     private long cmCacheFileLastModified;
-   }
+  ////////////////////////////////////////////////////////////////////
+  // inner classes
+  ////////////////////////////////////////////////////////////////////
+  /**
+   * Info about cached CMAKE_BUILD_TOOL entry parsed from from CMakeCache.txt
+   *
+   * @author Martin Weber
+   */
+  private static class CMakeCacheFileInfo {
+    /**
+     * cached CMAKE_BUILD_TOOL entry from CMakeCache.txt or {@code null} if CMakeCache.txt could not be parsed
+     */
+    private String cachedCmakeBuildTool;
+    private long cmCacheFileLastModified;
+  }
 
   /**
    * @author Martin Weber
