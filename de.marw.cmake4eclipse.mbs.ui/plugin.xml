@@ -83,4 +83,20 @@
           name="Build Tool Kits">
     </page>
  </extension>
+ <extension
+       point="org.eclipse.ui.preferenceTransfer">
+    <transfer
+          icon="platform:/plugin/org.eclipse.cdt.ui/icons/view16/c_pers.gif"
+          id="de.marw.cmake4eclipse.mbs.ui.transfer"
+          name="Cmake4eclipse Preferences">
+       <mapping
+             scope="instance">
+          <entry
+                node="de.marw.cmake4eclipse.mbs">
+          </entry>
+       </mapping>
+       <description>C/C++ > Cmake4eclipse preferences.
+       </description>
+    </transfer>
+ </extension>
 </plugin>
