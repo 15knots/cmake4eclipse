@@ -1,5 +1,10 @@
 # Cmake4eclipse Change Log
 
+## 3.0.2 (2022-02-07)
+### Changes
+- Closed #167: bison from <MSYS2_ROOT>\usr\bin fails when run for projects targeting mingw32 on windows.
+- Add support to export and import Cmake4eclipse workbench preferences.
+
 ## 3.0.1 (2022-01-31)
 ### Changes
 - Closed #164: NPE in BuildToolKitUtil.getEffectiveCMakeGenerator() when workspace preferences for cmake4eclipse has never been saved.
