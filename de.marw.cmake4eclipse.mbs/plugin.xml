@@ -146,4 +146,13 @@
           id="cmake4eclipse.mbs.cmakeConsole">
     </CBuildConsole>
  </extension>
+ <extension
+       point="org.eclipse.core.variables.dynamicVariables">
+    <variable
+          description="The value of the PATH property of cmake4eclipse`s overwriting Build Tool Kit, if any. Otherwise the value of the PATH environment variable"
+          name="cmake4eclipse_btk_PATH"
+          resolver="de.marw.cmake4eclipse.mbs.internal.BTKPathDynamicVariableResolver"
+          supportsArgument="false">
+    </variable>
+ </extension>
 </plugin>
