@@ -131,9 +131,16 @@ public class CMakeBuildRunner extends ExternalBuildRunner {
       IMarkerGenerator markerGenerator,
       IncrementalProjectBuilder projectBuilder, IProgressMonitor monitor)
       throws CoreException {
+    if (!builder.isDefaultBuildCmdOnly()) {
+      // either the project build settings in 'Use default build command' or the target in the 'Build Targets' view is
+      // configured to not use the default: do not inject command and args from cmake4eclipse..
+      return super.invokeBuild(kind, project, configuration, builder, console, markerGenerator, projectBuilder,
+          monitor);
+    }
+
     /*
-     * wrap the passed-in builder into one that gets its build command from the
-     * Cmake-generator. First do a sanity check.
+     * wrap the passed-in builder into one that gets its build command, parallelism- and stop-on-first-error args from
+     * the Cmake-generator. First do a sanity check.
      */
     IBuilder supa = builder;
     do {
@@ -156,13 +163,13 @@ public class CMakeBuildRunner extends ExternalBuildRunner {
         }
       }
 
+      // try to get CMAKE_MAKE_PROGRAM entry from CMakeCache.txt...
       String buildscriptProcessorCmd = getCommandFromCMakeCache(cfgd, project, markerGenerator);
       if (buildscriptProcessorCmd == null) {
         // actually this should not happen, since cmake will abort if it cannot determine
         // the build tool,.. but the variable name might change in future
         return false;
       }
-      // try to get CMAKE_MAKE_PROGRAM entry from CMakeCache.txt...
       IEclipsePreferences prefs = PreferenceAccess.getPreferences();
       final CmakeGenerator generator = BuildToolKitUtil.getEffectiveCMakeGenerator(prefs,
           BuildToolKitUtil.getOverwritingToolkit(prefs));
