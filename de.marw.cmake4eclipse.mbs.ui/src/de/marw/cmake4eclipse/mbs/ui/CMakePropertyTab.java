@@ -252,7 +252,7 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
 
     setCacheFileEditable(cacheFileEditable, prefs[0].getCacheFile());
     String text = prefs[0].getBuildDirectory();
-    setBuildFolderEditable(buildFolderEditable, text == null ? "build/${ConfigName}" : text);
+    setBuildFolderEditable(buildFolderEditable, text == null ? "_build/${ConfigName}" : text);
   }
 
   /**
