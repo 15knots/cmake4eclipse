@@ -10,8 +10,14 @@ package de.marw.cmake4eclipse.mbs.internal;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileVisitOption;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -248,6 +254,26 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
 //      System.out.println("DEL "+cacheFile);
       // tell the workspace about file removal
       buildFolder.getFile("CMakeCache.txt").refreshLocal(IResource.DEPTH_ZERO, monitor);
+
+      // also remove cache files for external project that were downloaded by cmake's FetchContent call (e.g. for CPM)...
+      java.nio.file.Path cpmDepsPath = buildDir.toPath().resolve("_deps");
+      try {
+        Files.walkFileTree(cpmDepsPath, EnumSet.noneOf(FileVisitOption.class), 1,
+            new SimpleFileVisitor<java.nio.file.Path>() {
+              @Override
+              public FileVisitResult visitFile(java.nio.file.Path file, BasicFileAttributes attrs) throws IOException {
+                System.out.println(
+                    "BuildscriptGenerator.generateBuildscripts(...).new SimpleFileVisitor() {...}.visitFile(): "+
+                file);
+                if ("CMakeCache.txt".equals(file.getFileName().toString())) {
+                  Files.delete(file);
+                }
+                return FileVisitResult.CONTINUE;
+              }
+            });
+      } catch (IOException ignore) {
+      }
+
       mustGenerate= true;
     }
     if (!mustGenerate && (!cacheFileExists || !new File(buildDir, getMakefileName()).exists())) {
@@ -481,18 +507,18 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       if (property != null) {
         IBuildPropertyValue value = property.getValue();
         if (ManagedBuildManager.BUILD_TYPE_PROPERTY_DEBUG.equals(value.getId())) {
-          args.add("-DCMAKE_BUILD_TYPE=Debug");
+          args.add("-DCMAKE_BUILD_TYPE:STRING=Debug");
         } else if (ManagedBuildManager.BUILD_TYPE_PROPERTY_RELEASE.equals(value.getId())) {
-          args.add("-DCMAKE_BUILD_TYPE=Release");
+          args.add("-DCMAKE_BUILD_TYPE:STRING=Release");
         }
       }
       // colored output during build is useless for build console (seems to affect progress report only)
 //      args.add("-DCMAKE_COLOR_MAKEFILE:BOOL=OFF");
       if (needVerboseBuild) {
         // echo commands to the console during the build to give output parsers a chance
-        args.add("-DCMAKE_VERBOSE_MAKEFILE=ON");
+        args.add("-DCMAKE_VERBOSE_MAKEFILE:BOOL=ON");
         // speed up build output parsing by disabling progress report msgs
-        args.add("-DCMAKE_RULE_MESSAGES=OFF");
+        args.add("-DCMAKE_RULE_MESSAGES:BOOL=OFF");
       }
     }
 
@@ -536,7 +562,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     }
 
     // tell cmake to write compile commands to a JSON file
-    args.add("-DCMAKE_EXPORT_COMPILE_COMMANDS=ON");
+    args.add("-DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=ON");
     // tell cmake where its script is located..
     args.add(srcDir.toOSString());
     return args;
@@ -572,7 +598,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     for (CmakeDefine def : defines) {
       final StringBuilder sb = new StringBuilder("-D");
       sb.append(def.getName());
-//      sb.append(':').append(def.getType().getCmakeArg());
+      sb.append(':').append(def.getType().getCmakeArg());
       sb.append('=');
       String expanded = mngr.resolveValue(def.getValue(), "", "", cfgd);
       sb.append(expanded);
