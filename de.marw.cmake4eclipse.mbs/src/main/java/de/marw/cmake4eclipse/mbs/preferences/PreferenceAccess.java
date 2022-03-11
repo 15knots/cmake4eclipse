@@ -72,9 +72,9 @@ public abstract class PreferenceAccess {
   /**
    * Converts the specified list of objects to a JSON string.
    */
-  public static String toJsonFromList(List<?> cacheEntries) {
+  public static String toJsonFromList(List<?> objects) {
     Gson gson = new GsonBuilder().disableHtmlEscaping().create();
-    return gson.toJson(cacheEntries);
+    return gson.toJson(objects);
   }
 
   /**
