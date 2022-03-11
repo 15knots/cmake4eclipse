@@ -282,7 +282,9 @@ public class JsonCompilationDatabaseParser extends LanguageSettingsSerializableP
         WorkspaceJob job = new WorkspaceJob("Parsing compilation database of project " + project.getName()) {
           @Override
           public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
-            parseAndSetEntries(cfgDescription, new NullProgressMonitor());
+            if (cfgDescription.getProjectDescription().getProject().isOpen()) {
+              parseAndSetEntries(cfgDescription, new NullProgressMonitor());
+            }
             return Status.OK_STATUS;
           }
         };
