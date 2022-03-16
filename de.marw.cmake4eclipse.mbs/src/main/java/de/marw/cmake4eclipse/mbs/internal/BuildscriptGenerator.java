@@ -245,26 +245,23 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     final File cacheFile = new File(buildDir, "CMakeCache.txt");
     IEclipsePreferences prefs = PreferenceAccess.getPreferences();
     boolean cacheFileExists = cacheFile.exists();
-    if ((prefs.getLong(PreferenceAccess.DIRTY_TS, 0L) > cacheFile.lastModified()
-        || ConfigurationManager.getInstance().getOrLoad(cfgDes).getDirtyTs() > cacheFile.lastModified())
-        || prefs.getBoolean(PreferenceAccess.CMAKE_FORCE_RUN, false)
-        && cacheFileExists) {
+    if (cacheFileExists && (prefs.getLong(PreferenceAccess.DIRTY_TS, 0L) > cacheFile.lastModified()
+        || ConfigurationManager.getInstance().getOrLoad(cfgDes).getDirtyTs() > cacheFile.lastModified()
+        || prefs.getBoolean(PreferenceAccess.CMAKE_FORCE_RUN, false))) {
+      mustGenerate= true;
       // The generator might have changed, remove cache file to avoid cmake's complaints..
       cacheFile.delete();
 //      System.out.println("DEL "+cacheFile);
       // tell the workspace about file removal
       buildFolder.getFile("CMakeCache.txt").refreshLocal(IResource.DEPTH_ZERO, monitor);
 
-      // also remove cache files for external project that were downloaded by cmake's FetchContent call (e.g. for CPM)...
+      // also remove cache files in cmake projects that were downloaded by cmake's FetchContent call (e.g. for CPM)...
       java.nio.file.Path cpmDepsPath = buildDir.toPath().resolve("_deps");
       try {
-        Files.walkFileTree(cpmDepsPath, EnumSet.noneOf(FileVisitOption.class), 1,
+        Files.walkFileTree(cpmDepsPath, EnumSet.noneOf(FileVisitOption.class), 2,
             new SimpleFileVisitor<java.nio.file.Path>() {
               @Override
               public FileVisitResult visitFile(java.nio.file.Path file, BasicFileAttributes attrs) throws IOException {
-                System.out.println(
-                    "BuildscriptGenerator.generateBuildscripts(...).new SimpleFileVisitor() {...}.visitFile(): "+
-                file);
                 if ("CMakeCache.txt".equals(file.getFileName().toString())) {
                   Files.delete(file);
                 }
@@ -273,8 +270,6 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
             });
       } catch (IOException ignore) {
       }
-
-      mustGenerate= true;
     }
     if (!mustGenerate && (!cacheFileExists || !new File(buildDir, getMakefileName()).exists())) {
       mustGenerate= true;
