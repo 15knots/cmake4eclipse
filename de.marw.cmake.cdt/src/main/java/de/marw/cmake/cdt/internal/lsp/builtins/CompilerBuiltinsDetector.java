@@ -46,6 +46,7 @@ import de.marw.cmake.cdt.internal.Plugin;
 import de.marw.cmake.cdt.lsp.builtins.IBuiltinsDetectionBehavior;
 import de.marw.cmake.cdt.lsp.builtins.IBuiltinsOutputProcessor;
 import de.marw.cmake.cdt.lsp.builtins.OutputSniffer;
+import de.marw.cmake4eclipse.mbs.console.CdtConsoleConstants;
 
 /**
  * Detects preprocessor macros and include paths that are built-in to a compiler.
@@ -53,8 +54,6 @@ import de.marw.cmake.cdt.lsp.builtins.OutputSniffer;
  * @author Martin Weber
  */
 public class CompilerBuiltinsDetector {
-  /** console ID for extension point org.eclipse.cdt.core.CBuildConsole (see plugin.xml) */
-  private static final String CONSOLE_ID = Plugin.PLUGIN_ID + ".detectorConsole";
   /** error marker ID */
   private static final String MARKER_ID = Plugin.PLUGIN_ID + ".CompilerBuiltinsDetectorMarker";
 
@@ -279,8 +278,8 @@ public class CompilerBuiltinsDetector {
 
     ILanguage ld = LanguageManager.getInstance().getLanguage(languageId);
     if (ld != null) {
-      String consoleId = CONSOLE_ID + '.' + languageId;
-      console = CCorePlugin.getDefault().getConsole(CONSOLE_ID, consoleId, null, null);
+      String consoleId = CdtConsoleConstants.BUILTINS_DETECTION_CONSOLE_ID + '.' + languageId;
+      console = CCorePlugin.getDefault().getConsole(CdtConsoleConstants.BUILTINS_DETECTION_CONSOLE_ID, consoleId, null, null);
       final IProject project = cfgDescription.getProjectDescription().getProject();
       console.start(project);
       try {

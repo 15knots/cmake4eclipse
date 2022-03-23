@@ -7,7 +7,7 @@
  * SPDX-License-Identifier: EPL-2.0
  *******************************************************************************/
 
-package de.marw.cmake4eclipse.mbs.console;
+package de.marw.cmake4eclipse.mbs.ui;
 
 import org.eclipse.cdt.core.ConsoleOutputStream;
 import org.eclipse.cdt.core.resources.IConsole;
@@ -18,14 +18,14 @@ import org.eclipse.core.runtime.CoreException;
 /**
  * @author Martin Weber
  */
-public abstract class AbstractConsole implements IConsole{
+public abstract class AbstractConsole implements IConsole {
 
-  private IConsole console;
+  protected IConsole console;
 
   /**
    * Gets a console manager that is configured to the console`s display-name, the ID and icon.
    *
-   * @see org.eclipse.cdt.ui.CUIPlugin#getConsoleManager(String, String)
+   * @see org.eclipse.cdt.ui.CUIPlugin#getConsoleManager(String, String, URL)
    */
   protected abstract IBuildConsoleManager getConsoleManager();
 

@@ -10,6 +10,7 @@ package de.marw.cmake4eclipse.mbs.internal;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.FileVisitOption;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -23,7 +24,6 @@ import java.util.Optional;
 import java.util.function.Predicate;
 
 import org.eclipse.cdt.core.CCorePlugin;
-import org.eclipse.cdt.core.ConsoleOutputStream;
 import org.eclipse.cdt.core.ICommandLauncher;
 import org.eclipse.cdt.core.cdtvariables.CdtVariableException;
 import org.eclipse.cdt.core.cdtvariables.ICdtVariableManager;
@@ -64,6 +64,7 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 
 import com.google.gson.JsonSyntaxException;
 
+import de.marw.cmake4eclipse.mbs.console.CdtConsoleConstants;
 import de.marw.cmake4eclipse.mbs.preferences.BuildToolKitDefinition;
 import de.marw.cmake4eclipse.mbs.preferences.PreferenceAccess;
 import de.marw.cmake4eclipse.mbs.settings.CMakePreferences;
@@ -81,8 +82,6 @@ import de.marw.cmake4eclipse.mbs.settings.ConfigurationManager;
 public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
   private static final ILog log = Activator.getDefault().getLog();
 
-  /** CBuildConsole element id */
-  private static final String CMAKE_CONSOLE_ID = "cmake4eclipse.mbs.cmakeConsole";
   /** buildscript generation error marker ID */
   private static final String MARKER_ID = Activator.PLUGIN_ID + ".BuildscriptGenerationError";
 
@@ -293,14 +292,14 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     // See if the user has cancelled the build
     checkCancel();
 
-    final IConsole console = CCorePlugin.getDefault().getConsole(CMAKE_CONSOLE_ID);
+    final IConsole console = CCorePlugin.getDefault().getConsole(CdtConsoleConstants.CMAKE_CONSOLE_ID);
     console.start(project);
 
     // create makefile, assuming the first source directory contains a
     // CMakeLists.txt
     final ICSourceEntry srcEntry = srcEntries[0]; // project relative
     try {
-      final ConsoleOutputStream cis = console.getInfoStream();
+      final OutputStream cis = console.getInfoStream();
       String msg = String.format("%tT Buildscript generation: %s::%s in %s\n", startDate, project.getName(),
           config.getName(), buildDir.getAbsolutePath());
       cis.write(msg.getBytes());
@@ -321,7 +320,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     }
 
     try {
-      final ConsoleOutputStream cis = console.getInfoStream();
+      final OutputStream cis = console.getInfoStream();
       Date endDate = new Date();
       String msg = String.format("%tT Buildscript generation finished (took %d ms)\n", endDate,
           endDate.getTime() - startDate.getTime());
@@ -456,7 +455,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
           value = CCorePlugin.getDefault().getCdtVariableManager().resolveValue(overwritingBtk.get().getPath(), "",
               var.getDelimiter(), null);
           try {
-            final ConsoleOutputStream cis = console.getInfoStream();
+            final OutputStream cis = console.getInfoStream();
             String msg = String.format("  Build tool kit '%s': $%s='%s'\n", overwritingBtk.get().getName(), name,
                 value);
             cis.write(msg.getBytes());

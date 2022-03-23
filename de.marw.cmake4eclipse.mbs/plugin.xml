@@ -140,13 +140,6 @@
     </initializer>
  </extension>
  <extension
-       point="org.eclipse.cdt.core.CBuildConsole">
-    <CBuildConsole
-          class="de.marw.cmake4eclipse.mbs.console.CMakeConsole"
-          id="cmake4eclipse.mbs.cmakeConsole">
-    </CBuildConsole>
- </extension>
- <extension
        point="org.eclipse.core.variables.dynamicVariables">
     <variable
           description="The value of the PATH property of cmake4eclipse`s overwriting Build Tool Kit, if any. Otherwise the value of the PATH environment variable"

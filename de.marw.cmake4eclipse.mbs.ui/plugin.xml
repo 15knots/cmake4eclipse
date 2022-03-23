@@ -99,4 +99,15 @@
        </description>
     </transfer>
  </extension>
+ <extension
+       point="org.eclipse.cdt.core.CBuildConsole">
+    <CBuildConsole
+          class="de.marw.cmake4eclipse.mbs.ui.CMakeConsole"
+          id="cmake4eclipse.mbs.cmakeConsole">
+    </CBuildConsole>
+    <CBuildConsole
+          class="de.marw.cmake4eclipse.mbs.ui.BuiltinsDetectionConsole"
+          id="cmake4eclipse.mbs.builtinsConsole">
+    </CBuildConsole>
+ </extension>
 </plugin>

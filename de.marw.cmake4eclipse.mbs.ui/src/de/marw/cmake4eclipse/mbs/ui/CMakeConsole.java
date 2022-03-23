@@ -6,10 +6,12 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *******************************************************************************/
-package de.marw.cmake4eclipse.mbs.console;
+package de.marw.cmake4eclipse.mbs.ui;
 
 import org.eclipse.cdt.ui.CUIPlugin;
 import org.eclipse.cdt.ui.IBuildConsoleManager;
+
+import de.marw.cmake4eclipse.mbs.console.CdtConsoleConstants;
 
 /**
  * A console for cmake invocations.
@@ -18,11 +20,11 @@ import org.eclipse.cdt.ui.IBuildConsoleManager;
  */
 public class CMakeConsole extends AbstractConsole {
 
-  private static final String CONSOLE_CONTEXT_MENU_ID = "CMakeConsole"; //$NON-NLS-1$
+  public static final String CONSOLE_CONTEXT_MENU_ID = "menu." + CdtConsoleConstants.CMAKE_CONSOLE_ID; //$NON-NLS-1$
 
   @Override
   protected IBuildConsoleManager getConsoleManager() {
-    return CUIPlugin.getDefault().getConsoleManager("CMake Console", CONSOLE_CONTEXT_MENU_ID);
+    return CUIPlugin.getDefault().getConsoleManager("CMake Console", CONSOLE_CONTEXT_MENU_ID,
+        Activator.getDefault().getBundle().getEntry("icons/CMakeLogo.gif"));
   }
-
 }
