@@ -10,7 +10,6 @@
 package de.marw.cmake4eclipse.mbs.internal;
 
 import java.io.File;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -37,6 +36,7 @@ import org.eclipse.cdt.core.language.settings.providers.LanguageSettingsSerializ
 import org.eclipse.cdt.core.model.CoreModel;
 import org.eclipse.cdt.core.model.ICElement;
 import org.eclipse.cdt.core.parser.ExtendedScannerInfo;
+import org.eclipse.cdt.core.resources.IConsole;
 import org.eclipse.cdt.core.settings.model.CIncludePathEntry;
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
 import org.eclipse.cdt.core.settings.model.ICLanguageSettingEntry;
@@ -45,6 +45,8 @@ import org.eclipse.cdt.core.settings.model.ICSettingEntry;
 import org.eclipse.cdt.core.settings.model.ICSourceEntry;
 import org.eclipse.cdt.core.settings.model.util.CDataUtil;
 import org.eclipse.cdt.jsoncdb.core.CompileCommandsJsonParser;
+import org.eclipse.cdt.jsoncdb.core.IParserPreferences;
+import org.eclipse.cdt.jsoncdb.core.IParserPreferencesAccess;
 import org.eclipse.cdt.jsoncdb.core.ISourceFileInfoConsumer;
 import org.eclipse.cdt.jsoncdb.core.ParseRequest;
 import org.eclipse.core.filesystem.URIUtil;
@@ -63,6 +65,10 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.e4.core.contexts.EclipseContextFactory;
+import org.osgi.framework.FrameworkUtil;
+
+import de.marw.cmake4eclipse.mbs.console.CdtConsoleConstants;
 
 /**
  * A ILanguageSettingsProvider that parses the file 'compile_commands.json' produced by cmake and other tools.<br>
@@ -224,14 +230,22 @@ public class JsonCompilationDatabaseParser extends LanguageSettingsSerializableP
       buildRoot = new Path(cwd);
     }
     IPath jsonPath = buildRoot.append("compile_commands.json"); //$NON-NLS-1$
-    URI jsonUri = URIUtil.toURI(jsonPath);
-    IFile[] files = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(jsonUri);
-    final IFile jsonFileRc = files[0];
+    IFile[] files = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(URIUtil.toURI(jsonPath));
+    if (files.length > 0) {
+      final IFile jsonFileRc = files[0];
 
-    CompileCommandsJsonParser parser = new CompileCommandsJsonParser(
-        new ParseRequest(jsonFileRc, new SourceFileInfoConsumer(cfgDescription),
-            CommandLauncherManager.getInstance().getCommandLauncher(cfgDescription), null));
-    parser.parse(monitor);
+      IConsole console = null;
+      IParserPreferences prefs = EclipseContextFactory
+          .getServiceContext(FrameworkUtil.getBundle(IParserPreferencesAccess.class).getBundleContext())
+          .get(IParserPreferencesAccess.class).getWorkspacePreferences();
+      if (prefs.getAllocateConsole()) {
+        console = CCorePlugin.getDefault().getConsole(CdtConsoleConstants.BUILTINS_DETECTION_CONSOLE_ID);
+      }
+      CompileCommandsJsonParser parser = new CompileCommandsJsonParser(
+          new ParseRequest(jsonFileRc, new SourceFileInfoConsumer(cfgDescription),
+              CommandLauncherManager.getInstance().getCommandLauncher(cfgDescription), console));
+      parser.parse(monitor);
+    }
   }
 
   /*-
