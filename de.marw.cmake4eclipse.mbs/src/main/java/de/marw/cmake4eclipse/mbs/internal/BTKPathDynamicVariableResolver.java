@@ -25,8 +25,8 @@ import de.marw.cmake4eclipse.mbs.preferences.PreferenceAccess;
 
 /**
  * Resolves to the value of the path property of the currently overwriting build tool kit. If no overwriting build tool
- * kit is present, resloves to the value of the system environment variable {@code PATH}.
- * 
+ * kit is present, resolves to the value of the system environment variable {@code PATH}.
+ *
  * @author Martin Weber
  */
 public class BTKPathDynamicVariableResolver implements IDynamicVariableResolver {

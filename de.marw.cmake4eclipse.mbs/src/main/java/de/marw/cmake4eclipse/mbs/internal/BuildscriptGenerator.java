@@ -126,42 +126,34 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
   }
 
   private IFolder getBuildFolder() {
-    // set the top build dir path for the current configuration
-    String buildDirStr = null;
-    final ICConfigurationDescription cfgd = ManagedBuildManager.getDescriptionForConfiguration(config);
-    try {
-      CMakePreferences prefs = ConfigurationManager.getInstance().getOrLoad(cfgd);
-      buildDirStr = prefs.getBuildDirectory();
-    } catch (CoreException e) {
-      // storage base is null; treat as bug in CDT..
-      log.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID,
-          "falling back to hard coded build directory", e));
-    }
-    IPath buildP;
-    if (buildDirStr == null) {
-      // not configured: fall back to legacy behavior
-      buildP = new Path("build").append(config.getName());
-    } else {
-      buildP = new Path(buildDirStr);
-    }
+    if (buildFolder == null) {
+      // set the top build dir path for the current configuration
+      String buildDirStr = null;
+      final ICConfigurationDescription cfgd = ManagedBuildManager.getDescriptionForConfiguration(config);
+      try {
+        CMakePreferences prefs = ConfigurationManager.getInstance().getOrLoad(cfgd);
+        buildDirStr = prefs.getBuildDirectory();
+      } catch (CoreException e) {
+        // storage base is null; treat as bug in CDT..
+        log.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "falling back to hard coded build directory", e));
+      }
+      if (buildDirStr == null) {
+        // not configured: fall back to legacy behavior
+        buildDirStr = "_build/${ConfigName}";
+      }
 
-    // Note that IPath from ICBuildSetting#getBuilderCWD() holding variables is mis-constructed,
-    // i.e. ${workspace_loc:/path} gets split into 2 path segments.
-    // MBS does that and we need to handle that
+      // Note that IPath from ICBuildSetting#getBuilderCWD() holding variables is mis-constructed,
+      // i.e. ${workspace_loc:/path} gets split into 2 path segments.
+      // MBS does that and we need to handle that.
 
-    // So resolve variables here and return an workspace relative path to not give CTD a chance to garble it up..
-    ICdtVariableManager mngr = CCorePlugin.getDefault().getCdtVariableManager();
-    try {
-      String buildPathString = buildP.toString();
-      buildPathString = mngr.resolveValue(buildPathString, "", null,
-          ManagedBuildManager.getDescriptionForConfiguration(config));
-      buildP= new Path(buildPathString);
-    } catch (CdtVariableException e) {
-      log.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID,
-          "variable expansion for build directory failed", e));
+      // So resolve variables here and return a workspace relative path to not give CDT a chance to garble it up..
+      try {
+        buildDirStr = CCorePlugin.getDefault().getCdtVariableManager().resolveValue(buildDirStr, "", null, cfgd);
+        buildFolder = project.getFolder(new Path(buildDirStr));
+      } catch (CdtVariableException e) {
+        log.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "variable expansion for build directory failed", e));
+      }
     }
-
-    buildFolder = project.getFolder(buildP);
     return buildFolder;
   }
 
@@ -431,9 +423,9 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
    */
   private ArrayList<String> buildEnvironment(IConsole console, Optional<BuildToolKitDefinition> overwritingBtk)
       throws CdtVariableException, CoreException {
-    ArrayList<String> envList = new ArrayList<>();
 
     IEnvironmentVariable[] variables = ManagedBuildManager.getEnvironmentVariableProvider().getVariables(config, true);
+    ArrayList<String> envList = new ArrayList<>(variables.length);
     if (overwritingBtk.isEmpty()) {
       for (IEnvironmentVariable var : variables) {
         envList.add(var.getName() + "=" + var.getValue()); //$NON-NLS-1$
@@ -452,12 +444,13 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
         String value = var.getValue();
         if (mustReplacePATH.test(name)) {
           // replace the value of $PATH with the value specified in the overwriting build tool kit
-          value = CCorePlugin.getDefault().getCdtVariableManager().resolveValue(overwritingBtk.get().getPath(), "",
+          BuildToolKitDefinition buildToolKitDefinition = overwritingBtk.get();
+          value = CCorePlugin.getDefault().getCdtVariableManager().resolveValue(buildToolKitDefinition.getPath(), "",
               var.getDelimiter(), null);
           try {
             final OutputStream cis = console.getInfoStream();
-            String msg = String.format("  Build tool kit '%s': $%s='%s'\n", overwritingBtk.get().getName(), name,
-                value);
+            String msg = String.format("  Using build tool kit '%s': $%s='%s'\n", buildToolKitDefinition.getName(),
+                name, value);
             cis.write(msg.getBytes());
           } catch (IOException ignore) {
           }
