@@ -10,6 +10,7 @@
 package de.marw.cmake4eclipse.mbs.internal;
 
 import java.io.File;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Properties;
 import java.util.WeakHashMap;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -24,7 +26,9 @@ import java.util.stream.Stream;
 
 import org.eclipse.cdt.build.core.scannerconfig.ScannerConfigNature;
 import org.eclipse.cdt.core.CCorePlugin;
-import org.eclipse.cdt.core.CommandLauncherManager;
+import org.eclipse.cdt.core.ICommandLauncher;
+import org.eclipse.cdt.core.envvar.IEnvironmentVariable;
+import org.eclipse.cdt.core.envvar.IEnvironmentVariableManager;
 import org.eclipse.cdt.core.index.IIndexManager;
 import org.eclipse.cdt.core.language.settings.providers.ICBuildOutputParser;
 import org.eclipse.cdt.core.language.settings.providers.ICListenerAgent;
@@ -49,8 +53,10 @@ import org.eclipse.cdt.jsoncdb.core.IParserPreferences;
 import org.eclipse.cdt.jsoncdb.core.IParserPreferencesAccess;
 import org.eclipse.cdt.jsoncdb.core.ISourceFileInfoConsumer;
 import org.eclipse.cdt.jsoncdb.core.ParseRequest;
-import org.eclipse.core.filesystem.URIUtil;
+import org.eclipse.cdt.managedbuilder.core.IBuilder;
+import org.eclipse.cdt.managedbuilder.core.ManagedBuildManager;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -219,33 +225,64 @@ public class JsonCompilationDatabaseParser extends LanguageSettingsSerializableP
    */
   private void parseAndSetEntries(ICConfigurationDescription cfgDescription, IProgressMonitor monitor)
       throws CoreException {
+    final CCorePlugin ccp = CCorePlugin.getDefault();
     // If ICBuildSetting#getBuilderCWD() returns a workspace relative path, it is garbled.
     // It returns '${workspace_loc:/my-project-name}'.
     final IPath builderCWD = cfgDescription.getBuildSetting().getBuilderCWD();
-    IPath buildRoot = ResourcesPlugin.getWorkspace().getRoot().getFolder(builderCWD).getLocation();
-    if (buildRoot == null) {
-      String cwd = builderCWD.toString();
-      cwd = CCorePlugin.getDefault().getCdtVariableManager().resolveValue(cwd.toString(), "", null, //$NON-NLS-1$
-          cfgDescription);
-      buildRoot = new Path(cwd);
-    }
-    IPath jsonPath = buildRoot.append("compile_commands.json"); //$NON-NLS-1$
-    IFile[] files = ResourcesPlugin.getWorkspace().getRoot().findFilesForLocationURI(URIUtil.toURI(jsonPath));
-    if (files.length > 0) {
-      final IFile jsonFileRc = files[0];
+    final String cwd = ccp.getCdtVariableManager().resolveValue(builderCWD.toString(), "", null, //$NON-NLS-1$
+        cfgDescription);
+    IFolder buildFolder = ResourcesPlugin.getWorkspace().getRoot().getFolder(new Path(cwd));
+    final IFile jsonFileRc = buildFolder.getFile("compile_commands.json"); //$NON-NLS-1$
 
-      IConsole console = null;
-      IParserPreferences prefs = EclipseContextFactory
-          .getServiceContext(FrameworkUtil.getBundle(IParserPreferencesAccess.class).getBundleContext())
-          .get(IParserPreferencesAccess.class).getWorkspacePreferences();
-      if (prefs.getAllocateConsole()) {
-        console = CCorePlugin.getDefault().getConsole(CdtConsoleConstants.BUILTINS_DETECTION_CONSOLE_ID);
-      }
-      CompileCommandsJsonParser parser = new CompileCommandsJsonParser(
-          new ParseRequest(jsonFileRc, new SourceFileInfoConsumer(cfgDescription),
-              CommandLauncherManager.getInstance().getCommandLauncher(cfgDescription), console));
-      parser.parse(monitor);
+    // get the launcher that runs in docker container, if any
+    IBuilder builder = ManagedBuildManager.getConfigurationForDescription(cfgDescription).getEditableBuilder();
+    ICommandLauncher launcher = builder.getCommandLauncher();
+    launcher.setProject(cfgDescription.getProjectDescription().getProject());
+
+    IConsole console = null;
+    IParserPreferences prefs = EclipseContextFactory
+        .getServiceContext(FrameworkUtil.getBundle(IParserPreferencesAccess.class).getBundleContext())
+        .get(IParserPreferencesAccess.class).getWorkspacePreferences();
+    if (prefs.getAllocateConsole()) {
+      console = ccp.getConsole(CdtConsoleConstants.BUILTINS_DETECTION_CONSOLE_ID);
+      launcher.showCommand(true);
     }
+
+    Map<String, String> envMap = prepareEnvironment(cfgDescription, builder);
+    launcher = new EnvCommandlauncher(launcher, envMap);
+    CompileCommandsJsonParser parser = new CompileCommandsJsonParser(
+        new ParseRequest(jsonFileRc, new SourceFileInfoConsumer(cfgDescription), launcher, console));
+    parser.parse(monitor);
+  }
+
+  private static Map<String, String> prepareEnvironment(ICConfigurationDescription cfgDes, IBuilder builder)
+      throws CoreException {
+    Map<String, String> envMap = new HashMap<>();
+    if (builder.appendEnvironment()) {
+      IEnvironmentVariableManager mngr = CCorePlugin.getDefault().getBuildEnvironmentManager();
+      IEnvironmentVariable[] vars = mngr.getVariables(cfgDes, true);
+      for (IEnvironmentVariable var : vars) {
+        envMap.put(var.getName(), var.getValue());
+      }
+    }
+
+    // Add variables from build info
+    Map<String, String> builderEnv = builder.getExpandedEnvironment();
+    if (builderEnv != null) {
+      envMap.putAll(builderEnv);
+    }
+
+    // replace $PATH, if necessary
+    BuildToolKitUtil.replacePathVarFromBuildToolKit(envMap);
+    // English language is set for parser because it relies on English messages in the output of the 'gcc -v'.
+    // On POSIX (Linux, UNIX) systems reset language variables to default (English) with UTF-8 encoding since GNU
+    // compilers can handle only UTF-8 characters.
+    // Include paths with locale characters will be handled properly regardless of the language as long as the encoding
+    // is set to UTF-8.
+    envMap.put("LANGUAGE", "en"); // override for GNU gettext
+    envMap.put("LC_ALL", "C.UTF-8"); // for other parts of the system libraries
+
+    return envMap;
   }
 
   /*-
@@ -449,4 +486,90 @@ public class JsonCompilationDatabaseParser extends LanguageSettingsSerializableP
       }
     }
   } // IndexerInfoConsumer
+
+  /**
+   * An {@code ICommandLauncher} that passes the environment variables used during the project build phase to the
+   * compilers that perform the built-in detection.
+   *
+   * @author Martin Weber
+   */
+  private static class EnvCommandlauncher implements ICommandLauncher {
+    private final ICommandLauncher delegate;
+    private Map<String, String> envMap;
+
+    EnvCommandlauncher(ICommandLauncher delegate, Map<String, String> envMap) {
+      this.delegate = Objects.requireNonNull(delegate);
+      this.envMap=envMap;
+    }
+
+    @Override
+    public Process execute(IPath commandPath, String[] args, String[] env, IPath workingDirectory,
+        IProgressMonitor monitor) throws CoreException {
+      if (env != null) {
+        for (String envStr : env) {
+          // Split "ENV=value" and put in envMap
+          int pos = envStr.indexOf('=');
+          if (pos < 0)
+            pos = envStr.length();
+          String key = envStr.substring(0, pos);
+          String value = envStr.substring(pos + 1);
+          envMap.put(key, value);
+        }
+      }
+      String[] effEnv = envMap.entrySet().stream().map(e -> e.getKey() + "=" + e.getValue()).toArray(String[]::new);
+
+      return delegate.execute(commandPath, args, effEnv, workingDirectory, monitor);
+    }
+
+    @Override
+    public void setProject(IProject project) {
+      delegate.setProject(project);
+    }
+
+    @Override
+    public IProject getProject() {
+      return delegate.getProject();
+    }
+
+    @Override
+    public void showCommand(boolean show) {
+      delegate.showCommand(show);
+    }
+
+    @Override
+    public String getErrorMessage() {
+      return delegate.getErrorMessage();
+    }
+
+    @Override
+    public void setErrorMessage(String error) {
+      delegate.setErrorMessage(error);
+    }
+
+    @Override
+    public String[] getCommandArgs() {
+      return delegate.getCommandArgs();
+    }
+
+    @Override
+    public Properties getEnvironment() {
+      return delegate.getEnvironment();
+    }
+
+    @Override
+    public String getCommandLine() {
+      return delegate.getCommandLine();
+    }
+
+    @Override
+    public int waitAndRead(OutputStream out, OutputStream err) {
+      return delegate.waitAndRead(out, err);
+    }
+
+    @Override
+    public int waitAndRead(OutputStream output, OutputStream err, IProgressMonitor monitor) {
+      return delegate.waitAndRead(output, err, monitor);
+    }
+
+  } // EnvCommandlauncher
 }

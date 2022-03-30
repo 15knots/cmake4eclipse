@@ -15,12 +15,8 @@ import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.Set;
-import java.util.function.Predicate;
 
-import org.eclipse.cdt.core.CCorePlugin;
 import org.eclipse.cdt.core.ICommandLauncher;
 import org.eclipse.cdt.core.IMarkerGenerator;
 import org.eclipse.cdt.core.ProblemMarkerInfo;
@@ -50,18 +46,14 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.osgi.framework.Version;
 
-import com.google.gson.JsonSyntaxException;
-
 import de.marw.cmake4eclipse.mbs.cmakecache.CMakeCacheFileParser;
 import de.marw.cmake4eclipse.mbs.cmakecache.CMakeCacheFileParser.EntryFilter;
 import de.marw.cmake4eclipse.mbs.cmakecache.SimpleCMakeCacheEntry;
-import de.marw.cmake4eclipse.mbs.preferences.BuildToolKitDefinition;
 import de.marw.cmake4eclipse.mbs.preferences.PreferenceAccess;
 import de.marw.cmake4eclipse.mbs.settings.CmakeGenerator;
 
@@ -83,41 +75,8 @@ public class CMakeBuildRunner extends ExternalBuildRunner {
   @Override
   protected Map<String, String> getEnvironment(IBuilder builder) throws CoreException {
     Map<String, String> environment = super.getEnvironment(builder);
-    IEclipsePreferences prefs = PreferenceAccess.getPreferences();
-    try {
-      Optional<BuildToolKitDefinition> overwritingBtk = BuildToolKitUtil.getOverwritingToolkit(prefs);
-
-      if (!overwritingBtk.isEmpty()) {
-        // PATH is overwritten...
-        Predicate<String> isPATH = n -> false;
-        if (Platform.OS_WIN32.equals(Platform.getOS())) {
-          // check for windows which has case-insensitive envvar names, e.g. 'pAth'
-          isPATH = n -> "PATH".equalsIgnoreCase(n);
-        } else {
-          isPATH = n -> "PATH".equals(n);
-        }
-
-        String newPath = null;
-        for (Iterator<Entry<String, String>> iter = environment.entrySet().iterator(); iter.hasNext();) {
-          Entry<String, String> entry = iter.next();
-          String key = entry.getKey();
-          if (isPATH.test(key)) {
-            // replace the value of $PATH with the value specified in the overwriting build tool kit
-            newPath = CCorePlugin.getDefault().getCdtVariableManager().resolveValue(overwritingBtk.get().getPath(), "",
-                null, null);
-            iter.remove(); // will be added later again as 'PATH'
-            break;
-          }
-        }
-        if (newPath != null) {
-          // replace $PATH
-          environment.put("PATH", newPath);
-        }
-      }
-    } catch (JsonSyntaxException ex) {
-      // workbench preferences file format error
-      throw new CoreException(Status.error("Error loading workbench preferences", ex));
-    }
+    // replace $PATH, if necessary
+    BuildToolKitUtil.replacePathVarFromBuildToolKit(environment);
 
     return environment;
   }

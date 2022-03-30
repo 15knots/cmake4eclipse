@@ -8,9 +8,18 @@
  *******************************************************************************/
 package de.marw.cmake4eclipse.mbs.internal;
 
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.function.Predicate;
 
+import org.eclipse.cdt.core.CCorePlugin;
+import org.eclipse.cdt.core.cdtvariables.CdtVariableException;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 
 import com.google.gson.JsonSyntaxException;
@@ -51,4 +60,46 @@ class BuildToolKitUtil {
     return Optional.empty();
   }
 
+  /**
+   * Replaces the PATH entry in the specified map with the value from the overwriting build tool kit, if any is
+   * overwriting.
+   *
+   * @throws CdtVariableException if expansion of the PATH variable fails
+   *
+   * @see BuildToolKitDefinition#getPath()
+   */
+  static void replacePathVarFromBuildToolKit(Map<String, String> environment)
+      throws CdtVariableException, CoreException {
+    IEclipsePreferences prefs = PreferenceAccess.getPreferences();
+    try {
+      Optional<BuildToolKitDefinition> overwritingBtk = BuildToolKitUtil.getOverwritingToolkit(prefs);
+      // replace $PATH, if necessary
+      if (overwritingBtk.isPresent()) {
+        BuildToolKitDefinition buildToolKitDefinition = overwritingBtk.get();
+        // PATH is overwritten...
+        Predicate<String> isPATH = n -> false;
+        if (Platform.OS_WIN32.equals(Platform.getOS())) {
+          // windows which has case-insensitive envvar names, e.g. 'pAth'
+          isPATH = n -> "PATH".equalsIgnoreCase(n);
+        } else {
+          isPATH = n -> "PATH".equals(n);
+        }
+
+        for (Iterator<Entry<String, String>> iter = environment.entrySet().iterator(); iter.hasNext();) {
+          Entry<String, String> entry = iter.next();
+          String key = entry.getKey();
+          if (isPATH.test(key)) {
+            // replace the value of $PATH with the value specified in the overwriting build tool kit
+            String newPath = CCorePlugin.getDefault().getCdtVariableManager()
+                .resolveValue(buildToolKitDefinition.getPath(), "", null, null);
+            entry.setValue(newPath);
+            break;
+          }
+        }
+      }
+    } catch (JsonSyntaxException ex) {
+      // workbench preferences file format error
+      throw new CoreException(Status.error("Error loading workbench preferences", ex));
+    }
+  }
 }
