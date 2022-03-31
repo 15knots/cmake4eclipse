@@ -28,11 +28,11 @@
         <setEntry value="com.ibm.icu@default:default"/>
         <setEntry value="com.sun.jna.platform@default:default"/>
         <setEntry value="com.sun.jna@default:default"/>
-        <setEntry value="com.sun.xml.bind*2.3.3.v20201118-1818@default:default"/>
+        <setEntry value="com.sun.xml.bind@default:default"/>
+        <setEntry value="jakarta.activation@default:default"/>
         <setEntry value="jakarta.servlet-api@default:default"/>
         <setEntry value="jakarta.xml.bind@default:default"/>
-        <setEntry value="javax.activation*1.1.0.v201211130549@default:default"/>
-        <setEntry value="javax.activation*1.2.2.v20201119-1642@default:default"/>
+        <setEntry value="javax.activation@default:default"/>
         <setEntry value="javax.annotation@default:default"/>
         <setEntry value="javax.el@default:default"/>
         <setEntry value="javax.inject@default:default"/>
@@ -63,6 +63,12 @@
         <setEntry value="org.eclipse.cdt.core@default:default"/>
         <setEntry value="org.eclipse.cdt.debug.core@default:default"/>
         <setEntry value="org.eclipse.cdt.debug.ui@default:default"/>
+        <setEntry value="org.eclipse.cdt.dsf.gdb.ui@default:default"/>
+        <setEntry value="org.eclipse.cdt.dsf.gdb@default:default"/>
+        <setEntry value="org.eclipse.cdt.dsf.ui@default:default"/>
+        <setEntry value="org.eclipse.cdt.dsf@default:default"/>
+        <setEntry value="org.eclipse.cdt.gdb.ui@default:default"/>
+        <setEntry value="org.eclipse.cdt.gdb@default:default"/>
         <setEntry value="org.eclipse.cdt.jsoncdb.core.doc@default:default"/>
         <setEntry value="org.eclipse.cdt.jsoncdb.core.ui@default:default"/>
         <setEntry value="org.eclipse.cdt.jsoncdb.core@default:default"/>
@@ -72,6 +78,7 @@
         <setEntry value="org.eclipse.cdt.managedbuilder.core@default:default"/>
         <setEntry value="org.eclipse.cdt.managedbuilder.gnu.ui@default:default"/>
         <setEntry value="org.eclipse.cdt.managedbuilder.ui@default:default"/>
+        <setEntry value="org.eclipse.cdt.native.serial@default:default"/>
         <setEntry value="org.eclipse.cdt.ui@default:default"/>
         <setEntry value="org.eclipse.compare.core@default:default"/>
         <setEntry value="org.eclipse.compare@default:default"/>
@@ -81,6 +88,7 @@
         <setEntry value="org.eclipse.core.databinding.property@default:default"/>
         <setEntry value="org.eclipse.core.databinding@default:default"/>
         <setEntry value="org.eclipse.core.expressions@default:default"/>
+        <setEntry value="org.eclipse.core.externaltools@default:default"/>
         <setEntry value="org.eclipse.core.filebuffers@default:default"/>
         <setEntry value="org.eclipse.core.filesystem.linux.x86_64@default:false"/>
         <setEntry value="org.eclipse.core.filesystem@default:default"/>
@@ -92,6 +100,7 @@
         <setEntry value="org.eclipse.core.runtime@default:true"/>
         <setEntry value="org.eclipse.core.variables@default:default"/>
         <setEntry value="org.eclipse.debug.core@default:default"/>
+        <setEntry value="org.eclipse.debug.ui.launchview@default:default"/>
         <setEntry value="org.eclipse.debug.ui@default:default"/>
         <setEntry value="org.eclipse.e4.core.commands@default:default"/>
         <setEntry value="org.eclipse.e4.core.contexts@default:default"/>
@@ -171,6 +180,7 @@
         <setEntry value="org.eclipse.team.core@default:default"/>
         <setEntry value="org.eclipse.team.ui@default:default"/>
         <setEntry value="org.eclipse.text@default:default"/>
+        <setEntry value="org.eclipse.tm.terminal.control@default:default"/>
         <setEntry value="org.eclipse.tools.templates.core@default:default"/>
         <setEntry value="org.eclipse.tools.templates.freemarker@default:default"/>
         <setEntry value="org.eclipse.tools.templates.ui@default:default"/>
@@ -189,8 +199,10 @@
         <setEntry value="org.eclipse.ui@default:default"/>
         <setEntry value="org.eclipse.urischeme@default:default"/>
         <setEntry value="org.freemarker@default:default"/>
-        <setEntry value="org.hamcrest.core@default:default"/>
-        <setEntry value="org.junit@default:default"/>
+        <setEntry value="org.hamcrest.core*1.1.0.v20090501071000@default:default"/>
+        <setEntry value="org.hamcrest.core*1.3.0.v20180420-1519@default:default"/>
+        <setEntry value="org.junit*4.12.0.v201504281640@default:default"/>
+        <setEntry value="org.junit*4.13.0.v20200204-1500@default:default"/>
         <setEntry value="org.slf4j.api@default:default"/>
         <setEntry value="org.tukaani.xz@default:default"/>
         <setEntry value="org.w3c.css.sac@default:default"/>
@@ -199,6 +211,7 @@
         <setEntry value="org.w3c.dom.svg@default:default"/>
     </setAttribute>
     <setAttribute key="selected_workspace_bundles">
+        <setEntry value="de.marw.cmake.cdt.tests@default:false"/>
         <setEntry value="de.marw.cmake.cdt@default:default"/>
         <setEntry value="de.marw.cmake4eclipse.mbs.ui@default:default"/>
         <setEntry value="de.marw.cmake4eclipse.mbs@default:default"/>

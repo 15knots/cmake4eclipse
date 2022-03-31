@@ -1,5 +1,12 @@
 # Cmake4eclipse Change Log
 
+## 3.0.3 (2022-03-31)
+### Changes
+- FIX: Also remove cache files for external projects that were downloaded by cmake's FetchContent call.
+- Do not update index in projects that were closed.
+- Honor workbench setting for builtins-detection console.
+- Closed #171: JSON Compilation Database Parser does not recognize built-ins.
+
 ## 3.0.2 (2022-02-07)
 ### Changes
 - Closed #167: bison from <MSYS2_ROOT>\usr\bin fails when run for projects targeting mingw32 on windows.

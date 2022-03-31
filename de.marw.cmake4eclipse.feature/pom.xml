@@ -15,7 +15,7 @@
   <artifactId>de.marw.cmake4eclipse.feature</artifactId>
   <!-- always use .qualifier in manifest, we do not plan to publish this plugin
     to a maven repo. (The repository version is a different thing) -->
-  <version>3.0.2-SNAPSHOT</version>
+  <version>3.0.3-SNAPSHOT</version>
   <packaging>eclipse-feature</packaging>
 
   <build>
