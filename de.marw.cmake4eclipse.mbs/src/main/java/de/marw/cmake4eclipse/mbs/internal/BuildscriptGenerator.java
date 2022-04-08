@@ -8,12 +8,12 @@
  *******************************************************************************/
 package de.marw.cmake4eclipse.mbs.internal;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.FileVisitOption;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
@@ -89,8 +89,8 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
   private IProgressMonitor monitor;
   private IConfiguration config;
   private IBuilder builder;
-  /** build folder - relative to the project. Lazily instantiated */
-  private IFolder buildFolder;
+  /** build path - relative to the project. Lazily instantiated */
+  private IPath buildRelPath;
 
   /**   */
   public BuildscriptGenerator() {
@@ -125,8 +125,8 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     builder = config.getEditableBuilder();
   }
 
-  private IFolder getBuildFolder() {
-    if (buildFolder == null) {
+  private IPath getBuildPath() {
+    if (buildRelPath == null) {
       // set the top build dir path for the current configuration
       String buildDirStr = null;
       final ICConfigurationDescription cfgd = ManagedBuildManager.getDescriptionForConfiguration(config);
@@ -149,12 +149,12 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       // So resolve variables here and return a workspace relative path to not give CDT a chance to garble it up..
       try {
         buildDirStr = CCorePlugin.getDefault().getCdtVariableManager().resolveValue(buildDirStr, "", null, cfgd);
-        buildFolder = project.getFolder(new Path(buildDirStr));
+        buildRelPath = new Path(buildDirStr);
       } catch (CdtVariableException e) {
         log.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "variable expansion for build directory failed", e));
       }
     }
-    return buildFolder;
+    return buildRelPath;
   }
 
   /*-
@@ -168,7 +168,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
 
     // So return workspace path (absolute) or absolute file system path,
     // since CDT Builder#getDefaultBuildPath() does weird thing with relative paths
-    return getBuildFolder().getFullPath();
+    return project.getFolder(getBuildPath()).getFullPath();
   }
 
   /**
@@ -231,24 +231,25 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
 
     boolean mustGenerate= forceGeneration;
 
-    final IFolder buildFolder = getBuildFolder();
-    final File buildDir = buildFolder.getLocation().toFile();
-    final File cacheFile = new File(buildDir, "CMakeCache.txt");
-    IEclipsePreferences prefs = PreferenceAccess.getPreferences();
-    boolean cacheFileExists = cacheFile.exists();
-    if (cacheFileExists && (prefs.getLong(PreferenceAccess.DIRTY_TS, 0L) > cacheFile.lastModified()
-        || ConfigurationManager.getInstance().getOrLoad(cfgDes).getDirtyTs() > cacheFile.lastModified()
-        || prefs.getBoolean(PreferenceAccess.CMAKE_FORCE_RUN, false))) {
-      mustGenerate= true;
-      // The generator might have changed, remove cache file to avoid cmake's complaints..
-      cacheFile.delete();
-//      System.out.println("DEL "+cacheFile);
-      // tell the workspace about file removal
-      buildFolder.getFile("CMakeCache.txt").refreshLocal(IResource.DEPTH_ZERO, monitor);
+    final IFolder buildFolder = project.getFolder(getBuildPath());
+    // make sure we have a resource to attach session properties to
+    createFolder(buildFolder);
+    final java.nio.file.Path buildDir = Paths.get(buildFolder.getLocationURI());
 
-      // also remove cache files in cmake projects that were downloaded by cmake's FetchContent call (e.g. for CPM)...
-      java.nio.file.Path cpmDepsPath = buildDir.toPath().resolve("_deps");
-      try {
+    IEclipsePreferences prefs = PreferenceAccess.getPreferences();
+    try {
+      final java.nio.file.Path cacheFile = buildDir.resolve( "CMakeCache.txt");
+      boolean cacheFileExists = Files.exists(cacheFile);
+      if (cacheFileExists
+          && (prefs.getLong(PreferenceAccess.DIRTY_TS, 0L) > Files.getLastModifiedTime(cacheFile).toMillis()
+              || ConfigurationManager.getInstance().getOrLoad(cfgDes).getDirtyTs() > Files
+                  .getLastModifiedTime(cacheFile).toMillis()
+              || prefs.getBoolean(PreferenceAccess.CMAKE_FORCE_RUN, false))) {
+        mustGenerate = true;
+        // The generator might have changed, remove cache file to avoid cmake's complaints..
+        Files.delete(cacheFile);
+        // also remove cache files in cmake projects that were downloaded by cmake's FetchContent call (e.g. for CPM)...
+        java.nio.file.Path cpmDepsPath = buildDir.resolve("_deps");
         Files.walkFileTree(cpmDepsPath, EnumSet.noneOf(FileVisitOption.class), 2,
             new SimpleFileVisitor<java.nio.file.Path>() {
               @Override
@@ -259,27 +260,22 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
                 return FileVisitResult.CONTINUE;
               }
             });
-      } catch (IOException ignore) {
       }
-    }
-    if (!mustGenerate && (!cacheFileExists || !new File(buildDir, getMakefileName()).exists())) {
-      mustGenerate= true;
-    }
+      if (!mustGenerate && (!cacheFileExists || !Files.exists(buildDir.resolve(getMakefileName())))) {
+        mustGenerate = true;
+      }
+      if (!mustGenerate) {
+        return new MultiStatus(Activator.PLUGIN_ID, IStatus.OK, "", null);
+      }
 
-    if( !mustGenerate){
-      return new MultiStatus(Activator.PLUGIN_ID, IStatus.OK, "", null);
+      // Create the top-level directory for the build output
+      Files.createDirectories(buildDir);
+    } catch (IOException ex) {
+      // if multiple projects are build, this information is lost when a new console is opened.
+      // So create a problem marker to show up in the problem view
+      createErrorMarker(project, ex.getMessage());
+      return new MultiStatus(Activator.PLUGIN_ID, IStatus.ERROR, ex.getMessage(), ex);
     }
-
-    // Create the top-level directory for the build output
-    createFolder(buildFolder);
-    /*
-     * make sure the directory REALLY exists in the file system. If it
-     * doesn't, the (buggy?) ICommandLauncher instance will cd to
-     * the current working directory, which is plainly wrong, NOTE:
-     * resource.refreshLocal() does not seem to work here.
-     */
-    buildDir.mkdirs();
-
     updateMonitor("Execute CMake for " + project.getName());
     // See if the user has cancelled the build
     checkCancel();
@@ -287,13 +283,12 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     final IConsole console = CCorePlugin.getDefault().getConsole(CdtConsoleConstants.CMAKE_CONSOLE_ID);
     console.start(project);
 
-    // create makefile, assuming the first source directory contains a
-    // CMakeLists.txt
+    // create makefile, assuming the first source directory contains a CMakeLists.txt
     final ICSourceEntry srcEntry = srcEntries[0]; // project relative
     try {
       final OutputStream cis = console.getInfoStream();
       String msg = String.format("%tT Buildscript generation: %s::%s in %s\n", startDate, project.getName(),
-          config.getName(), buildDir.getAbsolutePath());
+          config.getName(), buildDir);
       cis.write(msg.getBytes());
     } catch (IOException ignore) {
     }
@@ -301,7 +296,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     IContainer srcDir = srcPath.isEmpty() ? project : project.getFolder(srcPath);
 
     checkCancel();
-    MultiStatus status = invokeCMake(srcDir, buildFolder, console);
+    MultiStatus status = invokeCMake(srcDir, buildFolder.getLocation(), console);
     // NOTE: Commonbuilder reads getCode() to detect errors, not getSeverity()
     if (status.getCode() == IStatus.ERROR) {
       // failed to generate
@@ -356,13 +351,13 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
    *
    * @param console
    *        the build console to send messages to
-   * @param buildFolder
+   * @param buildPath
    *        abs. path
    * @param srcFolder
    * @return a MultiStatus object, where .getCode() return the severity
    * @throws CoreException
    */
-  private MultiStatus invokeCMake(IContainer srcFolder, IFolder buildFolder, IConsole console) throws CoreException {
+  private MultiStatus invokeCMake(IContainer srcFolder, IPath buildPath, IConsole console) throws CoreException {
     IEclipsePreferences prefs = PreferenceAccess.getPreferences();
     try {
       Optional<BuildToolKitDefinition> overwritingBtk = BuildToolKitUtil.getOverwritingToolkit(prefs);
@@ -378,7 +373,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       launcher.setProject(project); // 9.4++ versions of CDT require this for docker
       launcher.showCommand(true);
       final Process proc = launcher.execute(new Path(cmd), argList.toArray(new String[argList.size()]),
-          envList.toArray(new String[envList.size()]), buildFolder.getLocation(), monitor);
+          envList.toArray(new String[envList.size()]), buildPath, monitor);
       if (proc != null) {
         try {
           // Close the input of the process since we will never write to it
@@ -618,10 +613,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     // Is this a generated directory ...
     IPath path = resource.getProjectRelativePath();
     // It is if it is a root of the resource pathname
-    if (getBuildFolder().getFullPath().isPrefixOf(path))
-      return true;
-
-    return false;
+    return  getBuildPath().isPrefixOf(path);
   }
 
   /*-
