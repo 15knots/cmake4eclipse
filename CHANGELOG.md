@@ -1,5 +1,10 @@
 # Cmake4eclipse Change Log
 
+## 3.0.4 (2022-05-17)
+### Changes
+- Closed #172: docker build and additional include paths: eclipse doesn't find the includes
+- Use java.nio.file.Paths instead of java.io.File
+
 ## 3.0.3 (2022-03-31)
 ### Changes
 - FIX: Also remove cache files for external projects that were downloaded by cmake's FetchContent call.
