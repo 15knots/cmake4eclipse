@@ -21,6 +21,7 @@ import java.util.Objects;
 import java.util.Properties;
 import java.util.WeakHashMap;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -48,12 +49,16 @@ import org.eclipse.cdt.core.settings.model.ICProjectDescription;
 import org.eclipse.cdt.core.settings.model.ICSettingEntry;
 import org.eclipse.cdt.core.settings.model.ICSourceEntry;
 import org.eclipse.cdt.core.settings.model.util.CDataUtil;
+import org.eclipse.cdt.docker.launcher.ContainerCommandLauncher;
+import org.eclipse.cdt.docker.launcher.DockerLaunchUIPlugin;
 import org.eclipse.cdt.jsoncdb.core.CompileCommandsJsonParser;
 import org.eclipse.cdt.jsoncdb.core.IParserPreferences;
 import org.eclipse.cdt.jsoncdb.core.IParserPreferencesAccess;
 import org.eclipse.cdt.jsoncdb.core.ISourceFileInfoConsumer;
 import org.eclipse.cdt.jsoncdb.core.ParseRequest;
+import org.eclipse.cdt.managedbuilder.buildproperties.IOptionalBuildProperties;
 import org.eclipse.cdt.managedbuilder.core.IBuilder;
+import org.eclipse.cdt.managedbuilder.core.IConfiguration;
 import org.eclipse.cdt.managedbuilder.core.ManagedBuildManager;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -69,9 +74,11 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.e4.core.contexts.EclipseContextFactory;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
 
 import de.marw.cmake4eclipse.mbs.console.CdtConsoleConstants;
@@ -235,7 +242,8 @@ public class JsonCompilationDatabaseParser extends LanguageSettingsSerializableP
     final IFile jsonFileRc = buildFolder.getFile("compile_commands.json"); //$NON-NLS-1$
 
     // get the launcher that runs in docker container, if any
-    IBuilder builder = ManagedBuildManager.getConfigurationForDescription(cfgDescription).getEditableBuilder();
+    IConfiguration cfg = ManagedBuildManager.getConfigurationForDescription(cfgDescription);
+    IBuilder builder = cfg.getEditableBuilder();
     ICommandLauncher launcher = builder.getCommandLauncher();
     launcher.setProject(cfgDescription.getProjectDescription().getProject());
 
@@ -250,9 +258,41 @@ public class JsonCompilationDatabaseParser extends LanguageSettingsSerializableP
 
     Map<String, String> envMap = prepareEnvironment(cfgDescription, builder);
     launcher = new EnvCommandlauncher(launcher, envMap);
+
+    IContainerToHostPathConverter cthpc= path -> path;
+    // docker: include path mapping for copied header files
+    IOptionalBuildProperties props = cfg.getOptionalBuildProperties();
+    if (props != null) {
+      Bundle dockerBundle = Platform.getBundle(DockerLaunchUIPlugin.PLUGIN_ID); // dependency is optional
+      boolean runsInContainer = Boolean
+          .parseBoolean(props.getProperty(ContainerCommandLauncher.CONTAINER_BUILD_ENABLED));
+      if (runsInContainer && dockerBundle != null) {
+        String connectionName = props.getProperty(ContainerCommandLauncher.CONNECTION_ID);
+        String imageName = props.getProperty(ContainerCommandLauncher.IMAGE_ID);
+        if (connectionName != null && !connectionName.isEmpty() && imageName != null && !imageName.isEmpty()) {
+          // reverse engineered from
+          // org.eclipse.cdt.docker.launcher.ContainerCommandLauncherFactory#verifyLanguageSettingEntries()
+          IPath pluginPath = Platform.getStateLocation(dockerBundle);
+          IPath hostDir = pluginPath.append("HEADERS") //$NON-NLS-1$
+              .append(getCleanName(connectionName)).append(getCleanName(imageName));
+          IProject project = cfgDescription.getProjectDescription().getProject();
+          cthpc= new ContainerToHostPathConverter(hostDir, project);
+        }
+      }
+    }
+
     CompileCommandsJsonParser parser = new CompileCommandsJsonParser(
-        new ParseRequest(jsonFileRc, new SourceFileInfoConsumer(cfgDescription), launcher, console));
+        new ParseRequest(jsonFileRc, new SourceFileInfoConsumer(cfgDescription, cthpc), launcher, console));
     parser.parse(monitor);
+  }
+
+  /*
+   * Copied from org.eclipse.cdt.docker.launcher.ContainerCommandLauncherFactory#getCleanName()
+   */
+  private static String getCleanName(String name) {
+    String cleanName = name.replace("unix:///", "unix_"); //$NON-NLS-1$ //$NON-NLS-2$
+    cleanName = cleanName.replace("tcp://", "tcp_"); //$NON-NLS-1$ //$NON-NLS-2$
+    return cleanName.replaceAll("[:/.]", "_"); //$NON-NLS-1$ //$NON-NLS-2$
   }
 
   private static Map<String, String> prepareEnvironment(ICConfigurationDescription cfgDes, IBuilder builder)
@@ -460,9 +500,13 @@ public class JsonCompilationDatabaseParser extends LanguageSettingsSerializableP
     private Map<String, ExtendedScannerInfo> infoPerResource = new HashMap<>();
     private boolean haveUpdates;
     private final ICConfigurationDescription cfgDescription;
+    private Function<String,String> containerToHostPathConverter;
 
-    public SourceFileInfoConsumer(ICConfigurationDescription currentCfgDescription) {
+    public SourceFileInfoConsumer(ICConfigurationDescription currentCfgDescription,
+        IContainerToHostPathConverter containerToHostPathConverter) {
       this.cfgDescription = Objects.requireNonNull(currentCfgDescription);
+      Objects.requireNonNull(containerToHostPathConverter,"containerToHostPathConverter");
+      this.containerToHostPathConverter = p -> containerToHostPathConverter.convert(p);
     }
 
     @Override
@@ -470,8 +514,10 @@ public class JsonCompilationDatabaseParser extends LanguageSettingsSerializableP
         Map<String, String> definedSymbols, List<String> includePaths, List<String> macroFiles,
         List<String> includeFiles) {
       ExtendedScannerInfo info = new ExtendedScannerInfo(definedSymbols,
-          systemIncludePaths.stream().toArray(String[]::new), macroFiles.stream().toArray(String[]::new),
-          includeFiles.stream().toArray(String[]::new), includePaths.stream().toArray(String[]::new));
+          systemIncludePaths.stream().map(containerToHostPathConverter).toArray(String[]::new),
+          macroFiles.stream().toArray(String[]::new),
+          includeFiles.stream().map(containerToHostPathConverter).toArray(String[]::new),
+          includePaths.stream().map(containerToHostPathConverter).toArray(String[]::new));
       infoPerResource.put(sourceFileName, info);
       haveUpdates = true;
     }
@@ -570,6 +616,41 @@ public class JsonCompilationDatabaseParser extends LanguageSettingsSerializableP
     public int waitAndRead(OutputStream output, OutputStream err, IProgressMonitor monitor) {
       return delegate.waitAndRead(output, err, monitor);
     }
-
   } // EnvCommandlauncher
+
+  /**
+   * @author Martin Weber
+   */
+  private interface IContainerToHostPathConverter {
+    /**
+     * Converts a file system path inside a container to a local path that contains the header files that are copied out
+     * of the container.
+     *
+     * @param pathInContainer the path inside the container
+     * @return the converted path
+     */
+    String convert(String pathInContainer);
+  }
+
+  private static class ContainerToHostPathConverter implements IContainerToHostPathConverter{
+    private final IPath hostDir;
+    private IPath projectRoot;
+    /**
+     * @param hostDir
+     * @param project
+     */
+    public ContainerToHostPathConverter(IPath hostDir, IProject project) {
+      this.hostDir= Objects.requireNonNull(hostDir);
+      Objects.requireNonNull(project, "project");
+      projectRoot= project.getLocation();
+    }
+    @Override
+    public String convert(String pathInContainer) {
+      if (projectRoot.isPrefixOf(new Path(pathInContainer))) {
+        // got a path below project root
+        return pathInContainer;
+      }
+      return hostDir.append(pathInContainer).toString();
+    }
+  }
 }

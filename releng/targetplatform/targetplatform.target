@@ -9,6 +9,7 @@
 	<unit id="org.eclipse.rcp.source.feature.group" version="0.0.0"/>
 	<unit id="org.eclipse.platform.feature.group" version="0.0.0"/>
 	<unit id="org.eclipse.platform.source.feature.group" version="0.0.0"/>
+	<unit id="org.eclipse.cdt.docker.launcher.feature.group" version="10.5.0.202109270023"/>
 </location>
   <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="planner" includeSource="true" type="InstallableUnit">
       <repository location="https://download.eclipse.org/tools/cdt/releases/10.5"/>
