@@ -27,6 +27,7 @@ import java.util.stream.Stream;
 
 import org.eclipse.cdt.build.core.scannerconfig.ScannerConfigNature;
 import org.eclipse.cdt.core.CCorePlugin;
+import org.eclipse.cdt.core.CommandLauncherManager;
 import org.eclipse.cdt.core.ICommandLauncher;
 import org.eclipse.cdt.core.envvar.IEnvironmentVariable;
 import org.eclipse.cdt.core.envvar.IEnvironmentVariableManager;
@@ -244,7 +245,11 @@ public class JsonCompilationDatabaseParser extends LanguageSettingsSerializableP
     // get the launcher that runs in docker container, if any
     IConfiguration cfg = ManagedBuildManager.getConfigurationForDescription(cfgDescription);
     IBuilder builder = cfg.getEditableBuilder();
-    ICommandLauncher launcher = builder.getCommandLauncher();
+    // IBuilder#getCommandLauncher() might return the same object for different projects causing
+    // Bug 580045 - Spurious java.lang.IllegalThreadStateException: Process not Terminated in
+    // o.e.c.jsoncdb.core.CompileCommandsJsonParser
+    // So get a fresh one for the configuration
+    ICommandLauncher launcher = CommandLauncherManager.getInstance().getCommandLauncher(cfgDescription);
     launcher.setProject(cfgDescription.getProjectDescription().getProject());
 
     IConsole console = null;
@@ -259,24 +264,26 @@ public class JsonCompilationDatabaseParser extends LanguageSettingsSerializableP
     Map<String, String> envMap = prepareEnvironment(cfgDescription, builder);
     launcher = new EnvCommandlauncher(launcher, envMap);
 
-    IContainerToHostPathConverter cthpc= path -> path;
+    IContainerToHostPathConverter cthpc = path -> path;
     // docker: include path mapping for copied header files
     IOptionalBuildProperties props = cfg.getOptionalBuildProperties();
     if (props != null) {
       Bundle dockerBundle = Platform.getBundle(DockerLaunchUIPlugin.PLUGIN_ID); // dependency is optional
-      boolean runsInContainer = Boolean
-          .parseBoolean(props.getProperty(ContainerCommandLauncher.CONTAINER_BUILD_ENABLED));
-      if (runsInContainer && dockerBundle != null) {
-        String connectionName = props.getProperty(ContainerCommandLauncher.CONNECTION_ID);
-        String imageName = props.getProperty(ContainerCommandLauncher.IMAGE_ID);
-        if (connectionName != null && !connectionName.isEmpty() && imageName != null && !imageName.isEmpty()) {
-          // reverse engineered from
-          // org.eclipse.cdt.docker.launcher.ContainerCommandLauncherFactory#verifyLanguageSettingEntries()
-          IPath pluginPath = Platform.getStateLocation(dockerBundle);
-          IPath hostDir = pluginPath.append("HEADERS") //$NON-NLS-1$
-              .append(getCleanName(connectionName)).append(getCleanName(imageName));
-          IProject project = cfgDescription.getProjectDescription().getProject();
-          cthpc= new ContainerToHostPathConverter(hostDir, project);
+      if (dockerBundle != null) {
+        boolean runsInContainer = Boolean
+            .parseBoolean(props.getProperty(ContainerCommandLauncher.CONTAINER_BUILD_ENABLED));
+        if (runsInContainer) {
+          String connectionName = props.getProperty(ContainerCommandLauncher.CONNECTION_ID);
+          String imageName = props.getProperty(ContainerCommandLauncher.IMAGE_ID);
+          if (connectionName != null && !connectionName.isEmpty() && imageName != null && !imageName.isEmpty()) {
+            // reverse engineered from
+            // org.eclipse.cdt.docker.launcher.ContainerCommandLauncherFactory#verifyLanguageSettingEntries()
+            IPath pluginPath = Platform.getStateLocation(dockerBundle);
+            IPath hostDir = pluginPath.append("HEADERS") //$NON-NLS-1$
+                .append(getCleanName(connectionName)).append(getCleanName(imageName));
+            IProject project = cfgDescription.getProjectDescription().getProject();
+            cthpc = new ContainerToHostPathConverter(hostDir, project);
+          }
         }
       }
     }
@@ -500,12 +507,12 @@ public class JsonCompilationDatabaseParser extends LanguageSettingsSerializableP
     private Map<String, ExtendedScannerInfo> infoPerResource = new HashMap<>();
     private boolean haveUpdates;
     private final ICConfigurationDescription cfgDescription;
-    private Function<String,String> containerToHostPathConverter;
+    private Function<String, String> containerToHostPathConverter;
 
     public SourceFileInfoConsumer(ICConfigurationDescription currentCfgDescription,
         IContainerToHostPathConverter containerToHostPathConverter) {
       this.cfgDescription = Objects.requireNonNull(currentCfgDescription);
-      Objects.requireNonNull(containerToHostPathConverter,"containerToHostPathConverter");
+      Objects.requireNonNull(containerToHostPathConverter, "containerToHostPathConverter");
       this.containerToHostPathConverter = p -> containerToHostPathConverter.convert(p);
     }
 
@@ -545,7 +552,7 @@ public class JsonCompilationDatabaseParser extends LanguageSettingsSerializableP
 
     EnvCommandlauncher(ICommandLauncher delegate, Map<String, String> envMap) {
       this.delegate = Objects.requireNonNull(delegate);
-      this.envMap=envMap;
+      this.envMap = envMap;
     }
 
     @Override
@@ -632,18 +639,20 @@ public class JsonCompilationDatabaseParser extends LanguageSettingsSerializableP
     String convert(String pathInContainer);
   }
 
-  private static class ContainerToHostPathConverter implements IContainerToHostPathConverter{
+  private static class ContainerToHostPathConverter implements IContainerToHostPathConverter {
     private final IPath hostDir;
     private IPath projectRoot;
+
     /**
      * @param hostDir
      * @param project
      */
     public ContainerToHostPathConverter(IPath hostDir, IProject project) {
-      this.hostDir= Objects.requireNonNull(hostDir);
+      this.hostDir = Objects.requireNonNull(hostDir);
       Objects.requireNonNull(project, "project");
-      projectRoot= project.getLocation();
+      projectRoot = project.getLocation();
     }
+
     @Override
     public String convert(String pathInContainer) {
       if (projectRoot.isPrefixOf(new Path(pathInContainer))) {
