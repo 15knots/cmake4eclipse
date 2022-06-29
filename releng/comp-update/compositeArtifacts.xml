@@ -10,7 +10,7 @@
   </properties>
   <children size='2'>
     <child
-      location='jar:https://dl.cloudsmith.io/public/15knots/p2-zip/raw/files/cmake4eclipse-3.0.4.zip!/' />
+      location='jar:https://dl.cloudsmith.io/public/15knots/p2-zip/raw/files/cmake4eclipse-3.0.5.zip!/' />
     <child
       location='jar:https://dl.cloudsmith.io/public/15knots/p2-zip/raw/files/cmake4eclipse-2.1.4.zip!/' />
   </children>
