@@ -1,5 +1,9 @@
 # Cmake4eclipse Change Log
 
+## 3.0.5 (2022-06-30)
+### Changes
+- Fix 'process not terminated' exception
+
 ## 3.0.4 (2022-05-17)
 ### Changes
 - Closed #172: docker build and additional include paths: eclipse doesn't find the includes
