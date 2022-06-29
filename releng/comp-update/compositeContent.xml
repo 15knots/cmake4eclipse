@@ -5,7 +5,7 @@
   version='1.0.0'>
   <properties size='1'>
     <!-- get new time w/ `date +%s000` -->
-    <property name='p2.timestamp' value='1652731345000' />
+    <property name='p2.timestamp' value='1656532308000' />
     <property name='p2.name' value='cmake4eclipse' />
   </properties>
   <children size='2'>
