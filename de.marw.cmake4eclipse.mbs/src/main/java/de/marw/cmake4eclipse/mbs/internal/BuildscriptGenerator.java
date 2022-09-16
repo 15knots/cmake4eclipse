@@ -108,6 +108,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     // Cache the build tools
     this.config = cfg;
     this.builder = builder;
+    this.buildRelPath = null;
   }
 
   /*-
@@ -142,11 +143,6 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
         buildDirStr = "_build/${ConfigName}";
       }
 
-      // Note that IPath from ICBuildSetting#getBuilderCWD() holding variables is mis-constructed,
-      // i.e. ${workspace_loc:/path} gets split into 2 path segments.
-      // MBS does that and we need to handle that.
-
-      // So resolve variables here and return a workspace relative path to not give CDT a chance to garble it up..
       try {
         buildDirStr = CCorePlugin.getDefault().getCdtVariableManager().resolveValue(buildDirStr, "", null, cfgd);
         buildRelPath = new Path(buildDirStr);
@@ -163,11 +159,9 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
   @Override
   public IPath getBuildWorkingDir() {
     // Note that IPath from ICBuildSetting#getBuilderCWD() holding variables is mis-constructed,
-    // i.e. ${workspace_loc:/path} gets split into 2 path segments, if we
-    // return a relative path here.
-
-    // So return workspace path (absolute) or absolute file system path,
-    // since CDT Builder#getDefaultBuildPath() does weird thing with relative paths
+    // i.e. ${workspace_loc:/path} gets split into 2 path segments, if we return a relative path here.
+    // MBS does that and we need to handle that.
+    // So return a workspace relative path here
     return project.getFolder(getBuildPath()).getFullPath();
   }
 
