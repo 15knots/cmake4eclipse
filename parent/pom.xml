@@ -60,7 +60,7 @@
   </issueManagement>
 
   <properties>
-    <tycho-version>2.4.0</tycho-version>
+    <tycho-version>2.7.4</tycho-version>
     <platform.version>1.0.1</platform.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
