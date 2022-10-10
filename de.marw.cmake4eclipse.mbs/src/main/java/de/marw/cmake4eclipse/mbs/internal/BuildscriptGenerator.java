@@ -244,17 +244,18 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
         Files.delete(cacheFile);
         // also remove cache files in cmake projects that were downloaded by cmake's FetchContent call (e.g. for CPM)...
         java.nio.file.Path cpmDepsPath = buildDir.resolve("_deps");
-        Files.walkFileTree(cpmDepsPath, EnumSet.noneOf(FileVisitOption.class), 2,
-            new SimpleFileVisitor<java.nio.file.Path>() {
-              @Override
-              public FileVisitResult visitFile(java.nio.file.Path file, BasicFileAttributes attrs) throws IOException {
-                if ("CMakeCache.txt".equals(file.getFileName().toString())) {
-                  Files.delete(file);
+        if( Files.exists(cpmDepsPath)) {
+          Files.walkFileTree(cpmDepsPath, EnumSet.noneOf(FileVisitOption.class), 2,
+              new SimpleFileVisitor<java.nio.file.Path>() {
+                @Override
+                public FileVisitResult visitFile(java.nio.file.Path file, BasicFileAttributes attrs) throws IOException {
+                  if ("CMakeCache.txt".equals(file.getFileName().toString())) {
+                    Files.delete(file);
+                  }
+                  return FileVisitResult.CONTINUE;
                 }
-                return FileVisitResult.CONTINUE;
-              }
-
-            });
+              });
+        }
       }
       if (!mustGenerate && (!cacheFileExists || !Files.exists(buildDir.resolve(getMakefileName())))) {
         mustGenerate = true;
