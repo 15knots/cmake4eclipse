@@ -253,6 +253,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
                 }
                 return FileVisitResult.CONTINUE;
               }
+
             });
       }
       if (!mustGenerate && (!cacheFileExists || !Files.exists(buildDir.resolve(getMakefileName())))) {
