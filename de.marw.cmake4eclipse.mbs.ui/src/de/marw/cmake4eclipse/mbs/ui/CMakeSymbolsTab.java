@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.PlatformUI;
 
 import de.marw.cmake4eclipse.mbs.settings.CMakePreferences;
 import de.marw.cmake4eclipse.mbs.settings.ConfigurationManager;
@@ -61,6 +62,7 @@ public class CMakeSymbolsTab extends QuirklessAbstractCPropertyTab {
     definesViewer = new DefinesViewer(usercomp, resDesc == null ? null : resDesc.getConfiguration());
     // cmake undefines table...
     undefinesViewer = new UnDefinesViewer(usercomp);
+    PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, "cmake_symbols_context");
   }
 
   @Override

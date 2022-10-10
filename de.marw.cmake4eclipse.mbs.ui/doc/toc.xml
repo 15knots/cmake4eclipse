@@ -3,29 +3,41 @@
   <topic label="Tasks">
     <topic label="Configuring your Workbench">
       <topic label="How and When cmake is run">
-         <topic href="doc/html/wb_general_tab.html" label="General Tab">
+         <topic href="doc/html/ref/wb_general_tab.html" label="General Tab">
          </topic>
-         <topic href="doc/html/wb_cache_entries.html" label="CMake Cache Entries Tab">
+         <topic href="doc/html/ref/wb_cache_entries.html" label="CMake Cache Entries Tab">
          </topic>
       </topic>
-      <topic href="doc/html/wb_toolkits.html" label="Which tools will perform the build">
+      <topic href="doc/html/ref/wb_toolkits.html" label="Which tools will perform the build">
       </topic>
     </topic>
-    <topic href="doc/html/create_project.html" label="Creating a Project">
+    <topic href="doc/html/tasks/create_project.html" label="Creating a Project">
+       <topic href="doc/html/tasks/create_project_cmake4eclipse.html" label="Creating a Cmake4eclipse Managed Build project">
+       </topic>
+       <topic href="doc/html/tasks/create_project_mbs.html" label="Creating a C or C++ Managed Build project and configuring it">
+    <topic label="Configuring an Eclipse C-project or C++-project" href="doc/html/tasks/configure_project_mbs.html">
     </topic>
-    <topic label="Configuring an Eclipse C-project or C++-project" href="doc/html/configure_project.html">
-      <topic href="doc/html/builders.html" label="Project Builders">
-      </topic>
-      <topic href="doc/html/t_cmake_symbols_general.html" label="CMake cache entries">
-      </topic>
-      <topic href="doc/html/languageSettingsProviders.xhtml" label="Syntax Highlighting Support">
-      </topic>
+       </topic>
     </topic>
     <anchor id="cmake4eclipse_TasksInsertAnchor" />
   </topic>
   <topic label="Concepts">
-     <topic href="doc/html/co_toolkit.html" label="Build Toolkit">
+     <topic href="doc/html/concepts/toolkit.html" label="Build Toolkit">
      </topic>
+  </topic>
+  <topic label="Reference">
+      <topic href="doc/html/ref/wb_general_tab.html" label="General preferences">
+      </topic>
+      <topic href="doc/html/ref/wb_toolkits.html" label="Build Toolkits preferences">
+      </topic>
+     <topic href="doc/html/ref/wb_cache_entries.html" label="CMake cache entry preferences">
+     </topic>
+      <topic href="doc/html/ref/cmake_symbols.html" label="CMake cache entries">
+      </topic>
+      <topic href="doc/html/ref/languageSettingsProviders.html" label="Syntax Highlighting Support">
+      </topic>
+      <topic href="doc/html/ref/builders.html" label="Project Builders">
+      </topic>
   </topic>
   <topic href="doc/html/notices.html" label="Legal">
   </topic>

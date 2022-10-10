@@ -36,7 +36,7 @@
                      </option>
          </tool>
          <toolChain
-               errorParsers="org.eclipse.cdt.core.CWDLocator;org.eclipse.cdt.core.GmakeErrorParser;org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser"
+               errorParsers="org.eclipse.cdt.core.GmakeErrorParser;org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser"
                id="cmake4eclipse.mbs.toolchain.cmake"
                languageSettingsProviders="cmake4eclipse.lsp.CompileCommandsJsonParser"
                name="CMake driven">
@@ -76,7 +76,6 @@
          <configuration
                id="cmake4eclipse.mbs.config.base"
                languageSettingsProviders="${Toolchain};-de.marw.cmake.cdt.language.settings.providers.CompileCommandsJsonParser;-de.marw.cmake.cdt.language.settings.providers.BuiltinsCompileCommandsJsonParser;-org.eclipse.cdt.ui.UserLanguageSettingsProvider;-org.eclipse.cdt.core.ReferencedProjectsLanguageSettingsProvider;-org.eclipse.cdt.managedbuilder.core.MBSLanguageSettingsProvider;-org.eclipse.cdt.managedbuilder.core.GCCBuildCommandParser">
-               
          </configuration>
          <projectType
                buildArtefactType="cmake4eclipse.mbs.buildArtefactType.cmake"
@@ -148,4 +147,46 @@
           supportsArgument="false">
     </variable>
  </extension>
+ <extension
+       id="genscriptbuilder"
+       name="Cmake4eclipse buildscript generator"
+       point="org.eclipse.core.resources.builders">
+    <builder
+          hasNature="true">
+       <run
+             class="org.eclipse.cdt.managedbuilder.internal.core.CommonBuilder">
+       </run>
+    </builder>
+ </extension>
+  <extension
+        id="cmake4eclipsenature"
+        name="Cmake4eclipse"
+        point="org.eclipse.core.resources.natures">
+     <runtime>
+        <run
+              class="de.marw.cmake4eclipse.mbs.nature.C4ENature">
+        </run>
+     </runtime>
+     <builder
+            id="de.marw.cmake4eclipse.mbs.genscriptbuilder">
+      </builder>
+<!-- added by C4ENature class
+      <requires-nature
+            id="org.eclipse.cdt.core.cnature">
+      </requires-nature>
+      <requires-nature
+            id="org.eclipse.cdt.core.ccnature">
+      </requires-nature>
+-->
+  </extension>
+  <extension
+        id="cmake4eclipse"
+        name="cmake4eclipse"
+        point="org.eclipse.cdt.core.CConfigurationDataProvider">
+     <provider
+           class="org.eclipse.cdt.managedbuilder.internal.dataprovider.ConfigurationDataProvider"
+           conflictingNatures="org.eclipse.cdt.managedbuilder.core.managedBuildNature;org.eclipse.cdt.managedbuilder.core.ScannerConfigNature;org.eclipse.cdt.make.core.makeNature;org.eclipse.cdt.make.core.ScannerConfigNature;org.eclipse.cdt.make.core.cfgSupportNature"
+           natures="de.marw.cmake4eclipse.mbs.cmake4eclipsenature">
+     </provider>
+  </extension>
 </plugin>

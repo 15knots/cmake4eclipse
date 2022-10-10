@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Creating a Project</title>
+<script type="text/javascript" src="PLUGINS_ROOT/org.eclipse.help/livehelp.js">
+</script>
+</head>
+
+<body>
+  <h1>Creating a Project</h1>
+  <p>First of all: Do not try to manually generate an Eclipse project using <kbd>cmake -G Eclipse CDT4 - Unix Makefiles</kbd>
+  and import it, as that will make cmake4eclipse unavailable in your project!
+  </p>
+  <p>As a first start, you may want to try one of the 
+  <a href="https://github.com/15knots/cmake4eclipse-sample-projects">example projects</a>.
+  </p>
+  <p>As of cmake4eclipse version 4, the plugin comes with a project creation wizard of its own. Hence users have two 
+   choices to create a project:
+  <ol>
+	<li><a href="create_project_cmake4eclipse.html">Directly</a> create a <em>Cmake4eclipse Managed Build</em> project.
+	This is the recommened choice.</li>
+	<li><a href="create_project_mbs.html">Create</a> a <em>C Managed Build</em> or a <em>C++ Managed Build</em> project
+	and configure it to use cmake4eclipse. This is the classic way of cmake4eclipse prior to version 4.
+	</li>
+  </ol>
+  A <em>Cmake4eclipse Managed Build</em> project is essentially the same as a <em>Managed Build</em> project. Since cmake4eclipse
+  takes the user`s <code>CMakeLists.txt</code> files as the source of truth &#8212; in contrast to <em>Managed Build</em>
+  which uses the data entered in lots of project property pages &#8212; a <em>Cmake4eclipse Managed Build</em> project
+  does only display the project property pages and tabs that effect cmake`s buildscript generation; in the hope of
+  reducing end user`s confusion.
+  </p>
+</body>
+</html>
