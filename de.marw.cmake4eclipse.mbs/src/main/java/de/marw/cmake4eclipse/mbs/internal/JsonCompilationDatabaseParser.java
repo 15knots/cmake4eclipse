@@ -235,11 +235,34 @@ public class JsonCompilationDatabaseParser extends LanguageSettingsSerializableP
       throws CoreException {
     final CCorePlugin ccp = CCorePlugin.getDefault();
     // If ICBuildSetting#getBuilderCWD() returns a workspace relative path, it is garbled.
-    // It returns '${workspace_loc:/my-project-name}'.
+    // It returns '${workspace_loc:/my-project-name}'. MBS Builder.getDefaultBuildPath() does that.
     final IPath builderCWD = cfgDescription.getBuildSetting().getBuilderCWD();
+    if("${workspace_loc:".equals( builderCWD.segment(0))) {
+      // occasionally (during project creation?) our BuildscriptGenerator did not kick in.
+      // Assume no compile_commands.json file was generated, hence no need to try parsing at all...
+      // This should eliminate the infamous 'Resource '/home' does not exist.' exception
+      return;
+    }
+/*
+ *     // help detecting the 'Resource '/home' does not exist.' exception cause
+    if( !cfgDescription.getProjectDescription().getProject().getName().equals( builderCWD.segment(0))){
+      System.err.format("CDT bug??? ICBuildSetting#getBuilderCWD() returned a path that does not match the project name!%n\t"
+          + "builderCWD= '%s' vs '%s' (help detecting the 'Resource '/home' does not exist.' exception cause)%n", builderCWD, cfgDescription.getProjectDescription().getProject());
+    }
+ */
+
     final String cwd = ccp.getCdtVariableManager().resolveValue(builderCWD.toString(), "", null, //$NON-NLS-1$
         cfgDescription);
     IFolder buildFolder = ResourcesPlugin.getWorkspace().getRoot().getFolder(new Path(cwd));
+/*
+    // help detecting the 'Resource '/home' does not exist.' exception cause
+    if (!cfgDescription.getProjectDescription().getProject().equals(buildFolder.getProject())) {
+      System.err.format(
+          "CDT bug??? dtVariableManager()#resolveValue() returned a project that is not the project to build!%n\t"
+              + "buildFolder.getProject()= '%s' vs '%s' (help detecting the 'Resource '/home' does not exist.' exception cause)%n",
+          buildFolder.getProject(), cfgDescription.getProjectDescription().getProject());
+    }
+*/
     final IFile jsonFileRc = buildFolder.getFile("compile_commands.json"); //$NON-NLS-1$
 
     // get the launcher that runs in docker container, if any
@@ -375,7 +398,7 @@ public class JsonCompilationDatabaseParser extends LanguageSettingsSerializableP
   public void registerListener(ICConfigurationDescription cfgDescription) {
     if (cfgDescription != null) {
       // called as per-project provider
-      if (cfgDescription.isActive()) {
+      if (true||!cfgDescription.getProjectDescription().isCdtProjectCreating()) {
         final IProject project = cfgDescription.getProjectDescription().getProject();
         WorkspaceJob job = new WorkspaceJob("Parsing compilation database of project " + project.getName()) {
           @Override
