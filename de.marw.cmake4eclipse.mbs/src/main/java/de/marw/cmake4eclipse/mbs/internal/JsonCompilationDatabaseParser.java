@@ -398,7 +398,7 @@ public class JsonCompilationDatabaseParser extends LanguageSettingsSerializableP
   public void registerListener(ICConfigurationDescription cfgDescription) {
     if (cfgDescription != null) {
       // called as per-project provider
-      if (true||!cfgDescription.getProjectDescription().isCdtProjectCreating()) {
+      if (!cfgDescription.getProjectDescription().isCdtProjectCreating()) {
         final IProject project = cfgDescription.getProjectDescription().getProject();
         WorkspaceJob job = new WorkspaceJob("Parsing compilation database of project " + project.getName()) {
           @Override
