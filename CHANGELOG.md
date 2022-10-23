@@ -1,5 +1,10 @@
 # Cmake4eclipse Change Log
 
+## 3.0.6 (2022-10-23)
+### Changes
+- Fix NoSuchFileException '_build/Debug/_deps'
+- Fix #174: "Resource '/home' does not exist."
+
 ## 3.0.5 (2022-06-30)
 ### Changes
 - Fix 'process not terminated' exception
