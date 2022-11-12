@@ -24,8 +24,9 @@ Its <a id="pc">*Primary claim*</a> is: Co-workers should be able to just **check
 
 ---
 ## Planned changes for next major release (4)
-1. Removal of the deprecated CMAKE_EXPORT_COMPILE_COMMANDS language setting providers. Their code has long been integrated 
-into CDT. As a replacement, users should switch to the `CMake Compilation DB` parser which is based on the code in CDT.
+1. Removal of the deprecated *CMAKE_EXPORT_COMPILE_COMMANDS* language setting providers. Their code has long been integrated 
+into CDT. As a replacement, users should switch to the *CMake Compilation DB* parser which is based on the code in CDT.
+1. Removal of the deprecated *CMake Builder (deprecated)*. It has been kept for compatibility with cmake4eclipse 2.x and is superseded by the *CMake Builder*.
 1. Replacement of the cmake error parser with the parser coming with CDT. This does not affect end-users but helps to 
 reduce maintenance effort.
 1. New *cmake4eclipse* project creation wizard. Projects created through that wizard are still based on the managed build system (MBS)
