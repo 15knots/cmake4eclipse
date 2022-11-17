@@ -91,6 +91,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
   private IBuilder builder;
   /** build path - relative to the project. Lazily instantiated */
   private IPath buildRelPath;
+  private IPath rootDir;
 
   /**   */
   public BuildscriptGenerator() {
@@ -153,6 +154,32 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     return buildRelPath;
   }
 
+  private IPath getRootDir() {
+    if (rootDir == null) {
+      // set the top build dir path for the current configuration
+      String rootDirStr = null;
+      final ICConfigurationDescription cfgd = ManagedBuildManager.getDescriptionForConfiguration(config);
+      try {
+        CMakePreferences prefs = ConfigurationManager.getInstance().getOrLoad(cfgd);
+        rootDirStr = prefs.getRootDir();
+      } catch (CoreException e) {
+        // storage base is null; treat as bug in CDT..
+        log.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "falling back to hard coded root directory", e));
+      }
+      if (rootDirStr == null) {
+        // not configured: fall back to legacy behavior
+        rootDirStr = "";
+      }
+
+      try {
+        rootDirStr = CCorePlugin.getDefault().getCdtVariableManager().resolveValue(rootDirStr, "", null, cfgd);
+        rootDir = new Path(rootDirStr);
+      } catch (CdtVariableException e) {
+        log.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "variable expansion for root directory failed", e));
+      }
+    }
+    return rootDir;
+  }
   /*-
    * @see org.eclipse.cdt.managedbuilder.makegen.IManagedBuilderMakefileGenerator#getBuildWorkingDir()
    */
@@ -200,25 +227,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
 
     final ICConfigurationDescription cfgDes = ManagedBuildManager.getDescriptionForConfiguration(config);
 
-    ICSourceEntry[] srcEntries = config.getSourceEntries();
-    { // do a sanity check: only one source entry allowed for project
-      if (srcEntries.length == 0) {
-        // no source folders specified in project
-        final String msg = "No source directories configured for project";
-        MultiStatus status = new MultiStatus(Activator.PLUGIN_ID, IStatus.ERROR, msg + " " + project.getName(), null);
-        createErrorMarker(project, msg);
-        return status;
-      } else if (srcEntries.length > 1) {
-        final String msg = "Only a single source directory is supported";
-        MultiStatus status = new MultiStatus(Activator.PLUGIN_ID, IStatus.ERROR, msg, null);
-        // if multiple projects are build, this information is lost when a new console is opened.
-        // So create a problem marker to show up in the problem view
-        createErrorMarker(project, msg);
-        return status;
-      } else {
-        srcEntries = CDataUtil.resolveEntries(srcEntries, cfgDes);
-      }
-    }
+
 
     // See if the user has cancelled the build
     checkCancel();
@@ -279,8 +288,6 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     final IConsole console = CCorePlugin.getDefault().getConsole(CdtConsoleConstants.CMAKE_CONSOLE_ID);
     console.start(project);
 
-    // create makefile, assuming the first source directory contains a CMakeLists.txt
-    final ICSourceEntry srcEntry = srcEntries[0]; // project relative
     try {
       final OutputStream cis = console.getInfoStream();
       String msg = String.format("%tT Buildscript generation: %s::%s in %s\n", startDate, project.getName(),
@@ -288,8 +295,8 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       cis.write(msg.getBytes());
     } catch (IOException ignore) {
     }
-    final IPath srcPath = srcEntry.getFullPath();
-    IContainer srcDir = srcPath.isEmpty() ? project : project.getFolder(srcPath);
+    final IPath srcPath = getRootDir();
+    IContainer srcDir = srcPath.isEmpty() ? project: project.getFolder(srcPath);
 
     checkCancel();
     MultiStatus status = invokeCMake(srcDir, buildFolder.getLocation(), console);

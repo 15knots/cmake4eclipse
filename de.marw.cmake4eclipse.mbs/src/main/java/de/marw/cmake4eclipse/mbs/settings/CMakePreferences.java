@@ -13,7 +13,9 @@ import java.util.List;
 import java.util.Objects;
 
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
+import org.eclipse.cdt.core.settings.model.ICSourceEntry;
 import org.eclipse.cdt.core.settings.model.ICStorageElement;
+import org.eclipse.cdt.core.settings.model.util.CDataUtil;
 import org.eclipse.core.runtime.CoreException;
 
 import de.marw.cmake4eclipse.mbs.internal.Activator;
@@ -50,6 +52,7 @@ public class CMakePreferences {
   private static final String ATTR_BUILD_DIR = "buildDir";
   /** the 'dirty' time stamp (in milliseconds) */
   private static final String ATTR_DIRTY_TS = "dirtyTs";
+  private static final String ATTR_ROOT_DIR = "rootDir";
 
   private boolean warnNoDev, debugTryCompile, debugOutput, trace,
       warnUnitialized, warnUnused;
@@ -58,6 +61,7 @@ public class CMakePreferences {
   private List<CmakeUnDefine> undefines = new ArrayList<>(0);
   private String buildDirectory;
   private String cacheFile;
+  private String rootDir;
 
   private LinuxPreferences linuxPreferences = new LinuxPreferences();
 
@@ -92,6 +96,7 @@ public class CMakePreferences {
     defines.clear();
     undefines.clear();
     cacheFile= null;
+    rootDir= null;
 
 //    linuxPreferences.reset();
 //    windowsPreferences.reset();
@@ -109,7 +114,13 @@ public class CMakePreferences {
     ICStorageElement storage = cfgd.getStorage(CMakePreferences.CFG_STORAGE_ID, true);
     buildDirectory= storage.getAttribute(ATTR_BUILD_DIR);
     dirty_ts= Long.parseLong( Objects.requireNonNullElse( storage.getAttribute(ATTR_DIRTY_TS), "0"));
-
+    if (storage.hasAttribute(ATTR_ROOT_DIR)) {
+      rootDir= storage.getAttribute(ATTR_ROOT_DIR);
+    } else if (cfgd.getSourceEntries().length == 1) {
+      rootDir= cfgd.getSourceEntries()[0].getFullPath().removeFirstSegments(1).toString();
+    } else {
+      rootDir= "";
+    }
     final ICStorageElement[] children = storage.getChildren();
     for (ICStorageElement child : children) {
       if (ELEM_OPTIONS.equals(child.getName())) {
@@ -196,7 +207,13 @@ public class CMakePreferences {
       parent.setAttribute(ATTR_BUILD_DIR, buildDirectory);
     } else {
       parent.removeAttribute(ATTR_CACHE_FILE);
+    }    
+    if (rootDir!= null) {
+      parent.setAttribute(ATTR_ROOT_DIR, rootDir);
+    } else {
+      parent.setAttribute(ATTR_ROOT_DIR,"");
     }
+    
     parent.setAttribute(ATTR_DIRTY_TS, String.valueOf(dirty_ts));
 
     // defines...
@@ -443,5 +460,28 @@ public class CMakePreferences {
   @Deprecated
   public void setClearCache(boolean clearCache) {
     this.clearCache= clearCache;
+  }
+
+  /**
+   * Gets the relative root directory in which is located the main CMakeLists.txt
+   *
+   * @return the relative root directory in which is located the main CMakeLists.txt
+   */
+  public String getRootDir() {
+    return rootDir;
+  }
+
+  
+  /**
+   * Sets the the relative root directory in which is located the main CMakeLists.txt
+   *
+   * @param rootDir
+   *          the relative root directory in which is located the main CMakeLists.txt
+   */
+  public void setRootDir(String rootDir) {
+    if(! Objects.equals(rootDir, this.rootDir)) {
+      dirty_ts= System.currentTimeMillis();
+    }
+    this.rootDir= rootDir;
   }
 }

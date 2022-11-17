@@ -57,7 +57,10 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
   private Button b_createOutputFolder;
   /** variables in output folder text field */
   private Button b_cmdVariables;
-
+  /** cmake root dir */
+  private Text t_rootDir;
+  /** browse cmake root dir*/
+  private Button b_browseRootDir;
   /**
    * the preferences associated with our configurations to manage. Initialized
    * in {@link #updateData}. {@code null} if this tab has never been displayed so a user could
@@ -160,7 +163,35 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
       });
 
     } // cmake prepopulate cache group
+    
+    // cmake root dir group...
+    {
+      Group gr3 = WidgetHelper.createGroup(usercomp, SWT.FILL, 2, "Root directory for cmake", 2);
 
+      setupLabel(gr3, "&Folder", 1, SWT.BEGINNING);
+
+      t_rootDir = setupText(gr3, 1, GridData.FILL_HORIZONTAL);
+      // "Browse..." dialog launcher buttons...
+      b_browseRootDir = WidgetHelper.createButton(gr3, "B&rowse...", true);
+      b_browseRootDir.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false, 2, 1));
+
+      b_browseRootDir.addSelectionListener(new SelectionAdapter() {
+        @Override
+        public void widgetSelected(SelectionEvent e) {
+          FilteredResourcesSelectionDialog dialog = new FilteredResourcesSelectionDialog(t_rootDir.getShell(), false,
+              page.getProject(), IResource.FILE);
+          dialog.setTitle("Select file");
+          dialog.setInitialPattern("CMakeLists.txt", FilteredItemsSelectionDialog.FULL_SELECTION);
+          dialog.open();
+          IFile file = (IFile) dialog.getFirstResult();
+          if (file != null) {
+            // set the selected directory
+            t_rootDir.setText(file.getProjectRelativePath().removeLastSegments(1).toPortableString());
+          }
+        }
+      });
+
+    } // cmake root dir group
   }
 
   /**
@@ -194,13 +225,27 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
     b_createOutputFolder.setEnabled(editable);
     b_cmdVariables.setEnabled(editable);
   }
-
+  /**
+   * Sets the value of the root dir entry field and whether the user can edit
+   * that input field.
+   *
+   * @param text
+   *          the text to display in the root dirfield
+   */
+  private void setRootDirEditable(boolean editable, String text) {
+    text= editable ? text : " <configurations differ> ";
+    t_rootDir.setText(text == null ? "" : text);
+    t_rootDir.setEditable(editable);
+    t_rootDir.setEnabled(editable);
+    b_browseRootDir.setEnabled(editable);
+  }
   /**
    * Updates displayed values according to the preferences edited by this tab.
    */
   private void updateDisplay() {
     boolean cacheFileEditable = true;
     boolean buildFolderEditable = true;
+    boolean rootDirEditable = true;
 
     if (prefs.length > 1) {
       // we are editing multiple configurations...
@@ -245,6 +290,26 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
           break;
         }
       }}
+      /*
+       * make t_rootDir disabled, if its settings are not the same in all
+       * configurations
+       */
+      {
+      final String cf0 = prefs[0].getRootDir();
+      for (int i = 1; i < prefs.length; i++) {
+        String cf = prefs[i].getRootDir();
+        if (cf0 != null) {
+          if (!cf0.equals(cf)) {
+            // configurations differ
+            rootDirEditable = false;
+            break;
+          }
+        } else if (cf != null) {
+          // configurations differ
+          rootDirEditable = false;
+          break;
+        }
+      }}
     } else {
       // we are editing a single configuration...
       // all buttons are in toggle mode
@@ -253,6 +318,8 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
     setCacheFileEditable(cacheFileEditable, prefs[0].getCacheFile());
     String text = prefs[0].getBuildDirectory();
     setBuildFolderEditable(buildFolderEditable, text == null ? "_build/${ConfigName}" : text);
+    String rootDir = prefs[0].getRootDir();
+    setRootDirEditable(rootDirEditable, rootDir == null ? "" : rootDir);
   }
 
   /**
@@ -276,6 +343,10 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
           final String dir = t_outputFolder.getText();
           pref.setBuildDirectory(dir.trim().isEmpty() ? null : dir);
         }
+        if (t_rootDir.getEditable()) {
+          final String dir = t_rootDir.getText();
+          pref.setRootDir(dir.trim().isEmpty() ? null : dir);
+        }
       }
     } else {
       // we are editing a single configuration...
@@ -284,6 +355,9 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
       pref.setCacheFile(cacheFileName.isEmpty() ? null : cacheFileName);
       final String dir = t_outputFolder.getText().trim();
       pref.setBuildDirectory(dir.isEmpty() ? null : dir);
+      final String rootDir = t_rootDir.getText().trim();
+      pref.setRootDir(rootDir.isEmpty() ? null : rootDir);
+      
     }
   }
 
@@ -370,6 +444,7 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
         dstPrefs.setWarnUnused(srcPrefs.isWarnUnused());
         dstPrefs.setCacheFile(srcPrefs.getCacheFile());
         dstPrefs.setBuildDirectory(srcPrefs.getBuildDirectory());
+        dstPrefs.setRootDir(srcPrefs.getRootDir());
       }
   }
 
