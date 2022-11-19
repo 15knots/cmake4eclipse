@@ -10,7 +10,7 @@
    </description>
 
    <copyright>
-      Copyright (c) 2013-2021 Martin Weber
+      Copyright (c) 2013-2022 Martin Weber
    </copyright>
 
    <license url="https://opensource.org/licenses/EPL-2.0">
@@ -296,13 +296,6 @@ version(s), and exceptions or additional permissions here}.&quot;
    <url>
       <discovery label="cmake4eclipse Updates" url="https://raw.githubusercontent.com/15knots/cmake4eclipse/master/releng/comp-update/"/>
    </url>
-
-   <plugin
-         id="de.marw.cmake.cdt"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
 
    <plugin
          id="de.marw.cmake4eclipse.mbs"
