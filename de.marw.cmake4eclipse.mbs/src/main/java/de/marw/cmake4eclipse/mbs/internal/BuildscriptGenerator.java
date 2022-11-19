@@ -377,25 +377,33 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
         } catch (IOException e) {
         }
         CMakeErrorParser.deleteErrorMarkers(project);
+        // hook in cmake error parsing
+        CMakeExecutionMarkerFactory markerFactory = new CMakeExecutionMarkerFactory(srcFolder);
         // NOTE: we need 2 of this, since the output streams are not synchronized, causing loss of
         // the internal processor state
-        CMakeErrorParser epo = new CMakeErrorParser(srcFolder, console.getOutputStream());
-        CMakeErrorParser epe = new CMakeErrorParser(srcFolder, console.getErrorStream());
-        int state = launcher.waitAndRead(epo, epe, monitor);
-        if (state == ICommandLauncher.COMMAND_CANCELED) {
-          throw new OperationCanceledException(launcher.getErrorMessage());
-        }
+//        CMakeErrorParser epo = new CMakeErrorParser(srcFolder, console.getOutputStream());
+//        CMakeErrorParser epe = new CMakeErrorParser(srcFolder, console.getErrorStream());
+        try (CMakeErrorParser2 errorParserE = new CMakeErrorParser2(markerFactory);
+            CMakeErrorParser2 errorParserO = new CMakeErrorParser2(markerFactory)) {
+          OutputStream epe = new ParsingConsoleOutputStream(console.getErrorStream(), errorParserE);
+          OutputStream epo = new ParsingConsoleOutputStream(console.getOutputStream(), errorParserO);
 
-        // check cmake exit status
-        final int exitValue = proc.exitValue();
-        if (exitValue == 0) {
-          // success
-          return new MultiStatus(Activator.PLUGIN_ID, IStatus.OK, null, null);
-        } else {
-          // cmake had errors...
-          String msg = String.format("%1$s exited with status %2$d. See CDT global build console for details.", cmd,
-              exitValue);
-          return new MultiStatus(Activator.PLUGIN_ID, IStatus.ERROR, msg, null);
+          int state = launcher.waitAndRead(epo, epe, monitor);
+          if (state == ICommandLauncher.COMMAND_CANCELED) {
+            throw new OperationCanceledException(launcher.getErrorMessage());
+          }
+
+          // check cmake exit status
+          final int exitValue = proc.exitValue();
+          if (exitValue == 0) {
+            // success
+            return new MultiStatus(Activator.PLUGIN_ID, IStatus.OK, null, null);
+          } else {
+            // cmake had errors...
+            String msg = String.format("%1$s exited with status %2$d. See CDT global build console for details.", cmd,
+                exitValue);
+            return new MultiStatus(Activator.PLUGIN_ID, IStatus.ERROR, msg, null);
+          }
         }
       } else {
         // process start failed
