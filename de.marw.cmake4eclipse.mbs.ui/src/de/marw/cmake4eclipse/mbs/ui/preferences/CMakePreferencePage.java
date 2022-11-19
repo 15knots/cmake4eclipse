@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
 import com.google.gson.JsonSyntaxException;
@@ -173,6 +174,7 @@ public class CMakePreferencePage extends PreferencePage implements IWorkbenchPre
     createGeneralTab(tabFolder);
     createCacheVariablesTab(tabFolder);
     initFromPrefstore();
+    PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, Activator.PLUGIN_ID+ "wb_general_tab_context");
     return tabFolder;
   }
 

@@ -39,6 +39,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
 import com.google.gson.JsonSyntaxException;
@@ -71,6 +72,7 @@ public class BuildToolkitsPreferencePage extends PreferencePage implements IWork
   protected Control createContents(Composite parent) {
     Control control = createEditor(parent);
     initFromPrefstore();
+    PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, Activator.PLUGIN_ID+ "wb_toolkits_context");
     return control;
   }
 

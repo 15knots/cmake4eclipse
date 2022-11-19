@@ -28,12 +28,13 @@
          point="org.eclipse.cdt.ui.cPropertyTab">
       <tab
             class="de.marw.cmake4eclipse.mbs.ui.CMakePropertyTab"
+            icon="icons/CMakeLogo.gif"
             name="&amp;General"
             parent="de.marw.cmake4eclipse.mbs.ui.CMakePropertyPage">
       </tab>
       <tab
             class="de.marw.cmake4eclipse.mbs.ui.CMakeSymbolsTab"
-            helpId="de.marw.cmake4eclipse.mbs.ui.t_cmake_symbols_general"
+            helpId="de.marw.cmake4eclipse.mbs.ui.cmake_symbols_context"
             name="&amp;CMake cache entries"
             parent="de.marw.cmake4eclipse.mbs.ui.CMakePropertyPage">
       </tab>
@@ -73,13 +74,13 @@
     <page
           category="org.eclipse.cdt.ui.preferences.CPluginPreferencePage"
           class="de.marw.cmake4eclipse.mbs.ui.preferences.CMakePreferencePage"
-          id="de.marw.cmake4eclipse.mbs.ui.preferences.CMakePreferencePage"
+          id="cmake4eclipse.mbs.ui.preferences.CMakePreferencePage"
           name="Cmake4eclipse">
     </page>
     <page
-          category="de.marw.cmake4eclipse.mbs.ui.preferences.CMakePreferencePage"
+          category="cmake4eclipse.mbs.ui.preferences.CMakePreferencePage"
           class="de.marw.cmake4eclipse.mbs.ui.preferences.BuildToolkitsPreferencePage"
-          id="de.marw.cmake4eclipse.mbs.ui.toolchains"
+          id="cmake4eclipse.mbs.ui.toolchains"
           name="Build Tool Kits">
     </page>
  </extension>
@@ -87,7 +88,7 @@
        point="org.eclipse.ui.preferenceTransfer">
     <transfer
           icon="platform:/plugin/org.eclipse.cdt.ui/icons/view16/c_pers.gif"
-          id="de.marw.cmake4eclipse.mbs.ui.transfer"
+          id="cmake4eclipse.mbs.ui.transfer"
           name="Cmake4eclipse Preferences">
        <mapping
              scope="instance">
@@ -110,4 +111,156 @@
           id="cmake4eclipse.mbs.builtinsConsole">
     </CBuildConsole>
  </extension>
+ 
+      <extension
+         point="org.eclipse.ui.propertyPages">
+        <page
+            class="de.marw.cmake4eclipse.mbs.ui.slim.Page_BuildTop"
+            id="cmake4eclipse.mbs.ui.page_Build"
+            name="Cmake4eclipse Build"
+            >
+         <enabledWhen>
+           <adapt type="org.eclipse.core.resources.IResource">
+	            <test property="org.eclipse.core.resources.projectNature"
+	                  value="de.marw.cmake4eclipse.mbs.cmake4eclipsenature"/>
+           </adapt>
+         </enabledWhen>
+        </page>    
+      
+      <page
+            category="cmake4eclipse.mbs.ui.page_Build"
+            class="de.marw.cmake4eclipse.mbs.ui.slim.Page_CMake"
+            id="cmake4eclipse.mbs.ui.page_Cmake4eclipse"
+            name="CMake">
+         <enabledWhen>
+            <adapt
+                  type="org.eclipse.core.resources.IResource">
+               <test
+                     property="org.eclipse.core.resources.projectNature"
+                     value="de.marw.cmake4eclipse.mbs.cmake4eclipsenature">
+               </test>
+            </adapt>
+         </enabledWhen>
+      </page>
+<!-- already shown on the root level
+      <page
+            category="cmake4eclipse.mbs.ui.page_Build"
+            class="org.eclipse.cdt.internal.ui.preferences.BuildLogPreferencePage"
+            id="cmake4eclipse.mbs.ui.page_BuildLogging"
+            name="Logging">
+         <enabledWhen>
+            <adapt
+                  type="org.eclipse.core.resources.IResource">
+               <test
+                     property="org.eclipse.core.resources.projectNature"
+                     value="de.marw.cmake4eclipse.mbs.cmake4eclipsenature">
+               </test>
+            </adapt>
+         </enabledWhen>
+      </page>
+-->
+      <page
+            class="de.marw.cmake4eclipse.mbs.ui.slim.Page_SourceLocation"
+            id="cmake4eclipse.mbs.ui.page_SourceLocation"
+            category="org.eclipse.cdt.ui.newui.Page_head_general"
+            name="Source Location"
+            >
+         <enabledWhen>
+            <adapt type="org.eclipse.core.resources.IProject">
+	           <test property="org.eclipse.core.resources.projectNature"
+	                  value="de.marw.cmake4eclipse.mbs.cmake4eclipsenature"/>
+            </adapt>
+         </enabledWhen>
+      </page>
+
+  </extension>
+  <extension
+           point="org.eclipse.cdt.ui.cPropertyTab">
+     <tab
+           class="org.eclipse.cdt.managedbuilder.ui.properties.BuildBehaviourTab"
+           icon="platform:/plugin/org.eclipse.cdt.managedbuilder.ui/icons/obj16/target_obj.gif"
+           name="Behaviour"
+           helpId="cdt_u_prop_build"
+           parent="de.marw.cmake4eclipse.mbs.ui.slim.Page_BuildTop"
+           weight="20"/>
+     <tab
+           class="org.eclipse.cdt.managedbuilder.ui.properties.RefreshPolicyTab"
+           helpId="cdt_u_prop_build"
+           icon="platform:/plugin/org.eclipse.cdt.managedbuilder.ui/icons/elcl16/refresh_nav.gif"
+           name="Refresh policy"
+           parent="de.marw.cmake4eclipse.mbs.ui.slim.Page_BuildTop"
+           weight="60"/>
+     <tab
+           class="org.eclipse.cdt.internal.docker.launcher.ContainerPropertyTab"
+           icon="platform:/plugin/org.eclipse.cdt.docker.launcher/icons/repository-middle.gif"
+           name="Container Settings"
+           parent="de.marw.cmake4eclipse.mbs.ui.slim.Page_BuildTop"
+           weight="60">
+     </tab>
+     <tab
+           class="org.eclipse.cdt.ui.newui.BinaryParsTab"
+           icon="platform:/plugin/org.eclipse.cdt.managedbuilder.ui/icons/obj16/bin_obj.gif"
+           name="Binary Parsers"
+           weight="80"
+           helpId="cdt_u_prop_build_setting_binparser"
+           parent="de.marw.cmake4eclipse.mbs.ui.slim.Page_BuildTop"/>
+     <tab
+           class="org.eclipse.cdt.ui.newui.ErrorParsTab"
+           icon="platform:/plugin/org.eclipse.cdt.managedbuilder.ui/icons/obj16/error_obj.gif"
+           name="Error Parsers"
+           weight="90"
+           helpId="cdt_u_prop_build_setting_errparser"
+           parent="de.marw.cmake4eclipse.mbs.ui.slim.Page_BuildTop"/>
+     <tab
+           class="org.eclipse.cdt.ui.newui.CLocationSourceTab"
+           icon="platform:/plugin/org.eclipse.cdt.managedbuilder.ui/icons/obj16/sroot_obj.gif"
+           name="Source Location"
+           parent="de.marw.cmake4eclipse.mbs.ui.slim.Page_SourceLocation"
+           weight="0"/>
+  </extension>
+  <extension
+        point="org.eclipse.cdt.ui.cPropertyTab">
+        <!--
+     <tab
+           class="de.marw.cmake4eclipse.mbs.ui.CMakeProjectPropertyTab"
+           name="CMakeLists.txt"
+           parent="de.marw.cmake4eclipse.mbs.ui.slim.Page_BuildTop">
+     </tab>
+     -->
+      <tab
+            class="de.marw.cmake4eclipse.mbs.ui.CMakePropertyTab"
+            helpId="cdt_u_prop_pns_src"
+            icon="icons/CMakeLogo.gif"
+            name="&amp;CMake options"
+            parent="de.marw.cmake4eclipse.mbs.ui.slim.Page_CMake">
+      </tab>
+      <tab
+            class="de.marw.cmake4eclipse.mbs.ui.CMakeSymbolsTab"
+            helpId="de.marw.cmake4eclipse.mbs.ui.cmake_symbols"
+            name="&amp;CMake cache entries"
+            parent="de.marw.cmake4eclipse.mbs.ui.slim.Page_CMake">
+      </tab>
+  </extension>
+  <extension
+        point="org.eclipse.tools.templates.ui.templates">
+     <tag
+           id="de.marw.cmake4eclipse.mbs.ui.cmake4eclipse"
+           label="CMake">
+     </tag>
+     <template
+           icon="icons/CMakeLogo.gif"
+           id="de.marw.cmake4eclipse.mbs.ui.template_new_project"
+           label="Cmake4eclipse Managed Build"
+           wizard="de.marw.cmake4eclipse.mbs.ui.slim.NewProjectTemplateWizard">
+        <tagReference
+              id="org.eclipse.cdt.ui.cdtTag">
+        </tagReference>
+        <description>
+           A project for C or C++ source files using the CDT&apos;s managed build system. Lets CMake generate the build-scripts.
+        </description>
+        <tagReference
+              id="de.marw.cmake4eclipse.mbs.ui.cmake4eclipse">
+        </tagReference>
+     </template>
+  </extension>
 </plugin>

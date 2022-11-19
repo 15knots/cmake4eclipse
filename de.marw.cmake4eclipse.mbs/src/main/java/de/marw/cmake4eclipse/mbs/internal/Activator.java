@@ -18,10 +18,13 @@ public class Activator extends Plugin {
 
   public static final String PLUGIN_ID = "de.marw.cmake4eclipse.mbs"; //$NON-NLS-1$
   /** extension id of the cmake-generated makefile builder */
-  public static final String BUILDER_ID = Activator.PLUGIN_ID
-      + "." + "genmakebuilder"; //$NON-NLS-1$
+  public static final String BUILDER_ID = PLUGIN_ID + ".genscriptbuilder"; //$NON-NLS-1$
+  /** the managed-build build system ID of cmake4eclipse */
+  public static final String CMAKE4ECLIPSE_BUILD_SYSTEM_ID = PLUGIN_ID + ".cmake4eclipse";//$NON-NLS-1$
+  /** the MBS project type as defined in plugin.xml */
+  public static final String CMAKE4ECLIPSE_PROJECT_TYPE = "cmake4eclipse.mbs.projectType";//$NON-NLS-1$
 
-  //The shared instance.
+  // The shared instance.
   private static Activator plugin;
 
   /**
@@ -37,8 +40,7 @@ public class Activator extends Plugin {
   public void start(BundleContext context) throws Exception {
     super.start(context);
     if (!PLUGIN_ID.equals(this.getBundle().getSymbolicName()))
-      throw new RuntimeException(
-          "BUG: PLUGIN_ID does not match Bundle-SymbolicName");
+      throw new RuntimeException("BUG: PLUGIN_ID does not match Bundle-SymbolicName");
     plugin = this;
   }
 

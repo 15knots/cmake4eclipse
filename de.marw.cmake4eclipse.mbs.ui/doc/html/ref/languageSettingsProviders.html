@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"/>
+<title>Available Language Settings Providers</title>
+<style type="text/css">
+table, th, td {
+	border: 1px solid black;
+}
+th, td {
+	padding: 2pt;
+}
+</style>
+</head>
+<body>
+	<h1>Preprocessor Include Paths, Macros</h1>
+	<P>Include paths and preprocessor macros for the CDT source code indexer are supplied by
+	<strong>Language Settings Providers</strong> using the
+        <a href="PLUGINS_ROOT/org.eclipse.cdt.doc.user/tasks/cdt_t_sd.htm">Scanner Discovery</a>
+	mechanism. The C/C++/CUDA editors use the indexer to improve syntax highlighting, allowing you to jump to
+	macro definitions and to browse through include files.
+	</P>
+	<p>The Cmake4eclipse plugin provides one
+	<a href="PLUGINS_ROOT/org.eclipse.cdt.doc.user/concepts/cdt_c_scanner_discovery.htm">Language Settings Provider</a>:
+	</p>
+
+    <h2>CMake Compilation DB</h2>
+    <p>This is a provider which is based on the JSON compilation database parsers that were introduced in
+    CDT 10.4 (2021-09). The documentation can be found in the
+    <a href="PLUGINS_ROOT/org.eclipse.cdt.jsoncdb.core.doc/doc/html/supported-compilers.xhtml">
+    JSON Compilation Database Parser User Guide</a>.
+    </p>
+</body>
+</html>
