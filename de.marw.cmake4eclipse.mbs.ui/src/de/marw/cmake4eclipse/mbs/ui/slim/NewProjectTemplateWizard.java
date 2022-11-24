@@ -8,14 +8,27 @@
  *******************************************************************************/
 package de.marw.cmake4eclipse.mbs.ui.slim;
 
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
+import java.nio.file.FileVisitOption;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.EnumSet;
+import java.util.List;
 
 import org.eclipse.cdt.core.CCorePlugin;
 import org.eclipse.cdt.core.model.CoreModel;
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
 import org.eclipse.cdt.core.settings.model.ICProjectDescription;
 import org.eclipse.cdt.core.settings.model.ICProjectDescriptionManager;
+import org.eclipse.cdt.core.settings.model.ICStorageElement;
 import org.eclipse.cdt.core.settings.model.extension.CConfigurationData;
 import org.eclipse.cdt.managedbuilder.buildproperties.IBuildProperty;
 import org.eclipse.cdt.managedbuilder.core.BuildException;
@@ -52,6 +65,7 @@ import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;
 import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
 
 import de.marw.cmake4eclipse.mbs.nature.C4ENature;
+import de.marw.cmake4eclipse.mbs.settings.CMakePreferences;
 import de.marw.cmake4eclipse.mbs.ui.Activator;
 
 /**
@@ -107,9 +121,9 @@ public class NewProjectTemplateWizard extends TemplateWizard implements IGenerat
   /**
    * Create and return the project specified by the wizard.
    *
-   * @param onFinish true if the method is called when finish is pressed, false otherwise. If onFinish is false, the
+   * @param onFinish
+   *                 true if the method is called when finish is pressed, false otherwise. If onFinish is false, the
    *                 project is temporary and can be removed if cancel is pressed.
-   *
    * @return the newly created project
    */
   /* package */ IProject getProject(boolean onFinish) {
@@ -149,11 +163,15 @@ public class NewProjectTemplateWizard extends TemplateWizard implements IGenerat
   /**
    * First stage of creating the project. Only used internally.
    *
-   * @param name     name of the project
-   * @param location location URI for the project
-   * @param monitor  progress monitor
+   * @param name
+   *                 name of the project
+   * @param location
+   *                 location URI for the project
+   * @param monitor
+   *                 progress monitor
    * @return the project
-   * @throws CoreException if project creation fails for any reason
+   * @throws CoreException
+   *                       if project creation fails for any reason
    */
   private IProject createIProject(final String name, final URI location, IProgressMonitor monitor)
       throws CoreException {
@@ -208,6 +226,13 @@ public class NewProjectTemplateWizard extends TemplateWizard implements IGenerat
     ICProjectDescriptionManager mngr = CoreModel.getDefault().getProjectDescriptionManager();
     ICProjectDescription projectDescr = mngr.createProjectDescription(project, false, !onFinish);
     subMonitor.worked(1);
+    ICStorageElement storage = projectDescr.getStorage(CMakePreferences.CFG_STORAGE_ID, true);
+    String cmakelists = storage.getAttribute(CMakePreferences.ATTR_CMAKELISTS_FLDR);
+    if (cmakelists == null) {
+      // scan for top-level CMakeLists.txt file..
+      cmakelists = scanForCmakelists(project.getLocation().toFile()).toString();
+      storage.setAttribute(CMakePreferences.ATTR_CMAKELISTS_FLDR, cmakelists);
+    }
 
     IProjectType pt = ManagedBuildManager
         .getExtensionProjectType(de.marw.cmake4eclipse.mbs.internal.Activator.CMAKE4ECLIPSE_PROJECT_TYPE);
@@ -257,7 +282,38 @@ public class NewProjectTemplateWizard extends TemplateWizard implements IGenerat
 //    }
   }
 
-  @SuppressWarnings("restriction")
+  /**
+   * Scans the file system for a top-level {@code CMakeLists.txt} file.
+   *
+   * @param projectRootDir
+   *                       abs path to project root
+   * @return relative path to the top-level {@code CMakeLists.txt} file, never <code>null</code>
+   */
+  private static File scanForCmakelists(File projectRootDir) {
+    List<Path> files = new ArrayList<>();
+    Path rootPath = projectRootDir.toPath();
+    try {
+      Files.walkFileTree(rootPath, EnumSet.noneOf(FileVisitOption.class), 4,
+          new SimpleFileVisitor<java.nio.file.Path>() {
+            @Override
+            public FileVisitResult visitFile(java.nio.file.Path file, BasicFileAttributes attrs) throws IOException {
+              if ("CMakeLists.txt".equals(file.getFileName().toString())) {
+                files.add(file.getParent());
+                return FileVisitResult.SKIP_SUBTREE;
+              }
+              return FileVisitResult.CONTINUE;
+            }
+          });
+    } catch (IOException e) {
+      // ignore, we assign project root as default
+    }
+
+    Path shortestPath = files.stream().min(Comparator.comparing(Path::getNameCount)).orElse(rootPath);
+    shortestPath = rootPath.relativize(shortestPath);
+    return shortestPath.toFile();
+  }
+
+  // TODO use ManagedBuildManager#createConfigurationForProject
   private static IConfiguration createConfigurationForProject(ICProjectDescription projectDescr,
       IManagedProject managedProject, IConfiguration cloneConfiguration, String buildSystemId) throws CoreException {
     String id = ManagedBuildManager.calculateChildId(cloneConfiguration.getId(), null);

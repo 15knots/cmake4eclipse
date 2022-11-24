@@ -23,6 +23,21 @@
                id="de.marw.cmake4eclipse.mbs.keyword.cdt">
          </keywordReference>
         </page>
+        <page
+              category="cmake4eclipse.mbs.ui.CMakePropertyPage"
+              class="de.marw.cmake4eclipse.mbs.ui.slim.Page_CMakeProjectProperty"
+              id="cmake4eclipse.mbs.ui.ProjectPropertyPage"
+              name="Project Settings">
+           <enabledWhen>
+              <adapt
+                    type="org.eclipse.core.resources.IResource">
+                 <test
+                       property="org.eclipse.core.resources.projectNature"
+                       value="org.eclipse.cdt.managedbuilder.core.managedBuildNature">
+                 </test>
+              </adapt>
+           </enabledWhen>
+        </page>
   </extension>
    <extension
          point="org.eclipse.cdt.ui.cPropertyTab">
@@ -125,13 +140,25 @@
 	                  value="de.marw.cmake4eclipse.mbs.cmake4eclipsenature"/>
            </adapt>
          </enabledWhen>
-        </page>    
+        </page>
+      <page
+            category="cmake4eclipse.mbs.ui.page_Build"
+            class="de.marw.cmake4eclipse.mbs.ui.slim.Page_CMakeProjectProperty"
+            id="cmake4eclipse.mbs.ui.page_CMakeProjectProperty"
+            name="Project Settings">
+         <enabledWhen>
+           <adapt type="org.eclipse.core.resources.IResource">
+	            <test property="org.eclipse.core.resources.projectNature"
+	                  value="de.marw.cmake4eclipse.mbs.cmake4eclipsenature"/>
+           </adapt>
+         </enabledWhen>
+      </page>    
       
       <page
             category="cmake4eclipse.mbs.ui.page_Build"
             class="de.marw.cmake4eclipse.mbs.ui.slim.Page_CMake"
             id="cmake4eclipse.mbs.ui.page_Cmake4eclipse"
-            name="CMake">
+            name="CMake Options">
          <enabledWhen>
             <adapt
                   type="org.eclipse.core.resources.IResource">
@@ -179,7 +206,7 @@
      <tab
            class="org.eclipse.cdt.managedbuilder.ui.properties.BuildBehaviourTab"
            icon="platform:/plugin/org.eclipse.cdt.managedbuilder.ui/icons/obj16/target_obj.gif"
-           name="Behaviour"
+           name="Build Behaviour"
            helpId="cdt_u_prop_build"
            parent="de.marw.cmake4eclipse.mbs.ui.slim.Page_BuildTop"
            weight="20"/>
@@ -220,13 +247,11 @@
   </extension>
   <extension
         point="org.eclipse.cdt.ui.cPropertyTab">
-        <!--
      <tab
-           class="de.marw.cmake4eclipse.mbs.ui.CMakeProjectPropertyTab"
+           class="de.marw.cmake4eclipse.mbs.ui.slim.CMakeProjectPropertyTab"
            name="CMakeLists.txt"
-           parent="de.marw.cmake4eclipse.mbs.ui.slim.Page_BuildTop">
+           parent="de.marw.cmake4eclipse.mbs.ui.slim.Page_CMakeProjectProperty">
      </tab>
-     -->
       <tab
             class="de.marw.cmake4eclipse.mbs.ui.CMakePropertyTab"
             helpId="cdt_u_prop_pns_src"
