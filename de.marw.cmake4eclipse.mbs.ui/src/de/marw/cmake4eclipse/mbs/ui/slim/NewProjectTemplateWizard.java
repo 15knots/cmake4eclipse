@@ -25,11 +25,12 @@ import java.util.List;
 
 import org.eclipse.cdt.core.CCorePlugin;
 import org.eclipse.cdt.core.model.CoreModel;
+import org.eclipse.cdt.core.settings.model.CSourceEntry;
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
 import org.eclipse.cdt.core.settings.model.ICProjectDescription;
 import org.eclipse.cdt.core.settings.model.ICProjectDescriptionManager;
+import org.eclipse.cdt.core.settings.model.ICSourceEntry;
 import org.eclipse.cdt.core.settings.model.ICStorageElement;
-import org.eclipse.cdt.core.settings.model.extension.CConfigurationData;
 import org.eclipse.cdt.managedbuilder.buildproperties.IBuildProperty;
 import org.eclipse.cdt.managedbuilder.core.BuildException;
 import org.eclipse.cdt.managedbuilder.core.IBuilder;
@@ -37,8 +38,6 @@ import org.eclipse.cdt.managedbuilder.core.IConfiguration;
 import org.eclipse.cdt.managedbuilder.core.IManagedProject;
 import org.eclipse.cdt.managedbuilder.core.IProjectType;
 import org.eclipse.cdt.managedbuilder.core.ManagedBuildManager;
-import org.eclipse.cdt.managedbuilder.internal.core.Configuration;
-import org.eclipse.cdt.managedbuilder.internal.core.ManagedProject;
 import org.eclipse.cdt.managedbuilder.ui.wizards.CfgHolder;
 import org.eclipse.cdt.ui.CUIPlugin;
 import org.eclipse.core.filesystem.EFS;
@@ -227,11 +226,16 @@ public class NewProjectTemplateWizard extends TemplateWizard implements IGenerat
     ICProjectDescription projectDescr = mngr.createProjectDescription(project, false, !onFinish);
     subMonitor.worked(1);
     ICStorageElement storage = projectDescr.getStorage(CMakePreferences.CFG_STORAGE_ID, true);
+
     String cmakelists = storage.getAttribute(CMakePreferences.ATTR_CMAKELISTS_FLDR);
+    ICSourceEntry[] sourceEntries = null;
     if (cmakelists == null) {
       // scan for top-level CMakeLists.txt file..
       cmakelists = scanForCmakelists(project.getLocation().toFile()).toString();
       storage.setAttribute(CMakePreferences.ATTR_CMAKELISTS_FLDR, cmakelists);
+      if(!cmakelists.isEmpty()) {
+        sourceEntries = new ICSourceEntry[] { new CSourceEntry(cmakelists, null, 0) };
+      }
     }
 
     IProjectType pt = ManagedBuildManager
@@ -251,8 +255,9 @@ public class NewProjectTemplateWizard extends TemplateWizard implements IGenerat
     SubMonitor cfgMonitor = SubMonitor.convert(subMonitor.split(1), cfgs.length);
     // create build configurations..
     for (IConfiguration cfg : cfgs) {
-      IConfiguration iconfig = createConfigurationForProject(projectDescr, mProj, cfg,
+      IConfiguration iconfig = ManagedBuildManager.createConfigurationForProject(projectDescr, mProj, cfg,
           de.marw.cmake4eclipse.mbs.internal.Activator.CMAKE4ECLIPSE_BUILD_SYSTEM_ID);
+      iconfig.setSourceEntries(sourceEntries);
 
       IBuilder bld = iconfig.getEditableBuilder();
       if (bld != null) {
@@ -313,6 +318,7 @@ public class NewProjectTemplateWizard extends TemplateWizard implements IGenerat
     return shortestPath.toFile();
   }
 
+  /*
   // TODO use ManagedBuildManager#createConfigurationForProject
   private static IConfiguration createConfigurationForProject(ICProjectDescription projectDescr,
       IManagedProject managedProject, IConfiguration cloneConfiguration, String buildSystemId) throws CoreException {
@@ -324,6 +330,7 @@ public class NewProjectTemplateWizard extends TemplateWizard implements IGenerat
     config.setConfigurationDescription(cfgDes);
     return config;
   }
+*/
 
   /**
    * Remove created project either after error or if user returned back from config page.
