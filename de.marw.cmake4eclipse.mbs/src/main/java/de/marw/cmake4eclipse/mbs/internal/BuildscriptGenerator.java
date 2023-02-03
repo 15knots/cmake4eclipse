@@ -201,35 +201,28 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
 
     final ICConfigurationDescription cfgDes = ManagedBuildManager.getDescriptionForConfiguration(config);
 
-    IPath srcPath;
+    IPath cmakelistsPath;
     ICStorageElement storage = cfgDes.getProjectDescription().getStorage(CMakePreferences.CFG_STORAGE_ID, false);
     if (storage != null) {
       // Cmake4eclipse nature holds a path to the top-level cmakelists.txt file
       String cmakelists = storage.getAttribute(CMakePreferences.ATTR_CMAKELISTS_FLDR);
-      srcPath = new Path(cmakelists);
+      cmakelistsPath = new Path(cmakelists);
     } else {
       // classic cmake4eclipse with MBS build system...
       // .. assumes the top-level cmakelists.txt file is below the (single) source location
       ICSourceEntry[] srcEntries = config.getSourceEntries();
 
-      // do a sanity check: only one source entry allowed for project
+      // do a sanity check..
       if (srcEntries.length == 0) {
         // no source folders specified in project
         final String msg = "No source directories configured for project";
         MultiStatus status = new MultiStatus(Activator.PLUGIN_ID, IStatus.ERROR, msg + " " + project.getName(), null);
         createErrorMarker(project, msg);
         return status;
-      } else if (srcEntries.length > 1) {
-        final String msg = "Only a single source directory is supported";
-        MultiStatus status = new MultiStatus(Activator.PLUGIN_ID, IStatus.ERROR, msg, null);
-        // if multiple projects are build, this information is lost when a new console is opened.
-        // So create a problem marker to show up in the problem view
-        createErrorMarker(project, msg);
-        return status;
       } else {
         srcEntries = CDataUtil.resolveEntries(srcEntries, cfgDes);
         // assume the first source directory contains a CMakeLists.txt
-        srcPath = srcEntries[0].getFullPath();
+        cmakelistsPath = srcEntries[0].getFullPath();
       }
     }
 
@@ -300,7 +293,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       cis.write(msg.getBytes());
     } catch (IOException ignore) {
     }
-    IContainer srcDir = srcPath.isEmpty() ? project : project.getFolder(srcPath);
+    IContainer srcDir = cmakelistsPath.isEmpty() ? project : project.getFolder(cmakelistsPath);
 
     checkCancel();
     MultiStatus status = invokeCMake(srcDir, buildFolder.getLocation(), console);

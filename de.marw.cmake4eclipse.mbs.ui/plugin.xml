@@ -191,7 +191,19 @@
          </enabledWhen>
       </page>
 -->
-
+      <page
+            class="de.marw.cmake4eclipse.mbs.ui.slim.Page_SourceFolders"
+            id="cmake4eclipse.mbs.ui.page_SourceLocation"
+            category="org.eclipse.cdt.ui.newui.Page_head_general"
+            name="Source Folders"
+            >
+         <enabledWhen>
+            <adapt type="org.eclipse.core.resources.IProject">
+	           <test property="org.eclipse.core.resources.projectNature"
+	                  value="de.marw.cmake4eclipse.mbs.cmake4eclipsenature"/>
+            </adapt>
+         </enabledWhen>
+      </page>
   </extension>
   <extension
            point="org.eclipse.cdt.ui.cPropertyTab">
@@ -234,7 +246,7 @@
            class="org.eclipse.cdt.ui.newui.CLocationSourceTab"
            icon="platform:/plugin/org.eclipse.cdt.managedbuilder.ui/icons/obj16/sroot_obj.gif"
            name="Source Location"
-           parent="de.marw.cmake4eclipse.mbs.ui.slim.Page_SourceLocation"
+           parent="de.marw.cmake4eclipse.mbs.ui.slim.Page_SourceFolders"
            weight="0"/>
   </extension>
   <extension
