@@ -8,8 +8,13 @@
  *******************************************************************************/
 package de.marw.cmake4eclipse.mbs.ui.slim;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
+import org.eclipse.cdt.core.settings.model.ICProjectDescription;
 import org.eclipse.cdt.core.settings.model.ICResourceDescription;
 import org.eclipse.cdt.core.settings.model.ICStorageElement;
 import org.eclipse.core.resources.IFolder;
@@ -34,6 +39,8 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.FilteredResourcesSelectionDialog;
 import org.eclipse.ui.dialogs.NewFolderDialog;
 
+import de.marw.cmake4eclipse.mbs.internal.storage.BuildTargetSerializer;
+import de.marw.cmake4eclipse.mbs.internal.storage.Util;
 import de.marw.cmake4eclipse.mbs.settings.CMakePreferences;
 import de.marw.cmake4eclipse.mbs.ui.Activator;
 import de.marw.cmake4eclipse.mbs.ui.QuirklessAbstractCPropertyTab;
@@ -49,6 +56,8 @@ public class CMakeProjectPropertyTab extends QuirklessAbstractCPropertyTab {
 
   // Widgets
   private Text t_cmakelistsFolder;
+
+  private Text t_targets;
 
   @Override
   public boolean canSupportMultiCfg() {
@@ -98,7 +107,7 @@ public class CMakeProjectPropertyTab extends QuirklessAbstractCPropertyTab {
           IEclipsePreferences preferences = InstanceScope.INSTANCE.getNode(ResourcesPlugin.PI_RESOURCES);
           boolean noLinking = preferences.getBoolean(ResourcesPlugin.PREF_DISABLE_LINKING, false);
           try {
-            // do not allow users to created a linked folder for the cmakelists.txt file..
+            // do not allow users to create a linked folder for the cmakelists.txt file..
             preferences.putBoolean(ResourcesPlugin.PREF_DISABLE_LINKING, true);
 
             NewFolderDialog dialog = new NewFolderDialog(parent.getShell(), page.getProject());
@@ -111,6 +120,12 @@ public class CMakeProjectPropertyTab extends QuirklessAbstractCPropertyTab {
           }
         }
       });
+    }
+    // build targets group
+    {
+      Group gr = WidgetHelper.createGroup(usercomp, SWT.FILL, 2, "Build Targets", 2);
+      t_targets = setupText(gr, 1, GridData.FILL_HORIZONTAL);
+      t_targets.setToolTipText("Space-separated list of target names to show in the project explorer.");
     }
   }
 
@@ -127,8 +142,18 @@ public class CMakeProjectPropertyTab extends QuirklessAbstractCPropertyTab {
     try {
       ICStorageElement storage = resd.getConfiguration().getProjectDescription()
           .getStorage(CMakePreferences.CFG_STORAGE_ID, true);
-      String folder = Objects.requireNonNullElseGet(storage.getAttribute(CMakePreferences.ATTR_CMAKELISTS_FLDR), String::new);
+      String folder = Objects.requireNonNullElseGet(storage.getAttribute(CMakePreferences.ATTR_CMAKELISTS_FLDR),
+          String::new);
       t_cmakelistsFolder.setText(folder);
+
+      ICStorageElement[] storeTargets = storage.getChildrenByName(CMakePreferences.ELEM_BUILD_TARGETS);
+      List<String> targets = new ArrayList<>();
+      if (storeTargets != null && storeTargets.length > 0) {
+        Util.deserializeCollection(targets, new BuildTargetSerializer(), storeTargets[0]);
+      }
+      String targetsTxt = targets.stream().collect(Collectors.joining(" "));
+      t_targets.setText(targetsTxt);
+
     } catch (CoreException ex) {
       log.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, null, ex));
     }
@@ -143,7 +168,6 @@ public class CMakeProjectPropertyTab extends QuirklessAbstractCPropertyTab {
    */
   @Override
   protected void performApply(ICResourceDescription src, ICResourceDescription dst) {
-
     // save behavior as CDT has: Apply does persist settings:
     // this also solves the problem with different configuration that have been modified, apply but would
     // otherwise not be persisted on performOK()
@@ -165,9 +189,18 @@ public class CMakeProjectPropertyTab extends QuirklessAbstractCPropertyTab {
 
     // save project properties..
     try {
-      ICStorageElement storage = resDesc.getConfiguration().getProjectDescription()
+      ICProjectDescription prjDes = resDesc.getConfiguration().getProjectDescription();
+      ICStorageElement storage = prjDes
           .getStorage(CMakePreferences.CFG_STORAGE_ID, true);
       storage.setAttribute(CMakePreferences.ATTR_CMAKELISTS_FLDR, t_cmakelistsFolder.getText());
+
+      String[] targetsTxt = t_targets.getText().trim().split(" +");
+      Arrays.sort(targetsTxt);
+      List<String> targets = Arrays.asList(targetsTxt);
+      Util.serializeCollection(CMakePreferences.ELEM_BUILD_TARGETS, storage, new BuildTargetSerializer(),
+          targets);
+      // update the project explorer view
+      BuildTargetsManager.getDefault().notifyListeners(new BuildTargetEvent(prjDes.getProject(), targets));
     } catch (CoreException ex) {
       log.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, null, ex));
     }
@@ -179,6 +212,7 @@ public class CMakeProjectPropertyTab extends QuirklessAbstractCPropertyTab {
   @Override
   protected void performDefaults() {
     t_cmakelistsFolder.setText("");
+    t_targets.setText("");
     updateDisplay();
   }
 

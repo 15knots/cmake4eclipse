@@ -26,11 +26,12 @@ Bundle-Activator: de.marw.cmake4eclipse.mbs.internal.Activator
 Export-Package: de.marw.cmake4eclipse.mbs.cmakecache,
  de.marw.cmake4eclipse.mbs.console,
  de.marw.cmake4eclipse.mbs.internal;x-friends:="de.marw.cmake4eclipse.mbs.ui",
+ de.marw.cmake4eclipse.mbs.internal.storage;x-friends:="de.marw.cmake4eclipse.mbs.ui",
  de.marw.cmake4eclipse.mbs.nature;x-friends:="de.marw.cmake4eclipse.mbs.ui",
  de.marw.cmake4eclipse.mbs.preferences;x-friends:="de.marw.cmake4eclipse.mbs.ui",
  de.marw.cmake4eclipse.mbs.settings
 Automatic-Module-Name: de.marw.cmake4eclipse.mbs
-Require-Bundle: org.eclipse.cdt.core;bundle-version="7.3.0",
- org.eclipse.cdt.managedbuilder.core;bundle-version="9.3.100",
+Require-Bundle: org.eclipse.cdt.core;bundle-version="8.0.0",
+ org.eclipse.cdt.managedbuilder.core;bundle-version="9.5.0",
  org.eclipse.cdt.jsoncdb.core;bundle-version="1.0.0",
  org.eclipse.core.variables

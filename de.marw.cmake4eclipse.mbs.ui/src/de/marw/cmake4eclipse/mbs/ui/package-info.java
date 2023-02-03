@@ -7,19 +7,10 @@
  * SPDX-License-Identifier: EPL-2.0
  *******************************************************************************/
 
-package de.marw.cmake4eclipse.mbs.ui.slim;
-
-import org.eclipse.cdt.ui.newui.AbstractPage;
-
 /**
- * Page for C/C++ general project settings in the simplified MBS UI. Shows the MBS source location tab.
+ * Classes for the cmake4eclipse MBS UI.
  *
  * @author Martin Weber
  */
-public class Page_SourceLocation extends AbstractPage {
-
-  @Override
-  protected boolean isSingle() {
-    return false;
-  }
-}
+@org.eclipse.jdt.annotation.NonNullByDefault
+package de.marw.cmake4eclipse.mbs.ui;

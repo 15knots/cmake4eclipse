@@ -19,6 +19,7 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
@@ -63,6 +64,8 @@ import org.eclipse.tools.templates.ui.TemplateWizard;
 import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;
 import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
 
+import de.marw.cmake4eclipse.mbs.internal.storage.BuildTargetSerializer;
+import de.marw.cmake4eclipse.mbs.internal.storage.Util;
 import de.marw.cmake4eclipse.mbs.nature.C4ENature;
 import de.marw.cmake4eclipse.mbs.settings.CMakePreferences;
 import de.marw.cmake4eclipse.mbs.ui.Activator;
@@ -233,10 +236,13 @@ public class NewProjectTemplateWizard extends TemplateWizard implements IGenerat
       // scan for top-level CMakeLists.txt file..
       cmakelists = scanForCmakelists(project.getLocation().toFile()).toString();
       storage.setAttribute(CMakePreferences.ATTR_CMAKELISTS_FLDR, cmakelists);
-      if(!cmakelists.isEmpty()) {
+      if (!cmakelists.isEmpty()) {
         sourceEntries = new ICSourceEntry[] { new CSourceEntry(cmakelists, null, 0) };
       }
     }
+    // add well known build targets (sorted)...
+    List<String> targets = Arrays.asList("all", "clean", "help", "test");
+    Util.serializeCollection(CMakePreferences.ELEM_BUILD_TARGETS, storage, new BuildTargetSerializer(), targets);
 
     IProjectType pt = ManagedBuildManager
         .getExtensionProjectType(de.marw.cmake4eclipse.mbs.internal.Activator.CMAKE4ECLIPSE_PROJECT_TYPE);
@@ -276,15 +282,8 @@ public class NewProjectTemplateWizard extends TemplateWizard implements IGenerat
       ICConfigurationDescription conf = ManagedBuildManager.getDescriptionForConfiguration(active);
       projectDescr.setActiveConfiguration(conf);
     }
+
     mngr.setProjectDescription(project, projectDescr);
-    // add well known build targets (does not work, it converts projects back to ManagedBuildNature when building
-//    IMakeTargetManager tmngr = MakeCorePlugin.getDefault().getTargetManager();
-//    for (String tgt : Arrays.asList("all", "clean", "test", "help")) {
-//      IMakeTarget target = tmngr.createTarget(project, tgt, de.marw.cmake4eclipse.mbs.internal.Activator.BUILDER_ID);
-//      target.setBuildAttribute(IMakeTarget.BUILD_TARGET, target.getName());
-//      target.setUseDefaultBuildCmd(true);
-//      tmngr.addTarget(target);
-//    }
   }
 
   /**
@@ -318,21 +317,7 @@ public class NewProjectTemplateWizard extends TemplateWizard implements IGenerat
     return shortestPath.toFile();
   }
 
-  /*
-  // TODO use ManagedBuildManager#createConfigurationForProject
-  private static IConfiguration createConfigurationForProject(ICProjectDescription projectDescr,
-      IManagedProject managedProject, IConfiguration cloneConfiguration, String buildSystemId) throws CoreException {
-    String id = ManagedBuildManager.calculateChildId(cloneConfiguration.getId(), null);
-    Configuration config = new Configuration((ManagedProject) managedProject, (Configuration) cloneConfiguration, id,
-        false, true);
-    CConfigurationData data = config.getConfigurationData();
-    ICConfigurationDescription cfgDes = projectDescr.createConfiguration(buildSystemId, data);
-    config.setConfigurationDescription(cfgDes);
-    return config;
-  }
-*/
-
-  /**
+ /**
    * Remove created project either after error or if user returned back from config page.
    */
   private void clearProject() {

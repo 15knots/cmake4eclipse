@@ -91,6 +91,9 @@
           class="de.marw.cmake4eclipse.mbs.ui.preferences.CMakePreferencePage"
           id="cmake4eclipse.mbs.ui.preferences.CMakePreferencePage"
           name="Cmake4eclipse">
+       <keywordReference
+             id="de.marw.cmake4eclipse.mbs.keyword.cmake">
+       </keywordReference>
     </page>
     <page
           category="cmake4eclipse.mbs.ui.preferences.CMakePreferencePage"
@@ -111,8 +114,7 @@
                 node="de.marw.cmake4eclipse.mbs">
           </entry>
        </mapping>
-       <description>C/C++ > Cmake4eclipse preferences.
-       </description>
+       <description>C/C++ > Cmake4eclipse preferences.</description>
     </transfer>
  </extension>
  <extension
@@ -140,6 +142,9 @@
 	                  value="de.marw.cmake4eclipse.mbs.cmake4eclipsenature"/>
            </adapt>
          </enabledWhen>
+         <keywordReference
+               id="de.marw.cmake4eclipse.mbs.keyword.cmake">
+         </keywordReference>
         </page>
       <page
             category="cmake4eclipse.mbs.ui.page_Build"
@@ -186,19 +191,6 @@
          </enabledWhen>
       </page>
 -->
-      <page
-            class="de.marw.cmake4eclipse.mbs.ui.slim.Page_SourceLocation"
-            id="cmake4eclipse.mbs.ui.page_SourceLocation"
-            category="org.eclipse.cdt.ui.newui.Page_head_general"
-            name="Source Location"
-            >
-         <enabledWhen>
-            <adapt type="org.eclipse.core.resources.IProject">
-	           <test property="org.eclipse.core.resources.projectNature"
-	                  value="de.marw.cmake4eclipse.mbs.cmake4eclipsenature"/>
-            </adapt>
-         </enabledWhen>
-      </page>
 
   </extension>
   <extension
@@ -287,5 +279,55 @@
               id="de.marw.cmake4eclipse.mbs.ui.cmake4eclipse">
         </tagReference>
      </template>
+  </extension>
+
+  <extension
+        point="org.eclipse.ui.navigator.navigatorContent">
+     <navigatorContent
+           activeByDefault="true"
+           contentProvider="de.marw.cmake4eclipse.mbs.ui.slim.BuildTargetsTreeContentProvider"
+           icon="platform:/plugin/org.eclipse.cdt.managedbuilder.ui/icons/obj16/target_obj.gif"
+           id="de.marw.cmake4eclipse.mbs.ui.buildTargets.content"
+           labelProvider="de.marw.cmake4eclipse.mbs.ui.slim.BuildTargetsLabelProvider"
+           name="Build Targets (cmake)">
+       <triggerPoints>
+             <and>
+                <instanceof
+                      value="org.eclipse.core.resources.IProject">
+                </instanceof>
+                <test
+                      property="org.eclipse.core.resources.projectNature"
+                      value="de.marw.cmake4eclipse.mbs.cmake4eclipsenature">
+                </test>
+             </and>
+       </triggerPoints>
+       <possibleChildren>
+          <or>
+             <instanceof value="de.marw.cmake4eclipse.mbs.ui.slim.BuildTargetsContainer"/>
+             <instanceof value="de.marw.cmake4eclipse.mbs.ui.slim.NavBuildTarget"/>
+          </or>
+       </possibleChildren>
+       <actionProvider
+             class="de.marw.cmake4eclipse.mbs.ui.slim.NavBuildTargetActionProvider"
+             id="de.marw.cmake4eclipse.mbs.ui.buildTargets.actions">
+          <enablement>
+             <instanceof
+                   value="de.marw.cmake4eclipse.mbs.ui.slim.NavBuildTarget">
+             </instanceof>
+          </enablement>
+       </actionProvider>
+     </navigatorContent>
+  </extension>
+  <extension
+        point="org.eclipse.ui.navigator.viewer">
+    <viewerContentBinding
+          viewerId="org.eclipse.ui.navigator.ProjectExplorer">
+       <includes>
+          <contentExtension
+                isRoot="false"
+                pattern="de.marw.cmake4eclipse.mbs.ui.buildTargets.*">
+          </contentExtension>
+       </includes>
+    </viewerContentBinding>
   </extension>
 </plugin>
