@@ -117,7 +117,8 @@ public class CMakeBuildRunner extends ExternalBuildRunner {
       if (kind == IncrementalProjectBuilder.CLEAN_BUILD) {
         // avoid calling 'rm -rf' if it is a clean build and the build dir was
         // deleted
-        if (!builderCWD.toFile().exists()) {
+        IPath location = ResourcesPlugin.getWorkspace().getRoot().getFolder(builderCWD).getLocation();
+        if (!location.toFile().exists()) {
           return true; // is clean
         }
       }
