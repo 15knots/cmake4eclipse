@@ -1,5 +1,18 @@
 # Cmake4eclipse Change Log
 
+## 4.0.0 (2023-02-03)
+### Changes
+- Removed the deprecated *CMAKE_EXPORT_COMPILE_COMMANDS* language setting providers. Their code has long been integrated 
+into CDT. As a replacement, users should switch to the *CMake Compilation DB* parser which is based on the code in CDT.
+- Removed the deprecated *CMake Builder (deprecated)*. It has been kept for compatibility with cmake4eclipse 2.x and is superseded by the *CMake Builder*.
+- Replaced the cmake error parser with the parser coming with CDT. This does not affect end-users but helps to 
+reduce maintenance effort.
+- Added a new *cmake4eclipse* project creation wizard. Projects created through that wizard are still based on the managed build system (MBS)
+but do not show all the project property pages inherited from MBS that confuse end-users. Many of those MBS properties 
+have no meaning when build-scripts are created by cmake (e.g. *build artifact extension*). 
+- Requires CDT 11.0 as a prerequisite.
+- Fix #176: Support multiple source locations.
+
 ## 3.0.6 (2022-10-23)
 ### Changes
 - Fix NoSuchFileException '_build/Debug/_deps'
