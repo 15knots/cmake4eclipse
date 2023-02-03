@@ -11,13 +11,22 @@ package de.marw.cmake4eclipse.mbs.ui.slim;
 import org.eclipse.cdt.ui.newui.AbstractPage;
 
 /**
- * Page for CMake project settings in the simplified MBS UI.
+ * Page for CMake general project properties in the simplified MBS UI.
  *
  * @author Martin Weber
  */
-public class Page_Settings extends AbstractPage {
+public class Page_CMakeProjectProperty extends AbstractPage {
+  public Page_CMakeProjectProperty() {
+    setDescription("Properties that apply to each configuration.");
+  }
+
   @Override
   protected boolean isSingle() {
+    return true; // currently only one tab to show
+  }
+
+  @Override
+  protected boolean showsConfig() {
     return false;
   }
 }

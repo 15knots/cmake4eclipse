@@ -84,11 +84,12 @@
         <groupId>org.eclipse.tycho</groupId>
         <artifactId>tycho-source-plugin</artifactId>
       </plugin>
-
+<!-- 
       <plugin>
         <artifactId>maven-enforcer-plugin</artifactId>
         <inherited>false</inherited>
       </plugin>
+-->
     </plugins>
 
     <pluginManagement>
@@ -284,7 +285,7 @@
                   </requireMavenVersion>
                   <requireJavaVersion>
                     <!-- our project README states we require 11 or newer at runtime -->
-                    <version>[11,)</version>
+                    <version>[17,)</version>
                   </requireJavaVersion>
                 </rules>
               </configuration>

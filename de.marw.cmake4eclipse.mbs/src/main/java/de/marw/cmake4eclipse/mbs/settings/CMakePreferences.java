@@ -34,6 +34,15 @@ public class CMakePreferences {
    */
   public static final String CFG_STORAGE_ID = Activator.PLUGIN_ID
       + ".settings";
+  /**
+   * Attribute to store the folder of the top-level CMakeLists.txt file, used on the project level
+   */
+  public static final String ATTR_CMAKELISTS_FLDR= "cmakelistsFolder";
+  /**
+   * Element to store the build targets, used on the project level
+   */
+  public static final String ELEM_BUILD_TARGETS= "targets";
+
   private static final String ATTR_WARN_NO_DEV = "warnNoDev";
   private static final String ATTR_DEBUG_TRYCOMPILE = "debugTryCompile";
   private static final String ATTR_DEBUG = "debugOutput";

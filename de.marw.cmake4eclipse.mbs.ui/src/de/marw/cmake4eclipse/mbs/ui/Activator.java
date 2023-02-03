@@ -16,7 +16,7 @@ import org.osgi.framework.BundleContext;
  */
 public class Activator extends AbstractUIPlugin {
 
-  public static final String PLUGIN_ID = "de.marw.cmake4eclipse.mbs"; //$NON-NLS-1$
+  public static final String PLUGIN_ID = "de.marw.cmake4eclipse.mbs.ui"; //$NON-NLS-1$
 
   // The shared instance.
   private static Activator plugin;

@@ -33,6 +33,7 @@ import org.eclipse.cdt.core.language.settings.providers.ILanguageSettingsProvide
 import org.eclipse.cdt.core.resources.IConsole;
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
 import org.eclipse.cdt.core.settings.model.ICSourceEntry;
+import org.eclipse.cdt.core.settings.model.ICStorageElement;
 import org.eclipse.cdt.core.settings.model.util.CDataUtil;
 import org.eclipse.cdt.managedbuilder.buildproperties.IBuildProperty;
 import org.eclipse.cdt.managedbuilder.buildproperties.IBuildPropertyValue;
@@ -200,8 +201,18 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
 
     final ICConfigurationDescription cfgDes = ManagedBuildManager.getDescriptionForConfiguration(config);
 
-    ICSourceEntry[] srcEntries = config.getSourceEntries();
-    { // do a sanity check: only one source entry allowed for project
+    IPath srcPath;
+    ICStorageElement storage = cfgDes.getProjectDescription().getStorage(CMakePreferences.CFG_STORAGE_ID, false);
+    if (storage != null) {
+      // Cmake4eclipse nature holds a path to the top-level cmakelists.txt file
+      String cmakelists = storage.getAttribute(CMakePreferences.ATTR_CMAKELISTS_FLDR);
+      srcPath = new Path(cmakelists);
+    } else {
+      // classic cmake4eclipse with MBS build system...
+      // .. assumes the top-level cmakelists.txt file is below the (single) source location
+      ICSourceEntry[] srcEntries = config.getSourceEntries();
+
+      // do a sanity check: only one source entry allowed for project
       if (srcEntries.length == 0) {
         // no source folders specified in project
         final String msg = "No source directories configured for project";
@@ -217,6 +228,8 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
         return status;
       } else {
         srcEntries = CDataUtil.resolveEntries(srcEntries, cfgDes);
+        // assume the first source directory contains a CMakeLists.txt
+        srcPath = srcEntries[0].getFullPath();
       }
     }
 
@@ -279,8 +292,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     final IConsole console = CCorePlugin.getDefault().getConsole(CdtConsoleConstants.CMAKE_CONSOLE_ID);
     console.start(project);
 
-    // create makefile, assuming the first source directory contains a CMakeLists.txt
-    final ICSourceEntry srcEntry = srcEntries[0]; // project relative
+    // create makefile
     try {
       final OutputStream cis = console.getInfoStream();
       String msg = String.format("%tT Buildscript generation: %s::%s in %s\n", startDate, project.getName(),
@@ -288,7 +300,6 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       cis.write(msg.getBytes());
     } catch (IOException ignore) {
     }
-    final IPath srcPath = srcEntry.getFullPath();
     IContainer srcDir = srcPath.isEmpty() ? project : project.getFolder(srcPath);
 
     checkCancel();
