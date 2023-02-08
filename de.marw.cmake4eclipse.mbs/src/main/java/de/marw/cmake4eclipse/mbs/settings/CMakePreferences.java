@@ -15,6 +15,7 @@ import java.util.Objects;
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
 import org.eclipse.cdt.core.settings.model.ICStorageElement;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.annotation.Nullable;
 
 import de.marw.cmake4eclipse.mbs.internal.Activator;
 import de.marw.cmake4eclipse.mbs.internal.storage.CMakeDefineSerializer;
@@ -395,6 +396,7 @@ public class CMakePreferences {
    * @return the file name or {@code null} if the cmake cache shall not be
    *         pre-populated.
    */
+  @Nullable
   public String getCacheFile() {
     return cacheFile;
   }
@@ -407,7 +409,7 @@ public class CMakePreferences {
    *          the file name or {@code null} if the cmake cache shall not be
    *          pre-populated.
    */
-  public void setCacheFile(String cacheFile) {
+  public void setCacheFile(@Nullable String cacheFile) {
     if(! Objects.equals(cacheFile, this.cacheFile)) {
       dirty_ts= System.currentTimeMillis();
     }
@@ -420,7 +422,7 @@ public class CMakePreferences {
    * @return the build directory name or {@code null} if the hard-coded default shall be
    *         used.
    */
-  public String getBuildDirectory() {
+  @Nullable public String getBuildDirectory() {
     return buildDirectory;
   }
 
@@ -431,7 +433,7 @@ public class CMakePreferences {
    *          the build directory name or {@code null} if the hard-coded
    *          default shall be used.
    */
-  public void setBuildDirectory(String buildDirectory) {
+  public void setBuildDirectory(@Nullable String buildDirectory) {
     this.buildDirectory = buildDirectory;
   }
 
