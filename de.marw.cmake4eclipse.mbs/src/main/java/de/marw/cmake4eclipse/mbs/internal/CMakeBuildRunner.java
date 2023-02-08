@@ -265,6 +265,11 @@ public class CMakeBuildRunner extends ExternalBuildRunner {
     }
 
     @Override
+    public String getCommand() {
+      return cmakeBuildTool;
+    }
+
+    @Override
     public IPath getBuildCommand() {
       return new Path(cmakeBuildTool);
     }
@@ -297,11 +302,6 @@ public class CMakeBuildRunner extends ExternalBuildRunner {
     @Override
     public String getArguments() {
       return delegate.getArguments();
-    }
-
-    @Override
-    public String getCommand() {
-      return this.delegate.getCommand();
     }
 
     @Override

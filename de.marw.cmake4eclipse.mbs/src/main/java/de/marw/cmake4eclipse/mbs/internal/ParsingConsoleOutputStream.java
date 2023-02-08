@@ -24,13 +24,13 @@ import org.eclipse.cdt.core.ConsoleOutputStream;
 class ParsingConsoleOutputStream extends ConsoleOutputStream {
 
   private final ConsoleOutputStream os;
-  private final CMakeErrorParser2 parser;
+  private final CMakeErrorParser parser;
 
   /**
    * @param outputStream     the OutputStream to write to
    * @param cmakeErrorParser the CMakeErrorParser for processing the output
    */
-  public ParsingConsoleOutputStream(ConsoleOutputStream outputStream, CMakeErrorParser2 cmakeErrorParser) {
+  public ParsingConsoleOutputStream(ConsoleOutputStream outputStream, CMakeErrorParser cmakeErrorParser) {
     this.os = Objects.requireNonNull(outputStream);
     this.parser = Objects.requireNonNull(cmakeErrorParser);
   }

@@ -385,10 +385,8 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
         CMakeExecutionMarkerFactory markerFactory = new CMakeExecutionMarkerFactory(srcFolder);
         // NOTE: we need 2 of this, since the output streams are not synchronized, causing loss of
         // the internal processor state
-//        CMakeErrorParser epo = new CMakeErrorParser(srcFolder, console.getOutputStream());
-//        CMakeErrorParser epe = new CMakeErrorParser(srcFolder, console.getErrorStream());
-        try (CMakeErrorParser2 errorParserE = new CMakeErrorParser2(markerFactory);
-            CMakeErrorParser2 errorParserO = new CMakeErrorParser2(markerFactory)) {
+        try (CMakeErrorParser errorParserE = new CMakeErrorParser(markerFactory);
+            CMakeErrorParser errorParserO = new CMakeErrorParser(markerFactory)) {
           OutputStream epe = new ParsingConsoleOutputStream(console.getErrorStream(), errorParserE);
           OutputStream epo = new ParsingConsoleOutputStream(console.getOutputStream(), errorParserO);
 

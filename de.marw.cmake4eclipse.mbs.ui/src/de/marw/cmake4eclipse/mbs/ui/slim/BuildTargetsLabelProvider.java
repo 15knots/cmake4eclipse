@@ -61,12 +61,6 @@ public class BuildTargetsLabelProvider extends LabelProvider {
   }
 
   @Override
-  public boolean isLabelProperty(Object element, String property) {
-    // TODO Auto-generated method stub
-    return super.isLabelProperty(element, property);
-  }
-
-  @Override
   public void dispose() {
       super.dispose();
       resourceManager.dispose();
