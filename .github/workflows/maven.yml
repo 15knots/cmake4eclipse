@@ -25,4 +25,4 @@ jobs:
         cache: 'maven'
 
     - name: Build
-      run: mvn -P release -B --file parent/pom.xml verify
+      run: mvn -P release -B verify

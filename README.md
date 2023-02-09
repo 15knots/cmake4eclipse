@@ -40,7 +40,7 @@ This will require CDT version 11.0.
 The plugin is licensed under the <a href="https://www.eclipse.org/legal/epl-2.0/">Eclipse Public License Version 2.0 ("EPL-2.0")</a>.
 
 ## System Requirements
-- CDT v 10.5 or newer and Eclipse v 2021-12 or newer.
+- CDT v 11 or newer and Eclipse v 2022-12 or newer.
 - Java 11 or newer.
 
 ## Installation
@@ -66,7 +66,7 @@ make your product builds immune to downtimes on cloudsmith.
 
 ## Debug and Build
 This project uses Apache maven as its build system.
-To build from a command-line, run `mvn -f ./parent/pom.xml package` in the root directory of the project source files.
+To build from a command-line, run `mvn package` in the root directory of the project source files.
 
 There is also a run configuration for eclipse to invoke the maven build: `build cmake4eclipse`.
 

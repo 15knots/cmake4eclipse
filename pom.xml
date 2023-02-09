@@ -32,11 +32,11 @@
   </developers>
 
   <modules>
-    <module>../releng/targetplatform</module>
-    <module>../de.marw.cmake4eclipse.mbs</module>
-    <module>../de.marw.cmake4eclipse.mbs.ui</module>
-    <module>../de.marw.cmake4eclipse.feature</module>
-    <module>../releng/repo</module>
+    <module>de.marw.cmake4eclipse.mbs</module>
+    <module>de.marw.cmake4eclipse.mbs.ui</module>
+    <module>de.marw.cmake4eclipse.feature</module>
+    <module>releng/repo</module>
+    <module>releng/targetplatform</module>
   </modules>
 
   <scm>

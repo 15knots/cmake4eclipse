@@ -6,7 +6,7 @@
     <groupId>de.marw.cmake4eclipse</groupId>
     <artifactId>parent</artifactId>
     <version>1.1.0</version>
-    <relativePath>../parent/pom.xml</relativePath>
+    <relativePath>../pom.xml</relativePath>
   </parent>
 
   <artifactId>de.marw.cmake4eclipse.mbs</artifactId>

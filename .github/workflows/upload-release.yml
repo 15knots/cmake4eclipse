@@ -19,7 +19,7 @@ jobs:
         settings-path: ${{ github.workspace }}
 
     - name: Build
-      run: mvn -P release -B --file parent/pom.xml package
+      run: mvn -P release -B package
 
     - name: Determine artifact to upload
       id: TheZIP
