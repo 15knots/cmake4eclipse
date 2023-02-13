@@ -7,6 +7,9 @@
  * SPDX-License-Identifier: EPL-2.0
  *******************************************************************************/
 
+/**
+ * Classes and interfaces related to project properties.
+ */
 @org.eclipse.jdt.annotation.NonNullByDefault({ DefaultLocation.PARAMETER, DefaultLocation.RETURN_TYPE,
     DefaultLocation.TYPE_BOUND, DefaultLocation.TYPE_ARGUMENT })
 package de.marw.cmake4eclipse.mbs.settings;
