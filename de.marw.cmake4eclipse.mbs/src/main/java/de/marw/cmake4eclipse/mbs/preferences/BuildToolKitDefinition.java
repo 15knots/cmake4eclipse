@@ -10,6 +10,8 @@ package de.marw.cmake4eclipse.mbs.preferences;
 
 import java.util.Objects;
 
+import org.eclipse.jdt.annotation.Nullable;
+
 import de.marw.cmake4eclipse.mbs.settings.CmakeGenerator;
 
 /**
@@ -141,6 +143,7 @@ public class BuildToolKitDefinition {
    *
    * @return the absolute file system path of the external cmake executable or <code>null</code> if none is specified
    */
+  @Nullable
   public String getExternalCmakeFile() {
     return externalCmakeFile;
   }
@@ -151,7 +154,7 @@ public class BuildToolKitDefinition {
    * @param the absolute file system path of the external cmake executable or <code>null</code>. Must not be
    *            <code>null</code> if {@link #isExternalCmake()} return true
    */
-  public void setExternalCmakeFile(String externalCmakePath) {
+  public void setExternalCmakeFile(@Nullable String externalCmakePath) {
     this.externalCmakeFile = externalCmakePath;
   }
 
