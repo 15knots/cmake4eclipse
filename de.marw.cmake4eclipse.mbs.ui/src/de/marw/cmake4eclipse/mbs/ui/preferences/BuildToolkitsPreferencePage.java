@@ -72,7 +72,7 @@ public class BuildToolkitsPreferencePage extends PreferencePage implements IWork
   protected Control createContents(Composite parent) {
     Control control = createEditor(parent);
     initFromPrefstore();
-    PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, Activator.PLUGIN_ID+ "wb_toolkits_context");
+    PlatformUI.getWorkbench().getHelpSystem().setHelp(control, Activator.PLUGIN_ID + ".wb_toolkits_context");
     return control;
   }
 
@@ -243,12 +243,14 @@ public class BuildToolkitsPreferencePage extends PreferencePage implements IWork
       @SuppressWarnings("unchecked")
       List<BuildToolKitDefinition> tcs = (List<BuildToolKitDefinition>) tableViewer.getInput();
       BuildToolKitDefinition tc = (BuildToolKitDefinition) selection.getFirstElement();
-      BuildToolKitDefinition tc2 = new BuildToolKitDefinition(tc);
-      tc2.setName(generateName(tc.getName(), tcs));
-      AbstractBuildToolkitDialog dlg = new EditBuildToolkitDialog(tableViewer.getTable().getShell(), tc2);
-      if (dlg.open() == Dialog.OK) {
-        tcs.add(tc2);
-        tableViewer.add(tc2); // updates the display
+      if (tc != null) {
+        BuildToolKitDefinition tc2 = new BuildToolKitDefinition(tc);
+        tc2.setName(generateName(tc.getName(), tcs));
+        AbstractBuildToolkitDialog dlg = new EditBuildToolkitDialog(tableViewer.getTable().getShell(), tc2);
+        if (dlg.open() == Dialog.OK) {
+          tcs.add(tc2);
+          tableViewer.add(tc2); // updates the display
+        }
       }
     }
   }

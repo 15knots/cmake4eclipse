@@ -55,6 +55,7 @@ public class CMakeSymbolsTab extends QuirklessAbstractCPropertyTab {
 
   @Override
   protected void createControls(Composite parent) {
+    super.setHelpContextId(Activator.PLUGIN_ID + ".cmake_symbols_context");
     super.createControls(parent);
     usercomp.setLayout(new GridLayout(1, false));
     // cmake defines table...
@@ -62,7 +63,6 @@ public class CMakeSymbolsTab extends QuirklessAbstractCPropertyTab {
     definesViewer = new DefinesViewer(usercomp, resDesc == null ? null : resDesc.getConfiguration());
     // cmake undefines table...
     undefinesViewer = new UnDefinesViewer(usercomp);
-    PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, "cmake_symbols_context");
   }
 
   @Override

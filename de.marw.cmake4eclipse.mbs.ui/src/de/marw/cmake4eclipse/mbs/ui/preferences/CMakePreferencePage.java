@@ -174,7 +174,7 @@ public class CMakePreferencePage extends PreferencePage implements IWorkbenchPre
     createGeneralTab(tabFolder);
     createCacheVariablesTab(tabFolder);
     initFromPrefstore();
-    PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, Activator.PLUGIN_ID+ "wb_general_tab_context");
+    PlatformUI.getWorkbench().getHelpSystem().setHelp(parent, Activator.PLUGIN_ID + ".wb_general_tab_context");
     return tabFolder;
   }
 

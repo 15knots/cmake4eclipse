@@ -5,7 +5,7 @@
       <topic href="doc/html/ref/cmake_symbols.html" label="CMake cache entries"/>
    </context>
    <context id="wb_general_tab_context">
-      <description>This page is used to set preferences for how and when cmake is run.".</description>
+      <description>This page is used to set preferences for how and when cmake is run.</description>
       <topic href="doc/html/ref/wb_general_tab.html" label="Preferences - General cmake commandline options"/>
    </context>
    <context id="wb_cache_entries_context">
