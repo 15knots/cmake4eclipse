@@ -12,5 +12,4 @@
  *
  * @author Martin Weber
  */
-@org.eclipse.jdt.annotation.NonNullByDefault
 package de.marw.cmake4eclipse.mbs.ui;
