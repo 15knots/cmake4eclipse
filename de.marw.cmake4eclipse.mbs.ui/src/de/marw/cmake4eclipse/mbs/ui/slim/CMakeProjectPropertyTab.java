@@ -41,7 +41,7 @@ import org.eclipse.ui.dialogs.NewFolderDialog;
 
 import de.marw.cmake4eclipse.mbs.internal.storage.BuildTargetSerializer;
 import de.marw.cmake4eclipse.mbs.internal.storage.Util;
-import de.marw.cmake4eclipse.mbs.settings.CMakePreferences;
+import de.marw.cmake4eclipse.mbs.settings.CMakeSettings;
 import de.marw.cmake4eclipse.mbs.ui.Activator;
 import de.marw.cmake4eclipse.mbs.ui.QuirklessAbstractCPropertyTab;
 import de.marw.cmake4eclipse.mbs.ui.WidgetHelper;
@@ -141,12 +141,12 @@ public class CMakeProjectPropertyTab extends QuirklessAbstractCPropertyTab {
       return;
     try {
       ICStorageElement storage = resd.getConfiguration().getProjectDescription()
-          .getStorage(CMakePreferences.CFG_STORAGE_ID, true);
-      String folder = Objects.requireNonNullElseGet(storage.getAttribute(CMakePreferences.ATTR_CMAKELISTS_FLDR),
+          .getStorage(CMakeSettings.CFG_STORAGE_ID, true);
+      String folder = Objects.requireNonNullElseGet(storage.getAttribute(CMakeSettings.ATTR_CMAKELISTS_FLDR),
           String::new);
       t_cmakelistsFolder.setText(folder);
 
-      ICStorageElement[] storeTargets = storage.getChildrenByName(CMakePreferences.ELEM_BUILD_TARGETS);
+      ICStorageElement[] storeTargets = storage.getChildrenByName(CMakeSettings.ELEM_BUILD_TARGETS);
       List<String> targets = new ArrayList<>();
       if (storeTargets != null && storeTargets.length > 0) {
         Util.deserializeCollection(targets, new BuildTargetSerializer(), storeTargets[0]);
@@ -191,13 +191,13 @@ public class CMakeProjectPropertyTab extends QuirklessAbstractCPropertyTab {
     try {
       ICProjectDescription prjDes = resDesc.getConfiguration().getProjectDescription();
       ICStorageElement storage = prjDes
-          .getStorage(CMakePreferences.CFG_STORAGE_ID, true);
-      storage.setAttribute(CMakePreferences.ATTR_CMAKELISTS_FLDR, t_cmakelistsFolder.getText());
+          .getStorage(CMakeSettings.CFG_STORAGE_ID, true);
+      storage.setAttribute(CMakeSettings.ATTR_CMAKELISTS_FLDR, t_cmakelistsFolder.getText());
 
       String[] targetsTxt = t_targets.getText().trim().split(" +");
       Arrays.sort(targetsTxt);
       List<String> targets = Arrays.asList(targetsTxt);
-      Util.serializeCollection(CMakePreferences.ELEM_BUILD_TARGETS, storage, new BuildTargetSerializer(),
+      Util.serializeCollection(CMakeSettings.ELEM_BUILD_TARGETS, storage, new BuildTargetSerializer(),
           targets);
       // update the project explorer view
       BuildTargetsManager.getDefault().notifyListeners(new BuildTargetEvent(prjDes.getProject(), targets));

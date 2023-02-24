@@ -26,7 +26,7 @@ import de.marw.cmake4eclipse.mbs.internal.storage.Util;
  * @deprecated kept only to not break persistence of eclipse projects created with versions of this plugin prior to 3.0
  */
 @Deprecated
-public abstract class AbstractOsPreferences {
+public abstract class AbstractOsSettings {
   private static final String ATTR_COMMAND = "command";
   private static final String ATTR_USE_DEFAULT_COMMAND = "use-default";
   private static final String ATTR_GENERATOR = "generator";
@@ -41,7 +41,7 @@ public abstract class AbstractOsPreferences {
   /**
    * Creates a new object, initialized with all default values.
    */
-  public AbstractOsPreferences() {
+  public AbstractOsSettings() {
     reset();
     // after startup: assume the makefiles have been generated with the saved generator
     generatedWith = generator;
@@ -72,8 +72,8 @@ public abstract class AbstractOsPreferences {
    *
    * @return the platform specific or fall-back preferences
    */
-  public static AbstractOsPreferences extractOsPreferences(
-      CMakePreferences prefs) {
+  public static AbstractOsSettings extractOsPreferences(
+      CMakeSettings prefs) {
     final String os = Platform.getOS();
     if (Platform.OS_WIN32.equals(os)) {
       return prefs.getWindowsPreferences();
@@ -209,10 +209,10 @@ public abstract class AbstractOsPreferences {
 
     ICStorageElement[] children = parent.getChildren();
     for (ICStorageElement child : children) {
-      if (CMakePreferences.ELEM_DEFINES.equals(child.getName())) {
+      if (CMakeSettings.ELEM_DEFINES.equals(child.getName())) {
         // defines...
         Util.deserializeCollection(defines, new CMakeDefineSerializer(), child);
-      } else if (CMakePreferences.ELEM_UNDEFINES.equals(child.getName())) {
+      } else if (CMakeSettings.ELEM_UNDEFINES.equals(child.getName())) {
         // undefines...
         Util.deserializeCollection(undefines, new CMakeUndefineSerializer(),
             child);
@@ -246,10 +246,10 @@ public abstract class AbstractOsPreferences {
     // generator
     parent.setAttribute(ATTR_GENERATOR, generator.name());
     // defines...
-    Util.serializeCollection(CMakePreferences.ELEM_DEFINES, parent,
+    Util.serializeCollection(CMakeSettings.ELEM_DEFINES, parent,
         new CMakeDefineSerializer(), defines);
     // undefines...
-    Util.serializeCollection(CMakePreferences.ELEM_UNDEFINES, parent,
+    Util.serializeCollection(CMakeSettings.ELEM_UNDEFINES, parent,
         new CMakeUndefineSerializer(), undefines);
   }
 

@@ -27,7 +27,7 @@ import de.marw.cmake4eclipse.mbs.internal.storage.Util;
  *
  * @author Martin Weber
  */
-public class CMakePreferences {
+public class CMakeSettings {
 
   /**
    * storage ID used to store settings or preferences with a
@@ -69,16 +69,16 @@ public class CMakePreferences {
   private String buildDirectory;
   private String cacheFile;
 
-  private LinuxPreferences linuxPreferences = new LinuxPreferences();
+  private LinuxSettings linuxSettings = new LinuxSettings();
 
-  private WindowsPreferences windowsPreferences = new WindowsPreferences();
+  private WindowsSettings windowsSettings = new WindowsSettings();
   private boolean clearCache;
   private long dirty_ts;
 
   /**
    * Creates a new object, initialized with all default values.
    */
-  public CMakePreferences() {
+  public CMakeSettings() {
     reset();
   }
 
@@ -103,8 +103,8 @@ public class CMakePreferences {
     undefines.clear();
     cacheFile= null;
 
-//    linuxPreferences.reset();
-//    windowsPreferences.reset();
+//    linuxSettings.reset();
+//    windowsSettings.reset();
   }
 
   /**
@@ -116,7 +116,7 @@ public class CMakePreferences {
   void load(ICConfigurationDescription cfgd) throws CoreException {
     if (cfgd == null)
       return;
-    ICStorageElement storage = cfgd.getStorage(CMakePreferences.CFG_STORAGE_ID, true);
+    ICStorageElement storage = cfgd.getStorage(CMakeSettings.CFG_STORAGE_ID, true);
     buildDirectory= storage.getAttribute(ATTR_BUILD_DIR);
     dirty_ts= Long.parseLong( Objects.requireNonNullElse( storage.getAttribute(ATTR_DIRTY_TS), "0"));
 
@@ -143,8 +143,8 @@ public class CMakePreferences {
             child);
       }
     }
-    linuxPreferences.loadFromStorage(storage);
-    windowsPreferences.loadFromStorage(storage);
+    linuxSettings.loadFromStorage(storage);
+    windowsSettings.loadFromStorage(storage);
   }
 
   /**
@@ -381,12 +381,12 @@ public class CMakePreferences {
     }
   }
 
-  public LinuxPreferences getLinuxPreferences() {
-    return linuxPreferences;
+  public LinuxSettings getLinuxPreferences() {
+    return linuxSettings;
   }
 
-  public WindowsPreferences getWindowsPreferences() {
-    return windowsPreferences;
+  public WindowsSettings getWindowsPreferences() {
+    return windowsSettings;
   }
 
   /**

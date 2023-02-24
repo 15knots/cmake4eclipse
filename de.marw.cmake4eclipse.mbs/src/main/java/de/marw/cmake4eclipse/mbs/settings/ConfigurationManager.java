@@ -15,7 +15,7 @@ import org.eclipse.core.runtime.CoreException;
 
 /**
  * Associates {@link ICConfigurationDescription} objects with our
- * CMakePreferences objects in order to avoid redundant de-serialization from
+ * CMakeSettings objects in order to avoid redundant de-serialization from
  * storage.
  *
  * @author Martin Weber
@@ -23,8 +23,8 @@ import org.eclipse.core.runtime.CoreException;
 public final class ConfigurationManager {
   private static ConfigurationManager instance;
 
-  /** caches CMakePreferences by ICConfigurationDescription.ID */
-  private WeakHashMap<String, CMakePreferences> map = new WeakHashMap<>(
+  /** caches CMakeSettings by ICConfigurationDescription.ID */
+  private WeakHashMap<String, CMakeSettings> map = new WeakHashMap<>(
       2);
 
   /**
@@ -43,52 +43,52 @@ public final class ConfigurationManager {
   }
 
   /**
-   * Gets the {@code CMakePreferences} object associated with the specified
+   * Gets the {@code CMakeSettings} object associated with the specified
    * {@code ICConfigurationDescription}.
    *
-   * @return the stored {@code CMakePreferences} object, or {@code null} if this
+   * @return the stored {@code CMakeSettings} object, or {@code null} if this
    *         object contains no mapping for the configuration description
    */
-  public CMakePreferences get(ICConfigurationDescription cfgd) {
+  public CMakeSettings get(ICConfigurationDescription cfgd) {
     return map.get(cfgd.getId());
   }
 
   /**
-   * Tries to get the {@code CMakePreferences} object associated with the
+   * Tries to get the {@code CMakeSettings} object associated with the
    * specified {@code ICConfigurationDescription}. If no
-   * {@code CMakePreferences} object is found, a new one is created.
+   * {@code CMakeSettings} object is found, a new one is created.
    *
-   * @return the stored {@code CMakePreferences} object, or a newly created one
+   * @return the stored {@code CMakeSettings} object, or a newly created one
    *         if this object contains no mapping for the configuration
    *         description.
    */
-  public CMakePreferences getOrCreate(ICConfigurationDescription cfgd) {
-    CMakePreferences pref = get(cfgd);
+  public CMakeSettings getOrCreate(ICConfigurationDescription cfgd) {
+    CMakeSettings pref = get(cfgd);
     if (pref == null) {
-      pref = new CMakePreferences();
+      pref = new CMakeSettings();
       map.put(cfgd.getId(), pref);
     }
     return pref;
   }
 
   /**
-   * Tries to get the {@code CMakePreferences} object associated with the
+   * Tries to get the {@code CMakeSettings} object associated with the
    * specified {@code ICConfigurationDescription}. If no
-   * {@code CMakePreferences} object is found, a new one is created, then loaded
-   * from its storage via {@link CMakePreferences#loadFromStorage}.
+   * {@code CMakeSettings} object is found, a new one is created, then loaded
+   * from its storage via {@link CMakeSettings#loadFromStorage}.
    *
-   * @return the stored {@code CMakePreferences} object, or a freshly loaded one
+   * @return the stored {@code CMakeSettings} object, or a freshly loaded one
    *         if this object contains no mapping for the configuration
    *         description.
    * @throws CoreException
    *         if {@link ICConfigurationDescription#getStorage} throws a
    *         CoreException.
    */
-  public CMakePreferences getOrLoad(ICConfigurationDescription cfgd)
+  public CMakeSettings getOrLoad(ICConfigurationDescription cfgd)
       throws CoreException {
-    CMakePreferences pref = map.get(cfgd.getId());
+    CMakeSettings pref = map.get(cfgd.getId());
     if (pref == null) {
-      pref = new CMakePreferences();
+      pref = new CMakeSettings();
       pref.load(cfgd);
       map.put(cfgd.getId(), pref);
     }

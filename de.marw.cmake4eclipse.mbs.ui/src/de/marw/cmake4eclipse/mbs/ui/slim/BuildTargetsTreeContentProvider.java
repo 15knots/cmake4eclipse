@@ -25,7 +25,7 @@ import org.eclipse.jface.viewers.Viewer;
 
 import de.marw.cmake4eclipse.mbs.internal.storage.BuildTargetSerializer;
 import de.marw.cmake4eclipse.mbs.internal.storage.Util;
-import de.marw.cmake4eclipse.mbs.settings.CMakePreferences;
+import de.marw.cmake4eclipse.mbs.settings.CMakeSettings;
 
 /**
  * Contributes the build target nodes to the project explorer.
@@ -97,8 +97,8 @@ public class BuildTargetsTreeContentProvider implements ITreeContentProvider, IB
         // get targets from .cproject
         ICProjectDescription projectDescription = CoreModel.getDefault().getProjectDescription(project, false);
         try {
-          ICStorageElement storage = projectDescription.getStorage(CMakePreferences.CFG_STORAGE_ID, false);
-          ICStorageElement[] storeTargets = storage.getChildrenByName(CMakePreferences.ELEM_BUILD_TARGETS);
+          ICStorageElement storage = projectDescription.getStorage(CMakeSettings.CFG_STORAGE_ID, false);
+          ICStorageElement[] storeTargets = storage.getChildrenByName(CMakeSettings.ELEM_BUILD_TARGETS);
           targets = new ArrayList<>();
           if (storeTargets != null && storeTargets.length > 0) {
             Util.deserializeCollection(targets, new BuildTargetSerializer(), storeTargets[0]);

@@ -34,7 +34,7 @@ import org.eclipse.ui.dialogs.FilteredItemsSelectionDialog;
 import org.eclipse.ui.dialogs.FilteredResourcesSelectionDialog;
 import org.eclipse.ui.dialogs.NewFolderDialog;
 
-import de.marw.cmake4eclipse.mbs.settings.CMakePreferences;
+import de.marw.cmake4eclipse.mbs.settings.CMakeSettings;
 import de.marw.cmake4eclipse.mbs.settings.ConfigurationManager;
 
 /**
@@ -63,7 +63,7 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
    * in {@link #updateData}. {@code null} if this tab has never been displayed so a user could
    * have made edits.
    */
-  private CMakePreferences[] prefs;
+  private CMakeSettings[] prefs;
 
   @Override
   protected void createControls(final Composite parent) {
@@ -267,7 +267,7 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
     if (prefs.length > 1) {
       // we are editing multiple configurations...
       for (int i = 0; i < prefs.length; i++) {
-        CMakePreferences pref = prefs[i];
+        CMakeSettings pref = prefs[i];
 
         if (t_cacheFile.getEditable()) {
           final String cacheFileName = t_cacheFile.getText();
@@ -280,7 +280,7 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
       }
     } else {
       // we are editing a single configuration...
-      CMakePreferences pref = prefs[0];
+      CMakeSettings pref = prefs[0];
       final String cacheFileName = t_cacheFile.getText().trim();
       pref.setCacheFile(cacheFileName.isEmpty() ? null : cacheFileName);
       final String dir = t_outputFolder.getText().trim();
@@ -299,13 +299,13 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
         // we are editing multiple configurations...
         ICConfigurationDescription[] cfgs = (ICConfigurationDescription[]) ((ICMultiConfigDescription) cfgd).getItems();
 
-        prefs = new CMakePreferences[cfgs.length];
+        prefs = new CMakeSettings[cfgs.length];
         for (int i = 0; i < cfgs.length; i++) {
           prefs[i] = configMgr.getOrLoad(cfgs[i]);
         }
       } else {
         // we are editing a single configuration...
-        prefs = new CMakePreferences[1];
+        prefs = new CMakeSettings[1];
         prefs[0] = configMgr.getOrLoad(cfgd);
       }
     } catch (CoreException ex) {
@@ -359,8 +359,8 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
   @SuppressWarnings("deprecation")
   private static void applyConfig(ICConfigurationDescription srcCfg, ICConfigurationDescription dstCfg) throws CoreException {
     final ConfigurationManager configMgr = ConfigurationManager.getInstance();
-      CMakePreferences srcPrefs = configMgr.getOrLoad(srcCfg);
-      CMakePreferences dstPrefs = configMgr.getOrCreate(dstCfg);
+      CMakeSettings srcPrefs = configMgr.getOrLoad(srcCfg);
+      CMakeSettings dstPrefs = configMgr.getOrCreate(dstCfg);
       if (srcPrefs != dstPrefs) {
         dstPrefs.setClearCache(srcPrefs.isClearCache());
         dstPrefs.setDebugTryCompile(srcPrefs.isDebugTryCompile());
@@ -396,12 +396,12 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
         ICConfigurationDescription[] cfgs = (ICConfigurationDescription[]) ((ICMultiConfigDescription) cfgd).getItems();
 
         for (int i = 0; i < prefs.length; i++) {
-          ICStorageElement storage = cfgs[i].getStorage(CMakePreferences.CFG_STORAGE_ID, true);
+          ICStorageElement storage = cfgs[i].getStorage(CMakeSettings.CFG_STORAGE_ID, true);
           prefs[i].saveToStorage(storage);
         }
       } else {
         // we are editing a single configuration...
-        ICStorageElement storage = cfgd.getStorage(CMakePreferences.CFG_STORAGE_ID, true);
+        ICStorageElement storage = cfgd.getStorage(CMakeSettings.CFG_STORAGE_ID, true);
         prefs[0].saveToStorage(storage);
       }
     } catch (CoreException ex) {
@@ -416,7 +416,7 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
   protected void performDefaults() {
     if (prefs == null)
       return;
-    for (CMakePreferences pref : prefs) {
+    for (CMakeSettings pref : prefs) {
       pref.reset();
     }
     updateDisplay();

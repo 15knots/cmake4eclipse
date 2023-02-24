@@ -18,7 +18,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import de.marw.cmake4eclipse.mbs.settings.CMakePreferences;
+import de.marw.cmake4eclipse.mbs.settings.CMakeSettings;
 import de.marw.cmake4eclipse.mbs.settings.ConfigurationManager;
 
 /**
@@ -33,7 +33,7 @@ public class CMakeSymbolsTab extends QuirklessAbstractCPropertyTab {
    * the preferences associated with our configurations to manage. Initialized in {@link #updateData}. {@code null} if
    * this tab has never been displayed so a user could have made edits.
    */
-  private CMakePreferences prefs;
+  private CMakeSettings prefs;
 
   /** the table showing the cmake defines */
   private DefinesViewer definesViewer;
@@ -104,8 +104,8 @@ public class CMakeSymbolsTab extends QuirklessAbstractCPropertyTab {
     if(!(srcCfg instanceof ICMultiConfigDescription)) {
       try {
         final ConfigurationManager configMgr = ConfigurationManager.getInstance();
-        CMakePreferences srcPrefs = configMgr.getOrLoad(srcCfg);
-        CMakePreferences dstPrefs = configMgr.getOrCreate(dstCfg);
+        CMakeSettings srcPrefs = configMgr.getOrLoad(srcCfg);
+        CMakeSettings dstPrefs = configMgr.getOrCreate(dstCfg);
         if (srcPrefs != dstPrefs) {
           dstPrefs.setDefines(srcPrefs.getDefines());
           dstPrefs.setUndefines(srcPrefs.getUndefines());
@@ -137,7 +137,7 @@ public class CMakeSymbolsTab extends QuirklessAbstractCPropertyTab {
     final ICConfigurationDescription cfgd = resDesc.getConfiguration();
     try {
       // save as project settings..
-      ICStorageElement storage = cfgd.getStorage(CMakePreferences.CFG_STORAGE_ID, true);
+      ICStorageElement storage = cfgd.getStorage(CMakeSettings.CFG_STORAGE_ID, true);
       prefs.saveToStorage(storage);
     } catch (CoreException ex) {
       log.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, null, ex));

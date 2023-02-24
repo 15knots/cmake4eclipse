@@ -8,24 +8,25 @@
  *******************************************************************************/
 package de.marw.cmake4eclipse.mbs.settings;
 
+
 /**
  * Preferences that override/augment the generic properties when running under
- * Windows.
+ * Linux.
  *
  * @author Martin Weber
  */
-public class WindowsPreferences extends AbstractOsPreferences {
+public class LinuxSettings extends AbstractOsSettings {
 
-  /** Overridden to set a sensible generator. */
-  public void reset() {
-    super.reset();
-    setGenerator(CmakeGenerator.MinGWMakefiles);
+  /**
+   * Creates a new object, initialized with all default values.
+   */
+  public LinuxSettings() {
   }
 
   /**
-   * @return the String "win32".
+   * @return the String "linux".
    */
   protected String getStorageElementName() {
-    return "win32";
+    return "linux";
   }
 }

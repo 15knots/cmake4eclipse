@@ -67,7 +67,7 @@ import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
 import de.marw.cmake4eclipse.mbs.internal.storage.BuildTargetSerializer;
 import de.marw.cmake4eclipse.mbs.internal.storage.Util;
 import de.marw.cmake4eclipse.mbs.nature.C4ENature;
-import de.marw.cmake4eclipse.mbs.settings.CMakePreferences;
+import de.marw.cmake4eclipse.mbs.settings.CMakeSettings;
 import de.marw.cmake4eclipse.mbs.ui.Activator;
 
 /**
@@ -228,21 +228,21 @@ public class NewProjectTemplateWizard extends TemplateWizard implements IGenerat
     ICProjectDescriptionManager mngr = CoreModel.getDefault().getProjectDescriptionManager();
     ICProjectDescription projectDescr = mngr.createProjectDescription(project, false, !onFinish);
     subMonitor.worked(1);
-    ICStorageElement storage = projectDescr.getStorage(CMakePreferences.CFG_STORAGE_ID, true);
+    ICStorageElement storage = projectDescr.getStorage(CMakeSettings.CFG_STORAGE_ID, true);
 
-    String cmakelists = storage.getAttribute(CMakePreferences.ATTR_CMAKELISTS_FLDR);
+    String cmakelists = storage.getAttribute(CMakeSettings.ATTR_CMAKELISTS_FLDR);
     ICSourceEntry[] sourceEntries = null;
     if (cmakelists == null) {
       // scan for top-level CMakeLists.txt file..
       cmakelists = scanForCmakelists(project.getLocation().toFile()).toString();
-      storage.setAttribute(CMakePreferences.ATTR_CMAKELISTS_FLDR, cmakelists);
+      storage.setAttribute(CMakeSettings.ATTR_CMAKELISTS_FLDR, cmakelists);
       if (!cmakelists.isEmpty()) {
         sourceEntries = new ICSourceEntry[] { new CSourceEntry(cmakelists, null, 0) };
       }
     }
     // add well known build targets (sorted)...
     List<String> targets = Arrays.asList("all", "clean", "help", "test");
-    Util.serializeCollection(CMakePreferences.ELEM_BUILD_TARGETS, storage, new BuildTargetSerializer(), targets);
+    Util.serializeCollection(CMakeSettings.ELEM_BUILD_TARGETS, storage, new BuildTargetSerializer(), targets);
 
     IProjectType pt = ManagedBuildManager
         .getExtensionProjectType(de.marw.cmake4eclipse.mbs.internal.Activator.CMAKE4ECLIPSE_PROJECT_TYPE);

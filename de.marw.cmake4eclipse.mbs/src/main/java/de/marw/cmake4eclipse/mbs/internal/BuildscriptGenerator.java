@@ -68,7 +68,7 @@ import com.google.gson.JsonSyntaxException;
 import de.marw.cmake4eclipse.mbs.console.CdtConsoleConstants;
 import de.marw.cmake4eclipse.mbs.preferences.BuildToolKitDefinition;
 import de.marw.cmake4eclipse.mbs.preferences.PreferenceAccess;
-import de.marw.cmake4eclipse.mbs.settings.CMakePreferences;
+import de.marw.cmake4eclipse.mbs.settings.CMakeSettings;
 import de.marw.cmake4eclipse.mbs.settings.CmakeDefine;
 import de.marw.cmake4eclipse.mbs.settings.CmakeGenerator;
 import de.marw.cmake4eclipse.mbs.settings.CmakeUnDefine;
@@ -133,7 +133,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       String buildDirStr = null;
       final ICConfigurationDescription cfgd = ManagedBuildManager.getDescriptionForConfiguration(config);
       try {
-        CMakePreferences prefs = ConfigurationManager.getInstance().getOrLoad(cfgd);
+        CMakeSettings prefs = ConfigurationManager.getInstance().getOrLoad(cfgd);
         buildDirStr = prefs.getBuildDirectory();
       } catch (CoreException e) {
         // storage base is null; treat as bug in CDT..
@@ -202,10 +202,10 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     final ICConfigurationDescription cfgDes = ManagedBuildManager.getDescriptionForConfiguration(config);
 
     IPath cmakelistsPath;
-    ICStorageElement storage = cfgDes.getProjectDescription().getStorage(CMakePreferences.CFG_STORAGE_ID, false);
+    ICStorageElement storage = cfgDes.getProjectDescription().getStorage(CMakeSettings.CFG_STORAGE_ID, false);
     if (storage != null) {
       // Cmake4eclipse nature holds a path to the top-level cmakelists.txt file
-      String cmakelists = storage.getAttribute(CMakePreferences.ATTR_CMAKELISTS_FLDR);
+      String cmakelists = storage.getAttribute(CMakeSettings.ATTR_CMAKELISTS_FLDR);
       cmakelistsPath = new Path(cmakelists);
     } else {
       // classic cmake4eclipse with MBS build system...
@@ -539,7 +539,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     }
     /* project settings... */
     {
-      final CMakePreferences prefs = ConfigurationManager.getInstance().getOrLoad(cfgd);
+      final CMakeSettings prefs = ConfigurationManager.getInstance().getOrLoad(cfgd);
       if (prefs.getCacheFile() != null) {
         args.add("-C");
         args.add(prefs.getCacheFile());
