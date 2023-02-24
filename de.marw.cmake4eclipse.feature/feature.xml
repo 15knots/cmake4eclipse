@@ -2,7 +2,7 @@
 <feature
       id="de.marw.cmake4eclipse.feature"
       label="cmake4eclipse"
-      version="4.0.0"
+      version="4.0.1"
       provider-name="Martin Weber">
 
    <description>
