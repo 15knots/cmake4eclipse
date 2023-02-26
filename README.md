@@ -23,19 +23,6 @@ Its <a id="pc">*Primary claim*</a> is: Co-workers should be able to just **check
  1. If you have an existing C/C++ project code, inside Eclipse, goto `Help:Help Contents`, then read the `Cmake4eclipse User Guide:Tasks` nodes.
 
 ---
-## Planned changes for next major release (4)
-1. Removal of the deprecated *CMAKE_EXPORT_COMPILE_COMMANDS* language setting providers. Their code has long been integrated 
-into CDT. As a replacement, users should switch to the *CMake Compilation DB* parser which is based on the code in CDT.
-1. Removal of the deprecated *CMake Builder (deprecated)*. It has been kept for compatibility with cmake4eclipse 2.x and is superseded by the *CMake Builder*.
-1. Replacement of the cmake error parser with the parser coming with CDT. This does not affect end-users but helps to 
-reduce maintenance effort.
-1. New *cmake4eclipse* project creation wizard. Projects created through that wizard are still based on the managed build system (MBS)
-but do not show all the project property pages inherited from MBS that confuse end-users. Many of those MBS properties 
-have no meaning when build-scripts are created by cmake (e.g. *build artifact extension*). 
-This will require CDT version 11.0.
-1. Require CDT 11.0 as a prerequisite.
-
----
 ## License
 The plugin is licensed under the <a href="https://www.eclipse.org/legal/epl-2.0/">Eclipse Public License Version 2.0 ("EPL-2.0")</a>.
 
