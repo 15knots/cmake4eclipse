@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013-2019 Martin Weber.
+ * Copyright (c) 2013-2023 Martin Weber.
  *
  * Content is provided to you under the terms and conditions of the Eclipse Public License Version 2.0 "EPL".
  * A copy of the EPL is available at http://www.eclipse.org/legal/epl-2.0.
@@ -33,8 +33,7 @@ public class CMakeSettings {
    * storage ID used to store settings or preferences with a
    * ICConfigurationDescription
    */
-  public static final String CFG_STORAGE_ID = Activator.PLUGIN_ID
-      + ".settings";
+  public static final String CFG_STORAGE_ID = Activator.PLUGIN_ID + ".settings";
   /**
    * Attribute to store the folder of the top-level CMakeLists.txt file, used on the project level
    */
@@ -58,6 +57,7 @@ public class CMakeSettings {
   private static final String ELEM_OPTIONS = "options";
   private static final String ATTR_CACHE_FILE = "cacheEntriesFile";
   private static final String ATTR_BUILD_DIR = "buildDir";
+  private static final String ATTR_OTHER_ARGUMENTS = "otherArguments";
   /** the 'dirty' time stamp (in milliseconds) */
   private static final String ATTR_DIRTY_TS = "dirtyTs";
 
@@ -68,6 +68,7 @@ public class CMakeSettings {
   private List<CmakeUnDefine> undefines = new ArrayList<>(0);
   private String buildDirectory;
   private String cacheFile;
+  private String otherArguments;
 
   private LinuxSettings linuxSettings = new LinuxSettings();
 
@@ -92,7 +93,7 @@ public class CMakeSettings {
    * Sets each value to its default.
    */
   public void reset() {
-    dirty_ts= System.currentTimeMillis();
+    dirty_ts = System.currentTimeMillis();
     warnNoDev = false;
     debugTryCompile = false;
     debugOutput = false;
@@ -101,7 +102,9 @@ public class CMakeSettings {
     warnUnused = false;
     defines.clear();
     undefines.clear();
-    cacheFile= null;
+    buildDirectory = "_build/${ConfigName}";
+    cacheFile = null;
+    otherArguments = null;
 
 //    linuxSettings.reset();
 //    windowsSettings.reset();
@@ -110,8 +113,7 @@ public class CMakeSettings {
   /**
    * Initializes this object for the specified configuration.
    *
-   * @param cfgd the configuration to load the preferences for. If {@code null}, nothing is loaded and <code>null</code>
-   *             is returned.
+   * @param cfgd the configuration to load the preferences for. If {@code null}, nothing is loaded.
    */
   void load(ICConfigurationDescription cfgd) throws CoreException {
     if (cfgd == null)
@@ -123,17 +125,17 @@ public class CMakeSettings {
     final ICStorageElement[] children = storage.getChildren();
     for (ICStorageElement child : children) {
       if (ELEM_OPTIONS.equals(child.getName())) {
-        clearCache= Boolean.parseBoolean(child.getAttribute(ATTR_CLEAR_CACHE));
         // options...
+        cacheFile = child.getAttribute(ATTR_CACHE_FILE);
+        otherArguments = child.getAttribute(ATTR_OTHER_ARGUMENTS);
+
+        clearCache= Boolean.parseBoolean(child.getAttribute(ATTR_CLEAR_CACHE));
         warnNoDev = Boolean.parseBoolean(child.getAttribute(ATTR_WARN_NO_DEV));
-        debugTryCompile = Boolean.parseBoolean(child
-            .getAttribute(ATTR_DEBUG_TRYCOMPILE));
+        debugTryCompile = Boolean.parseBoolean(child.getAttribute(ATTR_DEBUG_TRYCOMPILE));
         debugOutput = Boolean.parseBoolean(child.getAttribute(ATTR_DEBUG));
         trace = Boolean.parseBoolean(child.getAttribute(ATTR_TRACE));
-        warnUnitialized = Boolean.parseBoolean(child
-            .getAttribute(ATTR_WARN_UNITIALIZED));
+        warnUnitialized = Boolean.parseBoolean(child.getAttribute(ATTR_WARN_UNITIALIZED));
         warnUnused = Boolean.parseBoolean(child.getAttribute(ATTR_WARN_UNUSED));
-        cacheFile = child.getAttribute(ATTR_CACHE_FILE);
       } else if (ELEM_DEFINES.equals(child.getName())) {
         // defines...
         Util.deserializeCollection(defines, new CMakeDefineSerializer(), child);
@@ -151,6 +153,9 @@ public class CMakeSettings {
    * Persists this configuration to the project file.
    */
   public void saveToStorage(ICStorageElement parent) {
+    setOrRemoveAttribute(parent, ATTR_BUILD_DIR, buildDirectory);
+    parent.setAttribute(ATTR_DIRTY_TS, String.valueOf(dirty_ts));
+
     ICStorageElement pOpts;
     ICStorageElement[] options = parent.getChildrenByName(ELEM_OPTIONS);
     if (options.length > 0) {
@@ -159,62 +164,58 @@ public class CMakeSettings {
       pOpts = parent.createChild(ELEM_OPTIONS);
     }
 
+    setOrRemoveAttribute(pOpts, ATTR_CACHE_FILE, cacheFile);
+    setOrRemoveAttribute(pOpts, ATTR_OTHER_ARGUMENTS, otherArguments);
+
     // continue to load/save deprecated properties to allow users to migrate back to older versions of cmake4eclipse
-    if (clearCache) {
-      pOpts.setAttribute(ATTR_CLEAR_CACHE, String.valueOf(clearCache));
-    } else {
-      pOpts.removeAttribute(ATTR_CLEAR_CACHE);
-    }
-    if (warnNoDev) {
-      pOpts.setAttribute(ATTR_WARN_NO_DEV, String.valueOf(warnNoDev));
-    } else {
-      pOpts.removeAttribute(ATTR_WARN_NO_DEV);
-    }
-    if (debugTryCompile) {
-      pOpts
-          .setAttribute(ATTR_DEBUG_TRYCOMPILE, String.valueOf(debugTryCompile));
-    } else {
-      pOpts.removeAttribute(ATTR_DEBUG_TRYCOMPILE);
-    }
-    if (debugOutput) {
-      pOpts.setAttribute(ATTR_DEBUG, String.valueOf(debugOutput));
-    } else {
-      pOpts.removeAttribute(ATTR_DEBUG);
-    }
-    if (trace) {
-      pOpts.setAttribute(ATTR_TRACE, String.valueOf(trace));
-    } else {
-      pOpts.removeAttribute(ATTR_TRACE);
-    }
-    if (warnUnitialized) {
-      pOpts
-          .setAttribute(ATTR_WARN_UNITIALIZED, String.valueOf(warnUnitialized));
-    } else {
-      pOpts.removeAttribute(ATTR_WARN_UNITIALIZED);
-    }
-    if (warnUnused) {
-      pOpts.setAttribute(ATTR_WARN_UNUSED, String.valueOf(warnUnused));
-    } else {
-      pOpts.removeAttribute(ATTR_WARN_UNUSED);
-    }
-    if (cacheFile != null) {
-      pOpts.setAttribute(ATTR_CACHE_FILE, cacheFile);
-    } else {
-      pOpts.removeAttribute(ATTR_CACHE_FILE);
-    }
-    if (buildDirectory!= null) {
-      parent.setAttribute(ATTR_BUILD_DIR, buildDirectory);
-    } else {
-      parent.removeAttribute(ATTR_CACHE_FILE);
-    }
-    parent.setAttribute(ATTR_DIRTY_TS, String.valueOf(dirty_ts));
+    setOrRemoveAttribute(pOpts, ATTR_CLEAR_CACHE, clearCache);
+    setOrRemoveAttribute(pOpts, ATTR_WARN_NO_DEV, warnNoDev);
+    setOrRemoveAttribute(pOpts, ATTR_DEBUG_TRYCOMPILE, debugTryCompile);
+    setOrRemoveAttribute(pOpts, ATTR_DEBUG, debugOutput);
+    setOrRemoveAttribute(pOpts, ATTR_TRACE, trace);
+    setOrRemoveAttribute(pOpts, ATTR_WARN_UNITIALIZED, warnUnitialized);
+    setOrRemoveAttribute(pOpts, ATTR_WARN_UNUSED, warnUnused);
 
     // defines...
-    Util.serializeCollection(ELEM_DEFINES, parent, new CMakeDefineSerializer(),
-        defines);
+    Util.serializeCollection(ELEM_DEFINES, parent, new CMakeDefineSerializer(), defines);
     // undefines...
-    Util.serializeCollection(ELEM_UNDEFINES, parent,
-        new CMakeUndefineSerializer(), undefines);
+    Util.serializeCollection(ELEM_UNDEFINES, parent, new CMakeUndefineSerializer(), undefines);
+  }
+
+  /**
+   * Sets the specified attribute in the parent element or removes it when the value is <code>false</code>.
+   *
+   * @param parent
+   *                  the parent element for the attribute
+   * @param attribute
+   *                  the name of the attribute to set or remove
+   * @param value
+   *                  the attribute value to set
+   */
+  private void setOrRemoveAttribute(ICStorageElement parent, String attribute, boolean value) {
+    if (value) {
+      parent.setAttribute(attribute, String.valueOf(value));
+    } else {
+      parent.removeAttribute(ATTR_DEBUG);
+    }
+  }
+
+  /**
+   * Sets the specified attribute in the parent element or removes it when the value is <code>null</code>.
+   *
+   * @param parent
+   *                  the parent element for the attribute
+   * @param attribute
+   *                  the name of the attribute to set or remove
+   * @param value
+   *                  the attribute value to set
+   */
+  private void setOrRemoveAttribute(ICStorageElement parent, String attribute, String value) {
+    if (value != null) {
+      parent.setAttribute(attribute, value);
+    } else {
+      parent.removeAttribute(ATTR_DEBUG);
+    }
   }
 
   /**
@@ -435,6 +436,25 @@ public class CMakeSettings {
    */
   public void setBuildDirectory(@Nullable String buildDirectory) {
     this.buildDirectory = buildDirectory;
+  }
+
+  /**
+   * Gets the arbitrary arguments for cmake.
+   *
+   * @return the arbitrary arguments for cmake or {@code null} if none
+   */
+  @Nullable public String getOtherArguments() {
+    return otherArguments;
+  }
+
+  /**
+   * Sets the arbitrary arguments for cmake.
+   *
+   * @param arguments
+   *          the arbitrary arguments for cmake or {@code null} if none.
+   */
+  public void setOtherArguments(@Nullable String arguments) {
+    this.otherArguments = arguments;
   }
 
   /**

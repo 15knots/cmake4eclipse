@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2013-2019 Martin Weber.
+ * Copyright (c) 2013-2023 Martin Weber.
  *
  * Content is provided to you under the terms and conditions of the Eclipse Public License Version 2.0 "EPL".
  * A copy of the EPL is available at http://www.eclipse.org/legal/epl-2.0.
@@ -7,6 +7,9 @@
  * SPDX-License-Identifier: EPL-2.0
  *******************************************************************************/
 package de.marw.cmake4eclipse.mbs.ui;
+
+import java.util.Objects;
+import java.util.function.Function;
 
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
 import org.eclipse.cdt.core.settings.model.ICMultiConfigDescription;
@@ -20,6 +23,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -44,6 +48,8 @@ import de.marw.cmake4eclipse.mbs.settings.ConfigurationManager;
  * @author Martin Weber
  */
 public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
+  private static final String CONFIGURATIONS_DIFFER = " <configurations differ> ";
+
   private static final ILog log = Activator.getDefault().getLog();
 
   // Widgets
@@ -53,10 +59,12 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
   private Button b_browseCacheFile;
   /** build directory */
   private Text t_outputFolder;
+  private Text t_otherArguments;
   private Button b_browseOutputFolder;
   private Button b_createOutputFolder;
   /** variables in output folder text field */
-  private Button b_cmdVariables;
+  private Button b_cmdVariablesOutput;
+  private Button b_cmdVariablesOther;
 
   /**
    * the preferences associated with our configurations to manage. Initialized
@@ -77,7 +85,6 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
       Group gr = WidgetHelper.createGroup(usercomp, SWT.FILL, 2, "Build output location (relative to project root)", 2);
 
       setupLabel(gr, "&Folder", 1, SWT.BEGINNING);
-
       t_outputFolder = setupText(gr, 1, GridData.FILL_HORIZONTAL);
 
       // "Browse", "Create" dialog launcher buttons...
@@ -116,9 +123,9 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
         }
       });
 
-      b_cmdVariables = WidgetHelper.createButton(buttonBar, "Insert &Variable...",
+      b_cmdVariablesOutput = WidgetHelper.createButton(buttonBar, "Insert &Variable...",
           true);
-      b_cmdVariables.addSelectionListener(new SelectionAdapter() {
+      b_cmdVariablesOutput.addSelectionListener(new SelectionAdapter() {
         @Override
         public void widgetSelected(SelectionEvent e) {
           final ICResourceDescription resDesc = getResDesc();
@@ -138,7 +145,6 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
       Group gr2 = WidgetHelper.createGroup(usercomp, SWT.FILL, 2, "Pre-load a script to populate the CMake cache entries (-C)", 2);
 
       setupLabel(gr2, "Fi&le", 1, SWT.BEGINNING);
-
       t_cacheFile = setupText(gr2, 1, GridData.FILL_HORIZONTAL);
       // "Browse..." dialog launcher buttons...
       b_browseCacheFile = WidgetHelper.createButton(gr2, "B&rowse...", true);
@@ -159,9 +165,32 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
           }
         }
       });
-
     } // cmake prepopulate cache group
 
+    // other cmake options group
+    {
+      Group gr2 = WidgetHelper.createGroup(usercomp, SWT.FILL, 2, "Other CMake arguments", 1);
+
+      t_otherArguments = new Text(gr2, SWT.MULTI | SWT.WRAP | SWT.BORDER|SWT.V_SCROLL);
+      GridDataFactory.fillDefaults().grab(true, true).minSize(SWT.DEFAULT, 80).applyTo(t_otherArguments);
+      t_otherArguments.setToolTipText("Specify arbitrary cmake arguments. Arguments must be separated by spaces but may "
+          + "contain spaces if they are enclosed in double quotes (will be handled like a Unix shell does).");
+      b_cmdVariablesOther = WidgetHelper.createButton(gr2, "Insert &Variable...", true);
+      b_cmdVariablesOther.setLayoutData(new GridData(SWT.END, SWT.CENTER, false, false, 2, 1));
+      b_cmdVariablesOther.addSelectionListener(new SelectionAdapter() {
+        @Override
+        public void widgetSelected(SelectionEvent e) {
+          final ICResourceDescription resDesc = getResDesc();
+          if (resDesc == null)
+            return;
+          ICConfigurationDescription cfgd= resDesc.getConfiguration();
+        String text = AbstractCPropertyTab.getVariableDialog(t_otherArguments.getShell(), cfgd);
+          if (text != null) {
+            t_otherArguments.insert(text);
+          }
+        }
+      });
+    } // other cmake options group
   }
 
   /**
@@ -172,7 +201,7 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
    *          the text to display in the cache-file field
    */
   private void setCacheFileEditable(boolean editable, String text) {
-    text= editable ? text : " <configurations differ> ";
+    text= editable ? text : CONFIGURATIONS_DIFFER;
     t_cacheFile.setText(text == null ? "" : text);
     t_cacheFile.setEditable(editable);
     t_cacheFile.setEnabled(editable);
@@ -187,73 +216,75 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
    *          the text to display in the cache-file field
    */
   private void setBuildFolderEditable(boolean editable, String text) {
-    text= editable ? text : " <configurations differ> ";
+    text= editable ? text : CONFIGURATIONS_DIFFER;
     t_outputFolder.setText(text == null ? "" : text);
     t_outputFolder.setEditable(editable);
     t_outputFolder.setEnabled(editable);
     b_browseOutputFolder.setEnabled(editable);
     b_createOutputFolder.setEnabled(editable);
-    b_cmdVariables.setEnabled(editable);
+    b_cmdVariablesOutput.setEnabled(editable);
+  }
+
+  /**
+   * Sets the value of the 'other options' entry field and whether the user can edit
+   * that input field.
+   *
+   * @param text
+   *          the text to display in the 'other options' field
+   */
+  private void setOtherOptionsEditable(boolean editable, String text) {
+    text= editable ? text : CONFIGURATIONS_DIFFER;
+    t_otherArguments.setText(text == null ? "" : text);
+    t_otherArguments.setEditable(editable);
+    t_otherArguments.setEnabled(editable);
+    b_cmdVariablesOther.setEnabled(editable);
   }
 
   /**
    * Updates displayed values according to the preferences edited by this tab.
    */
   private void updateDisplay() {
-    boolean cacheFileEditable = true;
-    boolean buildFolderEditable = true;
+    boolean cacheFileEditable;
+    boolean buildFolderEditable;
+    boolean otherArgsEditable;
 
     if (prefs.length > 1) {
       // we are editing multiple configurations...
-      // t_cacheFile
-      /*
-       * make t_cacheFile disabled, if its settings are not the same in all
-       * configurations
-       */
-      {
-      final String cf0 = prefs[0].getCacheFile();
-      for (int i = 1; i < prefs.length; i++) {
-        String cf = prefs[i].getCacheFile();
-        if (cf0 != null) {
-          if (!cf0.equals(cf)) {
-            // configurations differ
-            cacheFileEditable = false;
-            break;
-          }
-        } else if (cf != null) {
-          // configurations differ
-          cacheFileEditable = false;
-          break;
-        }
-      }}
-      /*
-       * make t_outputFolder disabled, if its settings are not the same in all
-       * configurations
-       */
-      {
-      final String cf0 = prefs[0].getBuildDirectory();
-      for (int i = 1; i < prefs.length; i++) {
-        String cf = prefs[i].getBuildDirectory();
-        if (cf0 != null) {
-          if (!cf0.equals(cf)) {
-            // configurations differ
-            buildFolderEditable = false;
-            break;
-          }
-        } else if (cf != null) {
-          // configurations differ
-          buildFolderEditable = false;
-          break;
-        }
-      }}
+      // make t_cacheFile disabled, if its settings are not the same in all configurations
+      cacheFileEditable = !preferencesDiffer(CMakeSettings::getCacheFile);
+      // make t_outputFolder disabled, if its settings are not the same in all configurations
+      buildFolderEditable = !preferencesDiffer(CMakeSettings::getBuildDirectory);
+      // make t_otherArguments disabled, if its settings are not the same in all configurations
+      otherArgsEditable = !preferencesDiffer(CMakeSettings::getOtherArguments);
     } else {
       // we are editing a single configuration...
       // all buttons are in toggle mode
+      cacheFileEditable = true;
+      buildFolderEditable = true;
+      otherArgsEditable = true;
     }
 
     setCacheFileEditable(cacheFileEditable, prefs[0].getCacheFile());
-    String text = prefs[0].getBuildDirectory();
-    setBuildFolderEditable(buildFolderEditable, text == null ? "_build/${ConfigName}" : text);
+    setBuildFolderEditable(buildFolderEditable, prefs[0].getBuildDirectory());
+    setOtherOptionsEditable(otherArgsEditable, prefs[0].getOtherArguments());
+  }
+
+  /**
+   * Gets whether preferences differ when we are editing multiple configurations.
+   *
+   * @param getter
+   *               the function to get the preference value in question from the array of preferences
+   */
+  private <V> boolean preferencesDiffer(Function<CMakeSettings, V> getter) {
+    final V cf0 = getter.apply(prefs[0]);
+    for (int i = 1; i < prefs.length; i++) {
+      V cf = getter.apply(prefs[i]);
+      if (!Objects.equals(cf0, cf)) {
+        // configurations differ
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
@@ -270,21 +301,28 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
         CMakeSettings pref = prefs[i];
 
         if (t_cacheFile.getEditable()) {
-          final String cacheFileName = t_cacheFile.getText();
-          pref.setCacheFile(cacheFileName.trim().isEmpty() ? null : cacheFileName);
+          final String cacheFileName = t_cacheFile.getText().trim();
+          pref.setCacheFile(cacheFileName.isEmpty() ? null : cacheFileName);
         }
         if (t_outputFolder.getEditable()) {
-          final String dir = t_outputFolder.getText();
-          pref.setBuildDirectory(dir.trim().isEmpty() ? null : dir);
+          final String dir = t_outputFolder.getText().trim();
+          pref.setBuildDirectory(dir.isEmpty() ? null : dir);
+        }
+        if (t_otherArguments.getEditable()) {
+          final String args = t_otherArguments.getText().trim();
+          pref.setOtherArguments(args.isEmpty() ? null : args);
         }
       }
     } else {
       // we are editing a single configuration...
       CMakeSettings pref = prefs[0];
-      final String cacheFileName = t_cacheFile.getText().trim();
-      pref.setCacheFile(cacheFileName.isEmpty() ? null : cacheFileName);
-      final String dir = t_outputFolder.getText().trim();
-      pref.setBuildDirectory(dir.isEmpty() ? null : dir);
+      String value;
+      value = t_cacheFile.getText().trim();
+      pref.setCacheFile(value.isEmpty() ? null : value);
+      value = t_outputFolder.getText().trim();
+      pref.setBuildDirectory(value.isEmpty() ? null : value);
+      value = t_otherArguments.getText().trim();
+      pref.setOtherArguments(value.isEmpty() ? null : value);
     }
   }
 

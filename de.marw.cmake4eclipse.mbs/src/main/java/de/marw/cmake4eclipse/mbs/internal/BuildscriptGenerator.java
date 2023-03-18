@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.StringTokenizer;
 import java.util.function.Predicate;
 
 import org.eclipse.cdt.core.CCorePlugin;
@@ -62,6 +63,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.jetty.util.QuotedStringTokenizer;
 
 import com.google.gson.JsonSyntaxException;
 
@@ -547,6 +549,16 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
 
       appendDefines(args, prefs.getDefines(), cfgd);
       appendUndefines(args, prefs.getUndefines());
+
+      /* user specified other cmake arguments.. */
+      String otherArguments = prefs.getOtherArguments();
+      if (otherArguments != null) {
+        // handle Unix shell quoting
+        StringTokenizer tokenizer = new QuotedStringTokenizer(otherArguments, " \t\n\r\f");
+        while (tokenizer.hasMoreTokens()) {
+          args.add(tokenizer.nextToken());
+        }
+      }
     }
 
     // tell cmake to write compile commands to a JSON file
