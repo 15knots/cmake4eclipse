@@ -5,12 +5,12 @@
   version='1.0.0'>
   <properties size='1'>
     <!-- get new time w/ `date +%s000` -->
-    <property name='p2.timestamp' value='1675458436000' />
+    <property name='p2.timestamp' value='1679344905000' />
     <property name='p2.name' value='cmake4eclipse' />
   </properties>
   <children size='3'>
     <child
-      location='jar:https://dl.cloudsmith.io/public/15knots/p2-zip/raw/files/cmake4eclipse-4.0.0.zip!/' />
+      location='jar:https://dl.cloudsmith.io/public/15knots/p2-zip/raw/files/cmake4eclipse-4.0.1.zip!/' />
     <child
       location='jar:https://dl.cloudsmith.io/public/15knots/p2-zip/raw/files/cmake4eclipse-3.0.6.zip!/' />
     <child
