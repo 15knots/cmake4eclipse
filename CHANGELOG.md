@@ -3,6 +3,7 @@
 ## 4.0.1 (2023-03-20)
 ### Changes
 - Fix #180: Allow adding arbitrary cmake command line arguments
+- Requires Java 17 as a prerequisite.
 
 ## 4.0.0 (2023-02-03)
 ### Changes
@@ -13,7 +14,7 @@ into CDT. As a replacement, users should switch to the *CMake Compilation DB* pa
 reduce maintenance effort.
 - Added a new *cmake4eclipse* project creation wizard. Projects created through that wizard are still based on the managed build system (MBS)
 but do not show all the project property pages inherited from MBS that confuse end-users. Many of those MBS properties 
-have no meaning when build-scripts are created by cmake (e.g. *build artifact extension*). 
+have no meaning when build-scripts are created by cmake (e.g. *build artifact extension*).
 - Requires CDT 11.0 as a prerequisite.
 - Fix #176: Support multiple source locations.
 

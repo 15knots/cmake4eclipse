@@ -28,7 +28,7 @@ The plugin is licensed under the <a href="https://www.eclipse.org/legal/epl-2.0/
 
 ## System Requirements
 - CDT v 11 or newer and Eclipse v 2022-12 or newer.
-- Java 11 or newer.
+- Java 17 or newer.
 
 ## Installation
 The easiest way is to drag this: <a href="http://marketplace.eclipse.org/marketplace-client-intro?mpc_install=2318334" class="drag" title="Drag to your running Eclipse workbench to install cmake4eclipse">
