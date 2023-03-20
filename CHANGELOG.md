@@ -1,5 +1,9 @@
 # Cmake4eclipse Change Log
 
+## 4.0.1 (2023-03-20)
+### Changes
+- Fix #180: Allow adding arbitrary cmake command line arguments
+
 ## 4.0.0 (2023-02-03)
 ### Changes
 - Removed the deprecated *CMAKE_EXPORT_COMPILE_COMMANDS* language setting providers. Their code has long been integrated 
