@@ -75,7 +75,7 @@ public final class ConfigurationManager {
    * Tries to get the {@code CMakeSettings} object associated with the
    * specified {@code ICConfigurationDescription}. If no
    * {@code CMakeSettings} object is found, a new one is created, then loaded
-   * from its storage via {@link CMakeSettings#loadFromStorage}.
+   * from its storage via {@link CMakeSettings#load}.
    *
    * @return the stored {@code CMakeSettings} object, or a freshly loaded one
    *         if this object contains no mapping for the configuration
@@ -89,7 +89,10 @@ public final class ConfigurationManager {
     CMakeSettings pref = map.get(cfgd.getId());
     if (pref == null) {
       pref = new CMakeSettings();
-      pref.load(cfgd);
+      if (!cfgd.getProjectDescription().isCdtProjectCreating()) {
+        // do not clobber default values when a project is creating
+        pref.load(cfgd);
+      }
       map.put(cfgd.getId(), pref);
     }
     return pref;

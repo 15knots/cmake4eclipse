@@ -79,7 +79,7 @@ public class CMakeSettings {
   /**
    * Creates a new object, initialized with all default values.
    */
-  public CMakeSettings() {
+  /* package */ CMakeSettings() {
     reset();
   }
 
@@ -153,8 +153,8 @@ public class CMakeSettings {
    * Persists this configuration to the project file.
    */
   public void saveToStorage(ICStorageElement parent) {
-    setOrRemoveAttribute(parent, ATTR_BUILD_DIR, buildDirectory);
     parent.setAttribute(ATTR_DIRTY_TS, String.valueOf(dirty_ts));
+    parent.setAttribute(ATTR_BUILD_DIR, buildDirectory);
 
     ICStorageElement pOpts;
     ICStorageElement[] options = parent.getChildrenByName(ELEM_OPTIONS);
@@ -435,6 +435,9 @@ public class CMakeSettings {
    *          default shall be used.
    */
   public void setBuildDirectory(@Nullable String buildDirectory) {
+    if(! Objects.equals(buildDirectory, this.buildDirectory)) {
+      dirty_ts= System.currentTimeMillis();
+    }
     this.buildDirectory = buildDirectory;
   }
 
@@ -454,6 +457,9 @@ public class CMakeSettings {
    *          the arbitrary arguments for cmake or {@code null} if none.
    */
   public void setOtherArguments(@Nullable String arguments) {
+    if(! Objects.equals(arguments, this.otherArguments)) {
+      dirty_ts= System.currentTimeMillis();
+    }
     this.otherArguments = arguments;
   }
 

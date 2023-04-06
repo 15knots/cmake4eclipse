@@ -226,7 +226,7 @@ public class NewProjectTemplateWizard extends TemplateWizard implements IGenerat
     }
 
     ICProjectDescriptionManager mngr = CoreModel.getDefault().getProjectDescriptionManager();
-    ICProjectDescription projectDescr = mngr.createProjectDescription(project, false, !onFinish);
+    ICProjectDescription projectDescr = mngr.createProjectDescription(project, false, true);
     subMonitor.worked(1);
     ICStorageElement storage = projectDescr.getStorage(CMakeSettings.CFG_STORAGE_ID, true);
 
@@ -283,7 +283,8 @@ public class NewProjectTemplateWizard extends TemplateWizard implements IGenerat
       projectDescr.setActiveConfiguration(conf);
     }
 
-    mngr.setProjectDescription(project, projectDescr);
+    mngr.setProjectDescription(project, projectDescr, onFinish ? 0 : ICProjectDescriptionManager.SET_NO_SERIALIZE,
+        monitor);
   }
 
   /**
