@@ -55,7 +55,7 @@ class NewProjectConfigWizardPage extends WizardPage {
   private static final String MESSAGE = "Select the build configurations";
   private static final String COMMENT = "Use \"Advanced settings\" button to edit project's properties.\n" + "\n"
       + "Additional configurations can be added after project creation.\n"
-      + "Use \"Manage configurations\" buttons either on toolbar or on property \n" + " pages.";
+      + "Use \"Manage configurations\" buttons either on toolbar or on property pages.";
   private static final String EMPTY_STR = ""; //$NON-NLS-1$
 
   private CheckboxTableViewer tv;
@@ -154,7 +154,7 @@ class NewProjectConfigWizardPage extends WizardPage {
     new Label(c, 0).setLayoutData(new GridData(GridData.FILL_BOTH));
 
     Button b3 = new Button(c, SWT.PUSH);
-    b3.setText("Advanced Settings...");
+    b3.setText("&Advanced Settings...");
     b3.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
     b3.addSelectionListener(new SelectionAdapter() {
       @Override
@@ -255,7 +255,7 @@ class NewProjectConfigWizardPage extends WizardPage {
         // disable manage configurations button
         CDTPrefUtil.setBool(CDTPrefUtil.KEY_NOMNG, true);
         try {
-          int res = PreferencesUtil.createPropertyDialogOn(getWizard().getContainer().getShell(), newProject,
+          int res = PreferencesUtil.createPropertyDialogOn(nmWizard.getContainer().getShell(), newProject,
               "cmake4eclipse.mbs.ui.page_Build", null, null).open();
           if (res != Window.OK) {
             // if user presses cancel, remove the project.
