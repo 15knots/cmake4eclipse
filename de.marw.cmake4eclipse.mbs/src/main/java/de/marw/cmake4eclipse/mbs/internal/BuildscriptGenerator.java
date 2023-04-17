@@ -528,7 +528,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       if (wPrefs.getBoolean(PreferenceAccess.CMAKE_TRACE, false))
         args.add("--trace");
       if (wPrefs.getBoolean(PreferenceAccess.CMAKE_WARN_UNINITIALIZED, false))
-        args.add("--warn-unitialized");
+        args.add("--warn-uninitialized");
       if (wPrefs.getBoolean(PreferenceAccess.CMAKE_WARN_UNUSED, false))
         args.add("--warn-unused");
       if (!needVerboseBuild && wPrefs.getBoolean(PreferenceAccess.VERBOSE_BUILD, false)) {
