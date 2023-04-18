@@ -43,8 +43,8 @@ public abstract class PreferenceAccess {
   public static final String CMAKE_TRACE = "CMAKE_TRACE";
   /** preference key for the --warn-uninitializedv commandline option */
   public static final String CMAKE_WARN_UNINITIALIZED = "CMAKE_WARN_UNINITIALIZED";
-  /** preference key for the --warn-unused-vars commandline option */
-  public static final String CMAKE_WARN_UNUSED = "CMAKE_WARN_UNUSED";
+  /** preference key for the --no-warn-unused-cli commandline option */
+  public static final String CMAKE_NO_WARN_UNUSED = "CMAKE_NO_WARN_UNUSED";
 
   /** preference key for the list of cache entries to pass to cmake */
   public static final String CMAKE_CACHE_ENTRIES = "CMAKE_CACHE_ENTRIES";

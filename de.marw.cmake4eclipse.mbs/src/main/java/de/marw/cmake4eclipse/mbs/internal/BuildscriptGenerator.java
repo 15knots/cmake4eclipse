@@ -529,8 +529,8 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
         args.add("--trace");
       if (wPrefs.getBoolean(PreferenceAccess.CMAKE_WARN_UNINITIALIZED, false))
         args.add("--warn-uninitialized");
-      if (wPrefs.getBoolean(PreferenceAccess.CMAKE_WARN_UNUSED, false))
-        args.add("--warn-unused");
+      if (wPrefs.getBoolean(PreferenceAccess.CMAKE_NO_WARN_UNUSED, false))
+        args.add("--no-warn-unused-cli");
       if (!needVerboseBuild && wPrefs.getBoolean(PreferenceAccess.VERBOSE_BUILD, false)) {
         args.add("-DCMAKE_VERBOSE_MAKEFILE=ON");
       }

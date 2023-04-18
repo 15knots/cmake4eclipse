@@ -240,8 +240,8 @@ public class CMakePreferencePage extends PreferencePage implements IWorkbenchPre
           "Warn about un&initialized values \t(--warn-uninitialized)");
       b_warnUnitialized.setData(PreferenceAccess.CMAKE_WARN_UNINITIALIZED);
       b_warnUnused = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2,
-          "Warn about un&used variables \t(--warn-unused-vars)");
-      b_warnUnused.setData(PreferenceAccess.CMAKE_WARN_UNUSED);
+          "Don't Warn about un&used variables on the command line \t(--no-warn-unused-cli)");
+      b_warnUnused.setData(PreferenceAccess.CMAKE_NO_WARN_UNUSED);
     } // cmake options group
 
     tab.setControl(composite);
