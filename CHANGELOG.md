@@ -1,5 +1,10 @@
 # Cmake4eclipse Change Log
 
+## 4.0.2 (2023-04-20)
+### Changes
+- Fix #182: "Warn about uninitialized values" passes wrong cli-option to cmake.
+- Fix #183: "--warn-unused-vars" has been removed in CMake 3.19 and above.
+
 ## 4.0.1 (2023-03-20)
 ### Changes
 - Fix #180: Allow adding arbitrary cmake command line arguments
