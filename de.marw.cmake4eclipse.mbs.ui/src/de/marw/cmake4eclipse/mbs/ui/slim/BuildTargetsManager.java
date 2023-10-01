@@ -20,7 +20,7 @@ import de.marw.cmake4eclipse.mbs.nature.C4ENature;
  *
  * @author Martin Weber
  */
-class BuildTargetsManager {
+public class BuildTargetsManager {
   private static BuildTargetsManager instance;
 
   private final ListenerList<IBuildTargetListener> listeners = new ListenerList<>(ListenerList.IDENTITY);

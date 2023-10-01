@@ -7,7 +7,7 @@
  * SPDX-License-Identifier: EPL-2.0
  *******************************************************************************/
 
-package de.marw.cmake4eclipse.mbs.ui.slim;
+package de.marw.cmake4eclipse.mbs.ui.navigator;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,6 +26,9 @@ import org.eclipse.jface.viewers.Viewer;
 import de.marw.cmake4eclipse.mbs.internal.storage.BuildTargetSerializer;
 import de.marw.cmake4eclipse.mbs.internal.storage.Util;
 import de.marw.cmake4eclipse.mbs.settings.CMakeSettings;
+import de.marw.cmake4eclipse.mbs.ui.slim.BuildTargetEvent;
+import de.marw.cmake4eclipse.mbs.ui.slim.BuildTargetsManager;
+import de.marw.cmake4eclipse.mbs.ui.slim.IBuildTargetListener;
 
 /**
  * Contributes the build target nodes to the project explorer.

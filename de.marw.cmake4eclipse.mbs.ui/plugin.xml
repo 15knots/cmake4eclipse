@@ -336,10 +336,10 @@
         point="org.eclipse.ui.navigator.navigatorContent">
      <navigatorContent
            activeByDefault="true"
-           contentProvider="de.marw.cmake4eclipse.mbs.ui.slim.BuildTargetsTreeContentProvider"
+           contentProvider="de.marw.cmake4eclipse.mbs.ui.navigator.BuildTargetsTreeContentProvider"
            icon="platform:/plugin/org.eclipse.cdt.managedbuilder.ui/icons/obj16/target_obj.gif"
            id="de.marw.cmake4eclipse.mbs.ui.buildTargets.content"
-           labelProvider="de.marw.cmake4eclipse.mbs.ui.slim.BuildTargetsLabelProvider"
+           labelProvider="de.marw.cmake4eclipse.mbs.ui.navigator.BuildTargetsLabelProvider"
            name="Build Targets (cmake)">
        <triggerPoints>
              <and>
@@ -354,28 +354,28 @@
        </triggerPoints>
        <possibleChildren>
           <or>
-             <instanceof value="de.marw.cmake4eclipse.mbs.ui.slim.BuildTargetsContainer"/>
-             <instanceof value="de.marw.cmake4eclipse.mbs.ui.slim.NavBuildTarget"/>
+             <instanceof value="de.marw.cmake4eclipse.mbs.ui.navigator.BuildTargetsContainer"/>
+             <instanceof value="de.marw.cmake4eclipse.mbs.ui.navigator.NavBuildTarget"/>
           </or>
        </possibleChildren>
        <actionProvider
-             class="de.marw.cmake4eclipse.mbs.ui.slim.NavBuildTargetActionProvider"
+             class="de.marw.cmake4eclipse.mbs.ui.navigator.NavBuildTargetActionProvider"
              id="de.marw.cmake4eclipse.mbs.ui.buildTargets.actions">
           <enablement>
              <instanceof
-                   value="de.marw.cmake4eclipse.mbs.ui.slim.NavBuildTarget">
+                   value="de.marw.cmake4eclipse.mbs.ui.navigator.NavBuildTarget">
              </instanceof>
           </enablement>
        </actionProvider>
        <actionProvider
-             class="de.marw.cmake4eclipse.mbs.ui.slim.EditBuildTargetsActionProvider">
+             class="de.marw.cmake4eclipse.mbs.ui.navigator.EditBuildTargetsActionProvider">
           <enablement>
              <or>
                 <instanceof
-                      value="de.marw.cmake4eclipse.mbs.ui.slim.BuildTargetsContainer">
+                      value="de.marw.cmake4eclipse.mbs.ui.navigator.BuildTargetsContainer">
                 </instanceof>
              <instanceof
-                   value="de.marw.cmake4eclipse.mbs.ui.slim.NavBuildTarget">
+                   value="de.marw.cmake4eclipse.mbs.ui.navigator.NavBuildTarget">
              </instanceof>
              </or>
           </enablement>

@@ -7,7 +7,7 @@
  * SPDX-License-Identifier: EPL-2.0
  *******************************************************************************/
 
-package de.marw.cmake4eclipse.mbs.ui.slim;
+package de.marw.cmake4eclipse.mbs.ui.navigator;
 
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.viewers.DoubleClickEvent;

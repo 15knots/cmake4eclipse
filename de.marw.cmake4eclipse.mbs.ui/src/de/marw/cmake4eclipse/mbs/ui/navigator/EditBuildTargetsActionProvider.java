@@ -1,4 +1,4 @@
-package de.marw.cmake4eclipse.mbs.ui.slim;
+package de.marw.cmake4eclipse.mbs.ui.navigator;
 
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.viewers.IStructuredSelection;

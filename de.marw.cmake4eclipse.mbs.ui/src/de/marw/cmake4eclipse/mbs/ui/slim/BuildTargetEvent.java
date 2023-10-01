@@ -20,7 +20,7 @@ import org.eclipse.core.resources.IProject;
  *
  * @author Martin Weber
  */
-class BuildTargetEvent {
+public class BuildTargetEvent {
 
   private final IProject project;
   private final List<String> targets;
