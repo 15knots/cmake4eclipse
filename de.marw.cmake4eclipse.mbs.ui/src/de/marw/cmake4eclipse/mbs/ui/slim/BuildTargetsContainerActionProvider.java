@@ -32,8 +32,7 @@ public class BuildTargetsContainerActionProvider extends CommonActionProvider {
   public void init(ICommonActionExtensionSite aSite) {
     super.init(aSite);
 
-    Shell shell = aSite.getViewSite().getShell();
-    buildTargetAction = new BuildTargetAction(shell);
+    buildTargetAction = new BuildTargetAction();
 //    buildLastTargetAction = new RebuildLastTargetAction();
 
     aSite.getStructuredViewer().addDoubleClickListener(new IDoubleClickListener() {

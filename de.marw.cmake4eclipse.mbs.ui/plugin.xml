@@ -367,6 +367,19 @@
              </instanceof>
           </enablement>
        </actionProvider>
+       <actionProvider
+             class="de.marw.cmake4eclipse.mbs.ui.slim.EditBuildTargetsActionProvider">
+          <enablement>
+             <or>
+                <instanceof
+                      value="de.marw.cmake4eclipse.mbs.ui.slim.BuildTargetsContainer">
+                </instanceof>
+             <instanceof
+                   value="de.marw.cmake4eclipse.mbs.ui.slim.NavBuildTarget">
+             </instanceof>
+             </or>
+          </enablement>
+       </actionProvider>
      </navigatorContent>
   </extension>
   <extension

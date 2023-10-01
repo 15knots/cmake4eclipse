@@ -35,7 +35,6 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
@@ -55,14 +54,10 @@ class BuildTargetAction extends SelectionListenerAction {
 
   public static final String LAST_TARGET = "lastTarget"; //$NON-NLS-1$
 
-  private Shell shell;
-
   /**
-   * @param shell
    */
-  public BuildTargetAction(Shell shell) {
+  public BuildTargetAction() {
     super("Build &Target");
-    this.shell = shell;
     URL url = null;
     try {
       url = new URL("platform:/plugin/" + Activator.PLUGIN_ID + "/icons/target_build.png");

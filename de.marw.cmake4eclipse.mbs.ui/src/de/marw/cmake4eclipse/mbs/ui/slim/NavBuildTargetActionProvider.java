@@ -32,7 +32,7 @@ public class NavBuildTargetActionProvider extends CommonActionProvider {
     super.init(aSite);
 
     Shell shell = aSite.getViewSite().getShell();
-    buildTargetAction = new BuildTargetAction(shell);
+    buildTargetAction = new BuildTargetAction();
 
     aSite.getStructuredViewer().addDoubleClickListener(new IDoubleClickListener() {
       @Override
