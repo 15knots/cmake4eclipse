@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %bundleName
 Bundle-SymbolicName: de.marw.cmake4eclipse.mbs.ui;singleton:=true
-Bundle-Version: 2.0.2.qualifier
+Bundle-Version: 2.1.0.qualifier
 Bundle-Vendor: Martin Weber
 Bundle-Localization: plugin
 Automatic-Module-Name: de.marw.cmake4eclipse.mbs.ui
