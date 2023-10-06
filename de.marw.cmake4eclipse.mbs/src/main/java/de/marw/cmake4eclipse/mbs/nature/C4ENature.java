@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.eclipse.cdt.core.CCProjectNature;
 import org.eclipse.cdt.core.CProjectNature;
+import org.eclipse.cdt.managedbuilder.core.ManagedCProjectNature;
 import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -37,14 +38,15 @@ public class C4ENature implements IProjectNature {
   private IProject project;
 
   /**
-   * Adds the natures to the specified project.
+   * Sets the natures of the specified project.
    *
    * @throws CoreException
    */
-  public static void addNature(IProject project, IProgressMonitor monitor) throws CoreException {
-    CProjectNature.addNature(project, NATURE_ID, monitor);
-    CProjectNature.addCNature(project, monitor);
-    CCProjectNature.addCCNature(project, monitor);
+  public static void setNatures(IProject project, IProgressMonitor monitor) throws CoreException {
+    IProjectDescription description = project.getDescription();
+    String[] newNatures = { NATURE_ID, CProjectNature.C_NATURE_ID, CCProjectNature.CC_NATURE_ID };
+    description.setNatureIds(newNatures);
+    project.setDescription(description, monitor);
   }
 
   @Override
@@ -63,7 +65,7 @@ public class C4ENature implements IProjectNature {
     List<ICommand> commands = new ArrayList<>(Arrays.asList(description.getBuildSpec()));
     commands.add(0, bldrCommand);
 
-    ICommand[] cmds = commands.stream().distinct().toArray(ICommand[]::new);
+    ICommand[] cmds = commands.stream().filter(c -> !ManagedCProjectNature.BUILDER_ID.equals(c.getBuilderName()) ). distinct().toArray(ICommand[]::new);
     description.setBuildSpec(cmds);
     project.setDescription(description, monitor);
   }
@@ -74,7 +76,7 @@ public class C4ENature implements IProjectNature {
     List<ICommand> commands = new ArrayList<>(Arrays.asList(description.getBuildSpec()));
     for (Iterator<ICommand> iter = commands.iterator(); iter.hasNext();) {
       ICommand iCommand = iter.next();
-      if(Activator.BUILDER_ID.equals(iCommand.getBuilderName())) {
+      if (Activator.BUILDER_ID.equals(iCommand.getBuilderName())) {
         iter.remove();
         break;
       }

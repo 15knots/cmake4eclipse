@@ -202,7 +202,7 @@ public class NewProjectTemplateWizard extends TemplateWizard implements IGenerat
       newProject.open(subMonitor.split(25));
     }
     IProgressMonitor continueCreationMonitor = subMonitor.split(25);
-    C4ENature.addNature(newProject, SubMonitor.convert(continueCreationMonitor, "Add Project Nature", 1).split(1));
+    C4ENature.setNatures(newProject, SubMonitor.convert(continueCreationMonitor, "Add Project Nature", 1).split(1));
 
     return newProject;
   }
