@@ -25,7 +25,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.eclipse.cdt.build.core.scannerconfig.ScannerConfigNature;
 import org.eclipse.cdt.core.CCorePlugin;
 import org.eclipse.cdt.core.CommandLauncherManager;
 import org.eclipse.cdt.core.ICommandLauncher;
@@ -33,10 +32,7 @@ import org.eclipse.cdt.core.envvar.IEnvironmentVariable;
 import org.eclipse.cdt.core.envvar.IEnvironmentVariableManager;
 import org.eclipse.cdt.core.index.IIndexManager;
 import org.eclipse.cdt.core.language.settings.providers.ICBuildOutputParser;
-import org.eclipse.cdt.core.language.settings.providers.ICListenerAgent;
 import org.eclipse.cdt.core.language.settings.providers.ILanguageSettingsEditableProvider;
-import org.eclipse.cdt.core.language.settings.providers.ILanguageSettingsProvider;
-import org.eclipse.cdt.core.language.settings.providers.ILanguageSettingsProvidersKeeper;
 import org.eclipse.cdt.core.language.settings.providers.IWorkingDirectoryTracker;
 import org.eclipse.cdt.core.language.settings.providers.LanguageSettingsSerializableProvider;
 import org.eclipse.cdt.core.model.CoreModel;
@@ -46,7 +42,6 @@ import org.eclipse.cdt.core.resources.IConsole;
 import org.eclipse.cdt.core.settings.model.CIncludePathEntry;
 import org.eclipse.cdt.core.settings.model.ICConfigurationDescription;
 import org.eclipse.cdt.core.settings.model.ICLanguageSettingEntry;
-import org.eclipse.cdt.core.settings.model.ICProjectDescription;
 import org.eclipse.cdt.core.settings.model.ICSettingEntry;
 import org.eclipse.cdt.core.settings.model.ICSourceEntry;
 import org.eclipse.cdt.core.settings.model.util.CDataUtil;
@@ -66,18 +61,15 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.resources.WorkspaceJob;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.e4.core.contexts.EclipseContextFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
@@ -93,7 +85,7 @@ import de.marw.cmake4eclipse.mbs.console.CdtConsoleConstants;
  * @author Martin Weber
  */
 public class JsonCompilationDatabaseParser extends LanguageSettingsSerializableProvider
-    implements ICListenerAgent, ICBuildOutputParser, ILanguageSettingsEditableProvider {
+    implements ICBuildOutputParser, ILanguageSettingsEditableProvider {
   static final String PROVIDER_ID = "de.marw.cmake4eclipse.mbs.internal.lsp.JsonCompilationDatabaseParser"; //$NON-NLS-1$
 
   private static final ILog log = Activator.getDefault().getLog();
@@ -132,8 +124,18 @@ public class JsonCompilationDatabaseParser extends LanguageSettingsSerializableP
       // speed up, we do not provide global (workspace) lang settings..
       return null;
     }
-
-    return entries.getSettingEntries(cfgDescription, rc);
+    List<ICLanguageSettingEntry> entries2 = entries.getSettingEntries(cfgDescription, rc);
+    if (entries2 == null && !entries.hasSettingEntries(cfgDescription) ) {
+      // compile_commands.json file has not been parsed yet...
+      try {
+        parseAndSetEntries(cfgDescription, new NullProgressMonitor());
+        entries2 = entries.getSettingEntries(cfgDescription, rc);
+      } catch (CoreException ex) {
+        log.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "Parsing compilation databases", //$NON-NLS-1$
+            ex));
+      }
+    }
+    return entries2;
   }
 
   private void setScannerInfos(ICConfigurationDescription cfgDescription,
@@ -388,90 +390,6 @@ public class JsonCompilationDatabaseParser extends LanguageSettingsSerializableP
     return false;
   }
 
-  /**
-   * Overridden to misuse this to populate the {@link #getSettingEntries setting entries} on startup. This is either
-   * called when a project is loaded or when a user adds the CMake Compilation DB provider on the providers tab in the
-   * UI.<br>
-   * {@inheritDoc}
-   */
-  @Override
-  public void registerListener(ICConfigurationDescription cfgDescription) {
-    if (cfgDescription != null) {
-      // called as per-project provider
-      if (!cfgDescription.getProjectDescription().isCdtProjectCreating()) {
-        final IProject project = cfgDescription.getProjectDescription().getProject();
-        WorkspaceJob job = new WorkspaceJob("Parsing compilation database of project " + project.getName()) {
-          @Override
-          public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
-            if (cfgDescription.getProjectDescription().getProject().isOpen()) {
-              parseAndSetEntries(cfgDescription, new NullProgressMonitor());
-            }
-            return Status.OK_STATUS;
-          }
-        };
-        job.setRule(project);
-        job.schedule();
-      }
-    } else {
-      // called as workspace (shared) provider
-      List<ICConfigurationDescription> configs = new ArrayList<>();
-      CCorePlugin ccp = CCorePlugin.getDefault();
-      // parse JSON file for any opened project that has a ScannerConfigNature...
-      for (IProject project : ResourcesPlugin.getWorkspace().getRoot().getProjects()) {
-        try {
-          if (project.isOpen() && project.hasNature(ScannerConfigNature.NATURE_ID)) {
-            ICProjectDescription projectDescription = ccp.getProjectDescription(project, false);
-            if (projectDescription != null) {
-              ICConfigurationDescription activeConfiguration = projectDescription.getActiveConfiguration();
-              if (activeConfiguration instanceof ILanguageSettingsProvidersKeeper) {
-                final List<ILanguageSettingsProvider> lsps = ((ILanguageSettingsProvidersKeeper) activeConfiguration)
-                    .getLanguageSettingProviders();
-                for (ILanguageSettingsProvider lsp : lsps) {
-                  if (PROVIDER_ID.equals(lsp.getId())) {
-                    configs.add(activeConfiguration);
-                    break;
-                  }
-                }
-              }
-            }
-          }
-        } catch (CoreException ex) {
-          log.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "registerListener()", //$NON-NLS-1$
-              ex));
-        }
-      }
-
-      if (!configs.isEmpty()) {
-        WorkspaceJob job = new WorkspaceJob("Parsing compilation databases") {
-          @Override
-          public IStatus runInWorkspace(IProgressMonitor monitor) throws CoreException {
-            MultiStatus status = new MultiStatus(Activator.PLUGIN_ID, IStatus.OK,
-                "Problem parsing compilation databases", null);
-            SubMonitor subMonitor = SubMonitor.convert(monitor, configs.size());
-            for (ICConfigurationDescription cfg : configs) {
-              try {
-                parseAndSetEntries(cfg, subMonitor.split(1));
-              } catch (CoreException e) {
-                IStatus s = new Status(IStatus.ERROR, Activator.PLUGIN_ID, IStatus.ERROR,
-                    "Error in project " + cfg.getProjectDescription().getProject().getName(), e);
-                status.merge(s);
-              }
-            }
-            return status;
-          }
-        };
-        job.schedule();
-      }
-    }
-  }
-
-  /*-
-   * @see org.eclipse.cdt.core.language.settings.providers.ICListenerAgent#unregisterListener()
-   */
-  @Override
-  public void unregisterListener() {
-  }
-
   @Override
   public JsonCompilationDatabaseParser clone() throws CloneNotSupportedException {
     return (JsonCompilationDatabaseParser) super.clone();
@@ -504,6 +422,16 @@ public class JsonCompilationDatabaseParser extends LanguageSettingsSerializableP
           storages.put(cfgDescription.getId(), store);
         }
         return store.put(rc, entries);
+      }
+    }
+
+    /**
+     * @return whether this object holds ICLanguageSettingEntry for the specified configuration
+     */
+    public boolean hasSettingEntries(ICConfigurationDescription cfgDescription) {
+      Objects.requireNonNull(cfgDescription, "cfgDescription"); //$NON-NLS-1$
+      synchronized (storagesLock) {
+        return storages.containsKey(cfgDescription.getId());
       }
     }
 
