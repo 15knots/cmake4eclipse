@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import org.eclipse.cdt.core.settings.model.ICProjectDescription;
 import org.eclipse.cdt.core.settings.model.ICResourceDescription;
 import org.eclipse.cdt.core.settings.model.ICStorageElement;
+import org.eclipse.cdt.ui.newui.AbstractPage;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -74,6 +75,8 @@ public class CMakeProjectPropertyTab extends QuirklessAbstractCPropertyTab {
       Group gr = WidgetHelper.createGroup(usercomp, SWT.FILL, 2, "CMakeLists.txt folder (relative to project root)", 2);
       setupLabel(gr, "&Folder", 1, SWT.BEGINNING);
       t_cmakelistsFolder = setupText(gr, 1, GridData.FILL_HORIZONTAL);
+      BelowRootPathTextFieldModifyListener.addListener(t_cmakelistsFolder, (AbstractPage) super.page,
+          "CMakeLists.txt folder must be below project root");
 
       // "Browse", "Create" dialog launcher buttons...
       Composite buttonBar = new Composite(gr, SWT.NONE);
@@ -91,6 +94,7 @@ public class CMakeProjectPropertyTab extends QuirklessAbstractCPropertyTab {
           FilteredResourcesSelectionDialog dialog = new FilteredResourcesSelectionDialog(t_cmakelistsFolder.getShell(),
               false, page.getProject(), IResource.FOLDER);
           dialog.setTitle("Select folder containing the top-level CMakeLists.txt file");
+//          dialog.setInitialPattern("CMakeLists.txt");
           dialog.open();
           IFolder folder = (IFolder) dialog.getFirstResult();
           if (folder != null) {
@@ -212,7 +216,7 @@ public class CMakeProjectPropertyTab extends QuirklessAbstractCPropertyTab {
   @Override
   protected void performDefaults() {
     t_cmakelistsFolder.setText("");
-    t_targets.setText("");
+    t_targets.setText("all clean help test install");
     updateDisplay();
   }
 

@@ -16,6 +16,7 @@ import org.eclipse.cdt.core.settings.model.ICMultiConfigDescription;
 import org.eclipse.cdt.core.settings.model.ICResourceDescription;
 import org.eclipse.cdt.core.settings.model.ICStorageElement;
 import org.eclipse.cdt.ui.newui.AbstractCPropertyTab;
+import org.eclipse.cdt.ui.newui.AbstractPage;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
@@ -40,6 +41,7 @@ import org.eclipse.ui.dialogs.NewFolderDialog;
 
 import de.marw.cmake4eclipse.mbs.settings.CMakeSettings;
 import de.marw.cmake4eclipse.mbs.settings.ConfigurationManager;
+import de.marw.cmake4eclipse.mbs.ui.slim.BelowRootPathTextFieldModifyListener;
 
 /**
  * UI to control general project properties for cmake. This tab is responsible
@@ -86,7 +88,9 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
 
       setupLabel(gr, "&Folder", 1, SWT.BEGINNING);
       t_outputFolder = setupText(gr, 1, GridData.FILL_HORIZONTAL);
-
+      BelowRootPathTextFieldModifyListener.addListener(t_outputFolder, (AbstractPage) super.page,
+          "Build output location must be below project root");
+      t_outputFolder.addModifyListener(evt -> {});
       // "Browse", "Create" dialog launcher buttons...
       Composite buttonBar = new Composite(gr, SWT.NONE);
       {
