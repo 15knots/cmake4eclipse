@@ -129,7 +129,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     builder = config.getEditableBuilder();
   }
 
-  private IPath getBuildPath() {
+  private IPath getRelBuildPath() {
     if (buildRelPath == null) {
       // set the top build dir path for the current configuration
       String buildDirStr = null;
@@ -165,7 +165,12 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     // i.e. ${workspace_loc:/path} gets split into 2 path segments, if we return a relative path here.
     // MBS does that and we need to handle that.
     // So return a workspace relative path here
-    return project.getFolder(getBuildPath()).getFullPath();
+    final IPath fullPath = project.getFullPath();
+    IPath buildPath = getRelBuildPath();
+    if (buildPath.segmentCount() == 0) {
+      return fullPath;
+    }
+    return fullPath.append(buildPath);
   }
 
   /**
@@ -233,9 +238,15 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
 
     boolean mustGenerate= forceGeneration;
 
-    final IFolder buildFolder = project.getFolder(getBuildPath());
+    final IContainer buildFolder;
+    IPath buildPath = getRelBuildPath();
+    if (buildPath.segmentCount() == 0) {
+      buildFolder= project;
+    } else {
+      buildFolder = project.getFolder(buildPath);
+      createFolder((IFolder) buildFolder);
+    }
     // make sure we have a resource to attach session properties to
-    createFolder(buildFolder);
     final java.nio.file.Path buildDir = Paths.get(buildFolder.getLocationURI());
 
     IEclipsePreferences prefs = PreferenceAccess.getPreferences();
@@ -631,7 +642,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     // Is this a generated directory ...
     IPath path = resource.getProjectRelativePath();
     // It is if it is a root of the resource pathname
-    return  getBuildPath().isPrefixOf(path);
+    return  getRelBuildPath().isPrefixOf(path);
   }
 
   /*-

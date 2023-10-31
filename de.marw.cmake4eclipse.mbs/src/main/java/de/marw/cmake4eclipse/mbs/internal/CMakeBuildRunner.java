@@ -12,11 +12,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.cdt.core.CCorePlugin;
 import org.eclipse.cdt.core.ICommandLauncher;
 import org.eclipse.cdt.core.IMarkerGenerator;
 import org.eclipse.cdt.core.ProblemMarkerInfo;
@@ -36,6 +38,7 @@ import org.eclipse.cdt.managedbuilder.core.ManagedBuildManager;
 import org.eclipse.cdt.managedbuilder.macros.IFileContextBuildMacroValues;
 import org.eclipse.cdt.managedbuilder.macros.IReservedMacroNameSupplier;
 import org.eclipse.cdt.managedbuilder.makegen.IManagedBuilderMakefileGenerator;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
@@ -162,12 +165,11 @@ public class CMakeBuildRunner extends ExternalBuildRunner {
     // If garbled, make sure de.marw.cmake4eclipse.mbs.internal.BuildscriptGenerator.getBuildWorkingDir()
     // returns a full, absolute path relative to the workspace.
     final IPath builderCWD = cfgd.getBuildSetting().getBuilderCWD();
+    final String cwd = CCorePlugin.getDefault().getCdtVariableManager().resolveValue(builderCWD.toString(), "", null, //$NON-NLS-1$
+        cfgd);
 
-    IPath location = ResourcesPlugin.getWorkspace().getRoot().getFolder(builderCWD).getLocation();
-    File file = null;
-    if (location != null) {
-      file = location.append("CMakeCache.txt").toFile();
-    }
+    final IFile file0 = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(cwd).append("CMakeCache.txt")); //$NON-NLS-1$
+    final File file = Paths.get(file0.getLocationURI()).toFile();
 
     if (file != null && file.isFile()) {
       final long lastModified = file.lastModified();
@@ -176,9 +178,7 @@ public class CMakeBuildRunner extends ExternalBuildRunner {
         fi.cachedCmakeBuildTool = null; // invalidate cache
 
         // parse CMakeCache.txt...
-        InputStream is = null;
-        try {
-          is = new FileInputStream(file);
+        try(InputStream is = new FileInputStream(file)) {
           final Set<SimpleCMakeCacheEntry> entries = new HashSet<>();
           final EntryFilter filter = new EntryFilter() {
             @Override
@@ -205,14 +205,7 @@ public class CMakeBuildRunner extends ExternalBuildRunner {
           }
         } catch (IOException ex) {
           throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID,
-              "Failed to parse file " + file, ex));
-        } finally {
-          if (is != null) {
-            try {
-              is.close();
-            } catch (IOException ignore) {
-            }
-          }
+              "Failed to parse file " + file0, ex));
         }
       }
     } else {

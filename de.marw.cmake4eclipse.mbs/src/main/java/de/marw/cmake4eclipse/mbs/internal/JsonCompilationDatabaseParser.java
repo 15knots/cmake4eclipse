@@ -57,7 +57,6 @@ import org.eclipse.cdt.managedbuilder.core.IBuilder;
 import org.eclipse.cdt.managedbuilder.core.IConfiguration;
 import org.eclipse.cdt.managedbuilder.core.ManagedBuildManager;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -255,7 +254,6 @@ public class JsonCompilationDatabaseParser extends LanguageSettingsSerializableP
 
     final String cwd = ccp.getCdtVariableManager().resolveValue(builderCWD.toString(), "", null, //$NON-NLS-1$
         cfgDescription);
-    IFolder buildFolder = ResourcesPlugin.getWorkspace().getRoot().getFolder(new Path(cwd));
 /*
     // help detecting the 'Resource '/home' does not exist.' exception cause
     if (!cfgDescription.getProjectDescription().getProject().equals(buildFolder.getProject())) {
@@ -265,7 +263,8 @@ public class JsonCompilationDatabaseParser extends LanguageSettingsSerializableP
           buildFolder.getProject(), cfgDescription.getProjectDescription().getProject());
     }
 */
-    final IFile jsonFileRc = buildFolder.getFile("compile_commands.json"); //$NON-NLS-1$
+    final IFile jsonFileRc = ResourcesPlugin.getWorkspace().getRoot()
+        .getFile(new Path(cwd).append("compile_commands.json")); //$NON-NLS-1$
 
     // get the launcher that runs in docker container, if any
     IConfiguration cfg = ManagedBuildManager.getConfigurationForDescription(cfgDescription);
