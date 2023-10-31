@@ -241,7 +241,7 @@ public class NewProjectTemplateWizard extends TemplateWizard implements IGenerat
       }
     }
     // add well known build targets (sorted)...
-    List<String> targets = Arrays.asList("all", "clean", "help", "test");
+    List<String> targets = Arrays.asList("all", "clean", "help", "install", "test");
     Util.serializeCollection(CMakeSettings.ELEM_BUILD_TARGETS, storage, new BuildTargetSerializer(), targets);
 
     IProjectType pt = ManagedBuildManager
