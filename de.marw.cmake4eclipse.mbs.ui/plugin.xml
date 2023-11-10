@@ -44,6 +44,7 @@
       <tab
             class="de.marw.cmake4eclipse.mbs.ui.CMakePropertyTab"
             icon="icons/CMakeLogo.gif"
+            helpId="de.marw.cmake4eclipse.mbs.ui.cmake_properties_context"
             name="&amp;General"
             parent="de.marw.cmake4eclipse.mbs.ui.CMakePropertyPage">
       </tab>
@@ -297,15 +298,15 @@
      </tab>
       <tab
             class="de.marw.cmake4eclipse.mbs.ui.CMakePropertyTab"
-            helpId="cdt_u_prop_pns_src"
+            helpId="de.marw.cmake4eclipse.mbs.ui.cmake_properties_context"
             icon="icons/CMakeLogo.gif"
-            name="&amp;CMake options"
+            name="CMake &amp;options"
             parent="de.marw.cmake4eclipse.mbs.ui.slim.Page_CMake">
       </tab>
       <tab
             class="de.marw.cmake4eclipse.mbs.ui.CMakeSymbolsTab"
             helpId="de.marw.cmake4eclipse.mbs.ui.cmake_symbols"
-            name="&amp;CMake cache entries"
+            name="CMake &amp;cache entries"
             parent="de.marw.cmake4eclipse.mbs.ui.slim.Page_CMake">
       </tab>
   </extension>

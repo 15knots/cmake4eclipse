@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <contexts>
    <context id="cmake_symbols_context">
-      <description>This page is used to set properties for specifying CMake cache entries.</description>
+      <description>This tab is used to specify which CMake cache entries are passed to cmake.</description>
       <topic href="doc/html/ref/cmake_symbols.html" label="CMake cache entries"/>
    </context>
+   <context id="cmake_options_tab_context">
+      <description>This tab is used to specify general options which are passed to cmake.</description>
+   </context>
    <context id="wb_general_tab_context">
-      <description>This page is used to set preferences for how and when cmake is run.</description>
+      <description>This tab is used to set preferences for how and when cmake is run.</description>
       <topic href="doc/html/ref/wb_general_tab.html" label="Preferences - General cmake commandline options"/>
    </context>
    <context id="wb_cache_entries_context">

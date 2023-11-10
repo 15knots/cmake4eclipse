@@ -77,7 +77,7 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
 
   @Override
   protected void createControls(final Composite parent) {
-    super.setHelpContextId(Activator.PLUGIN_ID + ".TODO");
+    super.setHelpContextId(Activator.PLUGIN_ID + ".cmake_options_tab_context");
     super.createControls(parent);
     usercomp.setLayout(new GridLayout(2, false));
 //    usercomp.setBackground(BACKGROUND_FOR_USER_VAR);
