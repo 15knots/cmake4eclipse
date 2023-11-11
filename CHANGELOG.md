@@ -1,5 +1,11 @@
 # Cmake4eclipse Change Log
 
+## 4.0.3 (2023-11-11)
+### Changes
+- Ensure project relative path are below project directory (no '..').
+- Fix project creation over existing cmake4eclipse project of versions < 4.x.
+- Added a context menu to edit build targets.
+
 ## 4.0.2 (2023-04-20)
 ### Changes
 - Fix #182: "Warn about uninitialized values" passes wrong cli-option to cmake.
