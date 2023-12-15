@@ -1,5 +1,14 @@
 # Cmake4eclipse Change Log
 
+## 5.0.0 (2023-12-??)
+### Changes
+- Restore compatibility with CDT 11.4
+- ???
+
+## 4.0.4 (2023-12-15)
+### Changes
+- Disallow to install it on CDT 11.4 (2023-12) since it is not compatible with CDT 11.4 and newer.
+
 ## 4.0.3 (2023-11-11)
 ### Changes
 - Ensure project relative path are below project directory (no '..').
