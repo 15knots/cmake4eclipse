@@ -26,7 +26,8 @@ A clear and concise description of what you expected to happen.
 If applicable, add screenshots to help explain your problem.
 
 **Useful Information**
-- cmake4eclipse version: 
+- cmake4eclipse version:
+- CDT version: 
 - Which OS do you use: 
 - Cmake version: 
 
