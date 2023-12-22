@@ -19,9 +19,9 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.EnumSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
-import java.util.StringTokenizer;
 import java.util.function.Predicate;
 
 import org.eclipse.cdt.core.CCorePlugin;
@@ -565,9 +565,9 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       String otherArguments = prefs.getOtherArguments();
       if (otherArguments != null) {
         // handle Unix shell quoting
-        StringTokenizer tokenizer = new QuotedStringTokenizer(otherArguments, " \t\n\r\f");
-        while (tokenizer.hasMoreTokens()) {
-          args.add(tokenizer.nextToken());
+        QuotedStringTokenizer tokenizer = QuotedStringTokenizer.builder().delimiters( " \t\n\r\f").build();
+        for (Iterator<String> iter = tokenizer.tokenize(otherArguments); iter.hasNext();) {
+          args.add(iter.next());
         }
       }
     }

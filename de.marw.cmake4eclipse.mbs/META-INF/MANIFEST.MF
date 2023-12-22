@@ -4,7 +4,7 @@ Bundle-Name: %bundleName
 Bundle-Description: CDT CMake build integration
 Bundle-Copyright: 2013 Martin Weber
 Bundle-SymbolicName: de.marw.cmake4eclipse.mbs;singleton:=true
-Bundle-Version: 2.0.4.qualifier
+Bundle-Version: 3.0.0.qualifier
 Bundle-Vendor: Martin Weber
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-17
@@ -17,7 +17,7 @@ Import-Package: com.google.gson;version="2.8.7",
  org.eclipse.core.runtime.jobs,
  org.eclipse.core.runtime.preferences;version="3.4.0",
  org.eclipse.e4.core.contexts;version="1.7.0",
- org.eclipse.jetty.util;version="[10.0.12,12.0.0)",
+ org.eclipse.jetty.util;version="[12.0.0,13.0.0)",
  org.osgi.framework,
  org.osgi.service.prefs;version="1.1.1"
 Bundle-Activator: de.marw.cmake4eclipse.mbs.internal.Activator
@@ -29,8 +29,9 @@ Export-Package: de.marw.cmake4eclipse.mbs.cmakecache,
  de.marw.cmake4eclipse.mbs.preferences;x-friends:="de.marw.cmake4eclipse.mbs.ui",
  de.marw.cmake4eclipse.mbs.settings
 Automatic-Module-Name: de.marw.cmake4eclipse.mbs
-Require-Bundle: org.eclipse.cdt.core;bundle-version="[8.0.0,8.4.0)",
- org.eclipse.cdt.managedbuilder.core;bundle-version="[9.5.0,9.6.200)",
+Require-Bundle: org.eclipse.cdt.core;bundle-version="8.3.0",
+ org.eclipse.cdt.managedbuilder.core;bundle-version="9.6.200",
  org.eclipse.cdt.jsoncdb.core;bundle-version="1.0.0",
  org.eclipse.core.variables,
- org.eclipse.jdt.annotation;bundle-version="2.2.700";resolution:=optional
+ org.eclipse.jdt.annotation;resolution:=optional,
+ org.eclipse.cdt.managedbuilder.gnu.ui
