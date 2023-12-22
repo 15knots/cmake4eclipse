@@ -127,6 +127,11 @@ public class JsonCompilationDatabaseParser extends LanguageSettingsSerializableP
     if (entries2 == null && !entries.hasSettingEntries(cfgDescription) ) {
       // compile_commands.json file has not been parsed yet...
       try {
+        if (ResourcesPlugin.getWorkspace().isTreeLocked()
+            || cfgDescription.getProjectDescription().isCdtProjectCreating()) {
+          // avoid ResourceException: The resource tree is locked for modifications during project creation
+          return null;
+        }
         parseAndSetEntries(cfgDescription, new NullProgressMonitor());
         entries2 = entries.getSettingEntries(cfgDescription, rc);
       } catch (CoreException ex) {
