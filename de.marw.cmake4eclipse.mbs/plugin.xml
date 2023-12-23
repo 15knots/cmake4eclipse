@@ -78,8 +78,8 @@
                languageSettingsProviders="${Toolchain};-de.marw.cmake.cdt.language.settings.providers.CompileCommandsJsonParser;-de.marw.cmake.cdt.language.settings.providers.BuiltinsCompileCommandsJsonParser;-org.eclipse.cdt.ui.UserLanguageSettingsProvider;-org.eclipse.cdt.core.ReferencedProjectsLanguageSettingsProvider;-org.eclipse.cdt.managedbuilder.core.MBSLanguageSettingsProvider;-org.eclipse.cdt.managedbuilder.core.GCCBuildCommandParser">
          </configuration>
          <projectType
-               buildArtefactType="cmake4eclipse.mbs.buildArtefactType.cmake"
-               id="cmake4eclipse.mbs.projectType">
+               id="cmake4eclipse.mbs.projectType"
+               isAbstract="true">
             <configuration
                   buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug"
                   id="cmake4eclipse.mbs.config.debug"
