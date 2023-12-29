@@ -152,6 +152,7 @@
        name="Cmake4eclipse buildscript generator"
        point="org.eclipse.core.resources.builders">
     <builder
+          callOnEmptyDelta="true"
           hasNature="true">
        <run
              class="org.eclipse.cdt.managedbuilder.internal.core.CommonBuilder">

@@ -20,6 +20,7 @@ import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IProjectNature;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -60,7 +61,8 @@ public class C4ENature implements IProjectNature {
 
     ICommand bldrCommand = description.newCommand();
     bldrCommand.setBuilderName(Activator.BUILDER_ID);
-//    bldrCommand.setBuilding(IncrementalProjectBuilder.AUTO_BUILD, false);
+    // do not run on each resource delta change..
+    bldrCommand.setBuilding(IncrementalProjectBuilder.INCREMENTAL_BUILD, false);
 
     List<ICommand> commands = new ArrayList<>(Arrays.asList(description.getBuildSpec()));
     commands.add(0, bldrCommand);
