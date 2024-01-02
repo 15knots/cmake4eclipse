@@ -14,10 +14,8 @@
     <topic href="doc/html/tasks/create_project.html" label="Creating a Project">
        <topic href="doc/html/tasks/create_project_cmake4eclipse.html" label="Creating a Cmake4eclipse Managed Build project">
        </topic>
-       <topic href="doc/html/tasks/create_project_mbs.html" label="Creating a C or C++ Managed Build project and configuring it">
-    <topic label="Configuring an Eclipse C-project or C++-project" href="doc/html/tasks/configure_project_mbs.html">
     </topic>
-       </topic>
+    <topic label="Configuring an Eclipse C/C++ project" href="doc/html/tasks/configure_project_mbs.html">
     </topic>
     <anchor id="cmake4eclipse_TasksInsertAnchor" />
   </topic>
@@ -35,8 +33,6 @@
       <topic href="doc/html/ref/cmake_symbols.html" label="CMake cache entries">
       </topic>
       <topic href="doc/html/ref/languageSettingsProviders.html" label="Syntax Highlighting Support">
-      </topic>
-      <topic href="doc/html/ref/builders.html" label="Project Builders">
       </topic>
   </topic>
   <topic href="doc/html/notices.html" label="Legal">

@@ -9,7 +9,7 @@
     <booleanAttribute key="clearConfig" value="true"/>
     <booleanAttribute key="clearws" value="true"/>
     <booleanAttribute key="clearwslog" value="true"/>
-    <stringAttribute key="configLocation" value="${workspace_loc}/.metadata/.plugins/org.eclipse.pde.core/cmake4eclipse-2023-12"/>
+    <stringAttribute key="configLocation" value="${workspace_loc}/.metadata/.plugins/org.eclipse.pde.core/cmake4eclipse"/>
     <booleanAttribute key="default" value="false"/>
     <setAttribute key="deselected_workspace_bundles"/>
     <booleanAttribute key="generateProfile" value="true"/>
@@ -160,6 +160,9 @@
         <setEntry value="org.eclipse.equinox.common@2:true"/>
         <setEntry value="org.eclipse.equinox.console@default:default"/>
         <setEntry value="org.eclipse.equinox.event@default:default"/>
+        <setEntry value="org.eclipse.equinox.http.jetty@default:default"/>
+        <setEntry value="org.eclipse.equinox.http.registry@default:default"/>
+        <setEntry value="org.eclipse.equinox.http.servlet@default:default"/>
         <setEntry value="org.eclipse.equinox.jsp.jasper.registry@default:default"/>
         <setEntry value="org.eclipse.equinox.jsp.jasper@default:default"/>
         <setEntry value="org.eclipse.equinox.p2.artifact.repository@default:default"/>
@@ -179,7 +182,15 @@
         <setEntry value="org.eclipse.help@default:default"/>
         <setEntry value="org.eclipse.jdt.annotation@default:default"/>
         <setEntry value="org.eclipse.jdt.core.compiler.batch@default:default"/>
+        <setEntry value="org.eclipse.jetty.ee8.security@default:default"/>
+        <setEntry value="org.eclipse.jetty.ee8.server@default:default"/>
+        <setEntry value="org.eclipse.jetty.ee8.servlet@default:default"/>
+        <setEntry value="org.eclipse.jetty.http@default:default"/>
+        <setEntry value="org.eclipse.jetty.io@default:default"/>
+        <setEntry value="org.eclipse.jetty.security@default:default"/>
+        <setEntry value="org.eclipse.jetty.server@default:default"/>
         <setEntry value="org.eclipse.jetty.servlet-api@default:default"/>
+        <setEntry value="org.eclipse.jetty.session@default:default"/>
         <setEntry value="org.eclipse.jetty.util@default:default"/>
         <setEntry value="org.eclipse.jface.databinding@default:default"/>
         <setEntry value="org.eclipse.jface.text@default:default"/>
