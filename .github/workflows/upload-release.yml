@@ -14,12 +14,12 @@ jobs:
     - name: Set up JDK
       uses: actions/setup-java@v2
       with:
-        java-version: '11'
+        java-version: '17'
         distribution: 'adopt'
         settings-path: ${{ github.workspace }}
 
     - name: Build
-      run: mvn -P release -B package
+      run: mvn -P release -B -ntp package
 
     - name: Determine artifact to upload
       id: TheZIP
