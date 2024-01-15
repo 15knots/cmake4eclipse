@@ -9,6 +9,10 @@
 This Eclipse plug-in automatically generates build-scripts for the Eclipse CDT managed build system from CMake scripts.
 Its <a id="pc">*Primary claim*</a> is: Co-workers should be able to just **check out the source and build** the project. 
 
+## Important notice to users that upgrade to version 5.0.x
+Since CDT 11.4 broke [compatibility](https://github.com/15knots/cmake4eclipse/issues/198) of this plugin 
+it may be necessary delete the Eclipse projects using this plugin and re-create each project from scratch. Please delete the `.cproject` file before re-creating.
+
 ## Design goals
 1. **Automatic** generation of build scripts. See [Primary claim](#pc): No need to **manually** invoke cmake: Cmake options are persisted in the Eclipse project settings files.
 1. Cmake is a cross-platform build tool. So Eclipse projects [should be cross-platform](#pc) as feasible; without the need for co-workers to adjust Eclipse project settings just to build on **their** platform. 
@@ -27,7 +31,7 @@ Its <a id="pc">*Primary claim*</a> is: Co-workers should be able to just **check
 The plugin is licensed under the <a href="https://www.eclipse.org/legal/epl-2.0/">Eclipse Public License Version 2.0 ("EPL-2.0")</a>.
 
 ## System Requirements
-- CDT v 11 or newer and Eclipse v 2022-12 or newer.
+- CDT v 11.4 or newer and Eclipse v 2023-12 or newer.
 - Java 17 or newer.
 
 ## Installation
@@ -57,7 +61,8 @@ To build from a command-line, run `mvn package` in the root directory of the pro
 
 There is also a run configuration for eclipse to invoke the maven build: `build cmake4eclipse`.
 
-To debug the plug-in from Eclipse, first set the Plug-in Development Target platform of your workbench to `cdt/8.7-eclipse/4.5.2`, then run the Eclipse Application launch configuration named `cmake4eclipse`.
+To debug the plug-in from Eclipse, first set the Plug-in Development Target platform of your workbench to `cdt/11.4-eclipse/2023-12`,
+then run the Eclipse Application launch configuration named `cmake4eclipse`.
 
 ## References
 ### Projects that recommend to use this plugin to develop it using Eclipse.

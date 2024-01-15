@@ -1,9 +1,9 @@
 # Cmake4eclipse Change Log
 
-## 5.0.0 (2023-12-??)
+## 5.0.0 (2024-01-15)
 ### Changes
-- Restore compatibility with CDT 11.4
-- ???
+- Restore compatibility with CDT 11.4/Eclipse 2023-12.
+- Fix #197: Run builder on empty delta to react on when the active configuration changes.
 
 ## 4.0.4 (2023-12-15)
 ### Changes

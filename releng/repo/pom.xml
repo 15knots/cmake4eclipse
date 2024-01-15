@@ -11,7 +11,7 @@
 
     <!-- builds a zipped p2 update site -->
     <artifactId>repo</artifactId>
-    <version>4.0.4</version>
+    <version>5.0.0</version>
     <packaging>eclipse-repository</packaging>
 
     <build>
