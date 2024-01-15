@@ -25,4 +25,4 @@ jobs:
         cache: 'maven'
 
     - name: Build
-      run: mvn -P release -B verify
+      run: mvn -P release -B -ntp verify
