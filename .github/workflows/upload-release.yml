@@ -18,6 +18,11 @@ jobs:
         distribution: 'adopt'
         settings-path: ${{ github.workspace }}
 
+    - name: Set up Maven
+      uses: stCarolas/setup-maven@v4.5
+      with:
+        maven-version: 3.9.0
+
     - name: Build
       run: mvn -P release -B -ntp package
 

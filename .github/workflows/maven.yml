@@ -24,5 +24,10 @@ jobs:
         distribution: 'adopt'
         cache: 'maven'
 
+    - name: Set up Maven
+      uses: stCarolas/setup-maven@v4.5
+      with:
+        maven-version: 3.9.0
+
     - name: Build
       run: mvn -P release -B -ntp verify
