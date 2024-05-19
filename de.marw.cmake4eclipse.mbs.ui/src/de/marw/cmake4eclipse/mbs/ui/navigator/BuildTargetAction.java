@@ -45,6 +45,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.BuildAction;
 import org.eclipse.ui.actions.SelectionListenerAction;
 
+import de.marw.cmake4eclipse.mbs.nature.C4ENature;
 import de.marw.cmake4eclipse.mbs.ui.Activator;
 
 /**
@@ -128,7 +129,7 @@ class BuildTargetAction extends SelectionListenerAction {
     ICommand[] commands = project.getDescription().getBuildSpec();
     SubMonitor subMonitor = SubMonitor.convert(monitor, commands.length);
     for (ICommand command : commands) {
-      if (de.marw.cmake4eclipse.mbs.internal.Activator.BUILDER_ID.equals(command.getBuilderName())) {
+      if (C4ENature.BUILDER_ID.equals(command.getBuilderName())) {
         // our builder...
         final HashMap<String, String> buildArgs = new HashMap<>();
         buildArgs.put(IMakeBuilderInfo.BUILD_TARGET_INCREMENTAL, target.getName());

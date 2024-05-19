@@ -75,6 +75,7 @@ import de.marw.cmake4eclipse.mbs.settings.CmakeDefine;
 import de.marw.cmake4eclipse.mbs.settings.CmakeGenerator;
 import de.marw.cmake4eclipse.mbs.settings.CmakeUnDefine;
 import de.marw.cmake4eclipse.mbs.settings.ConfigurationManager;
+import de.marw.cmake4eclipse.mbs.settings.ProjectPropsModifiedDateUtil;
 
 /**
  * Generates makefiles and other build scripts from CMake scripts
@@ -253,28 +254,30 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     try {
       final java.nio.file.Path cacheFile = buildDir.resolve( "CMakeCache.txt");
       boolean cacheFileExists = Files.exists(cacheFile);
-      if (cacheFileExists
-          && (prefs.getLong(PreferenceAccess.DIRTY_TS, 0L) > Files.getLastModifiedTime(cacheFile).toMillis()
-              || ConfigurationManager.getInstance().getOrLoad(cfgDes).getDirtyTs() > Files
-                  .getLastModifiedTime(cacheFile).toMillis()
-              || prefs.getBoolean(PreferenceAccess.CMAKE_FORCE_RUN, false))) {
-        mustGenerate = true;
-        // The generator might have changed, remove cache file to avoid cmake's complaints..
-        Files.delete(cacheFile);
-        // also remove cache files in cmake projects that were downloaded by cmake's FetchContent call (e.g. for CPM)...
-        java.nio.file.Path cpmDepsPath = buildDir.resolve("_deps");
-        if( Files.exists(cpmDepsPath)) {
-          Files.walkFileTree(cpmDepsPath, EnumSet.noneOf(FileVisitOption.class), 2,
-              new SimpleFileVisitor<java.nio.file.Path>() {
-                @Override
-                public FileVisitResult visitFile(java.nio.file.Path file, BasicFileAttributes attrs) throws IOException {
-                  if ("CMakeCache.txt".equals(file.getFileName().toString())) {
-                    Files.delete(file);
-                  }
-                  return FileVisitResult.CONTINUE;
-                }
-              });
-        }
+      if (cacheFileExists) {
+        ConfigurationManager.getInstance().getOrLoad(cfgDes); // migrate dirty time stamp attribute to file time stamp
+
+        if (prefs.getLong(PreferenceAccess.DIRTY_TS, 0L) > Files.getLastModifiedTime(cacheFile).toMillis()
+            || ProjectPropsModifiedDateUtil.getLastModified(project) > Files.getLastModifiedTime(cacheFile).toMillis()
+            || prefs.getBoolean(PreferenceAccess.CMAKE_FORCE_RUN, false)) {
+    mustGenerate = true;
+    // The generator might have changed, remove cache file to avoid cmake's complaints..
+    Files.delete(cacheFile);
+    // also remove cache files in cmake projects that were downloaded by cmake's FetchContent call (e.g. for CPM)...
+    java.nio.file.Path cpmDepsPath = buildDir.resolve("_deps");
+    if( Files.exists(cpmDepsPath)) {
+     Files.walkFileTree(cpmDepsPath, EnumSet.noneOf(FileVisitOption.class), 2,
+        new SimpleFileVisitor<java.nio.file.Path>() {
+          @Override
+          public FileVisitResult visitFile(java.nio.file.Path file, BasicFileAttributes attrs) throws IOException {
+            if ("CMakeCache.txt".equals(file.getFileName().toString())) {
+              Files.delete(file);
+            }
+            return FileVisitResult.CONTINUE;
+          }
+        });
+    }
+   }
       }
       if (!mustGenerate && (!cacheFileExists || !Files.exists(buildDir.resolve(getMakefileName())))) {
         mustGenerate = true;

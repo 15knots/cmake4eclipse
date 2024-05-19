@@ -38,6 +38,9 @@ public class C4ENature implements IProjectNature {
 
   private IProject project;
 
+  /** extension id of the cmake-generated makefile builder */
+  public static final String BUILDER_ID = Activator.PLUGIN_ID + ".genscriptbuilder"; //$NON-NLS-1$
+
   /**
    * Sets the natures of the specified project.
    *
@@ -60,7 +63,7 @@ public class C4ENature implements IProjectNature {
     IProjectDescription description = project.getDescription();
 
     ICommand bldrCommand = description.newCommand();
-    bldrCommand.setBuilderName(Activator.BUILDER_ID);
+    bldrCommand.setBuilderName(BUILDER_ID);
     // do not run on each resource delta change..
     bldrCommand.setBuilding(IncrementalProjectBuilder.INCREMENTAL_BUILD, false);
 
@@ -78,7 +81,7 @@ public class C4ENature implements IProjectNature {
     List<ICommand> commands = new ArrayList<>(Arrays.asList(description.getBuildSpec()));
     for (Iterator<ICommand> iter = commands.iterator(); iter.hasNext();) {
       ICommand iCommand = iter.next();
-      if (Activator.BUILDER_ID.equals(iCommand.getBuilderName())) {
+      if (BUILDER_ID.equals(iCommand.getBuilderName())) {
         iter.remove();
         break;
       }

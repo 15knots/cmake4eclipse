@@ -438,13 +438,11 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
         ICConfigurationDescription[] cfgs = (ICConfigurationDescription[]) ((ICMultiConfigDescription) cfgd).getItems();
 
         for (int i = 0; i < prefs.length; i++) {
-          ICStorageElement storage = cfgs[i].getStorage(CMakeSettings.CFG_STORAGE_ID, true);
-          prefs[i].saveToStorage(storage);
+          prefs[i].save(cfgs[i]);
         }
       } else {
         // we are editing a single configuration...
-        ICStorageElement storage = cfgd.getStorage(CMakeSettings.CFG_STORAGE_ID, true);
-        prefs[0].saveToStorage(storage);
+        prefs[0].save(cfgd);
       }
     } catch (CoreException ex) {
       log.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, null, ex));

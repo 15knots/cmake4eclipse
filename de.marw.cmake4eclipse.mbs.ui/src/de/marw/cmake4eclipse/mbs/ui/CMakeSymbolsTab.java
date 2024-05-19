@@ -137,8 +137,7 @@ public class CMakeSymbolsTab extends QuirklessAbstractCPropertyTab {
     final ICConfigurationDescription cfgd = resDesc.getConfiguration();
     try {
       // save as project settings..
-      ICStorageElement storage = cfgd.getStorage(CMakeSettings.CFG_STORAGE_ID, true);
-      prefs.saveToStorage(storage);
+      prefs.save(cfgd);
     } catch (CoreException ex) {
       log.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, null, ex));
     }

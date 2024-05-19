@@ -58,7 +58,7 @@ public class CMakeSettings {
   private static final String ATTR_CACHE_FILE = "cacheEntriesFile";
   private static final String ATTR_BUILD_DIR = "buildDir";
   private static final String ATTR_OTHER_ARGUMENTS = "otherArguments";
-  /** the 'dirty' time stamp (in milliseconds) */
+  /** the 'dirty' time stamp (in milliseconds). read only for migration purposes */
   private static final String ATTR_DIRTY_TS = "dirtyTs";
 
   private boolean warnNoDev, debugTryCompile, debugOutput, trace,
@@ -81,12 +81,6 @@ public class CMakeSettings {
    */
   /* package */ CMakeSettings() {
     reset();
-  }
-
-  /** Gets the 'dirty' time stamp (in milliseconds).
-   */
-  public long getDirtyTs() {
-    return dirty_ts;
   }
 
   /**
@@ -120,7 +114,15 @@ public class CMakeSettings {
       return;
     ICStorageElement storage = cfgd.getStorage(CMakeSettings.CFG_STORAGE_ID, true);
     buildDirectory= storage.getAttribute(ATTR_BUILD_DIR);
-    dirty_ts= Long.parseLong( Objects.requireNonNullElse( storage.getAttribute(ATTR_DIRTY_TS), "0"));
+
+    final String dirtyAttr = storage.getAttribute(ATTR_DIRTY_TS);
+    if (dirtyAttr != null) {
+      // migrate dirty time stamp attribute to file time stamp
+      dirty_ts = Long.parseLong(Objects.requireNonNullElse(dirtyAttr, "0"));
+      if(dirty_ts > 0) {
+        ProjectPropsModifiedDateUtil.setLastModified(cfgd.getProjectDescription().getProject(), dirty_ts);
+      }
+    }
 
     final ICStorageElement[] children = storage.getChildren();
     for (ICStorageElement child : children) {
@@ -152,16 +154,19 @@ public class CMakeSettings {
   /**
    * Persists this configuration to the project file.
    */
-  public void saveToStorage(ICStorageElement parent) {
-    parent.setAttribute(ATTR_DIRTY_TS, String.valueOf(dirty_ts));
-    parent.setAttribute(ATTR_BUILD_DIR, buildDirectory);
+  public void save(ICConfigurationDescription cfgd) throws CoreException {
+    // modification time stamp is stored below the plug-in state area to be more SCM friendly
+    ProjectPropsModifiedDateUtil.setLastModified(cfgd.getProjectDescription().getProject(), dirty_ts);
+
+    ICStorageElement storage = cfgd.getStorage(CMakeSettings.CFG_STORAGE_ID, true);
+    storage.setAttribute(ATTR_BUILD_DIR, buildDirectory);
 
     ICStorageElement pOpts;
-    ICStorageElement[] options = parent.getChildrenByName(ELEM_OPTIONS);
+    ICStorageElement[] options = storage.getChildrenByName(ELEM_OPTIONS);
     if (options.length > 0) {
       pOpts = options[0];
     } else {
-      pOpts = parent.createChild(ELEM_OPTIONS);
+      pOpts = storage.createChild(ELEM_OPTIONS);
     }
 
     setOrRemoveAttribute(pOpts, ATTR_CACHE_FILE, cacheFile);
@@ -177,9 +182,9 @@ public class CMakeSettings {
     setOrRemoveAttribute(pOpts, ATTR_WARN_UNUSED, warnUnused);
 
     // defines...
-    Util.serializeCollection(ELEM_DEFINES, parent, new CMakeDefineSerializer(), defines);
+    Util.serializeCollection(ELEM_DEFINES, storage, new CMakeDefineSerializer(), defines);
     // undefines...
-    Util.serializeCollection(ELEM_UNDEFINES, parent, new CMakeUndefineSerializer(), undefines);
+    Util.serializeCollection(ELEM_UNDEFINES, storage, new CMakeUndefineSerializer(), undefines);
   }
 
   /**
