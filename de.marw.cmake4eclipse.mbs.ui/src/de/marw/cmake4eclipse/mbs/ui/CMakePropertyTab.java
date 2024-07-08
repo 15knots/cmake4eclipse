@@ -90,7 +90,6 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
       t_outputFolder = setupText(gr, 1, GridData.FILL_HORIZONTAL);
       BelowRootPathTextFieldModifyListener.addListener(t_outputFolder, (AbstractPage) super.page,
           "Build output location must be below project root");
-      t_outputFolder.addModifyListener(evt -> {});
       // "Browse", "Create" dialog launcher buttons...
       Composite buttonBar = new Composite(gr, SWT.NONE);
       {
@@ -324,7 +323,7 @@ public class CMakePropertyTab extends QuirklessAbstractCPropertyTab {
       value = t_cacheFile.getText().trim();
       pref.setCacheFile(value.isEmpty() ? null : value);
       value = t_outputFolder.getText().trim();
-      pref.setBuildDirectory(value.isEmpty() ? null : value);
+      pref.setBuildDirectory(value);
       value = t_otherArguments.getText().trim();
       pref.setOtherArguments(value.isEmpty() ? null : value);
     }
