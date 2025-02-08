@@ -113,8 +113,9 @@ public class CMakeSettings {
     if (cfgd == null)
       return;
     ICStorageElement storage = cfgd.getStorage(CMakeSettings.CFG_STORAGE_ID, true);
-    buildDirectory= storage.getAttribute(ATTR_BUILD_DIR);
-
+    if(storage.hasAttribute(ATTR_BUILD_DIR)) {  // pre 1.6.1 compat
+      buildDirectory= storage.getAttribute(ATTR_BUILD_DIR);
+    }
     final String dirtyAttr = storage.getAttribute(ATTR_DIRTY_TS);
     if (dirtyAttr != null) {
       // migrate dirty time stamp attribute to file time stamp

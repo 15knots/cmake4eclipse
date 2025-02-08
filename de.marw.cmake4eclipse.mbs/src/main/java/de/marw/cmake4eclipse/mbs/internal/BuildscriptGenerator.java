@@ -142,10 +142,6 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
         // storage base is null; treat as bug in CDT..
         log.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "falling back to hard coded build directory", e));
       }
-      if (buildDirStr == null) {
-        // not configured: fall back to legacy behavior
-        buildDirStr = "_build/${ConfigName}";
-      }
 
       try {
         buildDirStr = CCorePlugin.getDefault().getCdtVariableManager().resolveValue(buildDirStr, "", null, cfgd);
