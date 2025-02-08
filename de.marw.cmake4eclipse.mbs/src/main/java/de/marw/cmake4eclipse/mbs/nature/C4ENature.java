@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.cdt.build.core.scannerconfig.ScannerConfigBuilder;
 import org.eclipse.cdt.core.CCProjectNature;
 import org.eclipse.cdt.core.CProjectNature;
 import org.eclipse.cdt.managedbuilder.core.ManagedCProjectNature;
@@ -70,7 +71,8 @@ public class C4ENature implements IProjectNature {
     List<ICommand> commands = new ArrayList<>(Arrays.asList(description.getBuildSpec()));
     commands.add(0, bldrCommand);
 
-    ICommand[] cmds = commands.stream().filter(c -> !ManagedCProjectNature.BUILDER_ID.equals(c.getBuilderName()) ). distinct().toArray(ICommand[]::new);
+    ICommand[] cmds = commands.stream().filter(c -> !ManagedCProjectNature.BUILDER_ID.equals(c.getBuilderName()))
+        .filter(c -> !ScannerConfigBuilder.BUILDER_ID.equals(c.getBuilderName())).distinct().toArray(ICommand[]::new);
     description.setBuildSpec(cmds);
     project.setDescription(description, monitor);
   }
