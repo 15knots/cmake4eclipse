@@ -563,10 +563,16 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       /* user specified other cmake arguments.. */
       String otherArguments = prefs.getOtherArguments();
       if (otherArguments != null) {
+        final ICdtVariableManager mngr = CCorePlugin.getDefault().getCdtVariableManager();
         // handle Unix shell quoting
-        QuotedStringTokenizer tokenizer = QuotedStringTokenizer.builder().delimiters( " \t\n\r\f").build();
+        QuotedStringTokenizer tokenizer = QuotedStringTokenizer.builder().delimiters(" \t\n\r\f").build();
         for (Iterator<String> iter = tokenizer.tokenize(otherArguments); iter.hasNext();) {
-          args.add(iter.next());
+          final String arg = iter.next();
+          try {
+            args.add(mngr.resolveValue(arg, null, "", cfgd));
+          } catch (CdtVariableException ex) {
+            args.add(arg);
+          }
         }
       }
     }
