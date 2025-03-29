@@ -1,5 +1,10 @@
 # Cmake4eclipse Change Log
 
+## 5.0.1 (2025-03-31)
+### Changes
+- Fix #201: NPE when managing multiple configurations
+- Enhancement #207: Other CMake argument field does not expand Eclipse variables
+
 ## 5.0.0 (2024-01-15)
 ### Changes
 - Restore compatibility with CDT 11.4/Eclipse 2023-12.
