@@ -220,7 +220,7 @@ abstract class AbstractBuildToolkitDialog extends MessageDialog {
     /*
      */
     tkIsExternalCmake = WidgetHelper.createCheckbox(gr, SWT.BEGINNING, 2,
-        "Do not use cmake executable from &tool kit path");
+        "Exclude cmake executable found on &tool kit path");
     tkIsExternalCmake.setToolTipText("Enable if you are running windows and for example use cygwin.\n"
         + "The cygwin variant of cmake produces file paths (like /bin/cc) that are not understood\n"
         + "by the workbench, causing each build to fail.");

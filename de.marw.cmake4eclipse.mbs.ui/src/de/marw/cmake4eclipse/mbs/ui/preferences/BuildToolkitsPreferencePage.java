@@ -1,15 +1,36 @@
-/**
+/* ******************************************************************************
+ * Copyright (c) 2021-2025 Martin Weber.
  *
- */
+ * Content is provided to you under the terms and conditions of the Eclipse Public License Version 2.0 "EPL".
+ * A copy of the EPL is available at http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *******************************************************************************/
 package de.marw.cmake4eclipse.mbs.ui.preferences;
 
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.nio.file.FileVisitOption;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.viewers.CellEditor;
@@ -34,13 +55,16 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
+import org.osgi.framework.FrameworkUtil;
 
 import com.google.gson.JsonSyntaxException;
 
@@ -54,12 +78,16 @@ import de.marw.cmake4eclipse.mbs.ui.WidgetHelper;
  * Preference page for Cmake4eclipse workbench preferences (build tools).
  */
 public class BuildToolkitsPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
+  private static final String ENV_VAR_PATH = "${env_var:PATH}";
+  private static final String MSYS2_SHELL_CMD_FILE = "msys2_shell.cmd";
+
   private TableViewer toolkitsTableViewer;
   private long overwritingBtkUid;
+  private CmakeGenerator defaultGenerator;
 
   public BuildToolkitsPreferencePage() {
     setDescription("Add, remove or edit build tool kit definitions.\n"
-        + "A build tool kit definition guides cmake to find build tools they are not in the executable file\n"
+        + "A build tool kit definition guides cmake to find build tools that are not in the executable file\n"
         + "search-list ($PATH on Linux).\n" + "Mark a build tool kit as 'Overwrites' to set it into effect.");
     noDefaultButton();
   }
@@ -105,6 +133,8 @@ public class BuildToolkitsPreferencePage extends PreferencePage implements IWork
       editButtons.setLayout(new GridLayout(1, false));
 
       final Button buttonTcAdd = WidgetHelper.createButton(editButtons, "&Add...", true);
+      final Button buttonTcSearch = WidgetHelper.createButton(editButtons, "&Search MSYS2...", true);
+      buttonTcSearch.setToolTipText("Search for MSYS2/MinGW installations");
       final Button buttonTcEdit = WidgetHelper.createButton(editButtons, "&Edit...", false);
       final Button buttonTcDuplicate = WidgetHelper.createButton(editButtons, "Dupli&cate...", false);
       final Button buttonTcDel = WidgetHelper.createButton(editButtons, "&Remove", false);
@@ -114,6 +144,12 @@ public class BuildToolkitsPreferencePage extends PreferencePage implements IWork
         @Override
         public void widgetSelected(SelectionEvent event) {
           handleTcAddButton(toolkitsTableViewer);
+        }
+      });
+      buttonTcSearch.addSelectionListener(new SelectionAdapter() {
+        @Override
+        public void widgetSelected(SelectionEvent event) {
+          handleTcSearchButton(toolkitsTableViewer);
         }
       });
       buttonTcEdit.addSelectionListener(new SelectionAdapter() {
@@ -191,7 +227,7 @@ public class BuildToolkitsPreferencePage extends PreferencePage implements IWork
         .setLabelProvider(ColumnLabelProvider.createTextProvider(e -> ((BuildToolKitDefinition) e).getName()));
     createTableViewerColumn(viewer, "Build System", 100, sortSelectionListener).setLabelProvider(
         ColumnLabelProvider.createTextProvider(e -> ((BuildToolKitDefinition) e).getGenerator().getCmakeName()));
-    createTableViewerColumn(viewer, "$PATH", 250, sortSelectionListener)
+    createTableViewerColumn(viewer, "$PATH", 300, sortSelectionListener)
         .setLabelProvider(ColumnLabelProvider.createTextProvider(e -> ((BuildToolKitDefinition) e).getPath()));
   }
 
@@ -212,9 +248,9 @@ public class BuildToolkitsPreferencePage extends PreferencePage implements IWork
     return viewerColumn;
   }
 
-  private static void handleTcAddButton(TableViewer tableViewer) {
+  private void handleTcAddButton(TableViewer tableViewer) {
     BuildToolKitDefinition tc = new BuildToolKitDefinition(BuildToolKitDefinition.createUniqueId(), "",
-        CmakeGenerator.Ninja, "${env_var:PATH}");
+        defaultGenerator, ENV_VAR_PATH);
     AbstractBuildToolkitDialog dlg = new AddBuildToolkitDialog(tableViewer.getTable().getShell(), tc);
 
     if (dlg.open() == Dialog.OK) {
@@ -222,6 +258,113 @@ public class BuildToolkitsPreferencePage extends PreferencePage implements IWork
       List<BuildToolKitDefinition> tcs = (List<BuildToolKitDefinition>) tableViewer.getInput();
       tcs.add(tc);
       tableViewer.add(tc); // updates the display
+    }
+  }
+
+  private void handleTcSearchButton(TableViewer tableViewer) {
+    final Shell shell = tableViewer.getTable().getShell();
+    DirectoryDialog dialog = new DirectoryDialog(shell);
+    dialog.setMessage("Select directory to search for MSYS2 installations");
+    dialog.setText("Directory Selection");
+    IDialogSettings settings = PlatformUI
+        .getDialogSettingsProvider(FrameworkUtil.getBundle(BuildToolkitsPreferencePage.class)).getDialogSettings();
+    {
+      String dir = settings.get("last_msys_search");
+      dialog.setFilterPath(dir != null ? dir : "C:\\msys64");
+    }
+    String text = dialog.open();
+    settings.put("last_msys_search", dialog.getFilterPath());
+    if (text != null) {
+      // search for MSYS installations...
+
+      List<Path> searchResults = new ArrayList<>();
+
+      IRunnableWithProgress op = new IRunnableWithProgress() {
+        @Override
+        public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+          monitor.beginTask("Searching MSYS2 installations (" + MSYS2_SHELL_CMD_FILE + ")...",
+              IProgressMonitor.UNKNOWN);
+          try {
+            Files.walkFileTree(Paths.get(text), EnumSet.noneOf(FileVisitOption.class), Integer.MAX_VALUE,
+                new SimpleFileVisitor<java.nio.file.Path>() {
+
+                  @Override
+                  public FileVisitResult visitFile(java.nio.file.Path file, BasicFileAttributes attrs)
+                      throws IOException {
+//                    if (file.getFileName().toString().startsWith("base")) {
+                    if (MSYS2_SHELL_CMD_FILE.equals(file.getFileName().toString())) {
+                      searchResults.add(file.getParent());
+                    }
+                    return monitor.isCanceled() ? FileVisitResult.TERMINATE : FileVisitResult.CONTINUE;
+                  }
+
+                  @Override
+                  public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
+                    monitor.subTask("Found " + searchResults.size() + " " + dir);
+                    return monitor.isCanceled() ? FileVisitResult.TERMINATE : FileVisitResult.CONTINUE;
+                  }
+
+                  @Override
+                  public FileVisitResult visitFileFailed(Path file, IOException exc) {
+                    return FileVisitResult.CONTINUE;
+                  }
+
+                  @Override
+                  public FileVisitResult postVisitDirectory(Path dir, IOException exc) {
+                    return FileVisitResult.CONTINUE;
+                  }
+
+                });
+          } catch (IOException shouldNotHappen) {
+            shouldNotHappen.printStackTrace();
+          }
+          monitor.done();
+        }
+      };
+      try {
+        new ProgressMonitorDialog(shell).run(true, true, op);
+
+        if (!searchResults.isEmpty()) {
+          // filter out already existing BTKs by PATH value...
+          @SuppressWarnings("unchecked")
+          List<BuildToolKitDefinition> tcs = (List<BuildToolKitDefinition>) tableViewer.getInput();
+          for (Path msysHome : searchResults) {
+            /**
+             * construct PATH value as follows for cmake:<br>
+             * 'mingw64/bin' - to find compilers and accompanying tools, <br>
+             * 'usr/bin' - to find tools like bison, flex which are not provided by mingw, <br>
+             * '${env_var:PATH}' - the PATH environment variable to find any other standard windows tools.
+             */
+            final String msysBin = msysHome.resolve("usr/bin").toString();
+            {
+              // MSYS + MinGW to build for 64 bit architecture
+              String path = String.join(File.pathSeparator, msysHome.resolve("mingw64/bin").toString(), msysBin,
+                  ENV_VAR_PATH);
+              if (tcs.stream().noneMatch(btk -> btk.getPath().trim().equals(path))) {
+                BuildToolKitDefinition tc = new BuildToolKitDefinition(BuildToolKitDefinition.createUniqueId(),
+                    generateName("MSYS/MinGW 64 bit", tcs), defaultGenerator, path);
+                tcs.add(tc);
+                tableViewer.add(tc); // updates the display
+              }
+            }
+            {
+              // MSYS + MinGW to build for 32 bit architecture
+              // (NOTE: 32-bit MSYS2 no longer actively supported by MSYS)
+              String path = String.join(File.pathSeparator, msysHome.resolve("mingw32/bin").toString(), msysBin,
+                  ENV_VAR_PATH);
+              if (tcs.stream().noneMatch(btk -> btk.getPath().trim().equals(path))) {
+                BuildToolKitDefinition tc = new BuildToolKitDefinition(BuildToolKitDefinition.createUniqueId(),
+                    generateName("MSYS/MinGW 32 bit", tcs), defaultGenerator, path);
+                tcs.add(tc);
+                tableViewer.add(tc); // updates the display
+              }
+            }
+          }
+        }
+      } catch (InvocationTargetException e) {
+        e.printStackTrace();
+      } catch (InterruptedException ignore) {
+      }
     }
   }
 
@@ -274,6 +417,7 @@ public class BuildToolkitsPreferencePage extends PreferencePage implements IWork
     IPreferenceStore store = getPreferenceStore();
 
     overwritingBtkUid = store.getLong(PreferenceAccess.TOOLKIT_OVERWRITES);
+    defaultGenerator = CmakeGenerator.valueOf(store.getString(PreferenceAccess.CMAKE_GENERATOR));
     String key = (String) toolkitsTableViewer.getTable().getData();
     String json = store.getString(key);
     try {
