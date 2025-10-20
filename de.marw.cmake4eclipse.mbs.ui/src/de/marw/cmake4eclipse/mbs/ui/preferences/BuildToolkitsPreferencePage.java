@@ -444,8 +444,8 @@ public class BuildToolkitsPreferencePage extends PreferencePage implements IWork
       String key = (String) toolkitsTableViewer.getTable().getData();
       String oldVal = store.getString(key);
       @SuppressWarnings("unchecked")
-      List<BuildToolKitDefinition> toolchains = (List<BuildToolKitDefinition>) toolkitsTableViewer.getInput();
-      String newVal = PreferenceAccess.toJsonFromList(toolchains);
+      List<BuildToolKitDefinition> btks = (List<BuildToolKitDefinition>) toolkitsTableViewer.getInput();
+      String newVal = PreferenceAccess.toJsonFromList(btks);
       if (!Objects.equals(newVal, oldVal)) {
         dirty = true;
         store.setValue(key, newVal);
@@ -474,8 +474,8 @@ public class BuildToolkitsPreferencePage extends PreferencePage implements IWork
    * @param name the name with which to ensure uniqueness
    * @return the unique version of the given name
    */
-  private static String generateName(String name, List<BuildToolKitDefinition> toolchains) {
-    if (!isDuplicateName(name, toolchains)) {
+  private static String generateName(String name, List<BuildToolKitDefinition> buildToolKits) {
+    if (!isDuplicateName(name, buildToolKits)) {
       return name;
     }
 
@@ -485,14 +485,14 @@ public class BuildToolkitsPreferencePage extends PreferencePage implements IWork
       String stringInt = name.substring(start + 1, end);
       int numericValue = Integer.parseInt(stringInt);
       String newName = name.substring(0, start + 1) + (numericValue + 1) + ")"; //$NON-NLS-1$
-      return generateName(newName, toolchains);
+      return generateName(newName, buildToolKits);
     } else {
-      return generateName(name + " (1)", toolchains); //$NON-NLS-1$
+      return generateName(name + " (1)", buildToolKits); //$NON-NLS-1$
     }
   }
 
-  private static boolean isDuplicateName(String name, List<BuildToolKitDefinition> toolchains) {
-    for (BuildToolKitDefinition tc : toolchains) {
+  private static boolean isDuplicateName(String name, List<BuildToolKitDefinition> buildToolKits) {
+    for (BuildToolKitDefinition tc : buildToolKits) {
       if (tc.getName().equals(name)) {
         return true;
       }
