@@ -297,18 +297,18 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     final IConsole console = CCorePlugin.getDefault().getConsole(CdtConsoleConstants.CMAKE_CONSOLE_ID);
     console.start(project);
 
+    final Optional<BuildToolKitDefinition> overwritingToolkit = BuildToolKitUtil.getOverwritingToolkit(prefs);
     // create makefile
     try {
-      final OutputStream cis = console.getInfoStream();
       String msg = String.format("%tT Buildscript generation: %s::%s in %s\n", startDate, project.getName(),
-          config.getName(), buildDir);
-      cis.write(msg.getBytes());
+          config.getName(), buildPath.toString());
+      console.getInfoStream().write(msg.getBytes());
     } catch (IOException ignore) {
     }
-    IContainer srcDir = cmakelistsPath.isEmpty() ? project : project.getFolder(cmakelistsPath);
+    IContainer cmakelistsDir = cmakelistsPath.isEmpty() ? project : project.getFolder(cmakelistsPath);
 
     checkCancel();
-    MultiStatus status = invokeCMake(srcDir, buildFolder.getLocation(), console);
+    MultiStatus status = invokeCMake(cmakelistsDir, buildFolder.getLocation(), console, overwritingToolkit);
     // NOTE: Commonbuilder reads getCode() to detect errors, not getSeverity()
     if (status.getCode() == IStatus.ERROR) {
       // failed to generate
@@ -361,23 +361,24 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
   /**
    * Run 'cmake -G xyz' command.
    *
-   * @param console
-   *        the build console to send messages to
+   * @param cmakelistsDir
+   *                           directory of the top-level CMakeLists.txt file
    * @param buildPath
-   *        abs. path
-   * @param srcFolder
+   *                           abs. path
+   * @param console
+   *                           the build console to send messages to
+   * @param overwritingToolkit
+   *                           an Optional indicating the overwriting build tool kit
    * @return a MultiStatus object, where .getCode() return the severity
    * @throws CoreException
    */
-  private MultiStatus invokeCMake(IContainer srcFolder, IPath buildPath, IConsole console) throws CoreException {
-    IEclipsePreferences prefs = PreferenceAccess.getPreferences();
+  private MultiStatus invokeCMake(IContainer cmakelistsDir, IPath buildPath, IConsole console,
+      Optional<BuildToolKitDefinition> overwritingToolkit) throws CoreException {
     try {
-      Optional<BuildToolKitDefinition> overwritingBtk = BuildToolKitUtil.getOverwritingToolkit(prefs);
-
       // Set the environment
-      ArrayList<String> envList = buildEnvironment(console, overwritingBtk);
+      ArrayList<String> envList = buildEnvironment(console, overwritingToolkit);
 
-      final List<String> argList = buildCommandline(srcFolder.getLocation(), overwritingBtk);
+      final List<String> argList = buildCommandline(cmakelistsDir.getLocation(), overwritingToolkit);
       // extract cmake command
       final String cmd = argList.remove(0);
       // run cmake..
@@ -394,7 +395,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
         }
         CMakeErrorParser.deleteErrorMarkers(project);
         // hook in cmake error parsing
-        CMakeExecutionMarkerFactory markerFactory = new CMakeExecutionMarkerFactory(srcFolder);
+        CMakeExecutionMarkerFactory markerFactory = new CMakeExecutionMarkerFactory(cmakelistsDir);
         // NOTE: we need 2 of this, since the output streams are not synchronized, causing loss of
         // the internal processor state
         try (CMakeErrorParser errorParserE = new CMakeErrorParser(markerFactory);
