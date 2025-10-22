@@ -1,5 +1,9 @@
 # Cmake4eclipse Change Log
 
+## 5.1.0 (2025-10-22)
+### Changes
+- Enhancement: add button to search for MSYS installations
+
 ## 5.0.1 (2025-03-31)
 ### Changes
 - Fix #201: NPE when managing multiple configurations

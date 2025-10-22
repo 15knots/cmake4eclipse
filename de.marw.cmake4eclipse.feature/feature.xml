@@ -2,7 +2,7 @@
 <feature
       id="de.marw.cmake4eclipse.feature"
       label="cmake4eclipse"
-      version="5.0.1"
+      version="5.1.0"
       provider-name="Martin Weber">
 
    <description>
@@ -299,16 +299,10 @@ version(s), and exceptions or additional permissions here}.&quot;
 
    <plugin
          id="de.marw.cmake4eclipse.mbs"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
    <plugin
          id="de.marw.cmake4eclipse.mbs.ui"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
+         version="0.0.0"/>
 
 </feature>
