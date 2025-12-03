@@ -35,6 +35,7 @@ public class CmakeGeneratorTest {
   public void testGetParallelBuildArg_Off() {
     assertEquals(null, CmakeGenerator.UnixMakefiles.getParallelBuildArg(1));
     assertEquals("-j 1", CmakeGenerator.Ninja.getParallelBuildArg(1));
+    assertEquals("-j1", CmakeGenerator.FastBuild.getParallelBuildArg(1));
     assertEquals(null, CmakeGenerator.MinGWMakefiles.getParallelBuildArg(1));
     assertEquals(null, CmakeGenerator.MSYSMakefiles.getParallelBuildArg(1));
     assertEquals(null, CmakeGenerator.NMakeMakefiles.getParallelBuildArg(1));
@@ -51,6 +52,7 @@ public class CmakeGeneratorTest {
   public void testGetParallelBuildArg_Unlimited() {
     assertEquals("-j", CmakeGenerator.UnixMakefiles.getParallelBuildArg(Integer.MAX_VALUE));
     assertEquals("-j " + Integer.MAX_VALUE, CmakeGenerator.Ninja.getParallelBuildArg(Integer.MAX_VALUE));
+    assertEquals("-j", CmakeGenerator.FastBuild.getParallelBuildArg(1));
     assertEquals("-j", CmakeGenerator.MinGWMakefiles.getParallelBuildArg(Integer.MAX_VALUE));
     assertEquals("-j", CmakeGenerator.MSYSMakefiles.getParallelBuildArg(Integer.MAX_VALUE));
     assertEquals(null, CmakeGenerator.NMakeMakefiles.getParallelBuildArg(Integer.MAX_VALUE));
@@ -68,6 +70,7 @@ public class CmakeGeneratorTest {
     int value = 123;
     assertEquals("-j " + value, CmakeGenerator.UnixMakefiles.getParallelBuildArg(value));
     assertEquals("-j " + value, CmakeGenerator.Ninja.getParallelBuildArg(value));
+    assertEquals("-j" + value, CmakeGenerator.FastBuild.getParallelBuildArg(value));
     assertEquals("-j " + value, CmakeGenerator.MinGWMakefiles.getParallelBuildArg(value));
     assertEquals("-j " + value, CmakeGenerator.MSYSMakefiles.getParallelBuildArg(value));
     assertEquals(null, CmakeGenerator.NMakeMakefiles.getParallelBuildArg(value));

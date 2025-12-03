@@ -303,15 +303,13 @@ abstract class AbstractBuildToolkitDialog extends MessageDialog {
   /* package */ static CmakeGenerator[] getAvailableGenerators() {
     switch (Platform.getOS()) {
     case Platform.OS_WIN32:
-      return new CmakeGenerator[] { CmakeGenerator.MinGWMakefiles, CmakeGenerator.Ninja, CmakeGenerator.MSYSMakefiles,
-          CmakeGenerator.UnixMakefiles, CmakeGenerator.NMakeMakefiles, CmakeGenerator.NMakeMakefilesJOM,
-          CmakeGenerator.BorlandMakefiles, CmakeGenerator.WatcomWMake };
+      return new CmakeGenerator[] { CmakeGenerator.MinGWMakefiles, CmakeGenerator.Ninja, CmakeGenerator.FastBuild,
+          CmakeGenerator.MSYSMakefiles, CmakeGenerator.UnixMakefiles, CmakeGenerator.NMakeMakefiles,
+          CmakeGenerator.NMakeMakefilesJOM, CmakeGenerator.BorlandMakefiles, CmakeGenerator.WatcomWMake };
     default:
       // fall back to linux, if OS is unknown
-      return new CmakeGenerator[] { CmakeGenerator.Ninja, CmakeGenerator.UnixMakefiles
-          // see https://gitlab.kitware.com/cmake/cmake/-/issues/14793
-          // , CmakeGenerator.WatcomWMake
-      };
+      return new CmakeGenerator[] { CmakeGenerator.Ninja, CmakeGenerator.UnixMakefiles, CmakeGenerator.FastBuild,
+          CmakeGenerator.WatcomWMake };
     }
   }
 

@@ -36,6 +36,21 @@ public enum CmakeGenerator {
         return "-j " + parallelizationNum; // Unlimited or User specified
     }
   },
+  FastBuild("FASTBuild", "-nostoponerror") {
+    @Override
+    public String getMakefileName(){
+      return "fbuild.bff";
+    }
+    @Override
+    public String getParallelBuildArg(int parallelizationNum) {
+      if (parallelizationNum == 1)
+        return "-j1"; // No parallel
+      else if (parallelizationNum == Integer.MAX_VALUE)
+        return "-j"; // Unlimited
+      else
+        return "-j" + parallelizationNum; // User specified
+    }
+  },
   // windows generators
   NMakeMakefilesJOM("NMake Makefiles JOM") {
     @Override
