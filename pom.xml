@@ -80,6 +80,11 @@
         <artifactId>target-platform-configuration</artifactId>
       </plugin>
 
+      <!-- get build host name -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+      </plugin>
       <!-- enable source bundle generation -->
       <plugin>
         <groupId>org.eclipse.tycho</groupId>
@@ -170,16 +175,20 @@
         </plugin>
 
         <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-jar-plugin</artifactId>
-          <version>2.5</version>
-          <configuration>
-            <archive>
-              <!-- Don't add the generated Maven information to the
-                jar -->
-              <addMavenDescriptor>false</addMavenDescriptor>
-            </archive>
-          </configuration>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>build-helper-maven-plugin</artifactId>
+          <version>3.6.1</version>
+          <executions>
+            <execution>
+              <id>init-build-properties</id>
+              <goals>
+                <goal>hostname</goal>
+              </goals>
+              <configuration>
+                <hostnameProperty>build.host</hostnameProperty>
+              </configuration>
+            </execution>
+          </executions>
         </plugin>
 
         <plugin>
@@ -196,6 +205,9 @@
             <!-- Don't add the generated Maven information to jar -->
             <archive>
               <addMavenDescriptor>false</addMavenDescriptor>
+              <manifestEntries>
+                <Build-Host>${build.host}</Build-Host>
+              </manifestEntries>
             </archive>
           </configuration>
           <dependencies>
@@ -263,13 +275,12 @@
 
         <plugin>
           <artifactId>maven-enforcer-plugin</artifactId>
-          <version>3.0.0-M2</version>
+          <version>3.6.2</version>
           <executions>
             <execution>
               <id>default-display-info</id>
               <phase>validate</phase>
               <goals>
-                <goal>display-info</goal>
                 <goal>enforce</goal>
               </goals>
               <configuration>
