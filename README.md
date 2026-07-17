@@ -58,6 +58,9 @@ make your product builds immune to downtimes on cloudsmith.
 ## Debug and Build
 This project uses Apache maven as its build system.
 To build from a command-line, run `mvn package` in the root directory of the project source files.
+To run tests from a command-line, run
+`MAVEN_OPTS="-Djdk.xml.maxGeneralEntitySizeLimit=0 -Djdk.xml.totalEntitySizeLimit=0" mvn -e -pl releng/targetplatform,de.marw.cmake4eclipse.mbs -am test`
+in the root directory of the project source files.
 
 There is also a run configuration for eclipse to invoke the maven build: `build cmake4eclipse`.
 

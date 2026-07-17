@@ -1,5 +1,10 @@
 # Cmake4eclipse Change Log
 
+## 5.2.0 (2026-07-17)
+### Changes
+- Enhancement: load `CMakePresets.json` and apply matching configure/build preset settings (generator, binary
+  directory, cache variables and configure debug/trace/warning flags) for the active Eclipse build configuration.
+
 ## 5.1.0 (2025-10-22)
 ### Changes
 - Enhancement: add button to search for MSYS installations
