@@ -1,5 +1,5 @@
 /* ******************************************************************************
- * Copyright (c) 2013-2019 Martin Weber.
+ * Copyright (c) 2013-2026 Martin Weber.
  *
  * Content is provided to you under the terms and conditions of the Eclipse Public License Version 2.0 "EPL".
  * A copy of the EPL is available at http://www.eclipse.org/legal/epl-2.0.
@@ -332,7 +332,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
   /**
    * Recursively creates the folder hierarchy needed for the build output, if
    * necessary. If the folder is created, its derived bit is set to true so the
-   * CM system ignores the contents. If the resource exists, respect the
+   * SCM system ignores the contents. If the resource exists, respect the
    * existing derived setting.
    *
    * @param folder
@@ -378,7 +378,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       // Set the environment
       ArrayList<String> envList = buildEnvironment(console, overwritingToolkit);
 
-      final List<String> argList = buildCommandline(cmakelistsDir.getLocation(), overwritingToolkit);
+      final List<String> argList = buildCommandline(cmakelistsDir.getLocation(), buildPath, overwritingToolkit);
       // extract cmake command
       final String cmd = argList.remove(0);
       // run cmake..
@@ -386,7 +386,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       launcher.setProject(project); // 9.4++ versions of CDT require this for docker
       launcher.showCommand(true);
       final Process proc = launcher.execute(new Path(cmd), argList.toArray(new String[argList.size()]),
-          envList.toArray(new String[envList.size()]), buildPath, monitor);
+          envList.toArray(new String[envList.size()]), null, monitor);
       if (proc != null) {
         try {
           // Close the input of the process since we will never write to it
@@ -481,7 +481,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
    *
    * @throws CoreException
    */
-  private List<String> buildCommandline(IPath srcDir, Optional<BuildToolKitDefinition> overwritingBtk)
+  private List<String> buildCommandline(IPath srcDir, IPath buildDir, Optional<BuildToolKitDefinition> overwritingBtk)
       throws CoreException {
     // load project properties..
     final ICConfigurationDescription cfgd = ManagedBuildManager.getDescriptionForConfiguration(config);
@@ -581,7 +581,10 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     // tell cmake to write compile commands to a JSON file
     args.add("-DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=ON");
     // tell cmake where its script is located..
+    args.add("-S");
     args.add(srcDir.toOSString());
+    args.add("-B");
+    args.add(buildDir.toOSString());
     return args;
   }
 
