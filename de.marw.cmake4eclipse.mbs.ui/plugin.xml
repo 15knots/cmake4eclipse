@@ -2,6 +2,90 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension
+         point="org.eclipse.core.expressions.definitions">
+      <definition
+            id="de.marw.cmake4eclipse.mbs.ui.isBuildableFileOpenInEditor">
+         <and>
+            <with variable="selection">
+               <not>
+                  <instanceof value="org.eclipse.jface.viewers.IStructuredSelection"/>
+               </not>
+            </with>
+            <with variable="activeEditorInput">
+               <reference definitionId="de.marw.cmake4eclipse.mbs.ui.isBuildableFile"/>
+            </with>
+         </and>
+      </definition>
+      <definition
+            id="de.marw.cmake4eclipse.mbs.ui.isBuildableFile">
+         <adapt type="org.eclipse.core.resources.IFile">
+            <and>
+               <test property="org.eclipse.core.resources.projectNature"
+                     value="de.marw.cmake4eclipse.mbs.cmake4eclipsenature"/>
+               <test property="org.eclipse.cdt.ui.isSource"/>
+            </and>
+         </adapt>
+      </definition>
+   </extension>
+
+   <extension
+         point="org.eclipse.ui.commands">
+      <category
+            name="%category.build.name"
+            description="%category.build.description"
+            id="de.marw.cmake4eclipse.mbs.ui.category.build"/>
+      <command
+            name="%command.buildSelectedFiles.name"
+            description="%command.buildSelectedFiles.description"
+            categoryId="de.marw.cmake4eclipse.mbs.ui.category.build"
+            id="de.marw.cmake4eclipse.mbs.ui.command.buildSelectedFiles"/>
+   </extension>
+
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="de.marw.cmake4eclipse.mbs.ui.actions.BuildSelectedFilesHandler"
+            commandId="de.marw.cmake4eclipse.mbs.ui.command.buildSelectedFiles"/>
+   </extension>
+
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            locationURI="popup:org.eclipse.ui.popup.any?before=additions">
+         <command
+               commandId="de.marw.cmake4eclipse.mbs.ui.command.buildSelectedFiles"
+               label="%command.buildSelectedFiles.label"
+               style="push">
+            <visibleWhen checkEnabled="false">
+               <and>
+                  <test property="org.eclipse.cdt.ui.checkPreference"
+                        value="org.eclipse.core.resources/description.autobuilding=false"/>
+                  <or>
+                     <with variable="selection">
+                        <iterate ifEmpty="false">
+                           <reference
+                                 definitionId="de.marw.cmake4eclipse.mbs.ui.isBuildableFile"/>
+                        </iterate>
+                     </with>
+                     <and>
+                        <reference
+                              definitionId="de.marw.cmake4eclipse.mbs.ui.isBuildableFileOpenInEditor">
+                        </reference>
+                        <with
+                              variable="activePart">
+                           <instanceof
+                                 value="org.eclipse.ui.IEditorPart">
+                           </instanceof>
+                        </with>
+                     </and>
+                  </or>
+               </and>
+            </visibleWhen>
+         </command>
+      </menuContribution>
+   </extension>
+
+   <extension
          point="org.eclipse.ui.propertyPages">
         <page
               category="org.eclipse.cdt.managedbuilder.ui.properties.Page_head_build"

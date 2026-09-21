@@ -1,5 +1,10 @@
 # Cmake4eclipse Change Log
 
+## 5.2.0 (2026-09-19)
+### Changes
+- Enhancement: add "Build Selected File(s)" context menu action, analogous to the same-named action for classic
+  Makefile-based Managed Build projects.
+
 ## 5.1.0 (2025-10-22)
 ### Changes
 - Enhancement: add button to search for MSYS installations
