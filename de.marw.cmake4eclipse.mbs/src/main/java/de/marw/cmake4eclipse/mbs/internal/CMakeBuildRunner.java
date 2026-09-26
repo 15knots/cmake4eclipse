@@ -168,8 +168,16 @@ public class CMakeBuildRunner extends ExternalBuildRunner {
     final String cwd = CCorePlugin.getDefault().getCdtVariableManager().resolveValue(builderCWD.toString(), "", null, //$NON-NLS-1$
         cfgd);
 
-    final IFile file0 = ResourcesPlugin.getWorkspace().getRoot().getFile(new Path(cwd).append("CMakeCache.txt")); //$NON-NLS-1$
-    final File file = Paths.get(file0.getLocationURI()).toFile();
+    final File file;
+    final IFile file0;
+    IPath cachePath = new Path(cwd).append("CMakeCache.txt"); //$NON-NLS-1$
+    if (cachePath.isAbsolute()) {
+      file = Paths.get(cachePath.toOSString()).toFile();
+      file0 = null;
+    } else {
+      file0 = ResourcesPlugin.getWorkspace().getRoot().getFile(cachePath);
+      file = Paths.get(file0.getLocationURI()).toFile();
+    }
 
     if (file != null && file.isFile()) {
       final long lastModified = file.lastModified();
@@ -205,7 +213,7 @@ public class CMakeBuildRunner extends ExternalBuildRunner {
           }
         } catch (IOException ex) {
           throw new CoreException(new Status(IStatus.ERROR, Activator.PLUGIN_ID,
-              "Failed to parse file " + file0, ex));
+              "Failed to parse file " + (file0 == null ? file : file0), ex));
         }
       }
     } else {

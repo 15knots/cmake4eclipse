@@ -52,6 +52,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.IResourceStatus;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IPath;
@@ -95,6 +96,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
   private IBuilder builder;
   /** build path - relative to the project. Lazily instantiated */
   private IPath buildRelPath;
+  private Optional<CMakePresetsLoader.ResolvedConfigurePreset> resolvedPreset = null;
 
   /**   */
   public BuildscriptGenerator() {
@@ -113,6 +115,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     this.config = cfg;
     this.builder = builder;
     this.buildRelPath = null;
+    this.resolvedPreset = null;
   }
 
   /*-
@@ -128,6 +131,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     // Cache the build tools
     config = info.getDefaultConfiguration();
     builder = config.getEditableBuilder();
+    resolvedPreset = null;
   }
 
   private IPath getRelBuildPath() {
@@ -137,7 +141,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       final ICConfigurationDescription cfgd = ManagedBuildManager.getDescriptionForConfiguration(config);
       try {
         CMakeSettings prefs = ConfigurationManager.getInstance().getOrLoad(cfgd);
-        buildDirStr = prefs.getBuildDirectory();
+        buildDirStr = resolveBuildDirectory(cfgd, prefs);
       } catch (CoreException e) {
         // storage base is null; treat as bug in CDT..
         log.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, "falling back to hard coded build directory", e));
@@ -164,6 +168,9 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     // So return a workspace relative path here
     final IPath fullPath = project.getFullPath();
     IPath buildPath = getRelBuildPath();
+    if (buildPath.isAbsolute()) {
+      return buildPath;
+    }
     if (buildPath.segmentCount() == 0) {
       return fullPath;
     }
@@ -205,29 +212,12 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
 
     final ICConfigurationDescription cfgDes = ManagedBuildManager.getDescriptionForConfiguration(config);
 
-    IPath cmakelistsPath;
-    ICStorageElement storage = cfgDes.getProjectDescription().getStorage(CMakeSettings.CFG_STORAGE_ID, false);
-    if (storage != null) {
-      // Cmake4eclipse nature holds a path to the top-level cmakelists.txt file
-      String cmakelists = storage.getAttribute(CMakeSettings.ATTR_CMAKELISTS_FLDR);
-      cmakelistsPath = new Path(cmakelists);
-    } else {
-      // classic cmake4eclipse with MBS build system...
-      // .. assumes the top-level cmakelists.txt file is below the (single) source location
-      ICSourceEntry[] srcEntries = config.getSourceEntries();
-
-      // do a sanity check..
-      if (srcEntries.length == 0) {
-        // no source folders specified in project
-        final String msg = "No source directories configured for project";
-        MultiStatus status = new MultiStatus(Activator.PLUGIN_ID, IStatus.ERROR, msg + " " + project.getName(), null);
-        createErrorMarker(project, msg);
-        return status;
-      } else {
-        srcEntries = CDataUtil.resolveEntries(srcEntries, cfgDes);
-        // assume the first source directory contains a CMakeLists.txt
-        cmakelistsPath = srcEntries[0].getFullPath();
-      }
+    IPath cmakelistsPath = getCmakelistsPath(cfgDes);
+    if (cmakelistsPath == null) {
+      final String msg = "No source directories configured for project";
+      MultiStatus status = new MultiStatus(Activator.PLUGIN_ID, IStatus.ERROR, msg + " " + project.getName(), null);
+      createErrorMarker(project, msg);
+      return status;
     }
 
     // See if the user has cancelled the build
@@ -235,16 +225,19 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
 
     boolean mustGenerate= forceGeneration;
 
-    final IContainer buildFolder;
     IPath buildPath = getRelBuildPath();
-    if (buildPath.segmentCount() == 0) {
-      buildFolder= project;
+    final IPath buildLocation;
+    if (buildPath.isAbsolute()) {
+      buildLocation = buildPath;
+    } else if (buildPath.segmentCount() == 0) {
+      buildLocation = project.getLocation();
     } else {
-      buildFolder = project.getFolder(buildPath);
-      createFolder((IFolder) buildFolder);
+      final IFolder buildFolder = project.getFolder(buildPath);
+      createFolder(buildFolder);
+      buildLocation = buildFolder.getLocation();
     }
     // make sure we have a resource to attach session properties to
-    final java.nio.file.Path buildDir = Paths.get(buildFolder.getLocationURI());
+    final java.nio.file.Path buildDir = Paths.get(buildLocation.toOSString());
 
     IEclipsePreferences prefs = PreferenceAccess.getPreferences();
     try {
@@ -305,10 +298,10 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       console.getInfoStream().write(msg.getBytes());
     } catch (IOException ignore) {
     }
-    IContainer cmakelistsDir = cmakelistsPath.isEmpty() ? project : project.getFolder(cmakelistsPath);
+    IContainer cmakelistsDir = getCmakelistsDir(cmakelistsPath);
 
     checkCancel();
-    MultiStatus status = invokeCMake(cmakelistsDir, buildFolder.getLocation(), console, overwritingToolkit);
+    MultiStatus status = invokeCMake(cmakelistsDir, buildLocation, console, overwritingToolkit);
     // NOTE: Commonbuilder reads getCode() to detect errors, not getSeverity()
     if (status.getCode() == IStatus.ERROR) {
       // failed to generate
@@ -485,6 +478,7 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       throws CoreException {
     // load project properties..
     final ICConfigurationDescription cfgd = ManagedBuildManager.getDescriptionForConfiguration(config);
+    final Optional<CMakePresetsLoader.ResolvedConfigurePreset> preset = getResolvedPreset(cfgd);
 
     boolean needVerboseBuild = false;
     {
@@ -507,10 +501,12 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       IBuildProperty property = buildProperties.getProperty(ManagedBuildManager.BUILD_TYPE_PROPERTY_ID);
       if (property != null) {
         IBuildPropertyValue value = property.getValue();
-        if (ManagedBuildManager.BUILD_TYPE_PROPERTY_DEBUG.equals(value.getId())) {
-          args.add("-DCMAKE_BUILD_TYPE:STRING=Debug");
-        } else if (ManagedBuildManager.BUILD_TYPE_PROPERTY_RELEASE.equals(value.getId())) {
-          args.add("-DCMAKE_BUILD_TYPE:STRING=Release");
+        if (!hasVariable(preset, "CMAKE_BUILD_TYPE")) {
+          if (ManagedBuildManager.BUILD_TYPE_PROPERTY_DEBUG.equals(value.getId())) {
+            args.add("-DCMAKE_BUILD_TYPE:STRING=Debug");
+          } else if (ManagedBuildManager.BUILD_TYPE_PROPERTY_RELEASE.equals(value.getId())) {
+            args.add("-DCMAKE_BUILD_TYPE:STRING=Release");
+          }
         }
       }
       // colored output during build is useless for build console (seems to affect progress report only)
@@ -527,8 +523,12 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     {
       IEclipsePreferences wPrefs = PreferenceAccess.getPreferences();
       CmakeGenerator generator = BuildToolKitUtil.getEffectiveCMakeGenerator(wPrefs, overwritingBtk);
+      String generatorName = generator.getCmakeName();
+      if (preset.isPresent() && preset.get().getGenerator() != null) {
+        generatorName = preset.get().getGenerator();
+      }
       args.add("-G");
-      args.add(generator.getCmakeName());
+      args.add(generatorName);
       /* add general settings */
       if (wPrefs.getBoolean(PreferenceAccess.CMAKE_WARN_NO_DEV, false))
         args.add("-Wno-dev");
@@ -549,6 +549,11 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
       String json = wPrefs.get(PreferenceAccess.CMAKE_CACHE_ENTRIES, "[]");
       List<CmakeDefine> entries = PreferenceAccess.toListFromJson(CmakeDefine.class, json);
       appendDefines(args, entries, null);
+    }
+    if (preset.isPresent()) {
+      CMakePresetsLoader.ResolvedConfigurePreset p = preset.get();
+      appendDefines(args, p.getCacheVariables(), cfgd);
+      args.addAll(p.getConfigureArguments());
     }
     /* project settings... */
     {
@@ -586,6 +591,90 @@ public class BuildscriptGenerator implements IManagedBuilderMakefileGenerator2 {
     args.add("-B");
     args.add(buildDir.toOSString());
     return args;
+  }
+
+  private IPath getCmakelistsPath(ICConfigurationDescription cfgDes) throws CoreException {
+    ICStorageElement storage = cfgDes.getProjectDescription().getStorage(CMakeSettings.CFG_STORAGE_ID, false);
+    if (storage != null) {
+      String cmakelists = storage.getAttribute(CMakeSettings.ATTR_CMAKELISTS_FLDR);
+      return cmakelists == null ? Path.EMPTY : new Path(cmakelists);
+    }
+    ICSourceEntry[] srcEntries = config.getSourceEntries();
+    if (srcEntries.length == 0) {
+      return null;
+    }
+    srcEntries = CDataUtil.resolveEntries(srcEntries, cfgDes);
+    return srcEntries[0].getFullPath();
+  }
+
+  private IContainer getCmakelistsDir(IPath cmakelistsPath) {
+    if (cmakelistsPath.isEmpty()) {
+      return project;
+    }
+    if (cmakelistsPath.isAbsolute()
+        || (cmakelistsPath.segmentCount() > 0 && project.getName().equals(cmakelistsPath.segment(0)))) {
+      return ResourcesPlugin.getWorkspace().getRoot().getFolder(cmakelistsPath);
+    }
+    return project.getFolder(cmakelistsPath);
+  }
+
+  private String resolveBuildDirectory(ICConfigurationDescription cfgd, CMakeSettings prefs) {
+    String buildDirectory = prefs.getBuildDirectory();
+    Optional<CMakePresetsLoader.ResolvedConfigurePreset> preset = getResolvedPreset(cfgd);
+    if (preset.isPresent()) {
+      String binaryDir = preset.get().getBinaryDir();
+      if (binaryDir != null && !binaryDir.isBlank()) {
+        java.nio.file.Path path = Paths.get(binaryDir);
+        if (!path.isAbsolute()) {
+          try {
+            IPath cmakelistsPath = getCmakelistsPath(cfgd);
+            if (cmakelistsPath != null) {
+              IPath sourceLocation = getCmakelistsDir(cmakelistsPath).getLocation();
+              if (sourceLocation != null) {
+                path = Paths.get(sourceLocation.toOSString()).resolve(path);
+              }
+            }
+          } catch (CoreException ex) {
+            log.log(new Status(IStatus.WARNING, Activator.PLUGIN_ID, "Failed to resolve preset binaryDir", ex));
+          }
+        }
+        buildDirectory = path.normalize().toString();
+      }
+    }
+    return buildDirectory;
+  }
+
+  private Optional<CMakePresetsLoader.ResolvedConfigurePreset> getResolvedPreset(ICConfigurationDescription cfgd) {
+    if (resolvedPreset != null) {
+      return resolvedPreset;
+    }
+    try {
+      IPath cmakelistsPath = getCmakelistsPath(cfgd);
+      if (cmakelistsPath == null) {
+        resolvedPreset = Optional.empty();
+        return resolvedPreset;
+      }
+      IContainer cmakelistsDir = getCmakelistsDir(cmakelistsPath);
+      IPath sourceLocation = cmakelistsDir.getLocation();
+      if (sourceLocation == null) {
+        resolvedPreset = Optional.empty();
+        return resolvedPreset;
+      }
+      resolvedPreset = CMakePresetsLoader.loadResolvedConfigurePreset(Paths.get(sourceLocation.toOSString()),
+          cfgd.getName());
+      return resolvedPreset;
+    } catch (IOException | RuntimeException | CoreException ex) {
+      log.log(new Status(IStatus.WARNING, Activator.PLUGIN_ID, "Failed to load CMakePresets.json", ex));
+      resolvedPreset = Optional.empty();
+      return resolvedPreset;
+    }
+  }
+
+  private static boolean hasVariable(Optional<CMakePresetsLoader.ResolvedConfigurePreset> preset, String name) {
+    if (preset.isEmpty()) {
+      return false;
+    }
+    return preset.get().getCacheVariables().stream().anyMatch(v -> name.equalsIgnoreCase(v.getName()));
   }
 
   /**
