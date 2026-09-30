@@ -1,6 +1,6 @@
 # Cmake4eclipse Change Log
 
-## 5.2.0 (2026-09-19)
+## 5.2.0 (2026-09-30)
 ### Changes
 - Enhancement: add "Build Selected File(s)" context menu action, analogous to the same-named action for classic
   Makefile-based Managed Build projects.
